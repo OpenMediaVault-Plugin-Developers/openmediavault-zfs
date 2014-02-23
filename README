@@ -1,7 +1,8 @@
 Objects:
 - zpool
-- vdev
-- disk
+	- vdev
+	- disk
 - zvol
 - dataset
+- snapshot
 

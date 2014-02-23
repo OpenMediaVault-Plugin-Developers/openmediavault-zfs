@@ -25,11 +25,10 @@
  */
 class OMVModulePoolType {
 	const OMVModulePoolType_TYPE_NONE	= 0;
-	const OMVModulePoolType_TYPE_STRIPE	= 1;
-	const OMVModulePoolType_TYPE_MIRROR	= 2;
-	const OMVModulePoolType_TYPE_RAIDZ1	= 3;
-	const OMVModulePoolType_TYPE_RAIDZ2	= 4;
-	const OMVModulePoolType_TYPE_RAIDZ3	= 5;
+	const OMVModulePoolType_TYPE_MIRROR	= 1;
+	const OMVModulePoolType_TYPE_RAIDZ1	= 2;
+	const OMVModulePoolType_TYPE_RAIDZ2	= 3;
+	const OMVModulePoolType_TYPE_RAIDZ3	= 4;
 
 	/**
 	 * Return OMVModulePoolType as string.
@@ -40,8 +39,6 @@ class OMVModulePoolType {
 	public static function toString($type) {
 		if ($type === self::OMVModulePoolType_TYPE_NONE) {
 			return 'OMVModulePoolType_TYPE_NONE';
-		} else if ($type === self::OMVModulePoolType_TYPE_STRIPE) {
-			return 'OMVModulePoolType_TYPE_STRIPE';
 		} else if ($type === self::OMVModulePoolType_TYPE_MIRROR) {
 			return 'OMVModulePoolType_TYPE_MIRROR';
 		} else if ($type === self::OMVModulePoolType_TYPE_RAIDZ1) {

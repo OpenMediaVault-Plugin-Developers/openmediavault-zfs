@@ -24,7 +24,8 @@
  * @class OMVModuleZPool.
  */
 
-require 'OMVModulePoolType.php';
+require ('OMVModulePoolType.php');
+require ('OMVModulePoolAction.php');
 
 class OMVModuleZPool {
 
@@ -33,23 +34,42 @@ class OMVModuleZPool {
 	private $mirror_log;
 	private $cache;
 	private $spare;
+	private $alloc;
+	private $status; // one of null, ok, degraded, faulted, scrub, resilver
+	private $debug;
 
 	/**
 	 * Constructor of class OMVModuleZPool.
 	 * @param params Array which can contain all or a subset of
 	 *   the following fields:
-	 *   \em atime Either true or false. <b>Default is true</b>.
-	 *   \em compress Either true or false. <b>Default is false</b>.
-	 *   \em dedub Either true or false. <b>Default is false</b>.
-	 *   \em name Name for pool
-	 *   \em size Size of pool in either MB or GB. 100M or 100G.
-	 *   \em sync Either true or false. <b>Default is false</b>.
-	 *   \em type See OMVModulePoolType.
-	 *   \em vdevs Number of vdevs in pool. <b>Default is 1</b>.
+	 * 	<ul>
+	 *   <li> atime Either true or false. <b>Default is true</b>.
+	 *   <li> compress Either true or false. <b>Default is false</b>.
+	 *   <li> dedub Either true or false. <b>Default is false</b>.
+	 *   <li> name Name for pool
+	 *   <li> size Size of pool in either MB or GB. 100M or 100G.
+	 *   <li> sync Either true or false. <b>Default is false</b>.
+	 *   <li> type See OMVModulePoolType.
+	 *   <li> vdevs Number of vdevs in pool. <b>Default is 1</b>.
+	 * 	</ul>
+	 * @param options Array which can contain all or a subset of
+	 *   the following fields:
+	 *   <ul>
+	 *   <li> log Array which contains the following fields:
+	 * 		<ul>
+	 *      <li> disks Array of disks. Format: /dev/disk/by-id/.....
+	 *      <li> mirror Either true or false. <b>Default is false</b>.
+	 *		</ul>
+	 *   <li> cache Array which contains the following fields:
+	 * 		<ul>
+	 * 		<li> disks Array of disks. Format: /dev/disk/by-id/.... <b>Default use internal</b>.
+	 * 		</ul>
+	 *   <li> spare Array of disks. Format: /dev/disk/by-id/...
+	 * 	</ul>
 	 * @param debug Print debug information to STDERR.
 	 * @throws Exception.
 	 */
-	public function __construct(array $params = array(), $debug = false) {
+	public function __construct(array $params = array(), array $options = array(), $debug = false) {
 		$this->params = array(
 			'atime'		=> 'on',
 			'compress'	=> 'off',
@@ -60,6 +80,7 @@ class OMVModuleZPool {
 			'type'		=> OMVModulePoolType::OMVModulePoolType_TYPE_NONE,
 			'vdevs'		=> 1
 		);
+		$this->debug = $debug;
 
 		foreach ($params as $key => $value) {
 			if (array_key_exists($key, $this->params)) {
@@ -70,7 +91,13 @@ class OMVModuleZPool {
 			}
 		}
 
-		if ($debug) {
+		foreach ($options as $key => $value) {
+			$this->validate($key, $value, true);
+		}
+
+		$this->status = null;
+
+		if ($this->debug) {
 			fprintf(STDERR, "OMVModuleZPool instantiate with the following params\n");
 			foreach ($this->params as $key => $value) {
 				$param = ($key == 'type') ? OMVModulePoolType::toString($value) : $value;
@@ -81,37 +108,169 @@ class OMVModuleZPool {
 
 	/**
 	 * Create pool.
-	 * @param disks Array of disks. Format: /dev/sdx or /dev/vdx.
+	 * @param disks Array of disks. Format: /dev/disk/by-id/...
+	 * @param name Name for the pool.
 	 * @param options Array which can contain all or a subset of
 	 *   the following fields:
-	 *   \em log Array which contains the following fields:
-	 *      \em disks Array of disks. Format: /dev/sdx or /dev/vdx.
-	 *      \em mirror Either true or false. <b>Default is false</b>.
-	 *   \em cache Disk to use for cache. <b>Default use internal</b>.
-	 *   \em spare Array of disks. Format: /dev/sdx or /dev/vdx.
+	 * 	<ul>
+	 *   <li> log Array which contains the following fields:
+	 * 		<ul>
+	 *      <li> disks Array of disks. Format: /dev/disk/by-id/...
+	 *      <li> mirror Either true or false. <b>Default is false</b>.
+	 * 		</ul>
+	 *   <li> cache Array which contains the following fields:
+	 * 		<ul>
+	 * 		<li> disks Array of disks. Format: /dev/disk/by-id/... <b>Default use internal</b>.
+	 * 		</ul>
+	 *   <li> spare Array of disks. Format: /dev/disk/by-id/...
+	 * 	</ul>
 	 * @throws Exception.
 	 */
-	public function createPool(array $disks, array $options = array()) {
-		$disk_num = count($disks);
+	public function createPool(array $disks, $name = null, array $options = array()) {
+		return $this->updatePool(OMVModulePoolAction::OMVModulePoolAction_TYPE_CREATE,
+								 $disks, count($disks), $name, $options);
+	}
+
+	/**
+	 * Add pool.
+	 * @param disks Array of disks. Format: /dev/disk/by-id/...
+	 * @param name Name for the pool.
+	 * @param options Array which can contain all or a subset of
+	 *   the following fields:
+	 * 	<ul>
+	 *   <li> log Array which contains the following fields:
+	 * 		<ul>
+	 *      <li> disks Array of disks. Format: /dev/disk/by-id/...
+	 *      <li> mirror Either true or false. <b>Default is false</b>.
+	 * 		</ul>
+	 *   <li> cache Array which contains the following fields:
+	 * 		<ul>
+	 * 		<li> disks Array of disks. Format: /dev/disk/by-id/... <b>Default use internal</b>.
+	 * 		</ul>
+	 *   <li> spare Array of disks. Format: /dev/disk/by-id/...
+	 * 	</ul>
+	 * @throws Exception.
+	 */
+	public function addPool(array $disks, $name = null, array $options = array()) {
+		$this->initPool($name);
+		return $this->updatePool(OMVModulePoolAction::OMVModulePoolAction_TYPE_ADD,
+								 $disks, count($disks), $name, $options);
+	}
+
+	public function removeDevice(array $disks, $name = null) {
+	}
+
+	public function destroyPool($name = null) {
+	}
+
+	public function scrubPool($name = null) {
+	}
+
+	public function exportPool($name = null){
+	}
+
+	public function importPool($name = null){
+	}
+
+	/*
+	 * public function attachDevice($extingDisk, $newDisk, $name = null)
+	 * public function detachDevice($disk, $name = null)
+	 * public function onlineDevice($disk, $name = null)
+	 * public function offlineDevice($disk, $name = null)
+	 * public function replaceDevice($extingDisk, $newDisk, $name = null)
+	 * public function upgradePool($name = null)
+	 */
+
+	private function initPool($name = null) {
+		// Replace with OMVUtil::exec
+		$this->validateName($name);
+	}
+
+	private function validateName($name = null) {
+		$oldname = null;
+		if ($name != null) {
+			$oldname = $this->params['name'];
+			$this->params['name'] = $name;
+		}
+		if (! $this->params['name'] || ! preg_match('/^\w+$/', $this->params['name'])) {
+			if ($oldname) {
+				$this->params['name'] = $oldname;
+			}
+			throw new Exception("Name of pool cannot be null or empty");
+		}
+	}
+
+	/**
+	 * Update pool.
+	 * @param action Action to be taken. create or add.
+	 * @param disks Array of disks. Format: /dev/disk/by-id/...
+	 * @param disk_num Number of disk(s) in the pool.
+	 * @param name Name for the pool.
+	 * @param options Array which can contain all or a subset of
+	 *   the following fields:
+	 * 	<ul>
+	 *   <li> log Array which contains the following fields:
+	 * 		<ul>
+	 *      <li> disks Array of disks. Format: /dev/disk/by-id/...
+	 *      <li> mirror Either true or false. <b>Default is false</b>.
+	 * 		</ul>
+	 *   <li> cache Array which contains the following fields:
+	 * 		<ul>
+	 * 		<li> disks Array of disks. Format: /dev/disk/by-id/... <b>Default use internal</b>.
+	 * 		</ul>
+	 *   <li> spare Array of disks. Format: /dev/disk/by-id/...
+	 * 	</ul>
+	 * @throws Exception.
+	 */
+	private function updatePool($action, array $disks, $disk_num, $name = null, array $options = array()) {
+		OMVModulePoolAction::toString($action);
+		$cmd = 'zpool ' . OMVModulePoolAction::getAction($action);
 		if ($disk_num < 1) {
 			throw new Exception("Pool must have at least 1 disk");
 		};
+		$this->validateName($name);
+		foreach ($options as $key => $value) {
+			$this->validate($key, $value, true);
+		}
+		switch ($action) {
+			case OMVModulePoolAction::OMVModulePoolAction_TYPE_CREATE:
+				$cmd .= ' ' . $this->params['name'];
+				break;
+			case OMVModulePoolAction::OMVModulePoolAction_TYPE_ADD:
+				$cmd .= ' ' . $this->params['name'];
+				break;
+		}
 		switch ($this->params['type']) {
 			case OMVModulePoolType::OMVModulePoolType_TYPE_NONE:
 				print "Create basic pool\n";
-				if ($disk_num % $this->params['vdevs']) {
-					throw new Exception("$disk_num disk(s) != ".$this->params['vdevs']." vdev(s)");
+				if ($this->params['vdevs'] != 1) {
+					throw new Exception("A basic zpool can only have 1 vdev");
 				}
-				foreach ($options as $key => $value) {
-					$this->validate($key, $value, OMVPoolType::OMV_TYPE_NONE);
+				$vdev = '';
+				foreach ($disks as $disk) {
+					$vdev .= ($vdev) ? " $disk" : "$disk";
 				}
+				$cmd .= " $vdev";
 				break;
 			case OMVModulePoolType::OMVModulePoolType_TYPE_MIRROR:
 				print "Create mirrored pool\n";
 				if ($disk_num / $this->params['vdevs'] < 2 ||
 				   ($disk_num / $this->params['vdevs']) % $this->params['vdevs']) {
 					throw new Exception("$disk_num disk(s) cannot be evenly distributed to ".
-					   $this->params['vdevs']." vdev(s) and form a proper mirror");
+					   $this->params['vdevs']." vdev(s) and form a proper stripe or mirror");
+				}
+				$vdevs = array();
+				$disk_sum = $disk_num / $this->params['vdevs'];
+				$s = '';
+				for ($i = 1, $num = 0; $i <= $disk_num; $i++) {
+					$s .= ($s) ? " ${disks[$i-1]}" : "${disks[$i-1]}";
+					if ($i % $disk_sum == 0) {
+						$vdevs[$num++] = $s;
+						$s = '';
+					}
+				}
+				foreach ($vdevs as $vdev) {
+					$cmd .= " mirror $vdev";
 				}
 				break;
 			case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ1:
@@ -121,46 +280,130 @@ class OMVModuleZPool {
 					throw new Exception("$disk_num disk and ".$this->params['vdevs'].
 					   " vdev(s) cannot provide mininum 3 disks per vdev for raidz1");
 				}
+				$vdevs = array();
+				$disk_sum = $disk_num / $this->params['vdevs'];
+				$s = '';
+				for ($i = 1, $num = 0; $i <= $disk_num; $i++) {
+					$s .= ($s) ? " ${disks[$i-1]}" : "${disks[$i-1]}";
+					if ($i % $disk_sum == 0) {
+						$vdevs[$num++] = $s;
+						$s = '';
+					}
+				}
+				foreach ($vdevs as $vdev) {
+					$cmd .= " raidz1 $vdev";
+				}
 				break;
 			case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ2:
 				print "Create raidz2 pool\n";
-				if ($disk_num / $this->params['vdevs'] < 5 ||
+				if ($disk_num / $this->params['vdevs'] < 4 ||
 				   ($disk_num / $this->params['vdevs']) % $this->params['vdevs']) {
 					throw new Exception("$disk_num disk and ".$this->params['vdevs'].
-					   " vdev(s) cannot provide mininum 5 disks per vdev for raidz2");
+					   " vdev(s) cannot provide mininum 4 disks per vdev for raidz2");
+				}
+				$vdevs = array();
+				$disk_sum = $disk_num / $this->params['vdevs'];
+				$s = '';
+				for ($i = 1, $num = 0; $i <= $disk_num; $i++) {
+					$s .= ($s) ? " ${disks[$i-1]}" : "${disks[$i-1]}";
+					if ($i % $disk_sum == 0) {
+						$vdevs[$num++] = $s;
+						$s = '';
+					}
+				}
+				foreach ($vdevs as $vdev) {
+					$cmd .= " raidz2 $vdev";
 				}
 				break;
 			case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ3:
 				print "Create raidz3 pool\n";
-				if ($disk_num / $this->params['vdevs'] < 8 ||
+				if ($disk_num / $this->params['vdevs'] < 5 ||
 				   ($disk_num / $this->params['vdevs']) % $this->params['vdevs']) {
 					throw new Exception("$disk_num disk and ".$this->params['vdevs'].
-					   " vdev(s) cannot provide mininum 8 disks per vdev for raidz3");
+					   " vdev(s) cannot provide mininum 5 disks per vdev for raidz3");
+				}
+				$vdevs = array();
+				$disk_sum = $disk_num / $this->params['vdevs'];
+				$s = '';
+				for ($i = 1, $num = 0; $i <= $disk_num; $i++) {
+					$s .= ($s) ? " ${disks[$i-1]}" : "${disks[$i-1]}";
+					if ($i % $disk_sum == 0) {
+						$vdevs[$num++] = $s;
+						$s = '';
+					}
+				}
+				foreach ($vdevs as $vdev) {
+					$cmd .= " raidz3 $vdev";
 				}
 				break;
 		}
+		foreach ($options as $key => $value) {
+			switch ($key) {
+				case 'log':
+					$cmd .= " log";
+					if ($value['mirror'] === true) {
+						$cmd .= " mirror";
+					}
+					foreach ($value['disks'] as $disk) {
+						$cmd .= " $disk";
+					}
+					break;
+				case 'cache':
+					$cmd .= " cache";
+					foreach ($value as $disk) {
+						$cmd .= " $disk";
+					}
+					break;
+				case 'spare':
+					$cmd .= " spare";
+					foreach ($value as $disk) {
+						$cmd .= " $disk";
+					}
+					break;
+			}
+		}
+		if ($this->debug) {
+			fprintf(STDERR, "%s\n", $cmd);
+		}
+
+		return $cmd;
 	}
 
-	private function validate($key, $value, $type = -1) {
-		if ($type > -1) {
-			switch ($type) {
-				case OMVModulePoolType::OMVModulePoolType_TYPE_NONE:
-					print "Create basic pool\n";
+	/**
+	 * Validate options.
+	 * @param key Option to validate.
+	 * @param value Value for option to validate.
+	 * @param type See OMVModulePoolType.
+	 * @throws Exception if option is invalid.
+	 */
+	private function validate($key, $value, $options = false) {
+		if ($options) {
+			switch ($key) {
+				case 'log':
+					if (! is_array($value) || ! array_key_exists('mirror', $value) ||
+						! array_key_exists('disks', $value)) {
+						throw new Exception("log option missing disks array or mirror value");
+					}
+					if ($value['mirror'] === true && count($value['disks']) != 2) {
+						throw new Exception("Two disks is required to form a log mirror");
+					}
+					$this->log = $value['disks'];
+					$this->mirror_log = $value['mirror'];
 					break;
-				case OMVModulePoolType::OMVModulePoolType_TYPE_MIRROR:
-					print "Create mirrored pool\n";
+				case 'cache':
+					if (! is_array($value)) {
+						throw new Exception("log option missing disks array or mirror value");
+					}
+					$this->cache = $value;
 					break;
-				case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ1:
-					print "Create raidz1 pool\n";
-					break;
-				case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ2:
-					print "Create raidz2 pool\n";
-					break;
-				case OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ3:
-					print "Create raidz3 pool\n";
+				case 'spare':
+					if (! is_array($value)) {
+						throw new Exception("log option missing disks array or mirror value");
+					}
+					$this->spare = $value;
 					break;
 				default:
-					throw new Exception("$type: Unknown OMVModulePoolType");
+					throw new Exception("$key: Not valid option");
 			}
 		} else {
 			switch ($key) {
@@ -179,7 +422,7 @@ class OMVModuleZPool {
 					break;
 				case 'type':
 					if (OMVModulePoolType::OMVModulePoolType_TYPE_NONE > $value ||
-					    OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ3 < $value) {
+						OMVModulePoolType::OMVModulePoolType_TYPE_RAIDZ3 < $value) {
 						throw new Exception("$key: Value must be type of OMVPoolType found '$value'");
 					}
 					break;

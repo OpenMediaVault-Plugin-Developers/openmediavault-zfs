@@ -7,7 +7,7 @@
  * @version   XXX
  * @copyright XXX
  */
-class Dataset {
+class OMVModuleZFSDataset {
     // Attributes
     /**
      * XXX

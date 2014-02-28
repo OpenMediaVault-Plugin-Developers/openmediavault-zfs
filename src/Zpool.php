@@ -11,7 +11,7 @@ require_once 'Zvol.php';
  * @version   XXX
  * @copyright XXX
  */
-class Zpool {
+class OMVModuleZFSZpool {
     // Attributes
     /**
      * XXX

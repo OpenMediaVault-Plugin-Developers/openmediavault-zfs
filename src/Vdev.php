@@ -1,54 +1,191 @@
 <?php
+require_once("Exception.php");
+require_once("VdevType.php");
+require_once("openmediavault/util.inc");
 
 /**
- * XXX detailed description
+ * Contains a Vdev
  *
- * @author    XXX
- * @version   XXX
- * @copyright XXX
+ * @author    Michael Rasmussen
+ * @version   0.1
+ * @copyright Michael Rasmussen <mir@datanom.net>
  */
-class Vdev {
+class OMVModuleZFSVdev {
     // Attributes
     /**
-     * XXX
+     * Array holding disks
      *
-     * @var    list<Disk> $disks
+     * @var    array $disks
      * @access private
      */
-    protected $_disks;
+    private $disks;
+
+    /**
+     * Name of pool
+     *
+     * @var    string $pool pool name
+     * @access private
+     */
+    private $pool;
+
+    /**
+     * Array holding disks
+     *
+     * @var    OMVModuleZFSVdevType $type Vdev type
+     * @access private
+     */
+    private $type;
 
     // Associations
     // Operations
+	/**
+	 * Constructor
+	 *
+	 * @param $pool pool this mirror belongs to
+	 */
+
+	public function __construct($pool, OMVModuleZFSVdevType $type, array $disks) {
+		switch ($type) {
+			case OMVModuleZFSVdevType::OMVMODULEZFSPLAIN:
+				break;
+			case OMVModuleZFSVdevType::OMVMODULEZFSMIRROR:
+				if (count($disks) < 2)
+					throw new OMVModuleZFSException("A mirror must contain at least 2 disks");
+				break;
+			case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1:
+				if (count($disks) < 3)
+					throw new OMVModuleZFSException("A Raidz1 must contain at least 3 disks");
+				break;
+			case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2:
+				if (count($disks) < 4)
+					throw new OMVModuleZFSException("A Raidz2 must contain at least 4 disks");
+				break;
+			case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3:
+				if (count($disks) < 5)
+					throw new OMVModuleZFSException("A Raidz3 must contain at least 5 disks");
+				break;
+		}
+		$this->pool = $pool;
+		$this->disks = $disks;
+		$this->type = $type;
+	}
+
+	/**
+	 * Helper function to execute an external program.
+	 * @param command The command that will be executed.
+	 * @param output If the output argument is present, then the specified
+	 *   array will be filled with every line of output from the command.
+	 *   Trailing whitespace, such as \n, is not included in this array.
+	 * @return The exit code of the command.
+	 * @throws E_EXEC_FAILED
+	 */
+	private function exec($command, &$output = NULL) {
+		OMVUtil::exec($command, $output, $result);
+		return $result;
+	}
+
+	private function safeExec($disk, $add = true, $change = false) {
+		$result = 1;
+
+		if ($add) {
+			if ($change || $this->type == OMVModuleZFSVdevType::OMVMODULEZFSMIRROR) {
+				$disk1 = $this->disks[0];
+				$result = exec("zpool attach {$this->pool} $disk1 $disk", $err);
+			} else {
+				$result = exec("zpool add {$this->pool} $disk", $err);
+			}
+		} else {
+			if ($this->type == OMVModuleZFSVdevType::OMVMODULEZFSMIRROR) {
+				$disk1 = $this->disks[0];
+				if (($res = exec("zpool offline {$this->pool} $disk", $err)) > 0)
+					$result = $res;
+				else
+					$result = exec("zpool detach {$this->pool} $disk", $err);
+			} else {
+				$result = 1;
+				$err = "Cannot remove $disk from {$this->pool}";
+			}
+		}
+
+		return ($result) ? $err : null;
+	}
+
     /**
-     * XXX
+     * Add a disk to this Vdev
      *
-     * @param  Disk $disk XXX
-     * @return void XXX
+     * @param  $disk the disk
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public function addDisk($disk) {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+    public function addDisk($disk, $changeType = false) {
+		if ($this->type != OMVModuleZFSVdevType::OMVMODULEZFSPLAIN ||
+				$this->type != OMVModuleZFSVdevType::OMVMODULEZFSMIRROR)
+			throw new OMVModuleZFSException("A Raidz Vdev cannot be changed");
+
+		if (in_array($disk, $this->disks))
+			throw new OMVModuleZFSException("$disk: Already part of Vdev");
+
+		if ($this->type == OMVModuleZFSVdevType::OMVMODULEZFSPLAIN &&
+				count($this->disks) < 2 && $changeType) {
+			$this->type = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+		}
+
+		if (($err = safeExec($disk, true, $changeType)) != null)
+			throw new OMVModuleZFSException($err);
+		else
+			array_push($this->disks, $disk);
     }
 
     /**
-     * XXX
+     * Remove a disk from Vdev
      *
-     * @param  Disk $disk XXX
-     * @return void XXX
+     * @param  $disk disk to remove
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public abstract function removeDisk($disk) {
-        trigger_error('Not Implemented!', E_USER_WARNING);
-    }
+    public function removeDisk($disk, $changeType = false) {
+		$new_disks = array();
+
+		if ($this->type != OMVModuleZFSVdevType::OMVMODULEZFSMIRROR)
+			throw new OMVModuleZFSException("Only inactive hot spares," .
+				"cache, top-level, or log devices can be removed");
+
+		if (count($this->disks) < 3 && ! $changeType)
+			throw new OMVModuleZFSException("A mirror must contain at least 2 disks");
+
+		if (! in_array($disk, $this->disks))
+			throw new OMVModuleZFSException("$disk: Not part of Vdev");
+
+		if (($err = safeExec($disk, false, $changeType)) != null)
+			throw new OMVModuleZFSException($err);
+		else {
+			foreach ($this->disks as $_disk) {
+				if (strcmp($_disk, $disk) != 0)
+					array_push($new_disks, $_disk);
+			}
+		}
+
+		$this->disks = $new_disks;
+	}
 
     /**
-     * XXX
+     * Get disk array
      *
-     * @return list<Disk> XXX
+     * @return array with disks
      * @access public
      */
     public function getDisks() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+        return $this->disks;
+    }
+
+    /**
+     * Get pool
+     *
+     * @return string pool
+     * @access public
+     */
+    public function getPool() {
+        return $pool;
     }
 
 }

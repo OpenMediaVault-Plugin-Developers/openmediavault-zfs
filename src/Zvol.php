@@ -7,7 +7,7 @@
  * @version   XXX
  * @copyright XXX
  */
-class Zvol {
+class OMVModuleZFSZvol {
     // Attributes
     /**
      * XXX

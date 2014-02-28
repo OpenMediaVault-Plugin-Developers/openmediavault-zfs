@@ -7,7 +7,7 @@
  * @version   XXX
  * @copyright XXX
  */
-class Snapshot {
+class OMVModuleZFSSnapshot {
     // Attributes
     /**
      * XXX

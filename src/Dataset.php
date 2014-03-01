@@ -10,12 +10,12 @@
 class OMVModuleZFSDataset {
     // Attributes
     /**
-     * XXX
+     * Name of Dataset
      *
      * @var    string $name
      * @access private
      */
-    private $_name;
+    private $name;
 
     /**
      * XXX
@@ -44,13 +44,13 @@ class OMVModuleZFSDataset {
     // Associations
     // Operations
     /**
-     * XXX
+     * Return name of the Dataset
      *
-     * @return string XXX
+     * @return string $name
      * @access public
      */
     public function getName() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+        return $this->name;
     }
 
     /**
@@ -90,7 +90,7 @@ class OMVModuleZFSDataset {
      * @return void XXX
      * @access public
      */
-    public function setFeatures($list<Feature>) {
+    public function setFeatures($list) {
         trigger_error('Not Implemented!', E_USER_WARNING);
     }
 

@@ -1,5 +1,6 @@
 <?php
 require_once("Exception.php");
+require_once("openmediavault/util.inc");
 
 /**
  * XXX detailed description
@@ -38,7 +39,7 @@ class OMVModuleZFSDataset {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param string $name Name of the new Dataset
 	 * @param array $features An array of features (strings) in the form <key>=<value> to set when creating the Dataset
 	 * @throws OMVModuleZFSException
@@ -52,7 +53,7 @@ class OMVModuleZFSDataset {
 			}
 		}
 		$cmd .= $name . " 2>&1";
-		exec($cmd,$out,$res);
+		OMVUtil::exec($cmd,$out,$res);
 		if ($res == 1) {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
@@ -106,13 +107,13 @@ class OMVModuleZFSDataset {
 	 * Sets a number of Dataset properties. If a property is already set it will be updated with the new value.
 	 *
 	 * @param  array $features An array of strings in format <key>=<value>
-	 * @return void 
+	 * @return void
 	 * @access public
 	 */
 	public function setFeatures($features) {
 		foreach ($features as $newfeature) {
 			$cmd = "zfs set " . $newfeature . " " . $this->name;
-			exec($cmd,$out,$res);
+			OMVUtil::exec($cmd,$out,$res);
 			if ($res == 1) {
 				throw new OMVModuleZFSException(implode("\n", $out));
 			}
@@ -140,7 +141,7 @@ class OMVModuleZFSDataset {
 	 */
 	public function destroy() {
 		$cmd = "zfs destroy " . $this->name;
-		exec($cmd,$out,$res);
+		OMVUtil::exec($cmd,$out,$res);
 		if ($res == 1) {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}

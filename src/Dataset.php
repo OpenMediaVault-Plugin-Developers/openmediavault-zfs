@@ -17,15 +17,6 @@ class OMVModuleZFSDataset {
      * @access private
      */
     private $name;
-
-    /**
-     * Size of Dataset
-     *
-     * @var    int $size
-     * @access private
-     */
-    private $size;
-
     /**
      * Mountpoint of the Dataset
      *
@@ -49,13 +40,16 @@ class OMVModuleZFSDataset {
 	 * Constructor
 	 * 
 	 * @param string $name Name of the new Dataset
-	 * @param array $features An array of features to set when creating the Dataset
+	 * @param array $features An array of features (strings) in the form <key>=<value> to set when creating the Dataset
+	 * @throws OMVModuleZFSException
 	 *
 	 */
 	public function __construct($name, array $features = null) {
 		$cmd = "zfs create ";
 		if (isset($features)) {
-			$cmd .= "-o " . implode(",", $features) . " ";
+			foreach ($features as $feature) {
+				$cmd .= "-o " . $feature . " ";
+			}
 		}
 		$cmd .= $name . " 2>&1";
 		exec($cmd,$out,$res);
@@ -89,17 +83,6 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * Get the size of the Dataset
-	 *
-	 * @return int $size
-	 * @access public
-	 */
-	public function getSize() {
-		return $this->size;
-	}
-
-
-	/**
 	 * Get the mountpoint of the Dataset
 	 *
 	 * @return string $mountPoint
@@ -120,14 +103,47 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * XXX
+	 * Sets a number of Dataset properties. If a property is already set it will be updated with the new value.
 	 *
-	 * @param  array XXX
-	 * @return void XXX
+	 * @param  array $features An array of strings in format <key>=<value>
+	 * @return void 
 	 * @access public
 	 */
-	public function setFeatures($list) {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+	public function setFeatures($features) {
+		foreach ($features as $newfeature) {
+			$cmd = "zfs set " . $newfeature . " " . $this->name;
+			exec($cmd,$out,$res);
+			if ($res == 1) {
+				throw new OMVModuleZFSException(implode("\n", $out));
+			}
+			$tmp = explode("=", $newfeature);
+			$newfeaturek = $tmp[0];
+			$found = false;
+			for ($i=0; $i<count($this->features); $i++) {
+				$tmp = explode("=", $this->features[$i]);
+				$oldfeaturek = $tmp[0];
+				if (strcmp($newfeaturek, $oldfeaturek) == 0) {
+					$this->features[$i] = $newfeature;
+					$found = true;
+					continue;
+				}
+			}
+			if (!$found) {
+				array_push($this->features, $newfeature);
+			}
+		}
+	}
+
+	/**
+	 * Destroy the Dataset.
+	 *
+	 */
+	public function destroy() {
+		$cmd = "zfs destroy " . $this->name;
+		exec($cmd,$out,$res);
+		if ($res == 1) {
+			throw new OMVModuleZFSException(implode("\n", $out));
+		}
 	}
 
 }

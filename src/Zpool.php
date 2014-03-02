@@ -1,208 +1,289 @@
 <?php
-require_once 'Vdev.php';
-require_once 'Snapshot.php';
-require_once 'Dataset.php';
-require_once 'Zvol.php';
+require_once("Vdev.php");
+require_once("Snapshot.php");
+require_once("Dataset.php");
+require_once("Zvol.php");
+require_once("Exception.php");
 
 /**
- * XXX detailed description
+ * Class containing information about the pool
  *
- * @author    XXX
- * @version   XXX
- * @copyright XXX
+ * @author    Michael Rasmussen
+ * @version   0.1
+ * @copyright Michael Rasmussen <mir@datanom.net>
  */
-class OMVModuleZFSZpool {
+class OMVModuleZFSZpool extends OMVModuleAbstract
+		implements OMVNotifyListener {
     // Attributes
     /**
-     * XXX
+     * Name of pool
      *
      * @var    string $name
      * @access private
      */
-    private $_name;
+    private $name;
 
     /**
-     * XXX
+     * List of Vdev
      *
-     * @var    list<Vdev> $vdevs
+     * @var    array $vdevs
      * @access private
+     * @accociation OMVModuleZFSVdev to vdevs
      */
-    private $_vdevs;
+    private $vdevs;
 
     /**
-     * XXX
+     * List of spares
      *
-     * @var    list<Disk> $spare
+     * @var    array $spare
      * @access private
+     * @accociation OMVModuleZFSVdev to spare
      */
-    private $_spare;
+    private $spare;
 
     /**
-     * XXX
+     * List of log
      *
-     * @var    Log $log
+     * @var    array $log
      * @access private
+     * @accociation OMVModuleZFSVdev to log
      */
-    private $_log;
+    private $log;
 
     /**
-     * XXX
+     * List of cache
      *
-     * @var    Cache $cache
+     * @var    array $cache
      * @access private
+     * @accociation OMVModuleZFSVdev to cache
      */
-    private $_cache;
+    private $cache;
 
     /**
-     * XXX
+     * Pool size
      *
      * @var    int $size
      * @access private
      */
-    private $_size;
+    private $size;
 
     /**
-     * XXX
+     * Pool's mountpoint
      *
      * @var    string $mountPoint
      * @access private
      */
-    private $_mountPoint;
+    private $mountPoint;
 
     /**
-     * XXX
+     * List of features
      *
-     * @var    list<Feature> $features
+     * @var    array $features
      * @access private
      */
-    private $_features;
+    private $features;
 
     // Associations
     /**
-     * XXX
+     * Array of OMVModuleZFSSnapshot.
      *
-     * @var    Snapshot $unnamed
+     * @var    array $snapshot
      * @access private
-     * @accociation Snapshot to unnamed
+     * @accociation OMVModuleZFSSnapshot to snapshot
      */
-    #var $unnamed;
+    private $snapshot;
 
     /**
-     * XXX
+     * Array of OMVModuleZFSDataset
      *
-     * @var    Dataset $unnamed
+     * @var    Dataset $dataset
      * @access private
-     * @accociation Dataset to unnamed
+     * @accociation OMVModuleZFSDataset to dataset
      */
-    #var $unnamed;
+    private $dataset;
 
     /**
-     * XXX
+     * Array of OMVModuleZFSZvol
      *
-     * @var    Zvol $unnamed
+     * @var    Zvol $zvol
      * @access private
-     * @accociation Zvol to unnamed
+     * @accociation OMVModuleZFSZvol to zvol
      */
-    #var $unnamed;
-
-    /**
-     * XXX
-     *
-     * @var    Vdev $unnamed
-     * @access private
-     * @accociation Vdev to unnamed
-     */
-    #var $unnamed;
+    private $zvol;
 
     // Operations
+	/**
+	 * Constructor
+	 *
+	 * @param $pool pool this mirror belongs to
+     * @throws OMVModuleZFSException
+	 */
+
+	public function __construct($vdev) {
+		if (is_array($vdev)) {
+			$cmd = $this->getCommandString($vdev);
+			$name = $vdev[0]->getPool();
+			$type = $vdev[0]->getType();
+		}
+		else {
+			$cmd = $this->getCommandString(array($vdev));
+			$name = $vdev->getPool();
+			$type = $vdev->getType();
+		}
+		$cmd = "zpool create $name $cmd";
+
+		OMVUtil::exec($cmd, $output, $result);
+		if ($result)
+			throw new OMVModuleZFSException($output);
+		else {
+			$this->vdevs = array();
+			$this->spare = array();
+			$this->log = array();
+			$this->cache = array();
+			$this->features = array();
+			$this->name = $name;
+			$this->type = $type;
+			if (is_array($vdev))
+				$this->vdevs = $vdev;
+			else
+				array_push ($this->vdevs, $vdev);
+			$this->size = $this->getAttribute("size");
+			$this->mountPoint = $this->getAttribute("mountpoint");
+		}
+	}
+
     /**
-     * XXX
+     * Get pool name
      *
-     * @return string XXX
+     * @return string
      * @access public
      */
     public function getName() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+        return $this->name;
     }
 
     /**
-     * XXX
+     * Get array of Vdev
      *
-     * @return list<Vdev> XXX
+     * @return array
      * @access public
      */
     public function getVdevs() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+        return $this->vdevs;
     }
 
     /**
-     * XXX
+     * Add Vdev to pool
      *
-     * @param  Vdev $vdev XXX
-     * @return void XXX
+     * @param  array $vdev array of OMVModuleZFSVdev
+     * @return void
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public function addVdev($vdev) {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+    public function addVdev(array $vdevs) {
+		$cmd = "zpool add " . $this->getName() . " " . $this->getCommandString($vdevs);
+		OMVUtil::exec($cmd, $output, $result);
+		if ($result)
+			throw new OMVModuleZFSException($output);
+		else
+			$this->vdevs = array_merge($this->vdevs, $vdevs);
     }
 
     /**
      * XXX
      *
-     * @param  Vdev $vdev XXX
-     * @return void XXX
+     * @param  OMVModuleZFSVdev $vdev
+     * @return void
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public function removeVdev($vdev) {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+    public function removeVdev(OMVModuleZFSVdev $vdev) {
+        throw new OMVModuleZFSException("Cannot remove vdevs from a pool");
     }
 
     /**
      * XXX
      *
-     * @param  Cache $cache XXX
-     * @return void XXX
+     * @param  OMVModuleZFSVdev $cache
+     * @return void
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public function addCache($cache) {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+    public function addCache(OMVModuleZFSVdev $cache) {
+        if ($cache->getType() != OMVModuleZFSVdevType::OMVMODULEZFSPLAIN)
+			throw new OMVModuleZFSException("Only a plain Vdev can be added as cache");
+
+		$cmd = "zpool add " . $this->getName() . " cache " . $this->getCommandString($vdevs);
+		OMVUtil::exec($cmd, $output, $result);
+		if ($result)
+			throw new OMVModuleZFSException($output);
+
+		$disks = $cache->getDisks();
+		foreach ($disks as $disk) {
+			array_push ($this->cache, $disk);
+		}
     }
 
     /**
      * XXX
      *
-     * @return void XXX
+     * @param array $disks
+     * @return void
+     * @throws OMVModuleZFSException
      * @access public
      */
-    public function removeCache() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+    public function removeCache(array $disks = null) {
+		$errors = array();
+		$exception = null;
+
+        if (! $disks)
+			$disks = $this->cache;
+
+		foreach ($disks as $disk) {
+			$cmd = "zpool remove " . $this->getName() . " $disk";
+			OMVUtil::exec($cmd, $output, $result);
+			if ($result)
+				array_push ($errors, $output);
+			else
+				$this->cache = $this->removeDisk($this->cache, $disk);
+		}
+
+		foreach ($errors as $error) {
+			if ($exception)
+				$exception .= "\n$error";
+			else
+				$exception = $error;
+		}
+
+		if ($exception)
+			throw new OMVModuleZFSException($exception);
     }
 
     /**
      * XXX
      *
-     * @return Cache XXX
+     * @return Cache
      * @access public
      */
     public function getCache() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+        return $this->cache;
     }
 
     /**
      * XXX
      *
-     * @param  Log $log XXX
-     * @return void XXX
+     * @param  OMVModuleZFSVdev $log
+     * @return void
      * @access public
      */
-    public function addLog($log) {
+    public function addLog(OMVModuleZFSVdev $log) {
         trigger_error('Not Implemented!', E_USER_WARNING);
     }
 
     /**
      * XXX
      *
-     * @return void XXX
+     * @return void
      * @access public
      */
     public function removeLog() {
@@ -212,7 +293,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return Log XXX
+     * @return Log
      * @access public
      */
     public function getLog() {
@@ -222,19 +303,19 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @param  Disk $spare XXX
-     * @return void XXX
+     * @param  array $spares
+     * @return void
      * @access public
      */
-    public function addSpare($spare) {
+    public function addSpare(array $spares) {
         trigger_error('Not Implemented!', E_USER_WARNING);
     }
 
     /**
      * XXX
      *
-     * @param  Disk $spare XXX
-     * @return void XXX
+     * @param  Disk $spare
+     * @return void
      * @access public
      */
     public function removeSpare($spare) {
@@ -244,7 +325,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return list<Disk> XXX
+     * @return list<Disk>
      * @access public
      */
     public function getSpares() {
@@ -254,7 +335,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return int XXX
+     * @return int
      * @access public
      */
     public function getSize() {
@@ -264,7 +345,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return string XXX
+     * @return string
      * @access public
      */
     public function getMountPoint() {
@@ -274,18 +355,18 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @param  list<Feature> $features XXX
-     * @return void XXX
+     * @param  array $features
+     * @return void
      * @access public
      */
-    public function setFeatures($features) {
+    public function setFeatures(array $features) {
         trigger_error('Not Implemented!', E_USER_WARNING);
     }
 
     /**
      * XXX
      *
-     * @return list<Feature> XXX
+     * @return list<Feature>
      * @access public
      */
     public function getFeatures() {
@@ -295,7 +376,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return void XXX
+     * @return void
      * @access public
      */
     public function export() {
@@ -305,8 +386,8 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @param  string $name XXX
-     * @return void XXX
+     * @param  string $name
+     * @return void
      * @access public
      */
     public function import($name) {
@@ -316,7 +397,7 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return void XXX
+     * @return void
      * @access public
      */
     public function scrub() {
@@ -326,11 +407,26 @@ class OMVModuleZFSZpool {
     /**
      * XXX
      *
-     * @return string XXX
+     * @return string
      * @access public
      */
     public function status() {
         trigger_error('Not Implemented!', E_USER_WARNING);
+    }
+
+    public function bindListeners(OMVNotifyDispatcher $dispatcher) {
+        $dispatcher->addListener(
+          OMV_NOTIFY_EVENT,
+          "org.openmediavault.module.service.nfs.start",
+          array($this, "onNotify"));
+        $dispatcher->addListener(
+          OMV_NOTIFY_EVENT,
+          "org.openmediavault.module.service.nfs.stop",
+          array($this, "onNotify"));
+        $dispatcher->addListener(
+          OMV_NOTIFY_EVENT,
+          "org.openmediavault.module.service.nfs.applyconfig",
+          array($this, "onNotify"));
     }
 
 	/**
@@ -347,30 +443,75 @@ class OMVModuleZFSZpool {
 	}
 
 	/**
-	 * XXX
+	 * Convert array of Vdev to command string
 	 *
-	 * @access public
+	 * @param array $vdevs
+	 * @return string
+	 * @throws OMVMODULEZFSException
 	 */
-	public function applyConfig() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+	private function getCommandString(array $vdevs) {
+		$adds = array();
+
+		foreach ($vdevs as $vdev) {
+			$type = $vdev->getType();
+			$command = "";
+
+			switch ($type) {
+				case OMVModuleZFSVdevType::OMVMODULEZFSPLAIN: break;
+				case OMVModuleZFSVdevType::OMVMODULEZFSMIRROR: $command = "mirror"; break;
+				case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1: $command = "raidz1"; break;
+				case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2: $command = "raidz2"; break;
+				case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3: $command = "raidz3"; break;
+				default:
+					throw new OMVMODULEZFSException("Unknown Vdev type");
+			}
+			$disks = $vdev->getDisks();
+			$diskStr = "";
+			foreach($disks as $disk) {
+				$diskStr .= " $disk";
+			}
+
+			array_push ($adds, $command . $diskStr);
+		}
+
+		return join(" ", $adds);
 	}
 
 	/**
-	 * XXX
+	 * Get an attribute from pool
 	 *
-	 * @access public
+	 * @param string $attribute
+	 * @return string value
 	 */
-	public function stopService() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+	private function getAttribute($attribute) {
+		$cmd = "zpool list -H -o $attribute {$this->name}";
+		OMVUtil::exec($cmd, $output, $result);
+		if ($result) {
+			$cmd = "zfs list -H -o $attribute {$this->name}";
+			OMVUtil::exec($cmd, $output, $result);
+			if ($result)
+				return null;
+		}
+
+		return $output;
 	}
 
 	/**
-	 * XXX
+	 * Remove a disk from array
 	 *
-	 * @access public
+	 * @param array $array
+	 * @param string $disk
+	 * @return array
 	 */
-	public function startService() {
-        trigger_error('Not Implemented!', E_USER_WARNING);
+	private function removeDisk(array $array, $disk) {
+		$new_disks = array();
+
+		foreach ($array as $item) {
+			if (strcmp($item, $disk) != 0)
+				array_push ($new_disks, $item);
+		}
+
+		return $new_disks;
 	}
 }
 

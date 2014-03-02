@@ -42,6 +42,7 @@ class OMVModuleZFSVdev {
 	 * Constructor
 	 *
 	 * @param $pool pool this mirror belongs to
+     * @throws OMVModuleZFSException
 	 */
 
 	public function __construct($pool, OMVModuleZFSVdevType $type, array $disks) {
@@ -186,6 +187,16 @@ class OMVModuleZFSVdev {
      */
     public function getPool() {
         return $pool;
+    }
+
+    /**
+     * Get type
+     *
+     * @return OMVModuleZFSVdevType
+     * @access public
+     */
+    public function getType() {
+        return $type;
     }
 
 }

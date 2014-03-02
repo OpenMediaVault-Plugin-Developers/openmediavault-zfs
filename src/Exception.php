@@ -17,8 +17,8 @@ class OMVModuleZFSException extends Exception {
      * @return void XXX
      * @access public
      */
-    public function __construct(string $message = "", int $code = 0, Exception $previous = NULL) {
-        parent::__construct(string $message = "", int $code = 0, Exception $previous = NULL);
+    public function __construct($message = "", $code = 0, Exception $previous = NULL) {
+        parent::__construct($message, $code, $previous);
     }
 
 }

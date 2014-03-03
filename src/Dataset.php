@@ -27,12 +27,12 @@ class OMVModuleZFSDataset {
     private $mountPoint;
 
     /**
-     * List of features assigned to the Dataset
+     * List of properties assigned to the Dataset
      *
-     * @var    array $features
+     * @var    array $properties
      * @access private
      */
-    private $features;
+    private $properties;
 
 	// Associations
 	// Operations
@@ -41,34 +41,34 @@ class OMVModuleZFSDataset {
 	 * Constructor
 	 *
 	 * @param string $name Name of the new Dataset
-	 * @param array $features An array of features (strings) in the form <key>=<value> to set when creating the Dataset
+	 * @param array $properties An array of properties (strings) in the form <key>=<value> to set when creating the Dataset
 	 * @throws OMVModuleZFSException
 	 *
 	 */
-	public function __construct($name, array $features = null) {
+	public function __construct($name, array $properties = null) {
 		$cmd = "zfs create ";
-		if (isset($features)) {
-			foreach ($features as $feature) {
-				$cmd .= "-o " . $feature . " ";
+		if (isset($properties)) {
+			foreach ($properties as $property) {
+				$cmd .= "-o " . $property . " ";
 			}
 		}
 		$cmd .= $name . " 2>&1";
 		OMVUtil::exec($cmd,$out,$res);
-		if ($res == 1) {
+		if ($res) {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
 		unset($res);
 		$this->name = $name;
-		if (isset($features)) {
-			$this->features = $features;
-			foreach ($features as $feature) {
-				if (preg_match('/^mountpoint\=(.*)$/', $feature, $res)) {
+		if (isset($properties)) {
+			$this->properties = $properties;
+			foreach ($properties as $property) {
+				if (preg_match('/^mountpoint\=(.*)$/', $property, $res)) {
 					$this->mountPoint = $res[1];
 					continue;
 				}
 			}
 		} else {
-			$this->features = array();
+			$this->properties = array();
 			$this->mountPoint = "/" . $name;
 		}
 	}
@@ -94,43 +94,43 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * Get an array of features associated with the Dataset
+	 * Get an array of properties associated with the Dataset
 	 *
-	 * @return array $features
+	 * @return array $properties
 	 * @access public
 	 */
-	public function getFeatures() {
-		return $this->features;
+	public function getProperties() {
+		return $this->properties;
 	}
 
 	/**
 	 * Sets a number of Dataset properties. If a property is already set it will be updated with the new value.
 	 *
-	 * @param  array $features An array of strings in format <key>=<value>
+	 * @param  array $properties An array of strings in format <key>=<value>
 	 * @return void
 	 * @access public
 	 */
-	public function setFeatures($features) {
-		foreach ($features as $newfeature) {
-			$cmd = "zfs set " . $newfeature . " " . $this->name;
+	public function setProperties($properties) {
+		foreach ($properties as $newproperty) {
+			$cmd = "zfs set " . $newproperty . " " . $this->name;
 			OMVUtil::exec($cmd,$out,$res);
-			if ($res == 1) {
+			if ($res) {
 				throw new OMVModuleZFSException(implode("\n", $out));
 			}
-			$tmp = explode("=", $newfeature);
-			$newfeaturek = $tmp[0];
+			$tmp = explode("=", $newproperty);
+			$newpropertyk = $tmp[0];
 			$found = false;
-			for ($i=0; $i<count($this->features); $i++) {
-				$tmp = explode("=", $this->features[$i]);
-				$oldfeaturek = $tmp[0];
-				if (strcmp($newfeaturek, $oldfeaturek) == 0) {
-					$this->features[$i] = $newfeature;
+			for ($i=0; $i<count($this->properties); $i++) {
+				$tmp = explode("=", $this->properties[$i]);
+				$oldpropertyk = $tmp[0];
+				if (strcmp($newpropertyk, $oldpropertyk) == 0) {
+					$this->properties[$i] = $newproperty;
 					$found = true;
 					continue;
 				}
 			}
 			if (!$found) {
-				array_push($this->features, $newfeature);
+				array_push($this->properties, $newproperty);
 			}
 		}
 	}

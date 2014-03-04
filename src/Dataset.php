@@ -121,6 +121,7 @@ class OMVModuleZFSDataset {
 	/**
 	 * Get all Dataset properties from commandline and update object properties attribute
 	 *
+	 * @return void
 	 * @throws OMVModuleZFSException
 	 * @access private
 	 */ 
@@ -141,6 +142,7 @@ class OMVModuleZFSDataset {
 	 * Get single Datset property from commandline and update object property attribute
 	 *
 	 * @param string $property Name of the property to update
+	 * @return void
 	 * @throws OMVModuleZFSException
 	 * @access private
 	 */
@@ -157,6 +159,7 @@ class OMVModuleZFSDataset {
 	/**
 	 * Destroy the Dataset.
 	 *
+	 * @return void
 	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
@@ -172,6 +175,7 @@ class OMVModuleZFSDataset {
 	 * Renames a Dataset
 	 *
 	 * @param string $newname New name of the Dataset
+	 * @return void
 	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
@@ -182,6 +186,24 @@ class OMVModuleZFSDataset {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
 		$this->name = $newname;
+	}
+
+	/**
+	 * Clears a previously set proporty and specifies that it should be
+	 * inherited from it's parent.
+	 *
+	 * @param string $property Name of the property to inherit.
+	 * @return void
+	 * @throws OMVModuleZFSException
+	 * @access public
+	 */
+	public function inherit($property) {
+		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
+		OMVUtil::exec($cmd,$out,$res);
+		if ($res) {
+			throw new OMVModuleZFSException(implode("\n", $out));
+		}
+		$this->updateProperty($property);
 	}
 
 }

@@ -46,7 +46,7 @@ class OMVModuleZFSDataset {
 	 *
 	 */
 	public function __construct($name, array $properties = null) {
-		$cmd = "zfs create " . $name . " 2>&1";
+		$cmd = "zfs create -p " . $name . " 2>&1";
 		OMVUtil::exec($cmd,$out,$res);
 		if ($res) {
 			throw new OMVModuleZFSException(implode("\n", $out));
@@ -166,6 +166,22 @@ class OMVModuleZFSDataset {
 		if ($res) {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
+	}
+
+	/**
+	 * Renames a Dataset
+	 *
+	 * @param string $newname New name of the Dataset
+	 * @throws OMVModuleZFSException
+	 * @access public
+	 */
+	public function rename($newname) {
+		$cmd = "zfs rename -p " . $this->name . " " . $newname . " 2>&1";
+		OMVUtil::exec($cmd,$out,$res);
+		if ($res) {
+			throw new OMVModuleZFSException(implode("\n", $out));
+		}
+		$this->name = $newname;
 	}
 
 }

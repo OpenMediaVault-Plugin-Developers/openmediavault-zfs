@@ -42,15 +42,11 @@ class OMVModuleZFSDataset {
 	 *
 	 * @param string $name Name of the new Dataset
 	 * @param array $properties An associative array with properties to set when creating the Dataset
-	 * @throws OMVModuleZFSException
 	 *
 	 */
 	public function __construct($name, array $properties = null) {
 		$cmd = "zfs create -p " . $name . " 2>&1";
-		OMVUtil::exec($cmd,$out,$res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$this->exec($cmd,$out,$res);
 		$this->name = $name;
 		$this->updateAllProperties();
 		$this->setProperties($properties);
@@ -110,10 +106,7 @@ class OMVModuleZFSDataset {
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
 			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name;
-			OMVUtil::exec($cmd,$out,$res);
-			if ($res) {
-				throw new OMVModuleZFSException(implode("\n", $out));
-			}
+			$this->exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
 	}
@@ -122,15 +115,11 @@ class OMVModuleZFSDataset {
 	 * Get all Dataset properties from commandline and update object properties attribute
 	 *
 	 * @return void
-	 * @throws OMVModuleZFSException
 	 * @access private
 	 */ 
 	private function updateAllProperties() {
 		$cmd = "zfs get -H all " . $this->name;
-		OMVUtil::exec($cmd,$out,$res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
 			$tmpary = preg_split('/\t+/', $line);
@@ -143,15 +132,11 @@ class OMVModuleZFSDataset {
 	 *
 	 * @param string $property Name of the property to update
 	 * @return void
-	 * @throws OMVModuleZFSException
 	 * @access private
 	 */
 	private function updateProperty($property) {
 		$cmd = "zfs get -H " . $property . " " . $this->name;
-		OMVUtil::exec($cmd,$out,$res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array($tmpary[2], $tmpary[3]);
 	}
@@ -160,15 +145,11 @@ class OMVModuleZFSDataset {
 	 * Destroy the Dataset.
 	 *
 	 * @return void
-	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
 	public function destroy() {
 		$cmd = "zfs destroy " . $this->name;
-		OMVUtil::exec($cmd,$out,$res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$this->exec($cmd,$out,$res);
 	}
 
 	/**
@@ -176,15 +157,11 @@ class OMVModuleZFSDataset {
 	 *
 	 * @param string $newname New name of the Dataset
 	 * @return void
-	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
 	public function rename($newname) {
 		$cmd = "zfs rename -p " . $this->name . " " . $newname . " 2>&1";
-		OMVUtil::exec($cmd,$out,$res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$this->exec($cmd,$out,$res);
 		$this->name = $newname;
 	}
 
@@ -194,16 +171,31 @@ class OMVModuleZFSDataset {
 	 *
 	 * @param string $property Name of the property to inherit.
 	 * @return void
-	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
 	public function inherit($property) {
 		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
-		OMVUtil::exec($cmd,$out,$res);
+		$this->exec($cmd,$out,$res);
+		$this->updateProperty($property);
+	}
+
+	/**
+	 * Helper function to execute a command and throw an exception on error
+	 * (requires stderr redirected to stdout for proper exception message).
+	 *
+	 * @param string $cmd Command to execute
+	 * @param array &$out If provided will contain output in an array
+	 * @param int &$res If provided will contain Exit status of the command
+	 * @return string Last line of output when executing the command
+	 * @throws OMVModuleZFSException
+	 * @access private
+	 */
+	private function exec($cmd, &$out = null, &$res = null) {
+		$tmp = OMVUtil::exec($cmd, $out, $res);
 		if ($res) {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
-		$this->updateProperty($property);
+		return $tmp;
 	}
 
 }

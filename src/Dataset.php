@@ -52,8 +52,9 @@ class OMVModuleZFSDataset {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
 		$this->name = $name;
+		$this->updateAllProperties();
 		$this->setProperties($properties);
-		$this->mountPoint = $this->properties["mountpoint"];
+		$this->mountPoint = $this->properties["mountpoint"][0];
 	}
 
 	/**
@@ -80,7 +81,7 @@ class OMVModuleZFSDataset {
 	 * Get a single property value associated with the Dataset
 	 *
 	 * @param string $property Name of the property to fetch
-	 * @return string
+	 * @return array The returned array key 0=property value and key 1=property source.
 	 * @access public
 	 */
 	public function getProperty($property) {
@@ -88,9 +89,11 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * Get an array of all properties associated with the Dataset
+	 * Get an associative array of all properties associated with the Dataset.
 	 *
-	 * @return array $properties
+	 * @return array $properties Each entry is an array where key 0=property value and key
+	 * 1=property source.
+	 *
 	 * @access public
 	 */
 	public function getProperties() {
@@ -111,9 +114,8 @@ class OMVModuleZFSDataset {
 			if ($res) {
 				throw new OMVModuleZFSException(implode("\n", $out));
 			}
-			$this->properties["$newpropertyk"] = $newpropertyv;
+			$this->updateProperty($newpropertyk);
 		}
-		$this->updateAllProperties();
 	}
 
 	/**
@@ -131,8 +133,25 @@ class OMVModuleZFSDataset {
 		unset($this->properties);
 		foreach ($out as $line) {
 			$tmpary = preg_split('/\t+/', $line);
-			$this->properties["$tmpary[1]"] = $tmpary[2];
+			$this->properties["$tmpary[1]"] = array($tmpary[2], $tmpary[3]);
 		}
+	}
+
+	/**
+	 * Get single Datset property from commandline and update object property attribute
+	 *
+	 * @param string $property Name of the property to update
+	 * @throws OMVModuleZFSException
+	 * @access private
+	 */
+	private function updateProperty($property) {
+		$cmd = "zfs get -H " . $property . " " . $this->name;
+		OMVUtil::exec($cmd,$out,$res);
+		if ($res) {
+			throw new OMVModuleZFSException(implode("\n", $out));
+		}
+		$tmpary = preg_split('/\t+/', $out[0]);
+		$this->properties["$tmpary[1]"] = array($tmpary[2], $tmpary[3]);
 	}
 
 	/**

@@ -18,7 +18,8 @@ class OMVModuleZFSDataset {
      * @access private
      */
     private $name;
-    /**
+	
+	/**
      * Mountpoint of the Dataset
      *
      * @var    string $mountPoint
@@ -177,6 +178,17 @@ class OMVModuleZFSDataset {
 		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty($property);
+	}
+
+	/**
+	 * Upgrades the Dataset to latest filesystem version
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function upgrade() {
+		$cmd = "zfs upgrade " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
 	}
 
 	/**

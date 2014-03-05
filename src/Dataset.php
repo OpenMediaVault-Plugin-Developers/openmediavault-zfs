@@ -43,15 +43,18 @@ class OMVModuleZFSDataset {
 	 *
 	 * @param string $name Name of the new Dataset
 	 * @param array $properties An associative array with properties to set when creating the Dataset
+	 * @param bool $create Should the Dataset be created on commandline? Defaults to false.
 	 *
 	 */
-	public function __construct($name, array $properties = null) {
-		$cmd = "zfs create -p " . $name . " 2>&1";
-		$this->exec($cmd,$out,$res);
+	public function __construct($name, array $properties = null, $create = false) {
+		if ($create) {
+			$cmd = "zfs create -p " . $name . " 2>&1";
+			$this->exec($cmd,$out,$res);
+		}
 		$this->name = $name;
 		$this->updateAllProperties();
 		$this->setProperties($properties);
-		$this->mountPoint = $this->properties["mountpoint"][0];
+		$this->mountPoint = $this->properties["mountpoint"]["value"];
 	}
 
 	/**
@@ -124,7 +127,7 @@ class OMVModuleZFSDataset {
 		unset($this->properties);
 		foreach ($out as $line) {
 			$tmpary = preg_split('/\t+/', $line);
-			$this->properties["$tmpary[1]"] = array($tmpary[2], $tmpary[3]);
+			$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 		}
 	}
 
@@ -139,7 +142,7 @@ class OMVModuleZFSDataset {
 		$cmd = "zfs get -H " . $property . " " . $this->name;
 		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
-		$this->properties["$tmpary[1]"] = array($tmpary[2], $tmpary[3]);
+		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 	}
 
 	/**

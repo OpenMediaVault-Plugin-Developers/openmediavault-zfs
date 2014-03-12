@@ -39,22 +39,25 @@ class OMVModuleZFSDataset {
 	// Operations
 
 	/**
-	 * Constructor
+	 * Constructor. If the Dataset already exists in the system the object will be updated with all
+	 * associated properties from commandline.
 	 *
 	 * @param string $name Name of the new Dataset
-	 * @param array $properties An associative array with properties to set when creating the Dataset
-	 * @param bool $create Should the Dataset be created on commandline? Defaults to false.
-	 *
+	 * @return void
+	 * @access public
 	 */
-	public function __construct($name, array $properties = null, $create = false) {
-		if ($create) {
-			$cmd = "zfs create -p " . $name . " 2>&1";
-			$this->exec($cmd,$out,$res);
-		}
+	public function __construct($name) {
 		$this->name = $name;
-		$this->updateAllProperties();
-		$this->setProperties($properties);
-		$this->mountPoint = $this->properties["mountpoint"]["value"];
+		$qname = preg_quote($name, '/');
+		$cmd = "zfs list -H";
+		$this->exec($cmd, $out, $res);
+		foreach ($out as $line) {
+			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
+				$this->updateAllProperties();
+				$this->mountPoint = $this->properties["mountpoint"]["value"];
+				continue;
+			}
+		}
 	}
 
 	/**
@@ -144,6 +147,22 @@ class OMVModuleZFSDataset {
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 	}
+
+	/**
+	 * Craete a Dataset on commandline. Optionally provide a number of properties to set.
+	 *
+	 * @param array $properties Properties to set when creating the dataset.
+	 * @return void
+	 * @access public
+	 */
+	public function create(array $properties = null) {
+		$cmd = "zfs create -p " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->updateAllProperties();
+		$this->setProperties($properties);
+		$this->mountPoint = $this->properties["mountpoint"]["value"];
+	}
+
 
 	/**
 	 * Destroy the Dataset.

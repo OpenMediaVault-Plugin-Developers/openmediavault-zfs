@@ -160,7 +160,7 @@ class OMVModuleZFSZvol {
 	 */
 	public function create($size, array $properties = null, $sparse = null) {
 		$cmd = "zfs create -p ";
-		if (isset($sparse) && $sparse == true) {
+		if ((isset($sparse)) && ($sparse == true)) {
 			$cmd .= "-s ";
 		}	
 		$cmd .= "-V " . $size . " " . $this->name . " 2>&1";
@@ -179,6 +179,19 @@ class OMVModuleZFSZvol {
 	public function destroy() {
 		$cmd = "zfs destroy " . $this->name;
 		$this->exec($cmd,$out,$res);
+	}
+
+	/**
+	 * Renames a Zvol
+	 * 
+	 * @param string $newname New name of the Dataset
+	 * @return void
+	 * @access public
+	 */
+	public function rename($newname) {
+		$cmd = "zfs rename -p " . $this->name . " " . $newname . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->name = $newname;
 	}
 
 	/**

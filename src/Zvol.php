@@ -44,7 +44,30 @@ class OMVModuleZFSZvol {
 
 	// Associations
 	// Operations
-	
+
+	/**
+	 * Constructor. If the Zvol already exists in the system the object will be updated with all
+	 * associated properties from commandline.
+	 * 
+	 * @param string $name Name of the new Zvol
+	 * @return void
+	 * @access public
+	 */
+	public function __construct($name) {
+		$this->name = $name;
+		$qname = preg_quote($name, '/');
+		$cmd = "zfs list -H -t volume";
+		$this->exec($cmd, $out, $res);
+		foreach ($out as $line) {
+			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
+				$this->updateAllProperties();
+				$this->mountPoint = $this->properties["mountpoint"]["value"];
+				$this->size = $this->properties["size"]["value"];
+				continue;
+			}
+		}
+	}
+
 	/**
 	 * Return name of the Zvol
 	 * 
@@ -108,6 +131,22 @@ class OMVModuleZFSZvol {
 	 */
 	public function setProperties($properties) {
 		trigger_error('Not Implemented!', E_USER_WARNING);
+	}
+
+	/**
+	 * Get all Zvol properties from commandline and update object properties attribute
+	 * 
+	 * @return void
+	 * @access private
+	 */
+	private function updateAllProperties() {
+		$cmd = "zfs get -H all " . $this->name;
+		$this->exec($cmd,$out,$res);
+		unset($this->properties);
+		foreach ($out as $line) {
+			$tmpary = preg_split('/\t+/', $line);
+			$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
+		}
 	}
 
 	/**

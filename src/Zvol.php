@@ -23,7 +23,7 @@ class OMVModuleZFSZvol {
 	/**
 	 * Size of Zvol
 	 *
-	 * @var int $size
+	 * @var string $size
 	 * @access private
 	 */
 	private $size;
@@ -95,24 +95,28 @@ class OMVModuleZFSZvol {
 	}
 
 	/**
-	 * XXX
+	 * Get the total size of the Zvol
 	 *
-	 * @return int XXX
+	 * @return string $size
 	 * @access public
 	 */
 	public function getSize() {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+		return $this->size;
 	}
 
 	/**
-	 * XXX
-	 *
-	 * @param   $list<Feature> XXX
-	 * @return void XXX
+	 * Sets a number of Zvol properties. If a property is already set it will be updated with the new value.
+	 * 
+	 * @param  array $properties An associative array with properties to set
+	 * @return void
 	 * @access public
 	 */
 	public function setProperties($properties) {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+		foreach ($properties as $newpropertyk => $newpropertyv) {
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name;
+			$this->exec($cmd,$out,$res);
+			$this->updateProperty($newpropertyk);
+		}
 	}
 
 	/**
@@ -135,11 +139,12 @@ class OMVModuleZFSZvol {
 	 * Create a Zvol on commandline. Optionally provide a number of properties to set.
 	 * 
 	 * @param string $size Size of the Zvol that should be created
-	 * @param array $properties Properties to set when creating the dataset.
+	 * @param array $properties Properties to set when creatiing the dataset.
+	 * @param boolean $sparse Defines if a sparse volume should be created.
 	 * @return void
 	 * @access public
 	 */
-	public function create($size, array $properties = null, bool $sparse = null) {
+	public function create($size, array $properties = null, $sparse = null) {
 		$cmd = "zfs create -p ";
 		if (isset($sparse) && $sparse == true) {
 			$cmd .= "-s ";

@@ -44,15 +44,50 @@ class OMVModuleZFSZvol {
 
 	// Associations
 	// Operations
+	
 	/**
-	 * XXX
-	 *
-	 * @return string XXX
+	 * Return name of the Zvol
+	 * 
+	 * @return string $name
 	 * @access public
 	 */
 	public function getName() {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+		return $this->name;
 	}
+
+	/**
+	 * Get the mountpoint of the Zvol
+	 * 
+	 * @return string $mountPoint
+	 * @access public
+	 */
+	public function getMountPoint() {
+		return $this->mountPoint;
+	}
+
+	/**
+	 * Get a single property value associated with the Zvol
+	 * 
+	 * @param string $property Name of the property to fetch
+	 * @return array The returned array with the property. The property is an associative array with
+	 * two elements, <value> and <source>.
+	 * @access public
+	 */
+	public function getProperty($property) {
+		return $this->properties["$property"];
+	}
+
+	/**
+	 * Get an associative array of all properties associated with the Zvol
+	 * 
+	 * @return array $properties Each entry is an associative array with two elements
+	 * <value> and <source>
+	 * @access public
+	 */
+	public function getProperties() {
+		return $this->properties;
+	}
+
 
 	/**
 	 * XXX
@@ -61,26 +96,6 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function getSize() {
-		trigger_error('Not Implemented!', E_USER_WARNING);
-	}
-
-	/**
-	 * XXX
-	 *
-	 * @return string XXX
-	 * @access public
-	 */
-	public function getMountPoint() {
-		trigger_error('Not Implemented!', E_USER_WARNING);
-	}
-
-	/**
-	 * XXX
-	 *
-	 * @return list<Feature> XXX
-	 * @access public
-	 */
-	public function getProperties() {
 		trigger_error('Not Implemented!', E_USER_WARNING);
 	}
 

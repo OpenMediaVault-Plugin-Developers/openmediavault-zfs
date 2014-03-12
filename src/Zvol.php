@@ -136,6 +136,20 @@ class OMVModuleZFSZvol {
 	}
 
 	/**
+	 * Get single Datset property from commandline and update object property attribute
+	 * 
+	 * @param string $property Name of the property to update
+	 * @return void
+	 * @access private
+	 */
+	private function updateProperty($property) {
+		$cmd = "zfs get -H " . $property . " " . $this->name;
+		$this->exec($cmd,$out,$res);
+		$tmpary = preg_split('/\t+/', $out[0]);
+		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
+	}
+
+	/**
 	 * Create a Zvol on commandline. Optionally provide a number of properties to set.
 	 * 
 	 * @param string $size Size of the Zvol that should be created
@@ -165,6 +179,20 @@ class OMVModuleZFSZvol {
 	public function destroy() {
 		$cmd = "zfs destroy " . $this->name;
 		$this->exec($cmd,$out,$res);
+	}
+
+	/**
+	 * Clears a previously set proporty and specifies that it should be
+	 * inherited from it's parent.
+	 * 
+	 * @param string $property Name of the property to inherit.
+	 * @return void
+	 * @access public
+	 */
+	public function inherit($property) {
+		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->updateProperty($property);
 	}
 
 	/**

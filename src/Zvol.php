@@ -1,4 +1,6 @@
 <?php
+require_once("Exception.php");
+require_once("openmediavault/util.inc");
 
 /**
  * XXX detailed description
@@ -27,14 +29,6 @@ class OMVModuleZFSZvol {
 	private $size;
 
 	/**
-	 * Mountpoint of the Zvol
-	 *
-	 * @var    string $mountPoint
-	 * @access private
-	 */
-	private $mountPoint;
-
-	/**
 	 * Array with properties assigned to the Zvol
 	 * 
 	 * @var    array $properties
@@ -61,8 +55,7 @@ class OMVModuleZFSZvol {
 		foreach ($out as $line) {
 			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
 				$this->updateAllProperties();
-				$this->mountPoint = $this->properties["mountpoint"]["value"];
-				$this->size = $this->properties["size"]["value"];
+				$this->size = $this->properties["volsize"]["value"];
 				continue;
 			}
 		}
@@ -76,16 +69,6 @@ class OMVModuleZFSZvol {
 	 */
 	public function getName() {
 		return $this->name;
-	}
-
-	/**
-	 * Get the mountpoint of the Zvol
-	 * 
-	 * @return string $mountPoint
-	 * @access public
-	 */
-	public function getMountPoint() {
-		return $this->mountPoint;
 	}
 
 	/**
@@ -110,7 +93,6 @@ class OMVModuleZFSZvol {
 	public function getProperties() {
 		return $this->properties;
 	}
-
 
 	/**
 	 * XXX
@@ -150,6 +132,26 @@ class OMVModuleZFSZvol {
 	}
 
 	/**
+	 * Create a Zvol on commandline. Optionally provide a number of properties to set.
+	 * 
+	 * @param string $size Size of the Zvol that should be created
+	 * @param array $properties Properties to set when creating the dataset.
+	 * @return void
+	 * @access public
+	 */
+	public function create($size, array $properties = null, bool $sparse = null) {
+		$cmd = "zfs create -p ";
+		if (isset($sparse) && $sparse == true) {
+			$cmd .= "-s ";
+		}	
+		$cmd .= "-V " . $size . " " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->updateAllProperties();
+		$this->setProperties($properties);
+		$this->size = $this->properties["volsize"]["value"];
+	}
+
+	/**
 	 * Helper function to execute a command and throw an exception on error
 	 * (requires stderr redirected to stdout for proper exception message).
 	 * 
@@ -167,7 +169,6 @@ class OMVModuleZFSZvol {
 		}
 		return $tmp;
 	}
-
 }
 
 ?>

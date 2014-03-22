@@ -1,6 +1,7 @@
 <?php
 require_once("Exception.php");
 require_once("openmediavault/util.inc");
+require_once("Snapshot.php");
 
 /**
  * XXX detailed description
@@ -36,6 +37,14 @@ class OMVModuleZFSZvol {
 	 */
 	private $properties;
 
+	/**
+	 * Array with Snapshots associated to the Zvol
+	 * 
+	 * @var     array $snapshots
+	 * @access private
+	 */
+	private $snapshots;
+
 	// Associations
 	// Operations
 
@@ -57,6 +66,14 @@ class OMVModuleZFSZvol {
 				$this->updateAllProperties();
 				$this->size = $this->properties["volsize"]["value"];
 				continue;
+			}
+		}
+		$qname = preg_quote($name . "@", '/');
+		$cmd = "zfs list -H -t snapshot 2>&1";
+		$this->exec($cmd, $out, $res);
+		foreach ($out as $line) {
+			if (preg_match('/^(' . $qname . '[^\s]+)\t.*$/', $line, $res)) {
+				$this->snapshots[$res[1]] = new OMVModuleZFSSnapshot($res[1]);
 			}
 		}
 	}
@@ -206,6 +223,33 @@ class OMVModuleZFSZvol {
 		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty($property);
+	}
+
+	/**
+	 * Creates a Snapshot and adds it to the existing list of snapshots associated
+	 * with the Zvol.
+	 * 
+	 * @param string $snap_name Name of the Snapshot to create.
+	 * @param array $properties Optional array of properties to set on Snapshot
+	 * @return void
+	 * @access public
+	 */
+	public function addSnapshot($snap_name, array $properties = null) {
+		$snap = new OMVModuleZFSSnapshot($snap_name);
+		$snap->create($properties);
+		$this->snapshots[$snap_name] = $snap;
+	}
+
+	/**
+	 * Destroys a Snapshot on commandline and removes it from the Zvol.
+	 * 
+	 * @param string $snap_name Name of the Snapshot to delete.
+	 * @return void
+	 * @access public
+	 */
+	public function deleteSnapshot($snap_name) {
+		$this->snapshots[$snap_name]->destroy();
+		unset($this->snapshots[$snap_name]);
 	}
 
 	/**

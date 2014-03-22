@@ -62,24 +62,55 @@ class OMVModuleZFSSnapshot {
 	}
 
 	/**
-	 * XXX
-	 *
-	 * @return list<Feature> XXX
+	 * Get a single property value associated with the Snapshot
+	 * 
+	 * @param string $property Name of the property to fetch
+	 * @return array The returned array with the property. The property is an associative array with
+	 * two elements, <value> and <source>.
 	 * @access public
 	 */
-	public function getFeatures() {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+	public function getProperty($property) {
+		return $this->properties["$property"];
 	}
 
 	/**
-	 * XXX
-	 *
-	 * @param   $list<Feature> XXX
-	 * @return void XXX
+	 * Get an associative array of all properties associated with the Snapshot
+	 * 
+	 * @return array $properties Each entry is an associative array with two elements
+	 * <value> and <source>
 	 * @access public
 	 */
-	public function setFeatures($list) {
-		trigger_error('Not Implemented!', E_USER_WARNING);
+	public function getProperties() {
+		return $this->properties;
+	}
+
+	/**
+	 * Sets a number of Snapshot properties. If a property is already set it will be updated with the new value.
+	 * 
+	 * @param  array $properties An associative array with properties to set
+	 * @return void
+	 * @access public
+	 */
+	public function setProperties($properties) {
+		foreach ($properties as $newpropertyk => $newpropertyv) {
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name;
+			$this->exec($cmd,$out,$res);
+			$this->updateProperty($newpropertyk);
+		}
+	}
+
+	/**
+	 * Get single Snapshot property from commandline and update object property attribute
+	 * 
+	 * @param string $property Name of the property to update
+	 * @return void
+	 * @access private
+	 */
+	private function updateProperty($property) {
+		$cmd = "zfs get -H " . $property . " " . $this->name;
+		$this->exec($cmd,$out,$res);
+		$tmpary = preg_split('/\t+/', $out[0]);
+		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 	}
 
 	/**
@@ -96,6 +127,20 @@ class OMVModuleZFSSnapshot {
 			$tmpary = preg_split('/\t+/', $line);
 			$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 		}
+	}
+
+	/**
+	 * Craete a Snapshot on commandline. Optionally provide a number of properties to set.
+	 * 
+	 * @param array $properties Properties to set when creating the dataset.
+	 * @return void
+	 * @access public
+	 */
+	public function create(array $properties = null) {
+		$cmd = "zfs snapshot " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->updateAllProperties();
+		$this->setProperties($properties);
 	}
 
 	/**

@@ -1,6 +1,7 @@
 <?php
 require_once("Exception.php");
 require_once("openmediavault/util.inc");
+require_once("Snapshot.php");
 
 /**
  * XXX detailed description
@@ -35,6 +36,14 @@ class OMVModuleZFSDataset {
      */
     private $properties;
 
+	/**
+	 * Array with Snapshots associated to the Dataset
+	 *
+	 * @var 	array $snapshots
+	 * @access private
+	 */
+	private $snapshots;
+
 	// Associations
 	// Operations
 
@@ -58,6 +67,14 @@ class OMVModuleZFSDataset {
 				continue;
 			}
 		}
+		$qname = preg_quote($name . "@", '/');
+		$cmd = "zfs list -H -t snapshot";
+		$this->exec($cmd, $out, $res);
+		foreach ($out as $line) {
+			if (preg_match('/^(' . $qname . '[^\s]+)\t.*$/', $line, $res)) {
+				$this->snapshots[] = new OMVModuleZFSSnapshot($res[1]);
+			}
+		}
 	}
 
 	/**
@@ -78,6 +95,16 @@ class OMVModuleZFSDataset {
 	 */
 	public function getMountPoint() {
 		return $this->mountPoint;
+	}
+
+	/**
+	 * Get all Snapshots associated with the Dataset
+	 *
+	 * @return array $snapshots
+	 * @access public
+	 */
+	public function getSnapshots() {
+		return $this->snapshots;
 	}
 
 	/**

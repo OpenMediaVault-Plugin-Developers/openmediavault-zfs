@@ -45,7 +45,6 @@ class OMVModuleZFSSnapshot {
 		$this->exec($cmd, $out, $res);
 		foreach ($out as $line) {
 			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
-				print("Name found!!!\n");
 				$this->updateAllProperties();
 				continue;
 			}

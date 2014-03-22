@@ -124,8 +124,12 @@ class OMVModuleZFSSnapshot {
 		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
-			$tmpary = preg_split('/\t+/', $line);
-			$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
+			$tmpary = preg_split('/\t/', $line);
+			if (strlen($tmpary[2] == 0)) {
+				$this->properties["$tmpary[1]"] = array("value" => "-", "source" => $tmpary[3]);
+			} else {
+				$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
+			}
 		}
 	}
 
@@ -141,6 +145,17 @@ class OMVModuleZFSSnapshot {
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
 		$this->setProperties($properties);
+	}
+
+	/**
+	 * Destroy a Snapshot on commandline.
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function destroy() {
+		$cmd = "zfs destroy " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
 	}
 
 	/**

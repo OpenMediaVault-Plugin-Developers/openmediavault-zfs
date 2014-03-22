@@ -72,7 +72,7 @@ class OMVModuleZFSDataset {
 		$this->exec($cmd, $out, $res);
 		foreach ($out as $line) {
 			if (preg_match('/^(' . $qname . '[^\s]+)\t.*$/', $line, $res)) {
-				$this->snapshots[] = new OMVModuleZFSSnapshot($res[1]);
+				$this->snapshots[$res[1]] = new OMVModuleZFSSnapshot($res[1]);
 			}
 		}
 	}
@@ -190,7 +190,6 @@ class OMVModuleZFSDataset {
 		$this->mountPoint = $this->properties["mountpoint"]["value"];
 	}
 
-
 	/**
 	 * Destroy the Dataset.
 	 *
@@ -264,6 +263,32 @@ class OMVModuleZFSDataset {
 		$this->updateProperty("mounted");
 	}
 
+	/**
+	 * Creates a Snapshot and adds it to the existing list of snapshots associated
+	 * with the Dataset.
+	 *
+	 * @param string $snap_name Name of the Snapshot to create.
+	 * @param array $properties Optional array of properties to set on Snapshot
+	 * @return void
+	 * @access public
+	 */
+	public function addSnapshot($snap_name, array $properties = null) {
+		$snap = new OMVModuleZFSSnapshot($snap_name);
+		$snap->create($properties);
+		$this->snapshots[$snap_name] = $snap;
+	}
+
+	/**
+	 * Destroys a Snapshot on commandline and removes it from the Dataset.
+	 *
+	 * @param string $snap_name Name of the Snapshot to delete.
+	 * @return void
+	 * @access public
+	 */
+	public function deleteSnapshot($snap_name) {
+		$this->snapshots[$snap_name]->destroy();
+		unset($this->snapshots[$snap_name]);
+	}
 
 	/**
 	 * Helper function to execute a command and throw an exception on error

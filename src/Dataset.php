@@ -109,9 +109,10 @@ class OMVModuleZFSDataset {
 
 	/**
 	 * Get a single property value associated with the Dataset
-	 *
+	 * 
 	 * @param string $property Name of the property to fetch
-	 * @return array The returned array key 0=property value and key 1=property source.
+	 * @return array The returned array with the property. The property is an associative array with
+	 * two elements, <value> and <source>.
 	 * @access public
 	 */
 	public function getProperty($property) {
@@ -119,11 +120,10 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * Get an associative array of all properties associated with the Dataset.
-	 *
-	 * @return array $properties Each entry is an array where key 0=property value and key
-	 * 1=property source.
-	 *
+	 * Get an associative array of all properties associated with the Snapshot
+	 * 
+	 * @return array $properties Each entry is an associative array with two elements
+	 * <value> and <source>
 	 * @access public
 	 */
 	public function getProperties() {

@@ -58,7 +58,7 @@ class OMVModuleZFSDataset {
 	public function __construct($name) {
 		$this->name = $name;
 		$qname = preg_quote($name, '/');
-		$cmd = "zfs list -H";
+		$cmd = "zfs list -H 2>&1";
 		$this->exec($cmd, $out, $res);
 		foreach ($out as $line) {
 			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
@@ -68,7 +68,7 @@ class OMVModuleZFSDataset {
 			}
 		}
 		$qname = preg_quote($name . "@", '/');
-		$cmd = "zfs list -H -t snapshot";
+		$cmd = "zfs list -H -t snapshot 2>&1";
 		$this->exec($cmd, $out, $res);
 		foreach ($out as $line) {
 			if (preg_match('/^(' . $qname . '[^\s]+)\t.*$/', $line, $res)) {
@@ -139,7 +139,7 @@ class OMVModuleZFSDataset {
 	 */
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
-			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name;
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name . " 2>&1";
 			$this->exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
@@ -152,7 +152,7 @@ class OMVModuleZFSDataset {
 	 * @access private
 	 */ 
 	private function updateAllProperties() {
-		$cmd = "zfs get -H all " . $this->name;
+		$cmd = "zfs get -H all " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
@@ -169,7 +169,7 @@ class OMVModuleZFSDataset {
 	 * @access private
 	 */
 	private function updateProperty($property) {
-		$cmd = "zfs get -H " . $property . " " . $this->name;
+		$cmd = "zfs get -H " . $property . " " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
@@ -197,7 +197,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function destroy() {
-		$cmd = "zfs destroy " . $this->name;
+		$cmd = "zfs destroy " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 

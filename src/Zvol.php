@@ -57,21 +57,23 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function __construct($name) {
+		$zvol_exists = true;
 		$this->name = $name;
-		$qname = preg_quote($name, '/');
-		$cmd = "zfs list -H -t volume 2>&1";
-		$this->exec($cmd, $out, $res);
-		foreach ($out as $line) {
-			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
-				$this->updateAllProperties();
-				$this->size = $this->properties["volsize"]["value"];
-				continue;
-			}
+		$cmd = "zfs list -H -t volume " . $name . " 2>&1";
+		try {
+			$this->exec($cmd, $out, $res);
+			$this->updateAllProperties();
+			$this->size = $this->properties["volsize"]["value"];
 		}
-		$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
-		$this->exec($cmd, $out2, $res2);
-		foreach ($out2 as $line2) {
-			$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+		catch (OMVModuleZFSException $e) {
+			$zvol_exists = false;
+		}
+		if ($zvol_exists) {
+			$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
+			$this->exec($cmd, $out2, $res2);
+			foreach ($out2 as $line2) {
+				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+			}
 		}
 
 	}

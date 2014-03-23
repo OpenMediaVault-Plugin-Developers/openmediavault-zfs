@@ -56,21 +56,23 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function __construct($name) {
+		$ds_exists = true;
 		$this->name = $name;
-		$qname = preg_quote($name, '/');
-		$cmd = "zfs list -H 2>&1";
-		$this->exec($cmd, $out, $res);
-		foreach ($out as $line) {
-			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
-				$this->updateAllProperties();
-				$this->mountPoint = $this->properties["mountpoint"]["value"];
-				continue;
-			}
+		$cmd = "zfs list -H -t filesystem " . $name . " 2>&1";
+		try {
+			$this->exec($cmd, $out, $res);
+			$this->updateAllProperties();
+			$this->mountPoint = $this->properties["mountpoint"]["value"];
 		}
-		$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
-		$this->exec($cmd, $out2, $res2);
-		foreach ($out2 as $line2) {
-			$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+		catch (OMVModuleZFSException $e) {
+			$ds_exists = false;
+		}
+		if ($ds_exists) {
+			$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
+			$this->exec($cmd, $out2, $res2);
+			foreach ($out2 as $line2) {
+				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+			}
 		}
 	}
 

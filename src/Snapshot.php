@@ -40,14 +40,12 @@ class OMVModuleZFSSnapshot {
 	 */
 	public function __construct($name) {
 		$this->name = $name;
-		$qname = preg_quote($name, '/');
-		$cmd = "zfs list -H -t snapshot 2>&1";
-		$this->exec($cmd, $out, $res);
-		foreach ($out as $line) {
-			if (preg_match('/^' . $qname . '\t.*$/', $line)) {
-				$this->updateAllProperties();
-				continue;
-			}
+		$cmd = "zfs list -H -t snapshot " .$name . " 2>&1";
+		try {
+			$this->exec($cmd, $out, $res);
+			$this->updateAllProperties();
+		}
+		catch (OMVModuleZFSException $e) {
 		}
 	}
 

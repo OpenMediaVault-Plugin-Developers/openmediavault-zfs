@@ -71,8 +71,12 @@ class OMVModuleZFSDataset {
 			$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			foreach ($out2 as $line2) {
-				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+				if (preg_match('/^' . preg_quote($name, '/') . '\@.*$/', $line2)) {
+					$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+				}
 			}
+		} else {
+			$this->create();
 		}
 	}
 
@@ -103,7 +107,11 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function getSnapshots() {
-		return $this->snapshots;
+		if (isset($this->snapshots)) {
+			return $this->snapshots;
+		} else {
+			return array();
+		}
 	}
 
 	/**
@@ -175,17 +183,15 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
-	 * Craete a Dataset on commandline. Optionally provide a number of properties to set.
+	 * Craete a Dataset on commandline.
 	 *
-	 * @param array $properties Properties to set when creating the dataset.
 	 * @return void
-	 * @access public
+	 * @access private
 	 */
-	public function create(array $properties = null) {
+	private function create() {
 		$cmd = "zfs create -p " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
-		$this->setProperties($properties);
 		$this->mountPoint = $this->properties["mountpoint"]["value"];
 	}
 

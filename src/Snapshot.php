@@ -39,6 +39,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function __construct($name) {
+		$snap_exists = true;
 		$this->name = $name;
 		$cmd = "zfs list -H -t snapshot " .$name . " 2>&1";
 		try {
@@ -46,6 +47,10 @@ class OMVModuleZFSSnapshot {
 			$this->updateAllProperties();
 		}
 		catch (OMVModuleZFSException $e) {
+			$snap_exists = false;
+		}
+		if (!$snap_exists) {
+			$this->create();
 		}
 	}
 
@@ -132,17 +137,15 @@ class OMVModuleZFSSnapshot {
 	}
 
 	/**
-	 * Craete a Snapshot on commandline. Optionally provide a number of properties to set.
+	 * Create a Snapshot on commandline.
 	 * 
-	 * @param array $properties Properties to set when creating the dataset.
 	 * @return void
-	 * @access public
+	 * @access private
 	 */
-	public function create(array $properties = null) {
+	private function create() {
 		$cmd = "zfs snapshot " . $this->name . " 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
-		$this->setProperties($properties);
 	}
 
 	/**

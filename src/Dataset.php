@@ -68,12 +68,10 @@ class OMVModuleZFSDataset {
 			$ds_exists = false;
 		}
 		if ($ds_exists) {
-			$cmd = "zfs list -r -o name -H -t snapshot " . $name . " 2>&1";
+			$cmd = "zfs list -r -d 1 -o name -H -t snapshot " . $name . " 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			foreach ($out2 as $line2) {
-				if (preg_match('/^' . preg_quote($name, '/') . '\@.*$/', $line2)) {
 					$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
-				}
 			}
 		} else {
 			$this->create();

@@ -122,6 +122,20 @@ class OMVModuleZFSZvol {
 	}
 
 	/**
+	 * Get all Snapshots associated with the Zvol
+	 * 
+	 * @return array $snapshots
+	 * @access public
+	 */
+	public function getSnapshots() {
+		if (isset($this->snapshots)) {
+			return $this->snapshots;
+		} else {
+			return array();
+		}
+	}
+
+	/**
 	 * Sets a number of Zvol properties. If a property is already set it will be updated with the new value.
 	 * 
 	 * @param  array $properties An associative array with properties to set

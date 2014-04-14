@@ -21,6 +21,7 @@ class OMVModuleZFSUtil {
 		foreach ($out as $line) {
 			$parts = preg_split('/\t/',$line);
 			if ((strpos($parts[0],'/') === false) && (strpos($parts[0],'@') === false)) {
+				//This is a Pool, thus create both the Pool entry and a Filesystem entry corresponding to the Pool.
 				$tmp = array('id'=>$prefix . $parts[0],
 					'parentid'=>'root',
 					'name'=>$parts[0],
@@ -38,6 +39,7 @@ class OMVModuleZFSUtil {
 					'expanded'=>true);
 				array_push($objects,$tmp);
 			} elseif (strpos($parts[0],'/') === false) {
+				//This is a Snapshot of the Pool Filesystem.
 				$pname = preg_split('/\@/',$parts[0]);
 				$tmp = array('id'=>$prefix . $pname[0] . '/' . $parts[0],
 					'parentid'=>$prefix . $pname[0]. '/' . $pname[0],
@@ -48,6 +50,7 @@ class OMVModuleZFSUtil {
 					'expanded'=>true);
 				array_push($objects,$tmp);
 			} elseif (preg_match('/(.*)\@(.*)$/', $parts[0], $result)) {
+				//This is a Snapshot of any other Filesystem than the Pool.
 				$pname = preg_split('/\//',$parts[0]);
 				$id = $prefix . $pname[0] . "/" . $result[0];
 				$parentid = $prefix . $pname[0] . "/" . $result[1];
@@ -63,6 +66,7 @@ class OMVModuleZFSUtil {
 					'expanded'=>true);
 				array_push($objects,$tmp);
 			} elseif (preg_match('/(.*)\/(.*)$/', $parts[0], $result)) {
+				//This is a Filesystem or a Volume
 				$pname = preg_split('/\//',$parts[0]);
 				$id = $prefix . $pname[0] . "/" . $result[0];
 				$parentid = $prefix . $pname[0] . "/" . $result[1];
@@ -70,17 +74,42 @@ class OMVModuleZFSUtil {
 				$type = ucfirst($parts[1]);
 				if (strcmp($type, "Filesystem") == 0) {
 					$icon = "images/filesystem.png";
+					$ds =  new OMVModuleZFSDataset($parts[0]);
+					if ($ds->isClone()) {
+						//This is a cloned Filesystem
+						$tmp = array('id'=>$id,
+							'parentid'=>$parentid,
+							'name'=>$name,
+							'type'=>'Clone',
+							'icon'=>$icon,
+							'path'=>$parts[0],
+							'expanded'=>true,
+							'origin' => $ds->getOrigin());
+						array_push($objects,$tmp);
+					} else {
+						//This is a standard Filesystem.
+						$tmp = array('id'=>$id,
+							'parentid'=>$parentid,
+							'name'=>$name,
+							'type'=>$type,
+							'icon'=>$icon,
+							'path'=>$parts[0],
+							'expanded'=>true,
+							'origin' => $ds->getOrigin());
+						array_push($objects,$tmp);
+					}
 				} else {
+					//This is a Volume.
 					$icon = "images/zfs_disk.png";
+					$tmp = array('id'=>$id,
+						'parentid'=>$parentid,
+						'name'=>$name,
+						'type'=>$type,
+						'icon'=>$icon,
+						'path'=>$parts[0],
+						'expanded'=>true);
+					array_push($objects,$tmp);
 				}
-				$tmp = array('id'=>$id,
-					'parentid'=>$parentid,
-					'name'=>$name,
-					'type'=>$type,
-					'icon'=>$icon,
-					'path'=>$parts[0],
-					'expanded'=>true);
-				array_push($objects,$tmp);
 			}
 		}
 		return $objects;

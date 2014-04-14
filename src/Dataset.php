@@ -294,6 +294,35 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
+	* Check if the Dataset is a clone or not.
+	*
+	* @return bool
+	* @access public
+	*/
+	public function isClone() {
+		$origin = $this->getProperty("origin");
+		if (strlen($origin) > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	* Get the origin of the Dataset if it's a clone.
+	*
+	* @return string The name of the origin if it exists. Otherwise an empty string.
+	* @access public
+	*/
+	public function getOrigin() {
+		if ($this->isClone()) {
+			return $this->getProperty("origin");
+		} else {
+			return "";
+		}
+	}
+
+	/**
 	 * Helper function to execute a command and throw an exception on error
 	 * (requires stderr redirected to stdout for proper exception message).
 	 *

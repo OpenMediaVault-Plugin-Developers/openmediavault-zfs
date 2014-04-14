@@ -323,6 +323,19 @@ class OMVModuleZFSDataset {
 	}
 
 	/**
+	* Promotes the Dataset if it's a clone.
+	*
+	* @return void
+	* @access public
+	*/
+	public function promote() {
+		if ($this->isClone()) {
+			$cmd = "zfs promote " . $this->name . " 2>&1";
+			$this->exec($cmd,$out,$res);
+		}
+	}
+
+	/**
 	 * Helper function to execute a command and throw an exception on error
 	 * (requires stderr redirected to stdout for proper exception message).
 	 *

@@ -301,7 +301,7 @@ class OMVModuleZFSDataset {
 	*/
 	public function isClone() {
 		$origin = $this->getProperty("origin");
-		if (strlen($origin) > 0) {
+		if (strlen($origin["value"]) > 0) {
 			return true;
 		} else {
 			return false;
@@ -316,7 +316,8 @@ class OMVModuleZFSDataset {
 	*/
 	public function getOrigin() {
 		if ($this->isClone()) {
-			return $this->getProperty("origin");
+			$origin = $this->getProperty("origin");
+			return $origin['value'];
 		} else {
 			return "";
 		}

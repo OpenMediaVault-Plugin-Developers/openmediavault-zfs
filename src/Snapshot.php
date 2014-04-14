@@ -160,6 +160,29 @@ class OMVModuleZFSSnapshot {
 	}
 
 	/**
+	 * Rollback a Snapshot on commandline.
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function rollback() {
+		$cmd = "zfs rollback " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+	}
+
+	/**
+	 * Clones a Snapshot on commandline.
+	 *
+	 * @param string $newname
+	 * @return void
+	 * @access public
+	 */
+	public function clonesnap($newname) {
+		$cmd = "zfs clone -p " . $this->name . " " . $newname . " 2>&1";
+		$this->exec($cmd,$out,$res);
+	}
+
+	/**
 	 * Helper function to execute a command and throw an exception on error
 	 * (requires stderr redirected to stdout for proper exception message).
 	 * 

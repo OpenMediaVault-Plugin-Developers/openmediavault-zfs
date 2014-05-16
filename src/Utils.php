@@ -9,6 +9,25 @@ require_once("Dataset.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Get UUID of ZFS pool by name
+	 *
+	 * @return string UUID of the pool
+	 */
+	public static function getUUIDbyName($name) {
+		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $name, $result);
+		$name = $result[1];
+		unset($result);
+		$cmd = "blkid -o full";
+		OMVModuleZFSUtil::exec($cmd, $out, $res);
+		foreach($out as $line) {
+			if(preg_match('/^.*LABEL=\"' . $name . '\" UUID=\"([A-Za-z0-9]+)\".*TYPE=\"zfs_member\"$/', $line, $result)) {
+				return($result[1]);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Get an array with all ZFS objects
 	 *
 	 * @return An array with all ZFS objects
@@ -26,7 +45,7 @@ class OMVModuleZFSUtil {
 			$subdirs = preg_split('/\//',$path);
 			$root = $subdirs[0];
 			$tmp = array();
-			
+
 			switch ($type) {
 			case "filesystem":
 				if (strpos($path,'/') === false) {

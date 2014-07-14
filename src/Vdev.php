@@ -29,7 +29,7 @@ class OMVModuleZFSVdev {
     private $pool;
 
     /**
-     * Array holding disks
+     * This vdev type
      *
      * @var    OMVModuleZFSVdevType $type Vdev type
      * @access private

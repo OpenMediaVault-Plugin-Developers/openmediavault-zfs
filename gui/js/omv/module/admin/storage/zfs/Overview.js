@@ -1,8 +1,8 @@
 // require("js/omv/tree/Panel.js")
-// require("js/omv/module/admin/service/zfs/TreePanel.js")
+// require("js/omv/module/admin/storage/zfs/TreePanel.js")
 // require("js/omv/workspace/window/Grid.js")
 
-Ext.define("OMV.module.admin.services.zfs.AddObject", {
+Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 	extend: "OMV.workspace.window.Form",
 	uses: [
 		"OMV.data.Store",
@@ -79,7 +79,7 @@ Ext.define("OMV.module.admin.services.zfs.AddObject", {
 
 
 
-Ext.define("OMV.module.admin.service.zfs.EditProperties", {
+Ext.define("OMV.module.admin.storage.zfs.EditProperties", {
 	extend: "OMV.workspace.window.Grid",
 	requires: [
 		"OMV.data.Store",
@@ -271,7 +271,7 @@ Ext.define("OMV.module.admin.service.zfs.EditProperties", {
 });
 
 
-Ext.define("OMV.module.admin.services.zfs.CreateShare", {
+Ext.define("OMV.module.admin.storage.zfs.CreateShare", {
 	extend: "OMV.workspace.window.Form",
 	uses: [
 		"OMV.data.Store",

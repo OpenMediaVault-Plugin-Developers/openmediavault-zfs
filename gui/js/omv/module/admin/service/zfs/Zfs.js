@@ -1,6 +1,6 @@
 OMV.WorkspaceManager.registerNode({
     id      : "zfs",
-    path    : "/service",
+    path    : "/storage",
     text    : _("ZFS"),
     icon16  : "images/zfs.png",
     iconSvg : "images/zfs.svg"

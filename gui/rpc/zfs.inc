@@ -97,7 +97,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$objects = array();
 		$name = $params['name'];
 		switch ($params['type']) {
-		case "Filesystem" || "Clone":
+		case "Filesystem":
+		case "Clone":
 			$tmp = new OMVModuleZFSDataset($name);
 			break;
 		case "Snapshot":
@@ -126,7 +127,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		$objects = array();
 		switch ($params['type']) {
-		case "Filesystem" || "Clone":
+		case "Filesystem":
+		case "Clone":
 			$tmp = new OMVModuleZFSDataset($params['name']);
 			break;
 		case "Snapshot":
@@ -159,7 +161,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$bgOutputFilename = $this->createBgProcOutput();
 			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
 			switch ($params['type']) {
-			case "Filesystem" || "Clone":
+			case "Filesystem":
+			case "Clone":
 				$tmp = new OMVModuleZFSDataset($params['name']);
 				break;
 			case "Snapshot":
@@ -230,7 +233,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		// Prepare the configuration object. Use the name of the shared
 		// folder as the relative directory name of the share.
 		switch ($params['type']) {
-		case "Filesystem" || "Clone":
+		case "Filesystem":
+		case "Clone":
 			$tmp = new OMVModuleZFSDataset($name);
 			break;
 		default:

@@ -70,7 +70,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function deleteObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		switch ($params['type']) {
-		case "Filesystem" || "Clone":
+		case "Filesystem":
+		case "Clone":
 			$name = $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
 			$tmp->destroy();
@@ -137,7 +138,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
-		}	
+		}
 		foreach ($params['properties'] as $property) {
 			$objects[$property['property']] = $property['value'];
 		}
@@ -239,7 +240,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 		$uuid = OMVUtil::uuid();
 		$pathName = $tmp->getMountPoint();
-		$subdirs = preg_split('/\//',$pathName);	
+		$subdirs = preg_split('/\//',$pathName);
 		$reldirpath = $subdirs[count($subdirs)-1];
 		$object = array(
 			"uuid" => $uuid,
@@ -307,7 +308,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 }
 
 // Register the RPC service.
-$rpcServiceMgr = &OMVRpcServiceMgr::getInstance(); // Get the "root" instance for the Services 
+$rpcServiceMgr = &OMVRpcServiceMgr::getInstance(); // Get the "root" instance for the Services
 $rpcServiceMgr->registerService(new OMVRpcServiceZFS()); // Register a new instance of the RPC service described above
 ?>
 

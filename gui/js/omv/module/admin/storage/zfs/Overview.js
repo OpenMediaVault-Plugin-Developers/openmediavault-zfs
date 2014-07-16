@@ -171,7 +171,7 @@ Ext.define("OMV.module.admin.service.zfs.EditProperties", {
 						value: "",
 						source: "local",
 						modified: "true",
-						newproperty: "true" 
+						newproperty: "true"
 					});
 					rowEditing.cancelEdit();
 					store.insert(0, newProperty);
@@ -239,7 +239,7 @@ Ext.define("OMV.module.admin.service.zfs.EditProperties", {
 				stateId: "newproperty",
 				sortable: false,
 				hidden: true
-			},{				
+			},{
 				text: _("Modified"),
 				sortable: false,
 				dataIndex: "modified",
@@ -255,7 +255,7 @@ Ext.define("OMV.module.admin.service.zfs.EditProperties", {
 		var values = me.getValues();
 		Ext.Array.each(values, function(value) {
 			if(value.modified === "false")
-				return;										 
+				return;
 			properties.push({
 				"property": value.property,
 				"value": value.value,
@@ -343,8 +343,8 @@ Ext.define("OMV.module.admin.services.zfs.CreateShare", {
 
 
 
-Ext.define("OMV.module.admin.service.zfs.Overview", {
-	extend: "OMV.module.admin.services.zfs.TreePanel",
+Ext.define("OMV.module.admin.storage.zfs.Overview", {
+	extend: "OMV.module.admin.storage.zfs.TreePanel",
 
 	rpcService: "ZFS",
 	rpcGetMethod: "getObjectTree",
@@ -379,7 +379,7 @@ Ext.define("OMV.module.admin.service.zfs.Overview", {
 		icon: 'images/checkmark.png',
 		handler: function(view, rowIndex, colIndex, item, e, record, row) {
 			var me = this;
-			Ext.create("OMV.module.admin.services.zfs.CreateShare", {
+			Ext.create("OMV.module.admin.storage.zfs.CreateShare", {
 				title: _("Create shared folder"),
 				rpcGetMethod: "getSharedParams",
 				rpcGetParams: {
@@ -445,8 +445,8 @@ Ext.define("OMV.module.admin.service.zfs.Overview", {
 		var me = this;
 		var sm = me.getSelectionModel();
 		var records = sm.getSelection();
-		var record = records[0];	    
-		Ext.create("OMV.module.admin.services.zfs.AddObject", {
+		var record = records[0];
+		Ext.create("OMV.module.admin.storage.zfs.AddObject", {
 			title: _("Add Object"),
 			rpcGetMethod: "passParam",
 			rpcGetParams: {
@@ -467,7 +467,7 @@ Ext.define("OMV.module.admin.service.zfs.Overview", {
 		var sm = me.getSelectionModel();
 		var records = sm.getSelection();
 		var record = records[0];
-		Ext.create("OMV.module.admin.service.zfs.EditProperties", {
+		Ext.create("OMV.module.admin.storage.zfs.EditProperties", {
 			name: record.get("path"),
 			type: record.get("type")
 		}).show();
@@ -493,10 +493,10 @@ Ext.define("OMV.module.admin.service.zfs.Overview", {
 
 OMV.WorkspaceManager.registerPanel({
 	id: "overview",
-	path: "/service/zfs",
+	path: "/storage/zfs",
 	text: _("Overview"),
 	position: 10,
-	className: "OMV.module.admin.service.zfs.Overview"
+	className: "OMV.module.admin.storage.zfs.Overview"
 });
 
 

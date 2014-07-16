@@ -74,7 +74,7 @@
  * @param rememberSelected TRUE to reselect the previous selected rows
  *   after the grid content has been reloaded/refreshed. Defaults to FALSE.
  */
-Ext.define("OMV.module.admin.services.zfs.TreePanel", {
+Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	extend: "OMV.tree.Panel",
 	requires: [
 		"OMV.window.MessageBox",

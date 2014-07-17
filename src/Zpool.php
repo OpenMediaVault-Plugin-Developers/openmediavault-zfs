@@ -13,7 +13,7 @@ require_once("Exception.php");
  * @copyright Michael Rasmussen <mir@datanom.net>
  */
 class OMVModuleZFSZpool extends OMVModuleAbstract
-		implements OMVNotifyListener {
+		implements OMVINotifyListener {
     // Attributes
     /**
      * Name of pool

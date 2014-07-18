@@ -45,7 +45,7 @@ class OMVModuleZFSVdev {
      * @throws OMVModuleZFSException
 	 */
 
-	public function __construct($pool, OMVModuleZFSVdevType $type, array $disks) {
+	public function __construct($pool, $type, array $disks) {
 		switch ($type) {
 			case OMVModuleZFSVdevType::OMVMODULEZFSPLAIN:
 				break;
@@ -65,6 +65,8 @@ class OMVModuleZFSVdev {
 				if (count($disks) < 5)
 					throw new OMVModuleZFSException("A Raidz3 must contain at least 5 disks");
 				break;
+			default:
+				throw new OMVModuleZFSException("$type: Unknown zpool type");
 		}
 		$this->pool = $pool;
 		$this->disks = $disks;

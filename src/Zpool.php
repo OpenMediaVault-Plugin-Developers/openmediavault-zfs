@@ -1,4 +1,6 @@
 <?php
+require_once('openmediavault/object.inc');
+require_once('openmediavault/module.inc');
 require_once("Vdev.php");
 require_once("Snapshot.php");
 require_once("Dataset.php");
@@ -444,8 +446,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 			'dedup', /* on | off */
 			'sync' /* standard | always | disabled */
 		);
-		if (array_count_values($this->features) < 1)
-			$this->features = getAllAttributes();
+		if (count($this->features) < 1)
+			$this->features = $this->getAllAttributes();
         foreach ($this->features as $attr => $val) {
 			if (in_array($attr, $featureSet))
 				$attrs[$attr] = $val;
@@ -648,7 +650,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 		OMVUtil::exec($cmd, $output, $result);
 		if ($result)
 			throw new OMVModuleZFSException($output);
-		$res = preg_match_all("/$pool\s+(\w+)\s+([\w\d\.]+).*/", $output, $matches, PREG_SET_ORDER);
+		$output = implode("\n", $output);
+		$res = preg_match_all("/{$this->name}\s+(\w+)\s+([\w\d\.]+).*/", $output, $matches, PREG_SET_ORDER);
 		if ($res == false || $res == 0)
 			throw new OMVModuleZFSException("Error return by zpool get all: $output");
 		foreach ($matches as $match) {
@@ -684,7 +687,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 	 * @throws OMVModuleZFSException
 	 */
 	private function assemblePool($name) {
-		$cmd = "zpool list -Hv $name";
+		$cmd = "zpool status -v $name";
 		$types = 'mirror|raidz1|raidz2|raidz3';
 		$dev = null;
 		$type = null;
@@ -695,26 +698,24 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 		OMVUtil::exec($cmd, $output, $result);
 		if ($result)
 			throw new OMVModuleZFSException($output);
-		$res = preg_match("/$name\s+([\w\d]+)\s+.*/", $output, $matches);
-		if ($res == false || $res == 0)
-			throw new OMVModuleZFSException("Error return by zpool list: $output");
 
 		$this->name = $name;
-		$lines = split("\n", $output);
-		foreach($lines as $line) {
+		foreach($output as $line) {
+			if (! strstr($line, PHP_EOL))
+				$line .= PHP_EOL;
 			if ($start) {
-				if (preg_match("/^\s*NAME/", $line))
-					$start = false;
-				continue;
+					if (preg_match("/^\s*NAME/", $line))
+							$start = false;
+					continue;
 			} else {
 				if (preg_match("/^\s*$/", $line)) {
 					if ($dev) {
-						output($part, $type, $dev);
+						$this->output($part, $type, $dev);
 					}
 					break;
 				} else if (preg_match("/^\s*($name|logs|cache|spares)/", $line, $match)) {
 					if ($dev) {
-						output($part, $type, $dev);
+						$this->output($part, $type, $dev);
 						$dev = null;
 						$type = null;
 					}
@@ -725,11 +726,11 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 							if (preg_match("/^\s*($types)/", $line, $match)) {
 								/* new vdev */
 								if ($type) {
-										output(null, $type, $dev);
-										$dev = null;
+									$this->output(null, $type, $dev);
+									$dev = null;
 								}
 								$type = $match[1];
-							} else if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+							} else if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
 								if ($dev)
 									$dev .= " $match[1]";
 								else
@@ -737,7 +738,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 							}
 							break;
 						case 'logs':
-							if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+							if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
 								if ($dev)
 									$dev .= " $match[1]";
 								else
@@ -746,7 +747,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 							break;
 						case 'cache':
 						case 'spares':
-							if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+							if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
 								if ($dev)
 									$dev .= " $match[1]";
 								else
@@ -817,6 +818,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 					array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSPLAIN, $disks));
 					$this->type = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
 				}
+			break;
 		}
 	}
 

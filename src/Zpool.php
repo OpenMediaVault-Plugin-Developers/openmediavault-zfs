@@ -616,7 +616,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 			array_push ($adds, $command . $diskStr);
 		}
 
-		return join(" ", $adds);
+		return implode(" ", $adds);
 	}
 
 	/**

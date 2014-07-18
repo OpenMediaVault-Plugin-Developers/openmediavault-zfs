@@ -120,35 +120,44 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 	 */
 
 	public function __construct($vdev) {
+		$create_pool = true;
+
 		if (is_array($vdev)) {
 			$cmd = $this->getCommandString($vdev);
 			$name = $vdev[0]->getPool();
 			$type = $vdev[0]->getType();
-		}
-		else {
+		} else if ($vdev instanceof OMVModuleZFSVdev) {
 			$cmd = $this->getCommandString(array($vdev));
 			$name = $vdev->getPool();
 			$type = $vdev->getType();
+		} else {
+			// Assume we make an instance of an existing pool
+			$create_pool = false;
 		}
-		$cmd = "zpool create $name $cmd";
 
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
-		else {
-			$this->vdevs = array();
-			$this->spare = array();
-			$this->log = array();
-			$this->cache = array();
-			$this->features = array();
-			$this->name = $name;
-			$this->type = $type;
-			if (is_array($vdev))
-				$this->vdevs = $vdev;
-			else
-				array_push ($this->vdevs, $vdev);
-			$this->size = $this->getAttribute("size");
-			$this->mountPoint = $this->getAttribute("mountpoint");
+		$this->vdevs = array();
+		$this->spare = null;
+		$this->log = null;
+		$this->cache = null;
+		$this->features = array();
+		if ($create_pool) {
+			$cmd = "zpool create $name $cmd";
+
+			OMVUtil::exec($cmd, $output, $result);
+			if ($result)
+				throw new OMVModuleZFSException($output);
+			else {
+				$this->name = $name;
+				$this->type = $type;
+				if (is_array($vdev))
+					$this->vdevs = $vdev;
+				else
+					array_push ($this->vdevs, $vdev);
+				$this->size = $this->getAttribute("size");
+				$this->mountPoint = $this->getAttribute("mountpoint");
+			}
+		} else {
+			$this->assemblePool($vdev);
 		}
 	}
 
@@ -265,6 +274,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      *
      * @param  OMVModuleZFSVdev $log
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function addLog(OMVModuleZFSVdev $log) {
@@ -284,6 +294,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      * XXX
      *
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function removeLog() {
@@ -319,6 +330,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      *
      * @param  OMVModuleZFSVdev $spares
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function addSpare(OMVModuleZFSVdev $spares) {
@@ -341,6 +353,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      *
      * @param  array $disks
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function removeSpare(array $disks = null) {
@@ -395,6 +408,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      *
      * @param  array $features
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function setFeatures(array $features) {
@@ -444,6 +458,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      * XXX
      *
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function export() {
@@ -458,6 +473,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      *
      * @param  string $name
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function import($name = null) {
@@ -474,6 +490,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      * XXX
      *
      * @return void
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function scrub() {
@@ -487,6 +504,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      * XXX
      *
      * @return string
+	 * @throws OMVModuleZFSException
      * @access public
      */
     public function status() {
@@ -621,6 +639,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 	/**
 	 * Get all attributes from pool
 	 * @return array of attributes
+	 * @throws OMVModuleZFSException
 	 */
 	private function getAllAttributes() {
 		$attrs = array();
@@ -656,6 +675,151 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 
 		return $new_disks;
 	}
+
+	/**
+	 * Construct existing pool
+	 *
+	 * @param string $name
+	 * @return void
+	 * @throws OMVModuleZFSException
+	 */
+	private function assemblePool($name) {
+		$cmd = "zpool list -Hv $name";
+		$types = 'mirror|raidz1|raidz2|raidz3';
+		$dev = null;
+		$type = null;
+		$log = false;
+		$cache = false;
+		$start = true;
+
+		OMVUtil::exec($cmd, $output, $result);
+		if ($result)
+			throw new OMVModuleZFSException($output);
+		$res = preg_match("/$name\s+([\w\d]+)\s+.*/", $output, $matches);
+		if ($res == false || $res == 0)
+			throw new OMVModuleZFSException("Error return by zpool list: $output");
+
+		$this->name = $name;
+		$lines = split("\n", $output);
+		foreach($lines as $line) {
+			if ($start) {
+				if (preg_match("/^\s*NAME/", $line))
+					$start = false;
+				continue;
+			} else {
+				if (preg_match("/^\s*$/", $line)) {
+					if ($dev) {
+						output($part, $type, $dev);
+					}
+					break;
+				} else if (preg_match("/^\s*($name|logs|cache|spares)/", $line, $match)) {
+					if ($dev) {
+						output($part, $type, $dev);
+						$dev = null;
+						$type = null;
+					}
+					$part = $match[1];
+				} else {
+					switch ($part) {
+						case $name:
+							if (preg_match("/^\s*($types)/", $line, $match)) {
+								/* new vdev */
+								if ($type) {
+										output(null, $type, $dev);
+										$dev = null;
+								}
+								$type = $match[1];
+							} else if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+								if ($dev)
+									$dev .= " $match[1]";
+								else
+									$dev = "$match[1]";
+							}
+							break;
+						case 'logs':
+							if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+								if ($dev)
+									$dev .= " $match[1]";
+								else
+									$dev = "$match[1]";
+							}
+							break;
+						case 'cache':
+						case 'spares':
+							if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
+								if ($dev)
+									$dev .= " $match[1]";
+								else
+									$dev = "$match[1]";
+							}
+							break;
+						default:
+							throw new Exception("$part: Unknown pool part");
+					}
+				}
+			}
+		}
+		$this->size = $this->getAttribute("size");
+		$this->mountPoint = $this->getAttribute("mountpoint");
+	}
+
+	/**
+	 * Create pool config from parsed input
+	 *
+	 * @param string $part
+	 * @param string $type
+	 * @param string $dev
+	 * @return void
+	 * @throws OMVModuleZFSException
+	 */
+	private function output($part, $type, $dev) {
+		$disks = split(" ", $dev);
+		switch ($part) {
+			case 'logs':
+				if ($type && $type != 'mirror')
+					throw new Exception("$type: Logs can only be mirror or plain");
+				if ($type)
+					$this->log = new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSMIRROR, $disks);
+				else
+					$this->log = new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSPLAIN, $disks);
+				break;
+			case 'cache':
+				if ($type)
+					throw new Exception("$type: cache can only be plain");
+				$this->cache = new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSPLAIN, $disks);
+				break;
+			case 'spares':
+				if ($type)
+					throw new Exception("$type: spares can only be plain");
+				$this->spare = new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSPLAIN, $disks);
+				break;
+			default:
+				if ($type) {
+					switch ($type) {
+						case 'mirror':
+							array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSMIRROR, $disks));
+							$this->type = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+							break;
+						case 'raidz1':
+							array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1, $disks));
+							$this->type = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
+							break;
+						case 'raidz2':
+							array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2, $disks));
+							$this->type = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
+							break;
+						case 'raidz3':
+							array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3, $disks));
+							$this->type = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
+							break;
+					}
+				} else {
+					array_push($this->vdevs, new OMVModuleZFSVdev($this->name, OMVModuleZFSVdevType::OMVMODULEZFSPLAIN, $disks));
+					$this->type = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
+				}
+		}
+	}
+
 }
 
 ?>

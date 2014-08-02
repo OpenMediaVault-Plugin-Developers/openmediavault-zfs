@@ -10,6 +10,7 @@ require_once("zfs/Utils.php");
 require_once("zfs/Dataset.php");
 require_once("zfs/Snapshot.php");
 require_once("zfs/Zvol.php");
+require_once("zfs/Zpool.php");
 
 class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function getName() { return "ZFS";} // RPC Service name. Same as in .js files
@@ -48,18 +49,22 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function addObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		switch ($params['type']) {
-		case "filesystem":
+		case "Filesystem":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
 			break;
-		case "snapshot":
+		case "Snapshot":
 			$name = $params['path'] . "@" . $params['name'];
 			$tmp = new OMVModuleZFSSnapshot($name);
 			break;
-		case "volume":
+		case "Volume":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSZvol($name);
 			$tmp->create($params['size']);
+			break;
+		case "Pool":
+			$name = $params['path'] . "/" . $params['name'];
+			$tmp = new OMVModuleZFSZpool($name);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
@@ -86,6 +91,11 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$tmp = new OMVModuleZFSZvol($name);
 			$tmp->destroy();
 			break;
+		case "Pool":
+			$name = $params['name'];
+			$tmp = new OMVModuleZFSZpool($name);
+			$tmp->destroy();
+			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
@@ -107,6 +117,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		case "Volume":
 			$tmp = new OMVModuleZFSZvol($name);
 			break;
+		case "Pool":
+				$tmp = new OMVModuleZFSZpool($name);
+				break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
@@ -136,6 +149,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			break;
 		case "Volume":
 			$tmp = new OMVModuleZFSZvol($params['name']);
+			break;
+		case "Pool":
+			$tmp = new OMVModuleZFSZpool($params['name']);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
@@ -170,6 +186,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				break;
 			case "Volume":
 				$tmp = new OMVModuleZFSZvol($params['name']);
+				break;
+			case "Pool":
+				$tmp = new OMVModuleZFSZpool($params['name']);
 				break;
 			default:
 				throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);

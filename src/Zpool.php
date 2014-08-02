@@ -5,6 +5,8 @@ require_once("Vdev.php");
 require_once("Snapshot.php");
 require_once("Dataset.php");
 require_once("Zvol.php");
+require_once("VdevType.php");
+require_once("Utils.php");
 require_once("Exception.php");
 
 /**
@@ -430,7 +432,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
      * @return array of features
      * @access public
      */
-    public function getFeatures() {
+    public function getFeatures($internal = true) {
 		$attrs = array();
 		$featureSet = array(
 			'recordsize', /* default 131072. 512 <= n^2 <=  131072*/
@@ -448,9 +450,16 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 		);
 		if (count($this->features) < 1)
 			$this->features = $this->getAllAttributes();
-        foreach ($this->features as $attr => $val) {
-			if (in_array($attr, $featureSet))
-				$attrs[$attr] = $val;
+		if ($internal) {
+			foreach ($this->features as $attr => $val) {
+				if (in_array($attr, $featureSet))
+					$attrs[$attr] = $val['value'];
+			}
+		} else {
+			foreach ($this->features as $attr => $val) {
+				if (in_array($attr, $featureSet))
+					$attrs[$attr] = $val;
+			}
 		}
 
 		return $attrs;
@@ -581,6 +590,73 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 	}
 
 	/**
+	 * Get a single property value associated with the Dataset
+	 *
+	 * @param string $property Name of the property to fetch
+	 * @return array The returned array with the property. The property is an associative array with
+	 * two elements, <value> and <source>.
+	 * @access public
+	 */
+	public function getProperty($property) {
+		$attrs = $this->getFeatures(false);
+		return $attrs["$property"];
+	}
+
+	/**
+	 * Get an associative array of all properties associated with the Snapshot
+	 *
+	 * @return array $properties Each entry is an associative array with two elements
+	 * <value> and <source>
+	 * @access public
+	 */
+	public function getProperties() {
+		$attrs = $this->getFeatures(false);
+		return $attrs;
+	}
+
+	/**
+	 * Sets a number of Dataset properties. If a property is already set it will be updated with the new value.
+	 *
+	 * @param  array $properties An associative array with properties to set
+	 * @return void
+	 * @access public
+	 */
+	public function setProperties($properties) {
+		foreach ($properties as $newpropertyk => $newpropertyv) {
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name . " 2>&1";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+			$attr = $this->getAttribute($newpropertyk);
+			$this->features[$newpropertyk] = $attr;
+		}
+	}
+
+	/**
+	 * Destroy the Dataset.
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function destroy() {
+		$cmd = "zpool destroy " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+	}
+
+	/**
+	 * Clears a previously set proporty and specifies that it should be
+	 * inherited from it's parent.
+	 *
+	 * @param string $property Name of the property to inherit.
+	 * @return void
+	 * @access public
+	 */
+	public function inherit($property) {
+		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
+		$this->exec($cmd,$out,$res);
+		$attr = $this->getAttribute($newpropertyk);
+		$this->features[$newpropertyk] = $attr;
+	}
+
+	/**
 	 * Convert array of Vdev to command string
 	 *
 	 * @param array $vdevs
@@ -647,18 +723,30 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 		$attrs = array();
 		$cmd = "zfs get -H all {$this->name}";
 
-		OMVUtil::exec($cmd, $output, $result);
+		try {
+			OMVUtil::exec($cmd, $output, $result);
+		} catch (OMVModuleZFSException $e) {}
 		if ($result)
 			throw new OMVModuleZFSException($output);
 		$output = implode("\n", $output);
-		$res = preg_match_all("/{$this->name}\s+(\w+)\s+([\w\d\.]+).*/", $output, $matches, PREG_SET_ORDER);
+		$res = preg_match_all("/{$this->name}\s+(\w+)\s+([\w\d\.]+)\s+(\w+).*/", $output, $matches, PREG_SET_ORDER);
 		if ($res == false || $res == 0)
 			throw new OMVModuleZFSException("Error return by zpool get all: $output");
 		foreach ($matches as $match) {
-			$attrs[$match[1]] = $match[2];
+			$attrs[$match[1]] = array('value' => $match[2], 'source' => $match[3]);
 		}
 
 		return $attrs;
+	}
+
+	/**
+	 * Get all Dataset properties from commandline and update object properties attribute
+	 *
+	 * @return void
+	 * @access private
+	 */
+	private function updateAllProperties() {
+		$this->features = $this->getAllAttributes();
 	}
 
 	/**

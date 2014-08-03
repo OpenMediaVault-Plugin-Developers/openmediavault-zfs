@@ -1,0 +1,11 @@
+Source: openmediavault-zfs
+Section: net
+Priority: optional
+Maintainer: OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+
+Package: openmediavault-zfs
+Architecture: amd64
+Depends:
+Description: zfs plugin for OpenMediaVault.

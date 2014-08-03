@@ -1,0 +1,5 @@
+openmediavault-zfs (0.6.0) testing; urgency=low
+
+  * Initial release for OMV 0.6
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 7 Jan 2014 21:28:27 -0500

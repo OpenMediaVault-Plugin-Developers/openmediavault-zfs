@@ -1,0 +1,14 @@
+dh_prep
+dh_installdirs
+dh_install
+dh_installchangelogs
+dh_installdebconf
+dh_lintian
+dh_link
+dh_compress
+dh_fixperms
+dh_installdeb
+dh_gencontrol
+dh_md5sums
+dh_builddeb
+dh_builddeb

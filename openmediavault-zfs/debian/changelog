@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.1) testing; urgency=low
+
+  * Add pool handling to GUI
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 3 Sep 2014 00:01:00 +0100
+
 openmediavault-zfs (0.6.0) testing; urgency=low
 
   * Initial release for OMV 0.6

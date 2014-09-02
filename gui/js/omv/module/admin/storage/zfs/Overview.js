@@ -1,6 +1,160 @@
 // require("js/omv/tree/Panel.js")
 // require("js/omv/module/admin/storage/zfs/TreePanel.js")
 // require("js/omv/workspace/window/Grid.js")
+// require("js/omv/form/field/CheckboxGrid.js")
+
+Ext.define("OMV.module.admin.storage.zfs.AddPool", {
+	extend: "OMV.workspace.window.Form",
+	requires: [
+		"OMV.data.Store",
+		"OMV.data.Model",
+		"OMV.data.proxy.Rpc",
+		"OMV.form.field.CheckboxGrid"
+	],
+
+	rpcService: "ZFS",
+	rpcSetMethod: "addPool",
+	title: _("Create ZFS pool"),
+	autoLoadData: false,
+	hideResetButton: true,
+	width: 550,
+	height: 260,
+
+	getFormItems: function() {
+		var me = this;
+		return [{
+			xtype: "textfield",
+			name: "name",
+			fieldLabel: _("Name")
+		},{
+			xtype: "combo",
+			name: "pooltype",
+			fieldLabel: _("Pool type"),
+			queryMode: "local",
+			store: Ext.create("Ext.data.ArrayStore", {
+				fields: [ "value", "text" ],
+				data: [
+					[ "basic", _("Basic") ],
+					[ "mirror", _("Mirror") ],
+					[ "raidz1", _("RAID-Z1") ],
+					[ "raidz2", _("RAID-Z2") ],
+					[ "raidz3", _("RAID-Z3") ]
+				]
+			}),
+			displayField: "text",
+			valueField: "value",
+			allowBlank: false,
+			editable: false,
+			triggerAction: "all",
+			value: "raidz1",
+			listeners: {
+				scope: me,
+				change: function(combo, value) {
+					var devicesField = this.findField("devices");
+					switch(value) {
+					case "basic":
+						devicesField.minSelections = 1;
+					break;
+					case "mirror":
+						devicesField.minSelections = 2;
+						break;
+					case "raidz1":
+						devicesField.minSelections = 3;
+						break;
+					case "raidz2":
+						devicesField.minSelections = 4;
+					case "raidz3":
+						devicesField.minSelections = 5;
+						break;
+					default:
+						devicesField.minSelections = 2;
+						break;
+					}
+					devicesField.validate();
+				}
+			}
+		},{
+			xtype: "checkboxgridfield",
+			name: "devices",
+			fieldLabel: _("Devices"),
+			valueField: "devicefile",
+			minSelections: 3, // Min. number of devices for RAIDZ-1
+			useStringValue: true,
+			height: 130,
+			store: Ext.create("OMV.data.Store", {
+				autoLoad: true,
+				model: OMV.data.Model.createImplicit({
+					idProperty: "devicefile",
+					fields: [
+						{ name: "devicefile", type: "string" },
+						{ name: "size", type: "string" },
+						{ name: "vendor", type: "string" },
+						{ name: "serialnumber", type: "string" }
+					]
+				}),
+				proxy: {
+					type: "rpc",
+					appendSortParams: false,
+					rpcData: {
+						service: "RaidMgmt",
+						method: "getCandidates"
+					}
+				},
+				sorters: [{
+					direction: "ASC",
+					property: "devicefile"
+				}]
+			}),
+			gridConfig: {
+				stateful: true,
+				stateId: "1866b5d0-327e-11e4-8c21-0800200c9a66",
+				columns: [{
+					text: _("Device"),
+					sortable: true,
+					dataIndex: "devicefile",
+					stateId: "devicefile",
+					flex: 1
+				},{
+					xtype: "binaryunitcolumn",
+					text: _("Capacity"),
+					sortable: true,
+					dataIndex: "size",
+					stateId: "size",
+					width: 50,
+					flex: 1
+				},{
+					text: _("Vendor"),
+					sortable: true,
+					dataIndex: "vendor",
+					stateId: "vendor",
+					flex: 1
+				},{
+					text: _("Serial Number"),
+					sortable: true,
+					dataIndex: "serialnumber",
+					stateId: "serialnumber",
+					flex: 1
+				}]
+			}
+		}];
+	},
+
+	doSubmit: function() {
+		var me = this;
+		OMV.MessageBox.show({
+			title: _("Confirmation"),
+			msg: _("Do you really want to create the ZFS pool?"),
+			buttons: Ext.Msg.YESNO,
+			fn: function(answer) {
+				if(answer === "no")
+					return;
+				me.superclass.doSubmit.call(me);
+			},
+			scope: me,
+			icon: Ext.Msg.QUESTION
+		});
+	}
+});
 
 Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 	extend: "OMV.workspace.window.Form",
@@ -439,6 +593,18 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			})
 		});
 		me.callParent(arguments);
+	},
+
+  	onAddButton: function() {
+		var me = this;
+		Ext.create("OMV.module.admin.storage.zfs.AddPool", {
+			listeners: {
+				scope: me,
+				submit: function() {
+					this.doReload();
+				}
+			}
+		}).show();
 	},
 
 	onAddObjButton: function() {

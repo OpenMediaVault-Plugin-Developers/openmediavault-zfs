@@ -17,12 +17,18 @@ class OMVModuleZFSUtil {
 		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $name, $result);
 		$name = $result[1];
 		unset($result);
-		$cmd = "blkid -o full";
+		$cmd = "zpool get guid " . $name . " 2>&1";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
-		foreach($out as $line) {
-			if(preg_match('/^.*LABEL=\"' . $name . '\" UUID=\"([A-Za-z0-9]+)\".*TYPE=\"zfs_member\"$/', $line, $result)) {
-				return($result[1]);
+		if (isset($out)) {
+			$headers = preg_split('/[\s]+/', $out[0]);
+			for ($i=0; $i<count($headers); $i++) {
+				if (strcmp($headers[$i], "VALUE") === 0) {
+					$valuecol=$i;
+					break;
+				}
 			}
+			$line = preg_split('/[\s]+/', $out[1]);
+			return $line[$valuecol];
 		}
 		return null;
 	}
@@ -38,24 +44,26 @@ class OMVModuleZFSUtil {
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
 			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
-			$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
-			$object = $xmlConfig->get($xpath);
-			if(is_null($object)) {
-				$uuid = OMVUtil::uuid();
-				$ds = new OMVModuleZFSDataset($name);
-				$dir = $ds->getMountPoint();
-				$object = array(
-					"uuid" => $uuid,
-					"fsname" => $pooluuid,
-					"dir" => $dir,
-					"type" => "zfs",
-					"opts" => "rw,relatime,xattr",
-					"freq" => "0",
-					"passno" => "2"
-				);
-				$xmlConfig->set("//system/fstab",array("mntent" => $object));
-				$dispatcher = &OMVNotifyDispatcher::getInstance();
-				$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
+			if (isset($pooluuid)) {
+				$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+				$object = $xmlConfig->get($xpath);
+				if(is_null($object)) {
+					$uuid = OMVUtil::uuid();
+					$ds = new OMVModuleZFSDataset($name);
+					$dir = $ds->getMountPoint();
+					$object = array(
+						"uuid" => $uuid,
+						"fsname" => $pooluuid,
+						"dir" => $dir,
+						"type" => "zfs",
+						"opts" => "rw,relatime,xattr",
+						"freq" => "0",
+						"passno" => "2"
+					);
+					$xmlConfig->set("//system/fstab",array("mntent" => $object));
+					$dispatcher = &OMVNotifyDispatcher::getInstance();
+					$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
+				}
 			}
 		}
 		return null;

@@ -188,7 +188,7 @@ class OMVModuleZFSVdev {
      * @access public
      */
     public function getPool() {
-        return $pool;
+        return $this->pool;
     }
 
     /**
@@ -198,7 +198,7 @@ class OMVModuleZFSVdev {
      * @access public
      */
     public function getType() {
-        return $type;
+        return $this->type;
     }
 
 }

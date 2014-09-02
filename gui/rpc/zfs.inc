@@ -19,6 +19,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	/* Initialize the RPC service. Different methods of the RPC service are declared here*/
 	public function initialize() {
+		$this->registerMethod("addPool");
 		$this->registerMethod("getObjectTree");
 		$this->registermethod("passParam");
 		$this->registermethod("addObject");
@@ -28,6 +29,33 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("inherit");
 		$this->registermethod("getSharedParams");
 		$this->registermethod("createShare");
+	}
+
+	public function addPool($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		switch ($params['pooltype']) {
+		case "basic":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
+			break;
+		case "mirror":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+			break;
+		case "raidz1":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
+			break;
+		case "raidz2":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
+			break;
+		case "raidz3":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
+			break;
+		default:
+			throw new OMVModuleZFSException("Incorrect pool type specified");
+			break;
+		}
+		$disks = preg_split("/[,;]/", $params['devices']);
+		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
+		$pool = new OMVModuleZFSZpool($vdev);
 	}
 
 	public function getObjectTree($params, $context) {

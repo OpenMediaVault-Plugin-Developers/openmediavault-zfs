@@ -145,11 +145,11 @@ class OMVModuleZFSZpool extends OMVModuleAbstract
 		$this->cache = null;
 		$this->features = array();
 		if ($create_pool) {
-			$cmd = "zpool create $name $cmd";
+			$cmd = "zpool create $name $cmd 2>&1";
 
 			OMVUtil::exec($cmd, $output, $result);
 			if ($result)
-				throw new OMVModuleZFSException($output);
+				throw new OMVModuleZFSException(implode("\n", $output));
 			else {
 				$this->name = $name;
 				$this->type = $type;

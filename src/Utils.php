@@ -28,6 +28,40 @@ class OMVModuleZFSUtil {
 	}
 
 	/**
+	 * Add any missing ZFS pool to the OMV backend
+	 *
+	 */
+	public static function addMissingOMVMntEnt() {
+		global $xmlConfig;
+		$msg = "";
+		$cmd = "zpool list -H -o name";
+		OMVModuleZFSUtil::exec($cmd, $out, $res);
+		foreach($out as $name) {
+			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
+			$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+			$object = $xmlConfig->get($xpath);
+			if(is_null($object)) {
+				$uuid = OMVUtil::uuid();
+				$ds = new OMVModuleZFSDataset($name);
+				$dir = $ds->getMountPoint();
+				$object = array(
+					"uuid" => $uuid,
+					"fsname" => $pooluuid,
+					"dir" => $dir,
+					"type" => "zfs",
+					"opts" => "rw,relatime,xattr",
+					"freq" => "0",
+					"passno" => "2"
+				);
+				$xmlConfig->set("//system/fstab",array("mntent" => $object));
+				$dispatcher = &OMVNotifyDispatcher::getInstance();
+				$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Get an array with all ZFS objects
 	 *
 	 * @return An array with all ZFS objects

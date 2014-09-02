@@ -13,20 +13,22 @@ require_once("zfs/Zvol.php");
 require_once("zfs/Zpool.php");
 
 class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
-	public function getName() { return "ZFS";} // RPC Service name. Same as in .js files
+	public function getName() {
+		return "ZFS";  // RPC Service name. Same as in .js files
+	}
 
-		/* Initialize the RPC service. Different methods of the RPC service are declared here*/
-		public function initialize() {
-			$this->registerMethod("getObjectTree");
-			$this->registermethod("passParam");
-			$this->registermethod("addObject");
-			$this->registermethod("deleteObject");
-			$this->registermethod("getProperties");
-			$this->registermethod("setProperties");
-			$this->registermethod("inherit");
-			$this->registermethod("getSharedParams");
-			$this->registermethod("createShare");
-		}
+	/* Initialize the RPC service. Different methods of the RPC service are declared here*/
+	public function initialize() {
+		$this->registerMethod("getObjectTree");
+		$this->registermethod("passParam");
+		$this->registermethod("addObject");
+		$this->registermethod("deleteObject");
+		$this->registermethod("getProperties");
+		$this->registermethod("setProperties");
+		$this->registermethod("inherit");
+		$this->registermethod("getSharedParams");
+		$this->registermethod("createShare");
+	}
 
 	public function getObjectTree($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
@@ -36,6 +38,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$new[$a['parentid']][] = $a;
 		}
 		$tree = OMVModuleZFSUtil::createTree($new, $new['root']);
+		OMVModuleZFSUtil::addMissingOMVMntEnt(); //Adds missing ZFS filesystems to the OMV core
 		return $tree;
 	}
 
@@ -118,8 +121,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$tmp = new OMVModuleZFSZvol($name);
 			break;
 		case "Pool":
-				$tmp = new OMVModuleZFSZpool($name);
-				break;
+			$tmp = new OMVModuleZFSZpool($name);
+			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
@@ -220,32 +223,12 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 		//Get the UUID of the Pool
 		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($params['name']);
- 		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $params['name'], $result);
+		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $params['name'], $result);
 		$poolname = $result[1];
 		unset($result);
 
-		//Check if the UUID is already stored as an mntent object. If it isn't then create it.
-		$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
-		$object = $xmlConfig->get($xpath);
-		if(is_null($object)) {
-			$uuid = OMVUtil::uuid();
-			$ds = new OMVModuleZFSDataset($poolname);
-			$dir = $ds->getMountPoint();
-			$object = array(
-				"uuid" => $uuid,
-				"fsname" => $pooluuid,
-				"dir" => $dir,
-				"type" => "zfs",
-				"opts" => "rw,relatime,xattr",
-				"freq" => "0",
-				"passno" => "2"
-			);
-			$xmlConfig->set("//system/fstab",array("mntent" => $object));
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
-		}
-
 		//Get the mntent object and fetch it's uuid.
+		$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
 		$object = $xmlConfig->get($xpath);
 		$mntentref = $object['uuid'];
 
@@ -253,8 +236,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		// folder as the relative directory name of the share.
 		switch ($params['type']) {
 		case "Filesystem":
+			$tmp = new OMVModuleZFSDataset($params['name']);
+			break;
 		case "Clone":
-			$tmp = new OMVModuleZFSDataset($name);
+			$tmp = new OMVModuleZFSDataset($params['name']);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
@@ -325,7 +310,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.shares.sharedfolder", $object);
 		// Return the configuration object.
 		return $object;
-
 	}
 
 }

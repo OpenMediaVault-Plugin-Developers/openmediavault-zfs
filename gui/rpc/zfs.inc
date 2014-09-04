@@ -56,6 +56,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$disks = preg_split("/[,;]/", $params['devices']);
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool = new OMVModuleZFSZpool($vdev);
+		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
+		$pool->export();
+		$pool->import($pool->getName());
 	}
 
 	public function getObjectTree($params, $context) {
@@ -80,22 +83,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function addObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		switch ($params['type']) {
-		case "Filesystem":
+		case "filesystem":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
 			break;
-		case "Snapshot":
+		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
 			$tmp = new OMVModuleZFSSnapshot($name);
 			break;
-		case "Volume":
+		case "volume":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSZvol($name);
 			$tmp->create($params['size']);
-			break;
-		case "Pool":
-			$name = $params['path'] . "/" . $params['name'];
-			$tmp = new OMVModuleZFSZpool($name);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);

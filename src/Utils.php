@@ -46,9 +46,16 @@ class OMVModuleZFSUtil {
 			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
 			if (isset($pooluuid)) {
 				$pooluuid = "UUID=" . $pooluuid;
-				$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+				$xpath = "//system/fstab/mntent";
 				$object = $xmlConfig->get($xpath);
-				if(is_null($object)) {
+				$uuidexists = false;
+				foreach ($object as $obj) {
+					if (strcmp($pooluuid, $obj['fsname']) === 0) {
+						$uuidexists = true;
+						break;
+					}
+				}
+				if (!$uuidexists) {
 					$uuid = OMVUtil::uuid();
 					$ds = new OMVModuleZFSDataset($name);
 					$dir = $ds->getMountPoint();

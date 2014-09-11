@@ -45,6 +45,7 @@ class OMVModuleZFSUtil {
 		foreach($out as $name) {
 			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
 			if (isset($pooluuid)) {
+				$pooluuid = "UUID=" . $pooluuid;
 				$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
 				$object = $xmlConfig->get($xpath);
 				if(is_null($object)) {

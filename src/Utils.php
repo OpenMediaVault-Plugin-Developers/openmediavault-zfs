@@ -144,7 +144,7 @@ class OMVModuleZFSUtil {
 					'parentid'=>$prefix . $root . "/" . $result[1],
 					'name'=>$result[2],
 					'type'=>ucfirst($type),
-					'icon'=>"images/zfs_disk.png",
+					'icon'=>"images/save.png",
 					'path'=>$path,
 					'expanded'=>$expanded);
 				array_push($objects,$tmp);

@@ -557,7 +557,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		xtype: 'actioncolumn',
 		tooltip: 'Details',
 		align: 'center',
-		icon: 'images/zfs_mag.png'
+		icon: 'images/search.png'
 	},{
 		text: _("Shared"),
 		dataIndex: 'shared',

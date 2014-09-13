@@ -137,6 +137,14 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 				}]
 			}
 		},{
+			xtype: "textfield",
+			name: "mountpoint",
+			fieldLabel: _("Mountpoint"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Optional mountpoint for the pool. Default is to use pool name.")
+			}]
+		},{
 			xtype: "checkbox",
 			name: "force",
 			fieldLabel: _("Force creation"),

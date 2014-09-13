@@ -59,6 +59,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		if ($params['force']) {
 			$opts .= "-f ";
 		}
+		if (strlen($params['mountpoint']) > 0) {
+			$opts .= "-m " . $params['mountpoint'] . " ";
+		}
+
 		$disks = preg_split("/[,;]/", $params['devices']);
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool = new OMVModuleZFSZpool($vdev, $opts);

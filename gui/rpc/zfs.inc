@@ -11,6 +11,7 @@ require_once("zfs/Dataset.php");
 require_once("zfs/Snapshot.php");
 require_once("zfs/Zvol.php");
 require_once("zfs/Zpool.php");
+require_once("zfs/NotifyListener.php");
 
 class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function getName() {

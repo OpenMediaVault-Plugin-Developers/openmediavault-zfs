@@ -18,7 +18,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,
-	height: 260,
+	height: 350,
 
 	getFormItems: function() {
 		var me = this;
@@ -52,22 +52,22 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 				change: function(combo, value) {
 					var devicesField = this.findField("devices");
 					switch(value) {
-					case "basic":
-						devicesField.minSelections = 1;
-					break;
-					case "mirror":
-						devicesField.minSelections = 2;
+						case "basic":
+							devicesField.minSelections = 1;
 						break;
-					case "raidz1":
-						devicesField.minSelections = 3;
+						case "mirror":
+							devicesField.minSelections = 2;
 						break;
-					case "raidz2":
-						devicesField.minSelections = 4;
-					case "raidz3":
-						devicesField.minSelections = 5;
+						case "raidz1":
+							devicesField.minSelections = 3;
 						break;
-					default:
-						devicesField.minSelections = 2;
+						case "raidz2":
+							devicesField.minSelections = 4;
+						case "raidz3":
+							devicesField.minSelections = 5;
+						break;
+						default:
+							devicesField.minSelections = 2;
 						break;
 					}
 					devicesField.validate();
@@ -136,6 +136,12 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 					flex: 1
 				}]
 			}
+		},{
+			xtype: "checkbox",
+			name: "force",
+			fieldLabel: _("Force creation"),
+			checked: false,
+			boxLabel: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
 		}];
 	},
 
@@ -595,7 +601,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		me.callParent(arguments);
 	},
 
-  	onAddButton: function() {
+	onAddButton: function() {
 		var me = this;
 		Ext.create("OMV.module.admin.storage.zfs.AddPool", {
 			listeners: {

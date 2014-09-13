@@ -122,7 +122,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      * @throws OMVModuleZFSException
 	 */
 
-	public function __construct($vdev) {
+	public function __construct($vdev, $opts = "") {
 		$create_pool = true;
 
 		if (is_array($vdev)) {
@@ -144,7 +144,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 		$this->cache = null;
 		$this->features = array();
 		if ($create_pool) {
-			$cmd = "zpool create $name $cmd 2>&1";
+			$cmd = "zpool create $opts$name $cmd 2>&1";
 
 			OMVUtil::exec($cmd, $output, $result);
 			if ($result)

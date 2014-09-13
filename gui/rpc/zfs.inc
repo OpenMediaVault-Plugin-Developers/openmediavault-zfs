@@ -54,9 +54,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			throw new OMVModuleZFSException("Incorrect pool type specified");
 			break;
 		}
+		//Check for user supplied options
+		$opts = "";
+		if ($params['force']) {
+			$opts .= "-f ";
+		}
 		$disks = preg_split("/[,;]/", $params['devices']);
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		$pool = new OMVModuleZFSZpool($vdev);
+		$pool = new OMVModuleZFSZpool($vdev, $opts);
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
 		$pool->export();
 		$pool->import($pool->getName());

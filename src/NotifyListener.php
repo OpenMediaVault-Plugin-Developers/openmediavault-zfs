@@ -42,6 +42,7 @@ class OMVModuleZFS extends OMVModuleAbstract
 		  OMV_NOTIFY_MODIFY,
 		  "org.openmediavault.services.nfs.shares.share",
 		  array($this, "onUpdateNFSShare"));
+		$this->debug(sprintf("bindListeners %s", var_export($dispatcher, true)));
     }
 
 	/**
@@ -86,25 +87,6 @@ class OMVModuleZFS extends OMVModuleAbstract
 	 */
 	public function onUpdateNFSShare($args) {
         $this->debug(sprintf("onUpdateNFSShare args=%s", var_export($args, true)));
-	}
-
-	/**
-	 * Helper function to execute a command and throw an exception on error
-	 * (requires stderr redirected to stdout for proper exception message).
-	 *
-	 * @param string $cmd Command to execute
-	 * @param array &$out If provided will contain output in an array
-	 * @param int &$res If provided will contain Exit status of the command
-	 * @return string Last line of output when executing the command
-	 * @throws OMVModuleZFSException
-	 * @access public
-	 */
-	private function exec($cmd, &$out = null, &$res = null) {
-		$tmp = OMVUtil::exec($cmd, $out, $res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
-		return $tmp;
 	}
 
 	private function updatePools() {

@@ -293,7 +293,11 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$uuid = OMVUtil::uuid();
 		$pathName = $tmp->getMountPoint();
 		$subdirs = preg_split('/\//',$pathName);
-		$reldirpath = $subdirs[count($subdirs)-1];
+		$reldirpath = "";
+		for ($i=2;$i<count($subdirs);$i++) {
+			$reldirpath .= $subdirs[$i] . "/";
+		}
+		$reldirpath = rtrim($reldirpath, "/");
 		$object = array(
 			"uuid" => $uuid,
 			"name" => $params['sharename'],

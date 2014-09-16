@@ -1,3 +1,10 @@
+openmediavault-zfs (0.6.2) testing; urgency=low
+
+  * Begin adding proper NotifyListener
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 9 Sep 2014 00:01:00 +0100
+
+
 openmediavault-zfs (0.6.1) testing; urgency=low
 
   * Add pool handling to GUI

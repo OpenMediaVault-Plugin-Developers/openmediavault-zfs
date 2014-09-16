@@ -63,7 +63,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$opts .= "-m " . $params['mountpoint'] . " ";
 		}
 
+		//Use /dev/disk/by-path as deafult when creating new pools as suggested in ZoL FAQ.
 		$disks = preg_split("/[,;]/", $params['devices']);
+		if (file_exists("/dev/disk/by-path/")) {
+			$tmp_disks = array();
+			foreach ($disks as $disk) {
+				$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+			}
+			$disks = $tmp_disks;
+		}
+
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool = new OMVModuleZFSZpool($vdev, $opts);
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools

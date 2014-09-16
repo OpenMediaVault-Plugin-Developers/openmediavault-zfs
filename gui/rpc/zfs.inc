@@ -125,6 +125,11 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		switch ($params['type']) {
 		case "Filesystem":
+			$name = $params['name'];
+			OMVModuleZFSUtil::deleteShares($name);
+			$tmp = new OMVModuleZFSDataset($name);
+			$tmp->destroy();
+			break;
 		case "Clone":
 			$name = $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
@@ -272,7 +277,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 
 		//Get the mntent object and fetch it's uuid.
-		$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
 		$mountpoint = $xmlConfig->get($xpath);
 		$mntentref = $mountpoint['uuid'];
 
@@ -292,12 +297,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 		$uuid = OMVUtil::uuid();
 		$pathName = $tmp->getMountPoint();
-		$subdirs = preg_split('/\//',$pathName);
-		$reldirpath = "";
-		for ($i=2;$i<count($subdirs);$i++) {
-			$reldirpath .= $subdirs[$i] . "/";
-		}
-		$reldirpath = rtrim($reldirpath, "/");
+		$reldirpath = OMVModuleZFSUtil::getReldirpath($pathName);
 		$object = array(
 			"uuid" => $uuid,
 			"name" => $params['sharename'],

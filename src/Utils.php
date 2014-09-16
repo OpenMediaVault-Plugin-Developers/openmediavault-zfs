@@ -9,6 +9,40 @@ require_once("Dataset.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Deletes all shared folders pointing to the specifc path
+	 *
+	 */
+	public static function deleteShares($name) {
+		global $xmlConfig;
+		$tmp = new OMVModuleZFSDataset($name);
+		$reldirpath = OMVModuleZFSUtil::getReldirpath($tmp->getMountPoint());
+		$poolname = OMVModuleZFSUtil::getPoolname($name);
+		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
+		$mountpoint = $xmlConfig->get($xpath);
+		$mntentuuid = $mountpoint['uuid'];
+		$xpath = "//system/shares/sharedfolder[mntentref='" . $mntentuuid . "' and reldirpath='" . $reldirpath . "']";
+		$xmlConfig->delete($xpath);
+		$dispatcher = &OMVNotifyDispatcher::getInstance();
+		$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.shares.sharedfolder");
+	}
+
+	/**
+	 * Get the relative path by complete path
+	 *
+	 * @return string Relative path of the complet path
+	 */
+	public static function getReldirpath($path) {
+ 		$subdirs = preg_split('/\//',$path);
+		$reldirpath = "";
+		for ($i=2;$i<count($subdirs);$i++) {
+			$reldirpath .= $subdirs[$i] . "/";
+		}
+		return(rtrim($reldirpath, "/"));
+
+	}
+
+	/**
 	 * Get /dev/disk/by-path from /dev/sdX
 	 *
 	 * @return string Disk identifier
@@ -66,7 +100,7 @@ class OMVModuleZFSUtil {
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
 			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
-			$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
 			$mountpoint = $xmlConfig->get($xpath);
 			if (is_null($mountpoint)) {
 				$uuid = OMVUtil::uuid();

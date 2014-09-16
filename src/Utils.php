@@ -111,7 +111,7 @@ class OMVModuleZFSUtil {
 			switch ($type) {
 			case "filesystem":
 				if (strpos($path,'/') === false) {
-					//This is a Pool, thus create both the Pool entry and a Filesystem entry corresponding to the Pool.
+					//This is a Pool
 					$tmp = array('id'=>$prefix . $path,
 						'parentid'=>'root',
 						'name'=>$path,
@@ -120,19 +120,11 @@ class OMVModuleZFSUtil {
 						'expanded'=>$expanded,
 						'path'=>$path);
 					array_push($objects,$tmp);
-					$tmp = array('id'=>$prefix . $path . '/' . $path,
-						'parentid'=>$prefix . $path,
-						'name'=>$path,
-						'type'=>'Filesystem',
-						'icon'=>'images/filesystem.png',
-						'path'=>$path,
-						'expanded'=>$expanded);
-					array_push($objects,$tmp);
 				} else {
-					//This is a Filesystem other than the Pool
+					//This is a Filesystem
 					preg_match('/(.*)\/(.*)$/', $path, $result);
-					$tmp = array('id'=>$prefix . $root . "/" . $path,
-						'parentid'=>$prefix . $root . "/" . $result[1],
+					$tmp = array('id'=>$prefix . $path,
+						'parentid'=>$prefix . $result[1],
 						'name'=>$result[2],
 						'icon'=>"images/filesystem.png",
 						'path'=>$path,
@@ -152,8 +144,8 @@ class OMVModuleZFSUtil {
 
 			case "volume":
 				preg_match('/(.*)\/(.*)$/', $path, $result);
-				$tmp = array('id'=>$prefix . $root . "/" . $path,
-					'parentid'=>$prefix . $root . "/" . $result[1],
+				$tmp = array('id'=>$prefix . $path,
+					'parentid'=>$prefix . $result[1],
 					'name'=>$result[2],
 					'type'=>ucfirst($type),
 					'icon'=>"images/save.png",
@@ -166,8 +158,8 @@ class OMVModuleZFSUtil {
 				preg_match('/(.*)\@(.*)$/', $path, $result);
 				$subdirs = preg_split('/\//',$result[1]);
 				$root = $subdirs[0];
-				$tmp = array('id'=>$prefix . $root . "/" . $path,
-					'parentid'=>$prefix . $root . "/" . $result[1],
+				$tmp = array('id'=>$prefix . $path,
+					'parentid'=>$prefix . $result[1],
 					'name'=>$result[2],
 					'type'=>ucfirst($type),
 					'icon'=>'images/zfs_snap.png',

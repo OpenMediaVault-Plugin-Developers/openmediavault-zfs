@@ -317,10 +317,9 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = false;
 		}
-		//Disable 'AddObj' button if selected row is a Poool or a Snapshot
+		//Disable 'AddObj' button if selected row is a Snapshot
 		Ext.Array.each(records, function(record) {
-			if(("Pool" == record.get("type")) ||
-			   ("Snapshot" == record.get("type"))) {
+			if("Snapshot" == record.get("type")) {
 				tbarBtnDisabled["addobj"] = true;
 				tbarBtnHidden["addobj"] = true;
 			return false;

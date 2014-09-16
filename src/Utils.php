@@ -9,15 +9,22 @@ require_once("Dataset.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Get poolname from name of dataset/volume etc.
+	 *
+	 * @return string Name of the pool
+	 */
+	public static function getPoolname($name) {
+		$tmp = preg_split('/[\/]+/', $name);
+		return($tmp[0]);
+	}
+
+	/**
 	 * Get UUID of ZFS pool by name
 	 *
 	 * @return string UUID of the pool
 	 */
-	public static function getUUIDbyName($name) {
-		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $name, $result);
-		$name = $result[1];
-		unset($result);
-		$cmd = "zpool get guid " . $name . " 2>&1";
+	public static function getUUIDbyName($poolname) {
+		$cmd = "zpool get guid " . $poolname . " 2>&1";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		if (isset($out)) {
 			$headers = preg_split('/[\s]+/', $out[0]);
@@ -39,39 +46,28 @@ class OMVModuleZFSUtil {
 	 */
 	public static function addMissingOMVMntEnt() {
 		global $xmlConfig;
-		$msg = "";
 		$cmd = "zpool list -H -o name";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
 			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
-			if (isset($pooluuid)) {
-				$pooluuid = "UUID=" . $pooluuid;
-				$xpath = "//system/fstab/mntent";
-				$object = $xmlConfig->get($xpath);
-				$uuidexists = false;
-				foreach ($object as $obj) {
-					if (strcmp($pooluuid, $obj['fsname']) === 0) {
-						$uuidexists = true;
-						break;
-					}
-				}
-				if (!$uuidexists) {
-					$uuid = OMVUtil::uuid();
-					$ds = new OMVModuleZFSDataset($name);
-					$dir = $ds->getMountPoint();
-					$object = array(
-						"uuid" => $uuid,
-						"fsname" => $pooluuid,
-						"dir" => $dir,
-						"type" => "zfs",
-						"opts" => "rw,relatime,xattr",
-						"freq" => "0",
-						"passno" => "2"
-					);
-					$xmlConfig->set("//system/fstab",array("mntent" => $object));
-					$dispatcher = &OMVNotifyDispatcher::getInstance();
-					$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
-				}
+			$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
+			$mountpoint = $xmlConfig->get($xpath);
+			if (is_null($mountpoint)) {
+				$uuid = OMVUtil::uuid();
+				$pool = new OMVModuleZFSZpool($name);
+				$dir = $pool->getMountPoint();
+				$object = array(
+					"uuid" => $uuid,
+					"fsname" => $pooluuid,
+					"dir" => $dir,
+					"type" => "zfs",
+					"opts" => "rw,relatime,xattr",
+					"freq" => "0",
+					"passno" => "2"
+				);
+				$xmlConfig->set("//system/fstab",array("mntent" => $object));
+				$dispatcher = &OMVNotifyDispatcher::getInstance();
+				$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
 			}
 		}
 		return null;

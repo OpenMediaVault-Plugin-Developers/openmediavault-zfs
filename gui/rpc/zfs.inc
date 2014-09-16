@@ -259,15 +259,13 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 
 		//Get the UUID of the Pool
-		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($params['name']);
-		preg_match('/^([A-Za-z0-9]+)\/?.*$/', $params['name'], $result);
-		$poolname = $result[1];
-		unset($result);
+		$poolname = OMVModuleZFSUtil::getPoolname($params['name']);
+		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 
 		//Get the mntent object and fetch it's uuid.
 		$xpath = "//system/fstab/mntent[fsname=" . $pooluuid . "]";
-		$object = $xmlConfig->get($xpath);
-		$mntentref = $object['uuid'];
+		$mountpoint = $xmlConfig->get($xpath);
+		$mntentref = $mountpoint['uuid'];
 
 		// Prepare the configuration object. Use the name of the shared
 		// folder as the relative directory name of the share.

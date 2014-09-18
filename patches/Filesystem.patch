@@ -1,0 +1,17 @@
+--- omv/Filesystem.js.org	2014-09-18 10:52:09.777037347 +0200
++++ omv/Filesystem.js	2014-09-18 21:18:41.363038848 +0200
+@@ -642,6 +642,14 @@
+ 				tbarBtnDisabled["quota"] = true;
+ 			}
+ 		}
++		//Disable all buttons for zfs filesystems. These actions should be
++		//handled by 3rd party plugin.
++		if([ "zfs_member" ].indexOf(
++			records[0].get("type")) == 0) {
++				tbarBtnDisabled["mount"] = true;
++				tbarBtnDisabled["unmount"] = true;
++				tbarBtnDisabled["delete"] = true;
++		}
+ 		// Update the button controls.
+ 		Ext.Object.each(tbarBtnDisabled, function(key, value) {
+ 			this.setToolbarButtonDisabled(key, value);

@@ -34,6 +34,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function addPool($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "pooltype":{"type":"string","enum":["basic","mirror",' .
+					'"raidz1","raidz2","raidz3"]},
+				  "force":{"type":"boolean"},
+				  "mountpoint":{"type":"string"},
+				  "name":{"type":"string"},
+				  "devices":{"type":"string"}
+			  }
+		  }');
 		switch ($params['pooltype']) {
 		case "basic":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
@@ -94,11 +106,30 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function passParam($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "key":{"type":"string"},
+				  "value":{"type":"string"}
+			  }
+		  }');
 		return array($params['key'] => $params['value']);
 	}
 
 	public function addObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "type":{"type":"string","enum":["filesystem","snapshot",' .
+					'"volume"]},
+				  "path":{"type":"string"},
+				  "name":{"type":"string"},
+				  "size":{"type":"string"}
+			  }
+		  }');
 		switch ($params['type']) {
 		case "filesystem":
 			$name = $params['path'] . "/" . $params['name'];
@@ -121,6 +152,15 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function deleteObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "type":{"type":"string","enum":["Filesystem","Snapshot",' .
+					'"Volume","Clone","Pool"]},
+				  "name":{"type":"string"}
+			  }
+		  }');
 		global $xmlConfig;
 		$name = $params['name'];
 		switch ($params['type']) {
@@ -161,6 +201,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function getProperties($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "type":{"type":"string"},
+				  "name":{"type":"string"},
+				  "start":{"type":"integer"},
+				  "limit":{'.$GLOBALS['OMV_JSONSCHEMA_COUNTFIELD'].'},
+				  "sortfield":{'.$GLOBALS['OMV_JSONSCHEMA_SORTFIELD'].'},
+				  "sortdir":{'.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].'}
+			  }
+		}');
 		$objects = array();
 		$name = $params['name'];
 		switch ($params['type']) {
@@ -195,6 +247,20 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function setProperties($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			"type":"object",
+				"properties":{
+					"type":{"type":"string","enum":["Filesystem","Snapshot",' .
+						'"Volume","Clone","Pool"]},
+					"name":{"type":"string"},
+					"properties":{"type":"array","items":{
+						"type":"object",
+						"properties":{	
+							"property":{"type":"string"},
+							"value":{"type":"string"}}}}
+				}
+		}');
 		$objects = array();
 		switch ($params['type']) {
 		case "Filesystem":
@@ -222,6 +288,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function inherit($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "type":{"type":"string","enum":["Filesystem","Snapshot",' .
+					'"Volume","Clone","Pool"]},
+				  "name":{"type":"string"},
+				  "property":{"type":"string"}
+			  }
+		  }');
 		// Create a background process.
 		$bgStatusFilename = $this->createBgProcStatus();
 		$pid = $this->fork();
@@ -262,6 +338,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function getSharedParams($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "type":{"type":"string"},
+				  "name":{"type":"string"}
+			  }
+		  }');
 		$objects = array();
 		$ds = new OMVModuleZFSDataset($params['name']);
 		$mountpoint = $ds->getMountPoint();
@@ -274,6 +358,19 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function createShare($params, $context) {
 		global $xmlConfig;
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "name":{"type":"string"},
+				  "type":{"type":"string","enum":["Filesystem","Clone"]},
+				  "sharename":{'.$GLOBALS['OMV_JSONSCHEMA_SHARENAME'].'},
+				  "comment":{"type":"string"},
+				  "mode":{"type":"string","enum":["700","750","755",'.
+				  	'"770","775","777"],"optional":true},
+				  "mountpoint":{"type":"string"}
+			  }
+		  }');
 
 		//Get the UUID of the Pool
 		$poolname = OMVModuleZFSUtil::getPoolname($params['name']);

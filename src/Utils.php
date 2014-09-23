@@ -111,9 +111,9 @@ class OMVModuleZFSUtil {
 					"fsname" => $pooluuid,
 					"dir" => $dir,
 					"type" => "zfs",
-					"opts" => "rw,relatime,xattr",
+					"opts" => "rw,relatime,xattr,noacl",
 					"freq" => "0",
-					"passno" => "2"
+					"passno" => "0"
 				);
 				$xmlConfig->set("//system/fstab",array("mntent" => $object));
 				$dispatcher = &OMVNotifyDispatcher::getInstance();

@@ -2,11 +2,54 @@
 require_once("Exception.php");
 require_once("openmediavault/util.inc");
 require_once("Dataset.php");
+require_once("Vdev.php");
+require_once("Zpool.php");
 
 /**
  * Helper class for ZFS module
  */
 class OMVModuleZFSUtil {
+
+	/**
+	 * Clears all ZFS labels on specified devices.
+	 * Needed for blkid to display proper data.
+	 *
+	 */
+	public static function clearZFSLabel($disks) {
+		foreach ($disks as $disk) {
+			$cmd = "zpool labelclear /dev/" . $disk . "1";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+		}
+	}
+
+	/**
+	 * Return all disks in /dev/sdXX used by the pool
+	 *
+	 * @return array An array with all the disks
+	 */
+	public static function getDevDisksByPool($name) {
+		$pool = new OMVModuleZFSZpool($name);
+		$disks = array();
+		$vdevs = $pool->getVdevs();
+		foreach ($vdevs as $vdev) {
+			$vdisks = $vdev->getDisks();
+			foreach ($vdisks as $vdisk) {
+				if (preg_match('/^[a-z0-9]+$/', $vdisk)) {
+					$disks[] = $vdisk;
+					continue;
+				}
+				$cmd = "ls -la /dev/disk/by-path/" . $vdisk;
+				unset($out);
+				OMVModuleZFSUtil::exec($cmd,$out,$res);
+				if (count($out) === 1) {
+					if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+						$disks[] = $match[1];
+					}
+				}
+			}
+		}
+		return($disks);
+	}
 
 	/**
 	 * Deletes all shared folders pointing to the specifc path
@@ -22,9 +65,10 @@ class OMVModuleZFSUtil {
 		$mountpoint = $xmlConfig->get($xpath);
 		$mntentuuid = $mountpoint['uuid'];
 		$xpath = "//system/shares/sharedfolder[mntentref='" . $mntentuuid . "' and reldirpath='" . $reldirpath . "']";
+		$object = $xmlConfig->get($xpath);
 		$xmlConfig->delete($xpath);
 		$dispatcher = &OMVNotifyDispatcher::getInstance();
-		$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.shares.sharedfolder");
+		$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.shares.sharedfolder",$object);
 	}
 
 	/**

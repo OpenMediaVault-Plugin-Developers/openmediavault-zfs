@@ -94,8 +94,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function passParam($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
-		//$msg = "Key=" . $params['key'] . ";Value=" . $params['value'] . ";";
-		//throw new OMVModuleZFSException($msg);
 		return array($params['key'] => $params['value']);
 	}
 
@@ -123,32 +121,37 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 
 	public function deleteObject($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		global $xmlConfig;
+		$name = $params['name'];
 		switch ($params['type']) {
 		case "Filesystem":
-			$name = $params['name'];
 			OMVModuleZFSUtil::deleteShares($name);
 			$tmp = new OMVModuleZFSDataset($name);
 			$tmp->destroy();
 			break;
 		case "Clone":
-			$name = $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
 			$tmp->destroy();
 			break;
 		case "Snapshot":
-			$name = $params['name'];
 			$tmp = new OMVModuleZFSSnapshot($name);
 			$tmp->destroy();
 			break;
 		case "Volume":
-			$name = $params['name'];
 			$tmp = new OMVModuleZFSZvol($name);
 			$tmp->destroy();
 			break;
 		case "Pool":
-			$name = $params['name'];
+			$disks = OMVModuleZFSUtil::getDevDisksByPool($name);
+			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
 			$tmp = new OMVModuleZFSZpool($name);
 			$tmp->destroy();
+			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and type='zfs']";
+			$object = $xmlConfig->get($xpath);
+			$xmlConfig->delete($xpath);
+			$dispatcher = &OMVNotifyDispatcher::getInstance();
+			$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.fstab.mntent", $object);
+			OMVModuleZFSUtil::clearZFSLabel($disks);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);

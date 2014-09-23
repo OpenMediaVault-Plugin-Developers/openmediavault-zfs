@@ -753,7 +753,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 									$dev = null;
 								}
 								$type = $match[1];
-							} else if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
+							} else if (preg_match("/^\s*([\w\d-a-z0-9\:\.\-]+)\s+/", $line, $match)) {
 								if ($dev)
 									$dev .= " $match[1]";
 								else

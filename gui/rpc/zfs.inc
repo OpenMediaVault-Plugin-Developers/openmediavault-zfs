@@ -30,6 +30,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("inherit");
 		$this->registermethod("getSharedParams");
 		$this->registermethod("createShare");
+		$this->registermethod("getObjectDetails");
 	}
 
 	public function addPool($params, $context) {
@@ -460,6 +461,41 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		return $object;
 	}
 
+	public function getObjectDetails($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			"type":"object",
+				"properties":{
+					"name":{"type":"string"},
+						"type":{"type":"string"}
+			}
+		}');
+		$output = "";
+		switch ($params['type']) {
+		case "Filesystem":
+			$output .= "Filesystem details (zfs get all):\n\r\n\r";
+			$cmd = "zfs get all {$params['name']}";
+			break;
+		case "Volume":
+			$output .= "Volume details (zfs get all):\n\r\n\r";
+			$cmd = "zfs get all {$params['name']}";
+			break;
+		case "Snapshot":
+			$output .= "Snapshot details (zfs get all):\n\r\n\r";
+			$cmd = "zfs get all {$params['name']}";
+			break;
+		case "Pool":
+			$output .= "Pool details (zpool get all):\n\r\n\r";
+			$cmd = "zpool get all {$params['name']}";
+			break;
+		default:
+			throw new OMVModuleZFSException("Incorrect type provided");
+		}
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		$output .= implode("\n\r", $out);
+		return array("details" => $output);
+	}
 }
 
 // Register the RPC service.

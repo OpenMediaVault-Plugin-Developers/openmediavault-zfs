@@ -2,6 +2,7 @@
 require_once("Exception.php");
 require_once("openmediavault/util.inc");
 require_once("Dataset.php");
+require_once("Zvol.php");
 require_once("Vdev.php");
 require_once("Zpool.php");
 
@@ -197,6 +198,11 @@ class OMVModuleZFSUtil {
 						'icon'=>'images/raid.png',
 						'expanded'=>$expanded,
 						'path'=>$path);
+					$pool = new OMVModuleZFSZpool($path);
+					$tmp['size'] = $pool->getSize();
+					$tmp['used'] = "n/a";
+					$tmp['available'] = "n/a";
+					$tmp['mountpoint'] = $pool->getMountPoint();
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -216,6 +222,12 @@ class OMVModuleZFSUtil {
 						//This is a standard Filesystem.
 						$tmp['type']= ucfirst($type);
 					}
+					$tmp['size'] = "n/a";
+					$used = $ds->getProperty("used");
+					$tmp['used'] = $used['value'];
+					$available = $ds->getProperty("available");
+					$tmp['available'] = $available['value'];
+					$tmp['mountpoint'] = $ds->getMountPoint();
 					array_push($objects,$tmp);
 				}
 				break;
@@ -229,6 +241,11 @@ class OMVModuleZFSUtil {
 					'icon'=>"images/save.png",
 					'path'=>$path,
 					'expanded'=>$expanded);
+				$vol = new OMVModuleZFSZvol();
+				$tmp['size'] = $vol->getSize();
+				$tmp['used'] = "n/a";
+				$tmp['available'] = "n/a";
+				$tmp['mountpoint'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 
@@ -243,6 +260,10 @@ class OMVModuleZFSUtil {
 					'icon'=>'images/zfs_snap.png',
 					'path'=>$path,
 					'expanded'=>$expanded);
+				$tmp['size'] = "n/a";
+				$tmp['used'] = "n/a";
+				$tmp['available'] = "n/a";
+				$tmp['mountpoint'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

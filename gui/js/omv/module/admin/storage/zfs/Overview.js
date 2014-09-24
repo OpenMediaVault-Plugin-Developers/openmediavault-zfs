@@ -3,6 +3,38 @@
 // require("js/omv/workspace/window/Grid.js")
 // require("js/omv/form/field/CheckboxGrid.js")
 
+Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
+	extend: "OMV.workspace.window.Form",
+	requires: [
+		"OMV.data.Store",
+		"OMV.data.Model",
+		"OMV.data.proxy.Rpc",
+	],
+
+	rpcService: "ZFS",
+	title: _("Object details"),
+	autoLoadData: true,
+	hideResetButton: true,
+	hideCancelButton: true,
+	width: 550,
+	height: 350,
+	layout: 'fit',
+	okButtonText: _("Ok"),
+
+	getFormItems: function() {
+		var me = this;
+		
+		return [{
+			xtype: "textareafield",
+			name: "details",
+			grow: true,
+			anchor: '100%',
+			readOnly: true
+		}];
+
+	}
+});
+
 Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 	extend: "OMV.workspace.window.Form",
 	requires: [
@@ -540,6 +572,30 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'type'
 	},{
+		text: _("Size"),
+		dataIndex: 'size',
+		sortable: true,
+		flex: 1,
+		stateId: 'size'
+	},{
+		text: _("Used"),
+		dataIndex: 'used',
+		sortable: true,
+		flex: 1,
+		stateId: 'used'
+	},{
+		text: _("Available"),
+		dataIndex: 'available',
+		sortable: true,
+		flex: 1,
+		stateId: 'available'
+	},{
+		text: _("Mountpoint"),
+		dataIndex: 'mountpoint',
+		sortable: true,
+		flex: 1,
+		stateId: 'mountpoint'
+	},{
 		text: _("Share"),
 		xtype: 'actioncolumn',
 		tooltip: 'Create shared folder',
@@ -564,14 +620,23 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 				return true;
 			}
 		}
-
-
 	},{
 		text: _("Details"),
 		xtype: 'actioncolumn',
 		tooltip: 'Details',
 		align: 'center',
-		icon: 'images/search.png'
+		icon: 'images/search.png',
+		handler: function(view, rowIndex, colIndex, item, e, record, row) {
+			var me = this;
+			Ext.create("OMV.module.admin.storage.zfs.ShowDetails", {
+				title: _("Object details"),
+				rpcGetMethod: "getObjectDetails",
+				rpcGetParams: {
+					name: record.get('path'),
+					type: record.get('type')
+				}
+			}).show();
+		}
 	},{
 		text: _("Shared"),
 		dataIndex: 'shared',
@@ -590,6 +655,10 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 					fields: [
 						{ name: "name", type: "string" },
 						{ name: "type", type: "string" },
+						{ name: "size", type: "string" },
+						{ name: "used", type: "string" },
+						{ name: "available", type: "string" },
+						{ name: "mountpoint", type: "string" },
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },

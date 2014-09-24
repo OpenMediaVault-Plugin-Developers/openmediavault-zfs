@@ -636,7 +636,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 	 * @param string $attribute
 	 * @return string value
 	 */
-	private function getAttribute($attribute) {
+	public function getAttribute($attribute) {
 		$cmd = "zpool list -H -o $attribute {$this->name}";
 		OMVUtil::exec($cmd, $output, $result);
 		if ($result) {

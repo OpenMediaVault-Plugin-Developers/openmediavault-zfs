@@ -200,8 +200,8 @@ class OMVModuleZFSUtil {
 						'path'=>$path);
 					$pool = new OMVModuleZFSZpool($path);
 					$tmp['size'] = $pool->getSize();
-					$tmp['used'] = "n/a";
-					$tmp['available'] = "n/a";
+					$tmp['used'] = $pool->getAttribute("allocated");
+					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
 					array_push($objects,$tmp);
 				} else {

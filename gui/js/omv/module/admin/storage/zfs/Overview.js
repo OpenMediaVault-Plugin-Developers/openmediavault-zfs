@@ -181,7 +181,10 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 			name: "force",
 			fieldLabel: _("Force creation"),
 			checked: false,
-			boxLabel: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
+			}]
 		}];
 	},
 
@@ -305,10 +308,7 @@ Ext.define("OMV.module.admin.storage.zfs.EditProperties", {
 					e.record.set("modified", "true");
 				},
 				beforeedit: function(editor, e, eOpts) {
-					if (e.record.get("property") === "mountpoint") {
-						e.grid.getPlugin('rowEditing').editor.form.findField("value").disable();
-						e.grid.getPlugin('rowEditing').editor.form.findField("property").disable();
-					} else if (e.record.get("newproperty") === "false") {
+					if (e.record.get("newproperty") === "false") {
 						e.grid.getPlugin('rowEditing').editor.form.findField("value").enable();
 						e.grid.getPlugin('rowEditing').editor.form.findField("property").disable();
 					} else {
@@ -495,8 +495,8 @@ Ext.define("OMV.module.admin.storage.zfs.CreateShare", {
 			xtype: "textfield",
 			name: "mountpoint",
 			fieldLabel: _("Path"),
-			allowBlank: false,
-			readOnly: true
+			allowBlank: true,
+			readOnly: false
 		},{
 			xtype: "combo",
 			name: "mode",

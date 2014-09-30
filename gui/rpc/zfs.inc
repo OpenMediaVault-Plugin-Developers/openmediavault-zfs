@@ -190,8 +190,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and type='zfs']";
 			$object = $xmlConfig->get($xpath);
 			$xmlConfig->delete($xpath);
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.fstab.mntent", $object);
 			OMVModuleZFSUtil::clearZFSLabel($disks);
 			break;
 		default:
@@ -262,7 +260,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 							"value":{"type":"string"}}}}
 				}
 		}');
-		$objects = array();
+		global $xmlConfig;
 		switch ($params['type']) {
 		case "Filesystem":
 		case "Clone":
@@ -282,9 +280,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			break;
 		}
 		foreach ($params['properties'] as $property) {
+			unset($objects);
+			$objects = array();
 			$objects[$property['property']] = $property['value'];
+			$tmp->setProperties($objects);
+			if ((strcmp($property['property'], "mountpoint") === 0) && (strcmp($params['type'], "Filesystem") === 0)) {
+				OMVModuleZFSUtil::relocateFilesystem($params['name']);
+			}
 		}
-		$tmp->setProperties($objects);
 	}
 
 	public function inherit($params, $context) {
@@ -348,10 +351,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			  }
 		  }');
 		$objects = array();
-		$ds = new OMVModuleZFSDataset($params['name']);
-		$mountpoint = $ds->getMountPoint();
+		//$ds = new OMVModuleZFSDataset($params['name']);
+		//$mountpoint = $ds->getMountPoint();
 		return array(
-			"mountpoint" => $mountpoint,
+			//"mountpoint" => $mountpoint,
 			"name" => $params['name'],
 			"type" => $params['type']);
 	}
@@ -372,16 +375,15 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "mountpoint":{"type":"string"}
 			  }
 		  }');
-
-		//Get the UUID of the Pool
-		$poolname = OMVModuleZFSUtil::getPoolname($params['name']);
-		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
-
-		//Get the mntent object and fetch it's uuid.
-		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
-		$mountpoint = $xmlConfig->get($xpath);
-		$mntentref = $mountpoint['uuid'];
-
+		
+   		// The field 'reldirpath' may not contain the characters '..'. This
+	    // is because of security reasons: the given canonicalized absolute
+	    // path MUST be below the given mount point.
+	    if(1 == preg_match("/\.\./", $params['mountpoint'])) {
+	    	throw new OMVException(OMVErrorMsg::E_RPC_SERVICE_METHOD_INVALID_PARAMS,
+				sprintf(gettext("The field '%s' contains forbidden two-dot symbols"), "mountpoint"));
+		}
+	
 		// Prepare the configuration object. Use the name of the shared
 		// folder as the relative directory name of the share.
 		switch ($params['type']) {
@@ -396,13 +398,22 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			break;
 		}
 
+		$poolname = OMVModuleZFSUtil::getPoolname($params['name']);
+		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+		$dir = $tmp->getMountPoint();
+
+		//Get the mntent object and fetch it's uuid.
+		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
+		$mountpoint = $xmlConfig->get($xpath);
+		$mntentref = $mountpoint['uuid'];
+		
 		$uuid = OMVUtil::uuid();
-		$pathName = $tmp->getMountPoint();
-		$reldirpath = OMVModuleZFSUtil::getReldirpath($pathName);
+		$pathName = $dir . "/" . trim($params['mountpoint'], "/");
+		$reldirpath = trim($params['mountpoint'], "/");
 		$object = array(
 			"uuid" => $uuid,
 			"name" => $params['sharename'],
-			"comment" => $params['comment'],
+			"comment" => $params['comment'] . "*** ZFS share on " . $params['name'] . " ***",
 			"mntentref" => $mntentref,
 			"reldirpath" => $reldirpath
 		);
@@ -436,6 +447,24 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$object['mode'] = $params['mode'];
 		}
 
+		// Create the shared folder directory if necessary.
+		if(FALSE === file_exists($pathName)) {
+		// Create the directory. Note, the function seems to have a bug
+		// when using the mask parameter. E.g. octdec("777") does not
+		// create the correct permissions as expected, thus change the
+		// mode using chmod.
+			if(FALSE === mkdir($pathName, 0700, TRUE)) {
+				throw new OMVException(OMVErrorMsg::E_MISC_FAILURE,
+					sprintf("Failed to create the directory '%s'", $pathName));
+			}
+			// Change the directory mode.
+			if(FALSE === chmod($pathName, octdec($object['mode']))) {
+				throw new OMVException(OMVErrorMsg::E_MISC_FAILURE,
+					sprintf("Failed to set file mode to '%s' for '%s'",
+					$object['mode'], $pathName));
+			}
+		}
+		
 		// Change group owner of directory to configured default group,
 		// e.g. 'users'.
 		if(FALSE === chgrp($pathName, $GLOBALS['OMV_USERMGMT_DEFAULT_GROUP'])) {

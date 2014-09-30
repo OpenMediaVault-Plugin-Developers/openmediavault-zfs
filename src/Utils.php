@@ -12,6 +12,24 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Manages relocation of ZFS filesystem mountpoints in the OMV backend.
+	 * Needed when the user changes mountpoint of a filesystem in the GUI.
+	 *
+	 */
+	public static function relocateFilesystem($name) {
+		global $xmlConfig;
+		$poolname = OMVModuleZFSUtil::getPoolname($name);
+		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+		$ds = new OMVModuleZFSDataset($name);
+		$dir = $ds->getMountPoint();
+		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
+		$object = $xmlConfig->get($xpath);
+		$object['dir'] = $property['value'];
+		$xmlConfig->replace($xpath, $object);
+		return null;
+	}
+	
+	/**
 	 * Clears all ZFS labels on specified devices.
 	 * Needed for blkid to display proper data.
 	 *
@@ -21,6 +39,7 @@ class OMVModuleZFSUtil {
 			$cmd = "zpool labelclear /dev/" . $disk . "1";
 			OMVModuleZFSUtil::exec($cmd,$out,$res);
 		}
+		return null;
 	}
 
 	/**
@@ -58,15 +77,22 @@ class OMVModuleZFSUtil {
 	 */
 	public static function deleteShares($name) {
 		global $xmlConfig;
-		$tmp = new OMVModuleZFSDataset($name);
-		$reldirpath = OMVModuleZFSUtil::getReldirpath($tmp->getMountPoint());
 		$poolname = OMVModuleZFSUtil::getPoolname($name);
 		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
-		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
+		$ds = new OMVModuleZFSDataset($name);
+		$dir = $ds->getMountPoint();
+		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
 		$mountpoint = $xmlConfig->get($xpath);
 		$mntentuuid = $mountpoint['uuid'];
-		$xpath = "//system/shares/sharedfolder[mntentref='" . $mntentuuid . "' and reldirpath='" . $reldirpath . "']";
-		$object = $xmlConfig->get($xpath);
+		$xpath = "//system/shares/sharedfolder[mntentref='" . $mntentuuid . "']";
+		$objects = $xmlConfig->getList($xpath);
+		foreach ($objects as $object) {
+			$tmpxpath = sprintf("//*[contains(name(),'sharedfolderref')]".
+				"[contains(.,'%s')]", $object['uuid']);
+			if ($xmlConfig->exists($tmpxpath)) {
+				throw new OMVModuleZFSException("The Filesystem is shared and in use. Please delete all references and try again.");
+			}
+		}
 		$xmlConfig->delete($xpath);
 		$dispatcher = &OMVNotifyDispatcher::getInstance();
 		$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.shares.sharedfolder",$object);
@@ -136,33 +162,33 @@ class OMVModuleZFSUtil {
 	}
 
 	/**
-	 * Add any missing ZFS pool to the OMV backend
+	 * Add any missing ZFS filesystems to the OMV backend
 	 *
 	 */
 	public static function addMissingOMVMntEnt() {
 		global $xmlConfig;
-		$cmd = "zpool list -H -o name";
+		$cmd = "zfs list -H -o name -t filesystem";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
-			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
-			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "']";
-			$mountpoint = $xmlConfig->get($xpath);
-			if (is_null($mountpoint)) {
-				$uuid = OMVUtil::uuid();
-				$pool = new OMVModuleZFSZpool($name);
-				$dir = $pool->getMountPoint();
-				$object = array(
-					"uuid" => $uuid,
-					"fsname" => $pooluuid,
-					"dir" => $dir,
-					"type" => "zfs",
-					"opts" => "rw,relatime,xattr,noacl",
-					"freq" => "0",
-					"passno" => "0"
-				);
-				$xmlConfig->set("//system/fstab",array("mntent" => $object));
-				$dispatcher = &OMVNotifyDispatcher::getInstance();
-				$dispatcher->notify(OMV_NOTIFY_CREATE,"org.openmediavault.system.fstab.mntent", $object);
+			if (preg_match('/[\/]+/', $name)) {
+				$poolname = OMVModuleZFSUtil::getPoolname($name);
+				$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+				$ds = new OMVModuleZFSDataset($name);
+				$dir = $ds->getMountPoint();
+				$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
+				if (!($xmlConfig->exists($xpath))) {
+					$uuid = OMVUtil::uuid();
+					$object = array(
+						"uuid" => $uuid,
+						"fsname" => $pooluuid,
+						"dir" => $dir,
+						"type" => "zfs",
+						"opts" => "rw,relatime,xattr,noacl",
+						"freq" => "0",
+						"passno" => "0"
+					);
+					$xmlConfig->set("//system/fstab",array("mntent" => $object));
+				}
 			}
 		}
 		return null;

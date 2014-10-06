@@ -185,7 +185,8 @@ class OMVModuleZFSUtil {
 						"type" => "zfs",
 						"opts" => "rw,relatime,xattr,noacl",
 						"freq" => "0",
-						"passno" => "0"
+						"passno" => "0",
+						"hidden" => "1"
 					);
 					$xmlConfig->set("//system/fstab",array("mntent" => $object));
 				}

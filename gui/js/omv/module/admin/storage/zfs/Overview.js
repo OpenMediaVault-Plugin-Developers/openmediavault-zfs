@@ -256,7 +256,8 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 			name: "path",
 			fieldLabel: _("Prefix"),
 			allowBlank: false,
-			readOnly: true
+			readOnly: true,
+			value: me.path
 		},{
 			xtype: "textfield",
 			name: "name",
@@ -814,11 +815,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		var record = records[0];
 		Ext.create("OMV.module.admin.storage.zfs.AddObject", {
 			title: _("Add Object"),
-			rpcGetMethod: "passParam",
-			rpcGetParams: {
-				key: "path",
-				value: record.get('path')
-			},
+			path: record.get("path"),
 			listeners: {
 				scope: me,
 				submit: function() {

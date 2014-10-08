@@ -31,6 +31,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("getSharedParams");
 		$this->registermethod("createShare");
 		$this->registermethod("getObjectDetails");
+		$this->registermethod("expandPool");
 	}
 
 	public function addPool($params, $context) {
@@ -524,6 +525,55 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$output .= implode("\n\r", $out);
 		return array("details" => $output);
+	}
+	
+	public function expandPool($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "pool_type":{"type":"string","enum":["Basic","Mirror",' .
+					'"Raidz1","Raidz2","Raidz3"]},
+				  "name":{"type":"string"},
+				  "devices":{"type":"string"}
+			  }
+		}');
+		$pool = new OMVModuleZFSZpool($params['name']);
+		switch ($params['pool_type']) {
+		case "Basic":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
+			break;
+		case "Mirror":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+			break;
+		case "Raidz1":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
+			break;
+		case "Raidz2":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
+			break;
+		case "Raidz3":
+			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
+			break;
+		default:
+			throw new OMVModuleZFSException("Incorrect pool type specified");
+			break;
+		}
+		//Use /dev/disk/by-path as deafult when creating new pools as suggested in ZoL FAQ.
+		$disks = preg_split("/[,;]/", $params['devices']);
+		if (file_exists("/dev/disk/by-path/")) {
+			$tmp_disks = array();
+			foreach ($disks as $disk) {
+				$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+			}
+			$disks = $tmp_disks;
+		}
+		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
+		$pool->addVdev($vdev);
+		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
+		$pool->export();
+		$pool->import($pool->getName());
 	}
 }
 

@@ -105,8 +105,10 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideDownButton: true,
 	hideApplyButton: true,
 	hideRefreshButton: true,
+	hideExpandPoolButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
+	expandPoolButtonText: _("Expand"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
 	upButtonText: _("Up"),
@@ -214,6 +216,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			scope: me,
 			disabled: true
 		},{
+			id: me.getId() + "-expand",
+			xtype: "button",
+			text: me.expandPoolButtonText,
+			icon: "images/zfs_expand.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideExpandPoolButton,
+			handler: Ext.Function.bind(me.onExpandPoolButton, me, [ me ]),
+			scope: me,
+			disabled: true
+		},{
 			id: me.getId() + "-delete",
 			xtype: "button",
 			text: me.deleteButtonText,
@@ -273,18 +285,20 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.hideTopToolbar)
 			return;
-		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down" ];
+		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand" ];
 		var tbarBtnDisabled = {
 			"addobj": false,
 			"edit": false,
 			"delete": false,
+			"expand": false,
 			"up": true,
-			"down": true
+			"down": true,
 		};
 		var tbarBtnHidden = {
 			"addobj": true,
 			"edit": true,
 			"delete": true,
+			"expand": true,
 			"up": true,
 			"down": true
 		};
@@ -295,27 +309,33 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnDisabled["delete"] = true;
 			tbarBtnDisabled["up"] = true;
 			tbarBtnDisabled["down"] = true;
+			tbarBtnDisabled["expand"] = true;
           	tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = true;
+			tbarBtnHidden["expand"] = true;
 		} else if(records.length == 1) {
 			tbarBtnDisabled["addobj"] = false;
 			tbarBtnDisabled["edit"] = false;
 			tbarBtnDisabled["delete"] = false;
 			tbarBtnDisabled["up"] = false;
 			tbarBtnDisabled["down"] = false;
+			tbarBtnDisabled["expand"] = false;
 			tbarBtnHidden["addobj"] = false;
 			tbarBtnHidden["edit"] = false;
 			tbarBtnHidden["delete"] = false;
+			tbarBtnHidden["expand"] = false;
 		} else {
 			tbarBtnDisabled["addobj"] = true;
 			tbarBtnDisabled["edit"] = true;
 			tbarBtnDisabled["delete"] = false;
 			tbarBtnDisabled["up"] = false;
 			tbarBtnDisabled["down"] = false;
+			tbarBtnDisabled["expand"] = true;
 			tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = false;
+			tbarBtnHidden["expand"] = true;
 		}
 		//Disable 'AddObj' button if selected row is a Snapshot
 		Ext.Array.each(records, function(record) {
@@ -332,6 +352,15 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 				tbarBtnDisabled["delete"] = true;
 				tbarBtnHidden["delete"] = true;
 			return false;
+			}
+		});
+		
+		//Disable 'ExpandPool' button if selected row is not a Pool
+		Ext.Array.each(records, function(record) {
+			if(!("Pool" == record.get("type"))) {
+				tbarBtnDisabled["expand"] = true;
+				tbarBtnHidden["expand"] = true;
+				return false;
 			}
 		});
 

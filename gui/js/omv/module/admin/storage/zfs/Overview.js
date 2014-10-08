@@ -280,6 +280,114 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 	}
 });
 
+Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
+	extend: "OMV.workspace.window.Form",
+	uses: [
+		"OMV.data.Store",
+		"OMV.data.Model",
+		"OMV.data.proxy.Rpc",
+		"OMV.data.reader.RpcArray"
+	],
+
+	rpcService: "ZFS",
+	rpcSetMethod: "expandPool",
+	width: 550,
+	height: 350,
+	autoLoadData: true,
+
+	getFormItems: function() {
+		var me = this;
+		return [{
+			xtype: "textfield",
+			name: "name",
+			fieldLabel: _("Name"),
+			allowBlank: false,
+			readOnly: true,
+			value: me.name
+		},{
+			xtype: "textfield",
+			name: "pool_type",
+			fieldLabel: _("Pool type"),
+			allowBlank: false,
+			readOnly: true,
+			value: me.pool_type
+		},{
+			xtype: "checkboxgridfield",
+			name: "devices",
+			fieldLabel: _("Devices"),
+			valueField: "devicefile",
+			listeners: {
+				scope: me,
+				change: function(e, eOpts) {
+					var deviceField = this.findField("devices");
+					if (me.pool_type == "Basic") {
+						deviceField.minSelections = 1;
+					} else {
+						deviceField.minSelections = me.nr_disks;
+						deviceField.maxSelections = me.nr_disks;
+					}
+				}
+			},
+			useStringValue: true,
+			height: 130,
+			store: Ext.create("OMV.data.Store", {
+				autoLoad: true,
+				model: OMV.data.Model.createImplicit({
+					idProperty: "devicefile",
+					fields: [
+						{ name: "devicefile", type: "string" },
+						{ name: "size", type: "string" },
+						{ name: "vendor", type: "string" },
+						{ name: "serialnumber", type: "string" }
+					]
+				}),
+				proxy: {
+					type: "rpc",
+					appendSortParams: false,
+					rpcData: {
+						service: "RaidMgmt",
+						method: "getCandidates"
+					}
+				},
+				sorters: [{
+					direction: "ASC",
+					property: "devicefile"
+				}]
+			}),
+			gridConfig: {
+				stateful: true,
+				stateId: "04942d40-4ee3-11e4-916c-0800200c9a66",
+				columns: [{
+					text: _("Device"),
+					sortable: true,
+					dataIndex: "devicefile",
+					stateId: "devicefile",
+					flex: 1
+				},{
+					xtype: "binaryunitcolumn",
+					text: _("Capacity"),
+					sortable: true,
+					dataIndex: "size",
+					stateId: "size",
+					width: 50,
+					flex: 1
+				},{
+					text: _("Vendor"),
+					sortable: true,
+					dataIndex: "vendor",
+					stateId: "vendor",
+					flex: 1
+				},{
+					text: _("Serial Number"),
+					sortable: true,
+					dataIndex: "serialnumber",
+					stateId: "serialnumber",
+					flex: 1
+				}]
+			}
+		}];
+	}
+});
 
 
 Ext.define("OMV.module.admin.storage.zfs.EditProperties", {
@@ -570,7 +678,14 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		dataIndex: 'type',
 		sortable: true,
 		flex: 1,
-		stateId: 'type'
+		stateId: 'type',
+		renderer: function(value, p, r){
+			if (r.data['type'] == "Pool") {
+				return r.data['type'] + ' (' + r.data['pool_type'] + ')';
+			} else {
+				return r.data['type'];
+			}
+		}
 	},{
 		text: _("Size"),
 		dataIndex: 'size',
@@ -662,7 +777,9 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },
-						{ name: "shared", type: "string", defaultValue: "false" }
+						{ name: "shared", type: "string", defaultValue: "false" },
+						{ name: "pool_type", type: "string"},
+						{ name: "nr_disks", type: "string"}
 					]
 				}),
 				proxy: {
@@ -719,6 +836,26 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		Ext.create("OMV.module.admin.storage.zfs.EditProperties", {
 			name: record.get("path"),
 			type: record.get("type")
+		}).show();
+	},
+	
+	onExpandPoolButton: function() {
+		var me = this;
+		var sm = me.getSelectionModel();
+		var records = sm.getSelection();
+		var record = records[0];
+		Ext.create("OMV.module.admin.storage.zfs.ExpandPool", {
+			title: _("Expand Pool"),
+			name: record.get("path"),
+			type: record.get("type"),
+			pool_type: record.get("pool_type"),
+			nr_disks: record.get("nr_disks"),
+			listeners: {
+				scope: me,
+				submit: function() {
+					this.doReload();
+				}
+			}
 		}).show();
 	},
 

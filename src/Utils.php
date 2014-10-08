@@ -230,6 +230,27 @@ class OMVModuleZFSUtil {
 					$tmp['used'] = $pool->getAttribute("allocated");
 					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
+					$vdevs = $pool->getVdevs();
+					$vdev_type = $vdevs[0]->getType();
+					switch ($vdev_type) {
+					case OMVModuleZFSVdevType::OMVMODULEZFSMIRROR:
+						$pool_type = "Mirror";
+						break;
+					case OMVModuleZFSVdevType::OMVMODULEZFSPLAIN:
+						$pool_type = "Basic";
+						break;
+					case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1:
+						$pool_type = "Raidz1";
+						break;
+					case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2:
+						$pool_type = "Raidz2";
+						break;
+					case OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3:
+						$pool_type = "Raidz3";
+						break;
+					}
+					$tmp['pool_type'] = $pool_type;
+					$tmp['nr_disks'] = count($vdevs[0]->getDisks());
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -255,6 +276,8 @@ class OMVModuleZFSUtil {
 					$available = $ds->getProperty("available");
 					$tmp['available'] = $available['value'];
 					$tmp['mountpoint'] = $ds->getMountPoint();
+					$tmp['pool_type'] = "n/a";
+					$tmp['nr_disks'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -273,6 +296,8 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
+				$tmp['pool_type'] = "n/a";
+				$tmp['nr_disks'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 
@@ -291,6 +316,8 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
+				$tmp['pool_type'] = "n/a";
+				$tmp['nr_disks'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

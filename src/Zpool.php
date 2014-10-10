@@ -192,11 +192,11 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      * @throws OMVModuleZFSException
      * @access public
      */
-    public function addVdev(array $vdevs) {
-		$cmd = "zpool add " . $this->name . " " . $this->getCommandString($vdevs);
+    public function addVdev(array $vdevs, $opts= "") {
+		$cmd = "zpool add " . $this->name . " " . $opts . $this->getCommandString($vdevs) . " 2>&1";
 		OMVUtil::exec($cmd, $output, $result);
 		if ($result)
-			throw new OMVModuleZFSException($output);
+			throw new OMVModuleZFSException(implode("\n", $output));
 		else
 			$this->vdevs = array_merge($this->vdevs, $vdevs);
 		$this->size = $this->getAttribute("size");

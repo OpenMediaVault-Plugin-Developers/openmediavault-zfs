@@ -95,6 +95,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 						break;
 						case "raidz2":
 							devicesField.minSelections = 4;
+							break;
 						case "raidz3":
 							devicesField.minSelections = 5;
 						break;
@@ -342,6 +343,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 						break;
 						case "raidz2":
 							devicesField.minSelections = 4;
+							break;
 						case "raidz3":
 							devicesField.minSelections = 5;
 						break;
@@ -415,6 +417,15 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 					flex: 1
 				}]
 			}
+		},{
+			xtype: "checkbox",
+			name: "force",
+			fieldLabel: _("Force creation"),
+			checked: false,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Forces the creation of the Vdev even if errors are reported. Use with extreme caution!")
+			}]
 		}];
 	}
 });

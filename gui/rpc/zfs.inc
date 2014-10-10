@@ -536,7 +536,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "vdevtype":{"type":"string","enum":["basic","mirror",' .
 					'"raidz1","raidz2","raidz3"]},
 				  "name":{"type":"string"},
-				  "devices":{"type":"string"}
+				  "devices":{"type":"string"},
+				  "force":{"type":"boolean"}
 			  }
 		}');
 		$pool = new OMVModuleZFSZpool($params['name']);
@@ -560,6 +561,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			throw new OMVModuleZFSException("Incorrect pool type specified");
 			break;
 		}
+		if ($params['force']) {
+			$opts .= "-f ";
+		}
 		//Use /dev/disk/by-path as deafult when creating new pools as suggested in ZoL FAQ.
 		$disks = preg_split("/[,;]/", $params['devices']);
 		if (file_exists("/dev/disk/by-path/")) {
@@ -570,7 +574,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$disks = $tmp_disks;
 		}
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		$pool->addVdev($vdev);
+		$pool->addVdev($vdev, $opts);
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
 		$pool->export();
 		$pool->import($pool->getName());

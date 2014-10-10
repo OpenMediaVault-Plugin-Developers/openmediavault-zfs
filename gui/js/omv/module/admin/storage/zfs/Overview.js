@@ -306,29 +306,58 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 			readOnly: true,
 			value: me.name
 		},{
-			xtype: "textfield",
-			name: "pool_type",
-			fieldLabel: _("Pool type"),
+			xtype: "combo",
+			name: "vdevtype",
+			fieldLabel: _("Vdev type"),
+			queryMode: "local",
+			store: Ext.create("Ext.data.ArrayStore", {
+				fields: [ "value", "text" ],
+				data: [
+					[ "basic", _("Basic") ],
+					[ "mirror", _("Mirror") ],
+					[ "raidz1", _("RAID-Z1") ],
+					[ "raidz2", _("RAID-Z2") ],
+					[ "raidz3", _("RAID-Z3") ]
+				]
+			}),
+			displayField: "text",
+			valueField: "value",
 			allowBlank: false,
-			readOnly: true,
-			value: me.pool_type
+			editable: false,
+			triggerAction: "all",
+			value: "raidz1",
+			listeners: {
+				scope: me,
+				change: function(combo, value) {
+					var devicesField = this.findField("devices");
+					switch(value) {
+						case "basic":
+							devicesField.minSelections = 1;
+						break;
+						case "mirror":
+							devicesField.minSelections = 2;
+						break;
+						case "raidz1":
+							devicesField.minSelections = 3;
+						break;
+						case "raidz2":
+							devicesField.minSelections = 4;
+						case "raidz3":
+							devicesField.minSelections = 5;
+						break;
+						default:
+							devicesField.minSelections = 2;
+						break;
+					}
+					devicesField.validate();
+				}
+			}
 		},{
 			xtype: "checkboxgridfield",
 			name: "devices",
 			fieldLabel: _("Devices"),
 			valueField: "devicefile",
-			listeners: {
-				scope: me,
-				change: function(e, eOpts) {
-					var deviceField = this.findField("devices");
-					if (me.pool_type == "Basic") {
-						deviceField.minSelections = 1;
-					} else {
-						deviceField.minSelections = me.nr_disks;
-						deviceField.maxSelections = me.nr_disks;
-					}
-				}
-			},
+			minSelections: 3, // Min. number of devices for RAIDZ-1
 			useStringValue: true,
 			height: 130,
 			store: Ext.create("OMV.data.Store", {
@@ -357,7 +386,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 			}),
 			gridConfig: {
 				stateful: true,
-				stateId: "04942d40-4ee3-11e4-916c-0800200c9a66",
+				stateId: "05c60750-5074-11e4-916c-0800200c9a66",
 				columns: [{
 					text: _("Device"),
 					sortable: true,
@@ -844,9 +873,6 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		Ext.create("OMV.module.admin.storage.zfs.ExpandPool", {
 			title: _("Expand Pool"),
 			name: record.get("path"),
-			type: record.get("type"),
-			pool_type: record.get("pool_type"),
-			nr_disks: record.get("nr_disks"),
 			listeners: {
 				scope: me,
 				submit: function() {

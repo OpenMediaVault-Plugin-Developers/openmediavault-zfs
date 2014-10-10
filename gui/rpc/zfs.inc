@@ -533,27 +533,27 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->validateMethodParams($params, '{
 			  "type":"object",
 			  "properties":{
-				  "pool_type":{"type":"string","enum":["Basic","Mirror",' .
-					'"Raidz1","Raidz2","Raidz3"]},
+				  "vdevtype":{"type":"string","enum":["basic","mirror",' .
+					'"raidz1","raidz2","raidz3"]},
 				  "name":{"type":"string"},
 				  "devices":{"type":"string"}
 			  }
 		}');
 		$pool = new OMVModuleZFSZpool($params['name']);
-		switch ($params['pool_type']) {
-		case "Basic":
+		switch ($params['vdevtype']) {
+		case "basic":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
 			break;
-		case "Mirror":
+		case "mirror":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
 			break;
-		case "Raidz1":
+		case "raidz1":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
 			break;
-		case "Raidz2":
+		case "raidz2":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
 			break;
-		case "Raidz3":
+		case "raidz3":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
 			break;
 		default:

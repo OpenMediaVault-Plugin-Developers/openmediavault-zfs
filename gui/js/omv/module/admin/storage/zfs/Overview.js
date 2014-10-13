@@ -261,23 +261,33 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 					var sizeField = this.findField("size");
 					var cloneField = this.findField("clonename");
 					var nameField = this.findField("name");
+					var mountField = this.findField("mountpoint");
 					switch(value) {
+						case "filesystem":
+							sizeField.hide();
+							sizeField.allowBlank = true;
+							cloneField.hide();
+							nameField.show();
+							mountField.show();
 						case "volume":
 							sizeField.show();
 							sizeField.allowBlank = false;
 							cloneField.hide();
 							nameField.show();
+							mountField.hide();
 						break;
 						case "clone":
 							sizeField.hide();
 							sizeField.allowBlank = true;
 							cloneField.show();
 							nameField.hide();
+							mountField.hide();
 						default:
 							sizeField.hide();
 							sizeField.allowBlank = true;
 							cloneField.hide();
 							nameField.show();
+							mountField.hide();
 						break;
 					}
 					sizeField.validate();
@@ -321,6 +331,26 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 					} else {
 						nameField.show();
 						nameField.allowBlank = false;
+					}
+				}
+			}
+		},{
+			xtype: "textfield",
+			name: "mountpoint",
+			fieldLabel: _("Mountpoint"),
+			allowBlank: true,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Optional mountpoint of the filesystem. If left blank parent mountpoint will be prepended to name of the filesystem.")
+			}],
+			listeners: {
+				scope: me,
+				beforerender: function(e, eOpts) {
+					var mountField = this.findField("mountpoint");
+					if (combodata[0][0] === "filesystem") {
+						mountField.show();
+					} else {
+						mountField.hide();
 					}
 				}
 			}

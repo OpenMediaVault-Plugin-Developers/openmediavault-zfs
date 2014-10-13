@@ -130,7 +130,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "path":{"type":"string"},
 				  "name":{"type":"string"},
 				  "size":{"type":"string"},
-				  "clonename":{"type":"string"}
+				  "clonename":{"type":"string"},
+				  "mountpoint":{"type":"string"}
 			  }
 		  }');
 		switch ($params['type']) {
@@ -141,6 +142,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		case "filesystem":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
+			if (strlen($params['mountpoint']) > 0) {
+				$properties = array("mountpoint"=>$params['mountpoint']);
+				$tmp->setProperties($properties);
+			}
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];

@@ -511,8 +511,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$cmd = "zfs get all {$params['name']}";
 			break;
 		case "Pool":
-			$output .= "Pool details (zpool get all):\n\r\n\r";
+			$output .= "Pool status (zpool status):\n\r\n\r";
+			$cmd = "zpool status {$params['name']}";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+			$output .= implode("\n\r", $out);
+			unset($out);
+			$output .= "\n\r\n\rPool details (zpool get all):\n\r\n\r";
 			$cmd = "zpool get all {$params['name']}";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+			$output .= implode("\n\r", $out);
+			unset($out);
+			$output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
+			$cmd = "zfs get all {$params['name']}";
 			break;
 		default:
 			throw new OMVModuleZFSException("Incorrect type provided");

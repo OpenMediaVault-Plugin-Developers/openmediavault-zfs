@@ -265,6 +265,49 @@ class OMVModuleZFSZvol {
 		$this->snapshots[$snap_name]->destroy();
 		unset($this->snapshots[$snap_name]);
 	}
+	
+	/**
+	* Check if the Volume is a clone or not.
+	*
+	* @return bool
+	* @access public
+	*/
+	public function isClone() {
+		$origin = $this->getProperty("origin");
+		if (strlen($origin["value"]) > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	* Get the origin of the Volume if it's a clone.
+	*
+	* @return string The name of the origin if it exists. Otherwise an empty string.
+	* @access public
+	*/
+	public function getOrigin() {
+		if ($this->isClone()) {
+			$origin = $this->getProperty("origin");
+			return $origin['value'];
+		} else {
+			return "";
+		}
+	}
+
+	/**
+	* Promotes the Volume if it's a clone.
+	*
+	* @return void
+	* @access public
+	*/
+	public function promote() {
+		if ($this->isClone()) {
+			$cmd = "zfs promote " . $this->name . " 2>&1";
+			$this->exec($cmd,$out,$res);
+		}
+	}
 
 	/**
 	 * Helper function to execute a command and throw an exception on error

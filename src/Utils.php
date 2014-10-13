@@ -226,6 +226,7 @@ class OMVModuleZFSUtil {
 						'expanded'=>$expanded,
 						'path'=>$path);
 					$pool = new OMVModuleZFSZpool($path);
+					$tmp['origin'] = "n/a";
 					$tmp['size'] = $pool->getSize();
 					$tmp['used'] = $pool->getAttribute("allocated");
 					$tmp['available'] = $pool->getAttribute("free");
@@ -243,12 +244,12 @@ class OMVModuleZFSUtil {
 					$ds =  new OMVModuleZFSDataset($path);
 					if ($ds->isClone()) {
 						//This is a cloned Filesystem
-						$tmp['type'] = "Clone";
 						$tmp['origin'] = $ds->getOrigin();
 					} else {
 						//This is a standard Filesystem.
-						$tmp['type']= ucfirst($type);
+						$tmp['origin'] = "n/a";
 					}
+					$tmp['type']= ucfirst($type);
 					$tmp['size'] = "n/a";
 					$used = $ds->getProperty("used");
 					$tmp['used'] = $used['value'];
@@ -268,7 +269,15 @@ class OMVModuleZFSUtil {
 					'icon'=>"images/save.png",
 					'path'=>$path,
 					'expanded'=>$expanded);
-				$vol = new OMVModuleZFSZvol();
+				$vol = new OMVModuleZFSZvol($path);
+				if ($vol->isClone()) {
+					//This is a cloned Volume
+					$tmp['origin'] = $vol->getOrigin();
+				} else {
+					//This is a standard Volume
+					$tmp['origin'] = "n/a";
+				}
+				$tmp['type']= ucfirst($type);
 				$tmp['size'] = $vol->getSize();
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
@@ -287,6 +296,7 @@ class OMVModuleZFSUtil {
 					'icon'=>'images/zfs_snap.png',
 					'path'=>$path,
 					'expanded'=>$expanded);
+				$tmp['origin'] = "n/a";
 				$tmp['size'] = "n/a";
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";

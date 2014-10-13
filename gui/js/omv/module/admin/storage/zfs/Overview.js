@@ -221,32 +221,63 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 
 	getFormItems: function() {
 		var me = this;
+	
+		var store = new Ext.data.ArrayStore({
+			autoDestroy: true,
+			storeId: 'my_store',
+	     	fields: [
+	           	{name: 'value', type: 'string'},
+	       		{name: 'display', type: 'string'}
+	     	]
+	 	});
+	
+		var combodata;
+		if (me.parenttype === "Snapshot") {
+			combodata = [["clone","Clone"]];
+		} else if (me.parenttype === "Volume") {
+			combodata = [["snapshot", "Snapshot"]];
+		} else {
+			combodata = [["filesystem","Filesystem"],
+						["volume","Volume"],
+						["snapshot","Snapshot"]];
+		}
+		store.loadData(combodata,false);
+
 		return [{
 			xtype: "combo",
 			name: "type",
 			fieldLabel: _("Object Type"),
 			queryMode: "local",
-			store: [
-				[ "filesystem", "Filesystem" ],
-				[ "snapshot", "Snapshot" ],
-				[ "volume", "Volume" ]
-			],
+			store: store,
 			allowBlank: true,
 			editable: false,
 			triggerAction: "all",
-			value: "filesystem",
+			valueField: "value",
+			displayField: "display",
+			value: combodata[0][0],
 			listeners: {
 				scope: me,
 				change: function(combo, value) {
 					var sizeField = this.findField("size");
+					var cloneField = this.findField("clonename");
+					var nameField = this.findField("name");
 					switch(value) {
 						case "volume":
 							sizeField.show();
-						sizeField.allowBlank = false;
+							sizeField.allowBlank = false;
+							cloneField.hide();
+							nameField.show();
 						break;
+						case "clone":
+							sizeField.hide();
+							sizeField.allowBlank = true;
+							cloneField.show();
+							nameField.hide();
 						default:
 							sizeField.hide();
-						sizeField.allowBlank = true;
+							sizeField.allowBlank = true;
+							cloneField.hide();
+							nameField.show();
 						break;
 					}
 					sizeField.validate();
@@ -258,19 +289,68 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 			fieldLabel: _("Prefix"),
 			allowBlank: false,
 			readOnly: true,
-			value: me.path
+			value: me.path,
+			listeners: {
+				scope: me,
+				beforerender: function(e, eOpts) {
+					var pathField = this.findField("path");
+					if (me.parenttype === "Snapshot") {
+						pathField.fieldLabel = _("Snapshot to clone");
+					} else {
+						pathField.fieldLabel = _("Prefix");
+					}
+				}
+			}
 		},{
 			xtype: "textfield",
 			name: "name",
+			id: "name",
 			fieldLabel: _("Name"),
 			allowBlank: false,
 			plugins: [{
 				ptype: "fieldinfo",
 				text: _("Name of the new object. Prefix will prepend the name. Please omit leading /")
-			}]
+			}],
+			listeners: {
+				scope: me,
+				beforerender: function(e, eOpts) {
+					var nameField = this.findField("name");
+					if (me.parenttype === "Snapshot") {
+						nameField.hide();
+						nameField.allowBlank = true;
+					} else {
+						nameField.show();
+						nameField.allowBlank = false;
+					}
+				}
+			}
+		},{
+			xtype: "textfield",
+			name: "clonename",
+			id: "clonename",
+			fieldLabel: _("Clone name"),
+			allowBlank: false,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Name of the new Clone. It can be placed anywhere within the ZFS hierarchy.")
+			}],
+			listeners: {
+				scope: me,
+				beforerender: function(e, eOpts) {
+					var cloneField = this.findField("clonename");
+					if (me.parenttype === "Snapshot") {
+						cloneField.show();
+						cloneField.allowBlank = false;
+					} else {
+						cloneField.hide();
+						cloneField.allowBlank = true;
+					}
+				}
+			}
 		},{
 			xtype: "textfield",
 			name: "size",
+			id: "size",
 			hidden: true,
 			fieldLabel: _("Size"),
 			allowBlank: true,
@@ -713,7 +793,14 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		dataIndex: 'name',
 		sortable: true,
 		flex: 2,
-		stateId: 'name'
+		stateId: 'name',
+		renderer: function(value, p, r){
+			if (r.data['origin'] === "n/a") {
+				return r.data['name'];
+			} else {
+				return r.data['name'] + ' (' + r.data['origin'] + ')';
+			}
+		}
 	},{
 		text: _("Type"),
 		dataIndex: 'type',
@@ -721,10 +808,10 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'type',
 		renderer: function(value, p, r){
-			if (r.data['type'] == "Pool") {
-				return r.data['type'] + ' (' + r.data['pool_type'] + ')';
-			} else {
+			if (r.data['origin'] === "n/a") {
 				return r.data['type'];
+			} else {
+				return 'Clone';
 			}
 		}
 	},{
@@ -856,6 +943,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		Ext.create("OMV.module.admin.storage.zfs.AddObject", {
 			title: _("Add Object"),
 			path: record.get("path"),
+			parenttype: record.get("type"),
 			listeners: {
 				scope: me,
 				submit: function() {

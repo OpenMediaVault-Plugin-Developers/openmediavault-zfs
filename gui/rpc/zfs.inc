@@ -126,13 +126,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			  "type":"object",
 			  "properties":{
 				  "type":{"type":"string","enum":["filesystem","snapshot",' .
-					'"volume"]},
+					'"volume","clone"]},
 				  "path":{"type":"string"},
 				  "name":{"type":"string"},
-				  "size":{"type":"string"}
+				  "size":{"type":"string"},
+				  "clonename":{"type":"string"}
 			  }
 		  }');
 		switch ($params['type']) {
+		case "clone":
+			$tmp = new OMVModuleZFSSnapshot($params['path']);
+			$tmp->clonesnap($params['clonename']);
+			break;
 		case "filesystem":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSDataset($name);
@@ -159,7 +164,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			  "type":"object",
 			  "properties":{
 				  "type":{"type":"string","enum":["Filesystem","Snapshot",' .
-					'"Volume","Clone","Pool"]},
+					'"Volume","Pool"]},
 				  "name":{"type":"string"}
 			  }
 		  }');
@@ -168,10 +173,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		switch ($params['type']) {
 		case "Filesystem":
 			OMVModuleZFSUtil::deleteShares($name);
-			$tmp = new OMVModuleZFSDataset($name);
-			$tmp->destroy();
-			break;
-		case "Clone":
 			$tmp = new OMVModuleZFSDataset($name);
 			$tmp->destroy();
 			break;
@@ -217,7 +218,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$name = $params['name'];
 		switch ($params['type']) {
 		case "Filesystem":
-		case "Clone":
 			$tmp = new OMVModuleZFSDataset($name);
 			break;
 		case "Snapshot":
@@ -252,7 +252,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			"type":"object",
 				"properties":{
 					"type":{"type":"string","enum":["Filesystem","Snapshot",' .
-						'"Volume","Clone","Pool"]},
+						'"Volume","Pool"]},
 					"name":{"type":"string"},
 					"properties":{"type":"array","items":{
 						"type":"object",
@@ -264,7 +264,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		global $xmlConfig;
 		switch ($params['type']) {
 		case "Filesystem":
-		case "Clone":
 			$tmp = new OMVModuleZFSDataset($params['name']);
 			break;
 		case "Snapshot":
@@ -298,7 +297,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			  "type":"object",
 			  "properties":{
 				  "type":{"type":"string","enum":["Filesystem","Snapshot",' .
-					'"Volume","Clone","Pool"]},
+					'"Volume","Pool"]},
 				  "name":{"type":"string"},
 				  "property":{"type":"string"}
 			  }
@@ -316,7 +315,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
 			switch ($params['type']) {
 			case "Filesystem":
-			case "Clone":
 				$tmp = new OMVModuleZFSDataset($params['name']);
 				break;
 			case "Snapshot":
@@ -368,7 +366,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			  "type":"object",
 			  "properties":{
 				  "name":{"type":"string"},
-				  "type":{"type":"string","enum":["Filesystem","Clone"]},
+				  "type":{"type":"string","enum":["Filesystem"]},
 				  "sharename":{'.$GLOBALS['OMV_JSONSCHEMA_SHARENAME'].'},
 				  "comment":{"type":"string"},
 				  "mode":{"type":"string","enum":["700","750","755",'.
@@ -389,9 +387,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		// folder as the relative directory name of the share.
 		switch ($params['type']) {
 		case "Filesystem":
-			$tmp = new OMVModuleZFSDataset($params['name']);
-			break;
-		case "Clone":
 			$tmp = new OMVModuleZFSDataset($params['name']);
 			break;
 		default:

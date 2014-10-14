@@ -179,6 +179,14 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 			}]
 		},{
 			xtype: "checkbox",
+			name: "diskpath",
+			fieldLabel: _("Disk-by-path"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Use /dev/disk/by-path when creating the pool. Recommended.")
+			}]
+		},{
+			xtype: "checkbox",
 			name: "force",
 			fieldLabel: _("Force creation"),
 			checked: false,
@@ -527,6 +535,14 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 					flex: 1
 				}]
 			}
+		},{
+			xtype: "checkbox",
+			name: "diskpath",
+			fieldLabel: _("Disk-by-path"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Use /dev/disk/by-path when creating the vdev. Recommended.")
+			}]
 		},{
 			xtype: "checkbox",
 			name: "force",

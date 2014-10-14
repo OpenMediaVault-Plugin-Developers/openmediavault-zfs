@@ -45,7 +45,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "force":{"type":"boolean"},
 				  "mountpoint":{"type":"string"},
 				  "name":{"type":"string"},
-				  "devices":{"type":"string"}
+				  "devices":{"type":"string"},
+				  "diskpath":{"type":"boolean"}
 			  }
 		  }');
 		switch ($params['pooltype']) {
@@ -77,14 +78,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$opts .= "-m " . $params['mountpoint'] . " ";
 		}
 
-		//Use /dev/disk/by-path as deafult when creating new pools as suggested in ZoL FAQ.
 		$disks = preg_split("/[,;]/", $params['devices']);
-		if (file_exists("/dev/disk/by-path/")) {
-			$tmp_disks = array();
-			foreach ($disks as $disk) {
-				$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+		//Use /dev/disk/by-path as suggested in ZoL FAQ.
+		if ($params['diskpath']) {
+			if (file_exists("/dev/disk/by-path/")) {
+				$tmp_disks = array();
+				foreach ($disks as $disk) {
+					$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+				}
+				$disks = $tmp_disks;
 			}
-			$disks = $tmp_disks;
 		}
 
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
@@ -547,7 +550,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					'"raidz1","raidz2","raidz3"]},
 				  "name":{"type":"string"},
 				  "devices":{"type":"string"},
-				  "force":{"type":"boolean"}
+				  "force":{"type":"boolean"},
+				  "diskpath":{"type":"boolean"}
 			  }
 		}');
 		$pool = new OMVModuleZFSZpool($params['name']);
@@ -574,14 +578,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		if ($params['force']) {
 			$opts .= "-f ";
 		}
-		//Use /dev/disk/by-path as deafult when creating new pools as suggested in ZoL FAQ.
 		$disks = preg_split("/[,;]/", $params['devices']);
-		if (file_exists("/dev/disk/by-path/")) {
-			$tmp_disks = array();
-			foreach ($disks as $disk) {
-				$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+		//Use /dev/disk/by-path as suggested in ZoL FAQ.
+		if ($params['diskpath']) {
+			if (file_exists("/dev/disk/by-path/")) {
+				$tmp_disks = array();
+				foreach ($disks as $disk) {
+					$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+				}
+				$disks = $tmp_disks;
 			}
-			$disks = $tmp_disks;
 		}
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool->addVdev($vdev, $opts);

@@ -29,7 +29,9 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 			name: "details",
 			grow: true,
 			anchor: '100%',
-			readOnly: true
+			readOnly: true,
+			preventScrollbars: true,
+			growMax: "2000"
 		}];
 
 	}

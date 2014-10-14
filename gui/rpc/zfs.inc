@@ -81,12 +81,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$disks = preg_split("/[,;]/", $params['devices']);
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
 		if ($params['diskpath']) {
-			if (file_exists("/dev/disk/by-path/")) {
-				$tmp_disks = array();
-				foreach ($disks as $disk) {
-					$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+			try {
+				if (file_exists("/dev/disk/by-path/")) {
+					$tmp_disks = array();
+					foreach ($disks as $disk) {
+						$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+					}
+					$disks = $tmp_disks;
 				}
-				$disks = $tmp_disks;
+			} catch (OMVModuleZFSException $e) {
+				//Do nothing if an excpetion is thrown
 			}
 		}
 
@@ -581,12 +585,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$disks = preg_split("/[,;]/", $params['devices']);
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
 		if ($params['diskpath']) {
-			if (file_exists("/dev/disk/by-path/")) {
-				$tmp_disks = array();
-				foreach ($disks as $disk) {
-					$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+			try {
+				if (file_exists("/dev/disk/by-path/")) {
+					$tmp_disks = array();
+					foreach ($disks as $disk) {
+						$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+					}
+					$disks = $tmp_disks;
 				}
-				$disks = $tmp_disks;
+			} catch (OMVModuleZFSException $e) {
+				//Do nothing if an exception is thrown
 			}
 		}
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);

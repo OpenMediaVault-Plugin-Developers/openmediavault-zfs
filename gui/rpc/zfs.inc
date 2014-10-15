@@ -79,6 +79,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		}
 
 		$disks = preg_split("/[,;]/", $params['devices']);
+		foreach ($disks as $disk) {
+			OMVModuleZFSUtil::setGPTLabel($disk);
+		}
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
 		if ($params['diskpath']) {
 			try {
@@ -583,6 +586,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$opts .= "-f ";
 		}
 		$disks = preg_split("/[,;]/", $params['devices']);
+		foreach ($disks as $disk) {
+			OMVModuleZFSUtil::setGPTLabel($disk);
+		}
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
 		if ($params['diskpath']) {
 			try {

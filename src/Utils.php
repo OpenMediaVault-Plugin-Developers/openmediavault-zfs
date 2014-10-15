@@ -12,6 +12,16 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Sets a GPT label on a disk to prevent the zpool command from generating
+	 * errors.
+	 *
+	 */
+	public static function setGPTLabel($disk) {
+		$cmd = "parted " . $disk . " mklabel gpt 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+	}
+
+	/**
 	 * Manages relocation of ZFS filesystem mountpoints in the OMV backend.
 	 * Needed when the user changes mountpoint of a filesystem in the GUI.
 	 *

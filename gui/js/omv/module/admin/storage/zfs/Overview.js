@@ -887,11 +887,11 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'mountpoint'
 	},{
-		text: _("Share"),
+		text: _("Share folder"),
 		xtype: 'actioncolumn',
 		tooltip: 'Create shared folder',
 		align: 'center',
-		icon: 'images/checkmark.png',
+		icon: 'images/share.png',
 		handler: function(view, rowIndex, colIndex, item, e, record, row) {
 			var me = this;
 			Ext.create("OMV.module.admin.storage.zfs.CreateShare", {

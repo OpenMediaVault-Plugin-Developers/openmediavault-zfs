@@ -17,7 +17,7 @@ class OMVModuleZFSUtil {
 	 *
 	 */
 	public static function setGPTLabel($disk) {
-		$cmd = "parted " . $disk . " mklabel gpt 2>&1";
+		$cmd = "parted -s " . $disk . " mklabel gpt 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
 

@@ -1,4 +1,20 @@
 <?php
+/**
+ * Copyright (C) 2014 OpenMediaVault Plugin Developers
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 require_once("openmediavault/object.inc");
 require_once("openmediavault/config.inc");
@@ -6,12 +22,12 @@ require_once("openmediavault/error.inc");
 require_once("openmediavault/util.inc");
 require_once("openmediavault/rpcservice.inc");
 require_once("openmediavault/notify.inc");
-require_once("zfs/Utils.php");
-require_once("zfs/Dataset.php");
-require_once("zfs/Snapshot.php");
-require_once("zfs/Zvol.php");
-require_once("zfs/Zpool.php");
-require_once("zfs/NotifyListener.php");
+require_once("/usr/share/omvzfs/Utils.php");
+require_once("/usr/share/omvzfs/Dataset.php");
+require_once("/usr/share/omvzfs/Snapshot.php");
+require_once("/usr/share/omvzfs/Zvol.php");
+require_once("/usr/share/omvzfs/Zpool.php");
+require_once("/usr/share/omvzfs/NotifyListener.php");
 
 class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function getName() {
@@ -271,7 +287,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					"name":{"type":"string"},
 					"properties":{"type":"array","items":{
 						"type":"object",
-						"properties":{	
+						"properties":{
 							"property":{"type":"string"},
 							"value":{"type":"string"}}}}
 				}
@@ -389,7 +405,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "mountpoint":{"type":"string"}
 			  }
 		  }');
-		
+
    		// The field 'reldirpath' may not contain the characters '..'. This
 	    // is because of security reasons: the given canonicalized absolute
 	    // path MUST be below the given mount point.
@@ -397,7 +413,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	    	throw new OMVException(OMVErrorMsg::E_RPC_SERVICE_METHOD_INVALID_PARAMS,
 				sprintf(gettext("The field '%s' contains forbidden two-dot symbols"), "mountpoint"));
 		}
-	
+
 		// Prepare the configuration object. Use the name of the shared
 		// folder as the relative directory name of the share.
 		switch ($params['type']) {
@@ -417,7 +433,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
 		$mountpoint = $xmlConfig->get($xpath);
 		$mntentref = $mountpoint['uuid'];
-		
+
 		$uuid = OMVUtil::uuid();
 		$pathName = $dir . "/" . trim($params['mountpoint'], "/");
 		$reldirpath = trim($params['mountpoint'], "/");
@@ -475,7 +491,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					$object['mode'], $pathName));
 			}
 		}
-		
+
 		// Change group owner of directory to configured default group,
 		// e.g. 'users'.
 		if(FALSE === chgrp($pathName, $GLOBALS['OMV_USERMGMT_DEFAULT_GROUP'])) {
@@ -546,7 +562,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$output .= implode("\n\r", $out);
 		return array("details" => $output);
 	}
-	
+
 	public function expandPool($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		// Validate the parameters of the RPC service method.
@@ -614,5 +630,3 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 // Register the RPC service.
 $rpcServiceMgr = &OMVRpcServiceMgr::getInstance(); // Get the "root" instance for the Services
 $rpcServiceMgr->registerService(new OMVRpcServiceZFS()); // Register a new instance of the RPC service described above
-?>
-

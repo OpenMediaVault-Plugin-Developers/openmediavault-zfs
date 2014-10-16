@@ -1,3 +1,10 @@
+openmediavault-zfs
+=================
+
+To build: fakeroot debian/rules clean binary
+
+
+
 Objects:
 - zpool
 	- vdev

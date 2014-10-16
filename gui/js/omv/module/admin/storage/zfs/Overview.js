@@ -59,7 +59,8 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 		return [{
 			xtype: "textfield",
 			name: "name",
-			fieldLabel: _("Name")
+			fieldLabel: _("Name"),
+			allowBlank: false
 		},{
 			xtype: "combo",
 			name: "pooltype",

@@ -73,12 +73,31 @@ class OMVModuleZFSUtil {
 				} else if (!(OMVModuleZFSUtil::getDevByID($vdisk) === null)) {
 					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
 					continue;
+				} else if (preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $vdisk)) {
+					$disks[] = getDevByUuid($vdisk);
+					continue;
 				} else {
 					throw new OMVModuleZFSException("Unknown disk identifier " . $vdisk);
 				}
 			}
 		}
 		return($disks);
+	}
+	
+	/**
+	 * Get the /dev/sdX device name from /dev/disk/by-uuid
+	 *
+	 */
+	public static function getDevByUuid($uuid) {
+		$cmd = "ls -la /dev/disk/by-uuid/" . $uuid;
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		if (count($out) === 1) {
+			if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+				$disk = $match[1];
+				return($disk);
+			}
+		}
+		throw new OMVModuleZFSException("Unable to find /dev/disk/by-uuid/" . $uuid);
 	}
 
 	/**

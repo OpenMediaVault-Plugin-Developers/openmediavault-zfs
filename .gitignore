@@ -1,4 +1,64 @@
-*.geany
+# General
+*.tmp
+*.bak
+*.swp
+*~
 html
 latex
 
+# Eclipse
+.project
+.metadata
+.settings/
+*.launch
+.buildpath
+*.pydevproject
+
+# JetBrains
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# Netbeans
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+
+# geany
+*.geany
+
+# SVN
+.svn/
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Package files
+debian/openmediavault-*
+debian/files
+debian/*.debhelper.log
+debian/*.debhelper
+debian/*substvars

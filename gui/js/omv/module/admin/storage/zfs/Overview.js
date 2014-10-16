@@ -887,31 +887,6 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'mountpoint'
 	},{
-		text: _("Share folder"),
-		xtype: 'actioncolumn',
-		tooltip: 'Create shared folder',
-		align: 'center',
-		icon: 'images/share.png',
-		handler: function(view, rowIndex, colIndex, item, e, record, row) {
-			var me = this;
-			Ext.create("OMV.module.admin.storage.zfs.CreateShare", {
-				title: _("Create shared folder"),
-				rpcGetMethod: "getSharedParams",
-				rpcGetParams: {
-					name: record.get('path'),
-					type: record.get('type')
-				}
-			}).show();
-		},
-		isDisabled: function(view, rowIdx, colIdx, item, record) {
-			var src = record.get("type");
-			if((src === "Filesystem") && (record.get("shared") === "false")) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-	},{
 		text: _("Details"),
 		xtype: 'actioncolumn',
 		tooltip: 'Details',
@@ -928,12 +903,6 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 				}
 			}).show();
 		}
-	},{
-		text: _("Shared"),
-		dataIndex: 'shared',
-		sortable: false,
-		stateId: 'shared',
-		hidden: true
 	}],
 
 	initComponent: function() {
@@ -953,7 +922,6 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },
-						{ name: "shared", type: "string", defaultValue: "false" },
 						{ name: "pool_type", type: "string"},
 						{ name: "nr_disks", type: "string"}
 					]

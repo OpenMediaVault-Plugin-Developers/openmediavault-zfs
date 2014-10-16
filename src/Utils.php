@@ -70,7 +70,7 @@ class OMVModuleZFSUtil {
 				} else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
 					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
 					continue;
-				} else if ((preg_match('/^scsi-[a-z0-9]+$/', $vdisk)) || (preg_match('/^wwn-0x[a-z0-9]+$/', $vdisk))) {
+				} else if (!(OMVModuleZFSUtil::getDevByID($vdisk) === null)) {
 					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
 					continue;
 				} else {
@@ -94,7 +94,7 @@ class OMVModuleZFSUtil {
 				return($disk);
 			}
 		}
-		throw new OMVModuleZFSException("Unable to find /dev/disk/by-id/" . $id);
+		return(null);
 	}
 
 	/**

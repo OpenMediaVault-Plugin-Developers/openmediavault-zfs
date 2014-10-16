@@ -1,0 +1,263 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: openmediavault-zfs\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-16 06:17-0500\n"
+"PO-Revision-Date: 2014-10-16 11:20+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Russian (http://www.transifex.com/projects/p/openmediavault-zfs/language/ru/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "% completed ..."
+msgstr ""
+
+msgid "100% completed ..."
+msgstr ""
+
+msgid "A shared folder with the given name already exists"
+msgstr ""
+
+msgid "Add Object"
+msgstr ""
+
+msgid "Add Pool"
+msgstr ""
+
+msgid "Administrator: read/write, Users: no access, Others: no access"
+msgstr ""
+
+msgid "Administrator: read/write, Users: read-only, Others: no access"
+msgstr ""
+
+msgid "Administrator: read/write, Users: read-only, Others: read-only"
+msgstr ""
+
+msgid "Administrator: read/write, Users: read/write, Others: no access"
+msgstr ""
+
+msgid "Administrator: read/write, Users: read/write, Others: read-only"
+msgstr ""
+
+msgid "Available"
+msgstr ""
+
+msgid "Basic"
+msgstr ""
+
+msgid "Capacity"
+msgstr ""
+
+msgid "Clone name"
+msgstr ""
+
+msgid "Comment"
+msgstr ""
+
+msgid "Confirmation"
+msgstr ""
+
+msgid "Create ZFS pool"
+msgstr ""
+
+msgid "Create shared folder"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Deleting selected item(s)"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Device"
+msgstr ""
+
+msgid "Devices"
+msgstr ""
+
+msgid "Disk-by-path"
+msgstr ""
+
+msgid "Displaying items {0} - {1} of {2}"
+msgstr ""
+
+msgid "Do you really want to create the ZFS pool?"
+msgstr ""
+
+msgid "Do you really want to delete the selected item(s)?"
+msgstr ""
+
+msgid "Down"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit properties"
+msgstr ""
+
+msgid "Everyone: read/write"
+msgstr ""
+
+msgid "Expand"
+msgstr ""
+
+msgid "Expand Pool"
+msgstr ""
+
+msgid "Force creation"
+msgstr ""
+
+msgid ""
+"Forces the creation of the Vdev even if errors are reported. Use with "
+"extreme caution!"
+msgstr ""
+
+msgid ""
+"Forces the creation of the pool even if errors are reported. Use with "
+"extreme caution!"
+msgstr ""
+
+msgid "Mirror"
+msgstr ""
+
+msgid "Modified"
+msgstr ""
+
+msgid "Mountpoint"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid ""
+"Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
+msgstr ""
+
+msgid ""
+"Name of the new object. Prefix will prepend the name. Please omit leading /"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "No items to display"
+msgstr ""
+
+msgid "Object Type"
+msgstr ""
+
+msgid "Object details"
+msgstr ""
+
+msgid "Ok"
+msgstr ""
+
+msgid "Optional mountpoint for the pool. Default is to use pool name."
+msgstr ""
+
+msgid ""
+"Optional mountpoint of the filesystem. If left blank parent mountpoint will "
+"be prepended to name of the filesystem."
+msgstr ""
+
+msgid "Overview"
+msgstr ""
+
+msgid "Path"
+msgstr ""
+
+msgid "Permissions"
+msgstr ""
+
+msgid "Pool type"
+msgstr ""
+
+msgid "Prefix"
+msgstr ""
+
+msgid "Property"
+msgstr ""
+
+msgid "RAID-Z1"
+msgstr ""
+
+msgid "RAID-Z2"
+msgstr ""
+
+msgid "RAID-Z3"
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Serial Number"
+msgstr ""
+
+msgid "Share folder"
+msgstr ""
+
+msgid "Shared"
+msgstr ""
+
+msgid "Size"
+msgstr ""
+
+msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
+msgstr ""
+
+msgid "Snapshot to clone"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "The field '%s' contains forbidden two-dot symbols"
+msgstr ""
+
+msgid "The file mode of the shared folder path."
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Up"
+msgstr ""
+
+msgid "Updating property..."
+msgstr ""
+
+msgid "Use /dev/disk/by-path when creating the pool. Recommended."
+msgstr ""
+
+msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
+msgstr ""
+
+msgid "Used"
+msgstr ""
+
+msgid "Value"
+msgstr ""
+
+msgid "Vdev type"
+msgstr ""
+
+msgid "Vendor"
+msgstr ""
+
+msgid "ZFS"
+msgstr ""

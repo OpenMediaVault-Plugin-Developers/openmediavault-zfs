@@ -1,0 +1,20 @@
+Source: openmediavault-zfs
+Section: misc
+Priority: optional
+Maintainer: OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+Build-Depends: debhelper (>= 9.0.0 )
+Standards-Version: 3.9.3
+Homepage: http://omv-extras.org/
+
+Package: openmediavault-zfs
+Architecture: amd64
+Depends: ${misc:Depends}, openmediavault (>= 1.0.28), debian-zfs
+Description: OpenMediaVault plugin for ZFS
+ ZFS is a combined file system and logical volume manager designed
+ by Sun Microsystems. The features of ZFS include protection against
+ data corruption, support for high storage capacities, efficient data
+ compression, integration of the concepts of filesystem and volume
+ management, snapshots and copy-on-write clones, continuous integrity
+ checking and automatic repair, RAID-Z and native NFSv4 ACLs.
+ .
+ The native Linux kernel port of the ZFS filesystem.

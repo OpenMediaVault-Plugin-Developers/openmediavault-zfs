@@ -46,7 +46,7 @@ class OMVModuleZFSUtil {
 	 */
 	public static function clearZFSLabel($disks) {
 		foreach ($disks as $disk) {
-			$cmd = "zpool labelclear /dev/" . $disk . "1";
+			$cmd = "zpool labelclear " . $disk . " 2>&1";
 			OMVModuleZFSUtil::exec($cmd,$out,$res);
 		}
 		return null;
@@ -64,21 +64,53 @@ class OMVModuleZFSUtil {
 		foreach ($vdevs as $vdev) {
 			$vdisks = $vdev->getDisks();
 			foreach ($vdisks as $vdisk) {
-				if (preg_match('/^[a-z0-9]+$/', $vdisk)) {
-					$disks[] = $vdisk;
+				if (preg_match('/^sd[a-z]{1}$/', $vdisk)) {
+					$disks[] = "/dev/" . $vdisk . "1";
 					continue;
-				}
-				$cmd = "ls -la /dev/disk/by-path/" . $vdisk;
-				unset($out);
-				OMVModuleZFSUtil::exec($cmd,$out,$res);
-				if (count($out) === 1) {
-					if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
-						$disks[] = $match[1];
-					}
+				} else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
+					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
+					continue;
+				} else if ((preg_match('/^scsi-[a-z0-9]+$/', $vdisk)) || (preg_match('/^wwn-0x[a-z0-9]+$/', $vdisk))) {
+					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
+					continue;
+				} else {
+					throw new OMVModuleZFSException("Unknown disk identifier " . $vdisk);
 				}
 			}
 		}
 		return($disks);
+	}
+
+	/**
+	 * Get the /dev/sdX device name from /dev/disk/by-id
+	 *
+	 */
+	public static function getDevByID($id) {
+		$cmd = "ls -la /dev/disk/by-id/" . $id;
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		if (count($out) === 1) {
+			if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+				$disk = $match[1];
+				return($disk);
+			}
+		}
+		throw new OMVModuleZFSException("Unable to find /dev/disk/by-id/" . $id);
+	}
+
+	/**
+	 * Get the /dev/sdX device name from /dev/disk/by-path
+	 *
+	 */
+	public static function getDevByPath($path) {
+		$cmd = "ls -la /dev/disk/by-path/" . $path;
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		if (count($out) === 1) {
+			if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+				$disk = $match[1];
+				return($disk);
+			}
+		}
+		throw new OMVModuleZFSException("Unable to find /dev/disk/by-path/" . $path);
 	}
 
 	/**

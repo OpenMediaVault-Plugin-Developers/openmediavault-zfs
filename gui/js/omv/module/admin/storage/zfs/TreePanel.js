@@ -106,9 +106,11 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideApplyButton: true,
 	hideRefreshButton: true,
 	hideExpandPoolButton: true,
+	hideShareButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
 	expandPoolButtonText: _("Expand"),
+	shareButtonText: _("Share"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
 	upButtonText: _("Up"),
@@ -226,6 +228,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			scope: me,
 			disabled: true
 		},{
+			id: me.getId() + "-share",
+			xtype: "button",
+			text: me.shareButtonText,
+			icon: "images/share.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideShareButton,
+			handler: Ext.Function.bind(me.onShareButton, me, [ me ]),
+			scope: me,
+			disabled: true
+		},{
 			id: me.getId() + "-delete",
 			xtype: "button",
 			text: me.deleteButtonText,
@@ -285,12 +297,13 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.hideTopToolbar)
 			return;
-		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand" ];
+		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "share" ];
 		var tbarBtnDisabled = {
 			"addobj": false,
 			"edit": false,
 			"delete": false,
 			"expand": false,
+			"share": false,
 			"up": true,
 			"down": true,
 		};
@@ -299,6 +312,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			"edit": true,
 			"delete": true,
 			"expand": true,
+			"share": true,
 			"up": true,
 			"down": true
 		};
@@ -310,10 +324,12 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnDisabled["up"] = true;
 			tbarBtnDisabled["down"] = true;
 			tbarBtnDisabled["expand"] = true;
+			tbarBtnDisabled["share"] = true;
           	tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = true;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["share"] = true;
 		} else if(records.length == 1) {
 			tbarBtnDisabled["addobj"] = false;
 			tbarBtnDisabled["edit"] = false;
@@ -321,10 +337,12 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnDisabled["up"] = false;
 			tbarBtnDisabled["down"] = false;
 			tbarBtnDisabled["expand"] = false;
+			tbarBtnDisabled["share"] = false;
 			tbarBtnHidden["addobj"] = false;
 			tbarBtnHidden["edit"] = false;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = false;
+			tbarBtnHidden["share"] = false;
 		} else {
 			tbarBtnDisabled["addobj"] = true;
 			tbarBtnDisabled["edit"] = true;
@@ -332,23 +350,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnDisabled["up"] = false;
 			tbarBtnDisabled["down"] = false;
 			tbarBtnDisabled["expand"] = true;
+			tbarBtnDisabled["share"] = true;
 			tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["share"] = true;
 		}
-		//Disable 'AddObj' button if selected row is a Clone
-		Ext.Array.each(records, function(record) {
-			if("Clone" == record.get("type")) {
-				tbarBtnDisabled["addobj"] = true;
-				tbarBtnHidden["addobj"] = true;
-			return false;
-			}
-		});
-
 		// Disable 'Delete' button if a selected node is not a leaf
 		Ext.Array.each(records, function(record) {
-			if((false == record.get("leaf"))) {
+			if(false === record.get("leaf")) {
 				tbarBtnDisabled["delete"] = true;
 				tbarBtnHidden["delete"] = true;
 			return false;
@@ -357,9 +368,18 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		
 		//Disable 'ExpandPool' button if selected row is not a Pool
 		Ext.Array.each(records, function(record) {
-			if(!("Pool" == record.get("type"))) {
+			if("Pool" !== record.get("type")) {
 				tbarBtnDisabled["expand"] = true;
 				tbarBtnHidden["expand"] = true;
+				return false;
+			}
+		});
+		
+		//Disable 'Share' button if selected row is not a Filesystem
+		Ext.Array.each(records, function(record) {
+			if("Filesystem" !== record.get("type")) {
+				tbarBtnDisabled["share"] = true;
+				tbarBtnHidden["share"] = true;
 				return false;
 			}
 		});

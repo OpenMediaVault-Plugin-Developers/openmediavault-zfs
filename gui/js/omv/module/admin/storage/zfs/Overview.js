@@ -1028,6 +1028,21 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			}
 		}).show();
 	},
+	
+	onShareButton: function() {
+		var me = this;
+		var sm = me.getSelectionModel();
+		var records = sm.getSelection();
+		var record = records[0];
+		Ext.create("OMV.module.admin.storage.zfs.CreateShare", {
+			title: _("Create shared folder"),
+			rpcGetMethod: "getSharedParams",
+			rpcGetParams: {
+				name: record.get('path'),
+				type: record.get('type')
+			},
+		}).show();
+	},
 
 	doDeletion: function(record) {
 		var me = this;

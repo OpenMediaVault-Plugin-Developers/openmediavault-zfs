@@ -280,6 +280,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.hide();
 							nameField.show();
 							mountField.show();
+						break;
 						case "volume":
 							sizeField.show();
 							sizeField.allowBlank = false;
@@ -293,6 +294,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.show();
 							nameField.hide();
 							mountField.hide();
+						break;
 						default:
 							sizeField.hide();
 							sizeField.allowBlank = true;

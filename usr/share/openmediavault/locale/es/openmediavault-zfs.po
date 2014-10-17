@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Raul Fernandez Garcia <raulfg3@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-16 06:17-0500\n"
-"PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2014-10-17 06:26+0000\n"
+"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/openmediavault-zfs/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,246 +19,246 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "% completed ..."
-msgstr ""
+msgstr "% completado ..."
 
 msgid "100% completed ..."
-msgstr ""
+msgstr "100% completado ..."
 
 msgid "A shared folder with the given name already exists"
-msgstr ""
+msgstr "Ya existe una carpeta compartida con el mismo nombre"
 
 msgid "Add Object"
-msgstr ""
+msgstr "Añadir objeto"
 
 msgid "Add Pool"
-msgstr ""
+msgstr "Añadir Pool"
 
 msgid "Administrator: read/write, Users: no access, Others: no access"
-msgstr ""
+msgstr "Administrador: Lectura/Escritura, Usuarios: Sin acceso, Otros:Sin acceso."
 
 msgid "Administrator: read/write, Users: read-only, Others: no access"
-msgstr ""
+msgstr "Administrador: Lectura/Escritura, Usuarios: Solo Lectura, Otros:Sin acceso."
 
 msgid "Administrator: read/write, Users: read-only, Others: read-only"
-msgstr ""
+msgstr "Administrador: Lectura/Escritura, Usuarios: Solo Lectura, Otros:Solo Lectura."
 
 msgid "Administrator: read/write, Users: read/write, Others: no access"
-msgstr ""
+msgstr "Administrador: Lectura/Escritura, Usuarios: Lectura/Escritura, Otros:Sin acceso."
 
 msgid "Administrator: read/write, Users: read/write, Others: read-only"
-msgstr ""
+msgstr "Administrador: Lectura/Escritura, Usuarios: Lectura/Escritura, Otros:Solo Lectura."
 
 msgid "Available"
-msgstr ""
+msgstr "Disponible"
 
 msgid "Basic"
-msgstr ""
+msgstr "Basico"
 
 msgid "Capacity"
-msgstr ""
+msgstr "Capacidad"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Nombre del Clon"
 
 msgid "Comment"
-msgstr ""
+msgstr "Comentario"
 
 msgid "Confirmation"
-msgstr ""
+msgstr "Confirmación"
 
 msgid "Create ZFS pool"
-msgstr ""
+msgstr "Crear un Pool ZFS"
 
 msgid "Create shared folder"
-msgstr ""
+msgstr "Crear una carpeta compartida"
 
 msgid "Delete"
-msgstr ""
+msgstr "Borrar"
 
 msgid "Deleting selected item(s)"
-msgstr ""
+msgstr "Borrar elemento(s) seleccionado(s)"
 
 msgid "Details"
-msgstr ""
+msgstr "Detalles"
 
 msgid "Device"
-msgstr ""
+msgstr "Dispositivo"
 
 msgid "Devices"
-msgstr ""
+msgstr "Dispositivos"
 
 msgid "Disk-by-path"
-msgstr ""
+msgstr "Disco by-path"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr ""
+msgstr "Mostrando elementos {0} - {1} of {2}"
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr ""
+msgstr "¿Realmente desea crear un Pool ZFS?"
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr ""
+msgstr "¿Realmente desea borrar los elemento(s) seleccionados?"
 
 msgid "Down"
-msgstr ""
+msgstr "Bajar"
 
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 msgid "Edit properties"
-msgstr ""
+msgstr "Editar propiedades"
 
 msgid "Everyone: read/write"
-msgstr ""
+msgstr "Todos: Lectura/Escritura"
 
 msgid "Expand"
-msgstr ""
+msgstr "Expandir"
 
 msgid "Expand Pool"
-msgstr ""
+msgstr "Expandir el Pool"
 
 msgid "Force creation"
-msgstr ""
+msgstr "Forzar"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Fuerza la creacción de un Vdev incluso si hay errores. !Usar con precaución!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Fuerza la creacción de un Pool incluso si hay errores. !Usar con precaución!"
 
 msgid "Mirror"
-msgstr ""
+msgstr "Espejo"
 
 msgid "Modified"
-msgstr ""
+msgstr "Modificado"
 
 msgid "Mountpoint"
-msgstr ""
+msgstr "Punto de Montaje"
 
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr ""
+msgstr "Nombre del nuevo Clon. Puede ser creado en cualquier lugar del sistema ZFS"
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr ""
+msgstr "Nombre del nuevo Objeto. El prefijo se le añadirá al nombre. Omita empezar por \"/\""
 
 msgid "New"
-msgstr ""
+msgstr "Nuevo"
 
 msgid "No items to display"
-msgstr ""
+msgstr "Nada que mostrar"
 
 msgid "Object Type"
-msgstr ""
+msgstr "Tipo de Objeto"
 
 msgid "Object details"
-msgstr ""
+msgstr "Detalles del Objeto"
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr ""
+msgstr "Punto de montaje opcional. Por defecto se usa el nombre del pool."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr ""
+msgstr "Punto de montaje del sistema de archivos (opcional). Si se deja en blanco se añade el padre al nombre del sistema de archivos."
 
 msgid "Overview"
-msgstr ""
+msgstr "Resumen"
 
 msgid "Path"
-msgstr ""
+msgstr "Ruta"
 
 msgid "Permissions"
-msgstr ""
+msgstr "Permisos"
 
 msgid "Pool type"
-msgstr ""
+msgstr "Tipo de Pool"
 
 msgid "Prefix"
-msgstr ""
+msgstr "Prefijo"
 
 msgid "Property"
-msgstr ""
+msgstr "Propiedad"
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr ""
+msgstr "Refrescar"
 
 msgid "Save"
-msgstr ""
+msgstr "Salvar"
 
 msgid "Serial Number"
-msgstr ""
+msgstr "Nº de Serie"
 
 msgid "Share folder"
-msgstr ""
+msgstr "Carpeta compartida"
 
 msgid "Shared"
-msgstr ""
+msgstr "Compartidos"
 
 msgid "Size"
-msgstr ""
+msgstr "Tamaño"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr ""
+msgstr "Tamaño del volumen Ej: 5mb,100gb,1tb etc"
 
 msgid "Snapshot to clone"
-msgstr ""
+msgstr "Instantaneas a clonar"
 
 msgid "Source"
-msgstr ""
+msgstr "Origen"
 
 msgid "The field '%s' contains forbidden two-dot symbols"
-msgstr ""
+msgstr "El campo '%s' contiene el simbolo prohibido \":\""
 
 msgid "The file mode of the shared folder path."
-msgstr ""
+msgstr "El modo de la ruta de la carpeta compartida"
 
 msgid "Type"
-msgstr ""
+msgstr "tipo"
 
 msgid "Up"
-msgstr ""
+msgstr "Arriba"
 
 msgid "Updating property..."
-msgstr ""
+msgstr "Actualizando propiedad..."
 
 msgid "Use /dev/disk/by-path when creating the pool. Recommended."
-msgstr ""
+msgstr "Usar /dev/disk/by-path Cuando se cree el Pool. Recomendado."
 
 msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
-msgstr ""
+msgstr "Usar /dev/disk/by-path Cuando se cree el Vdev. Recomendado."
 
 msgid "Used"
-msgstr ""
+msgstr "Usado"
 
 msgid "Value"
-msgstr ""
+msgstr "Valor"
 
 msgid "Vdev type"
-msgstr ""
+msgstr "Tipo de Vdev"
 
 msgid "Vendor"
-msgstr ""
+msgstr "Fabricante"
 
 msgid "ZFS"
-msgstr ""
+msgstr "ZFS"

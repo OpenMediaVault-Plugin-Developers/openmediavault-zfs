@@ -203,8 +203,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$name = $params['name'];
 		switch ($params['type']) {
 		case "Filesystem":
-			OMVModuleZFSUtil::deleteShares($name);
 			$tmp = new OMVModuleZFSDataset($name);
+			OMVModuleZFSUtil::deleteShares($name);
+			$mountpoint = $tmp->getMountPoint();
+			$poolname = OMVModuleZFSUtil::getPoolname($name);
+			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and type='zfs' and dir='" . $mountpoint . "']";
+			$object = $xmlConfig->get($xpath);
+			$xmlConfig->delete($xpath);
 			$tmp->destroy();
 			break;
 		case "Snapshot":
@@ -217,12 +223,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			break;
 		case "Pool":
 			$disks = OMVModuleZFSUtil::getDevDisksByPool($name);
-			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($name);
 			$tmp = new OMVModuleZFSZpool($name);
 			$tmp->destroy();
-			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and type='zfs']";
-			$object = $xmlConfig->get($xpath);
-			$xmlConfig->delete($xpath);
 			OMVModuleZFSUtil::clearZFSLabel($disks);
 			break;
 		default:

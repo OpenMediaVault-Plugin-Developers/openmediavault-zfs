@@ -62,7 +62,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "mountpoint":{"type":"string"},
 				  "name":{"type":"string"},
 				  "devices":{"type":"string"},
-				  "diskpath":{"type":"boolean"}
+				  "diskpath":{"type":"boolean"},
+				  "ashift":{"type":"boolean"},
+				  "ashiftval":{"type":"string"}
 			  }
 		  }');
 		switch ($params['pooltype']) {
@@ -85,10 +87,13 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			throw new OMVModuleZFSException("Incorrect pool type specified");
 			break;
 		}
-		//Check for user supplied options
+		//Check for user supplied options (order is important)
 		$opts = "";
 		if ($params['force']) {
 			$opts .= "-f ";
+		}
+		if ($params['ashift']) {
+			$opts .= "-o ashift=" . $params['ashiftval'] . " ";
 		}
 		if (strlen($params['mountpoint']) > 0) {
 			$opts .= "-m " . $params['mountpoint'] . " ";

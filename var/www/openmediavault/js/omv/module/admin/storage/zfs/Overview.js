@@ -52,7 +52,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,
-	height: 350,
+	height: 450,
 
 	getFormItems: function() {
 		var me = this;
@@ -197,6 +197,37 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 				ptype: "fieldinfo",
 				text: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
 			}]
+		},{
+			xtype: "checkbox",
+			name: "ashift",
+			fieldLabel: _("Set ashift"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Specify ashift value. Only use if you are sure you need it.")
+			}],
+			listeners: {
+				scope: me,
+				change: function(combo, value) {
+					var ashifttxt = this.findField("ashiftval");
+					if (value === true) {
+						ashifttxt.show();
+						ashifttxt.allowBlank = false;
+					} else {
+						ashifttxt.hide();
+						ashifttxt.allowBlank = true;
+					}
+				}
+			}
+		},{
+			xtype: "textfield",
+			name: "ashiftval",
+			fieldLabel: _("Ashift value"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Ashift value to use.")
+			}],
+			hidden: true,
+			allowBlank: true
 		}];
 	},
 

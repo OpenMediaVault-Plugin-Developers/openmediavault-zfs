@@ -48,7 +48,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 
 	rpcService: "ZFS",
 	rpcSetMethod: "addPool",
-	title: _("Create ZFS pool"),
+	title: _("Create ZFS Pool"),
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,

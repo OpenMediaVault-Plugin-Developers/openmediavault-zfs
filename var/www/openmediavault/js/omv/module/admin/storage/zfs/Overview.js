@@ -186,7 +186,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 			fieldLabel: _("Disk-by-path"),
 			plugins: [{
 				ptype: "fieldinfo",
-				text: _("Use /dev/disk/by-path when creating the pool. Recommended.")
+				text: _("Don't use /dev/disk/by-path when creating the pool. Not recommended.")
 			}]
 		},{
 			xtype: "checkbox",
@@ -577,7 +577,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 			fieldLabel: _("Disk-by-path"),
 			plugins: [{
 				ptype: "fieldinfo",
-				text: _("Use /dev/disk/by-path when creating the vdev. Recommended.")
+				text: _("Don't use /dev/disk/by-path when creating the vdev. Not recommended.")
 			}]
 		},{
 			xtype: "checkbox",

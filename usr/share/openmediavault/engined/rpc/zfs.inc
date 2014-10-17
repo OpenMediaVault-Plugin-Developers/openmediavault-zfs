@@ -104,7 +104,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			OMVModuleZFSUtil::setGPTLabel($disk);
 		}
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
-		if ($params['diskpath']) {
+		if (!($params['diskpath'])) {
 			try {
 				if (file_exists("/dev/disk/by-path/")) {
 					$tmp_disks = array();
@@ -613,7 +613,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			OMVModuleZFSUtil::setGPTLabel($disk);
 		}
 		//Use /dev/disk/by-path as suggested in ZoL FAQ.
-		if ($params['diskpath']) {
+		if (!($params['diskpath'])) {
 			try {
 				if (file_exists("/dev/disk/by-path/")) {
 					$tmp_disks = array();

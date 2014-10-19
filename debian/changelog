@@ -1,3 +1,13 @@
+openmediavault-zfs (0.6.3.2) UNRELEASED; urgency=low
+
+  * Fix broken "Add object" dialog
+  * Fix typo in the "Create ZFS Pool" dialog
+  * Made it possible to specify ashift value when creating a pool
+  * Reversed the functionality of the /dev/disk/by-path checkbox
+  * Made /dev/disk/by-path default when creating/expanding pools
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 19 Oct 2014 21:43:03 +0200
+
 openmediavault-zfs (0.6.3.1) testing; urgency=low
 
   * Fix to properly remove filesystem entries in config.xml

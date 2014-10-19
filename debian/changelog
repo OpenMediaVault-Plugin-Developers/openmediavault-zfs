@@ -1,4 +1,4 @@
-openmediavault-zfs (0.6.3.2) UNRELEASED; urgency=low
+openmediavault-zfs (0.6.3.2) testing; urgency=low
 
   * Fix broken "Add object" dialog
   * Fix typo in the "Create ZFS Pool" dialog
@@ -6,7 +6,7 @@ openmediavault-zfs (0.6.3.2) UNRELEASED; urgency=low
   * Reversed the functionality of the /dev/disk/by-path checkbox
   * Made /dev/disk/by-path default when creating/expanding pools
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 19 Oct 2014 21:43:03 +0200
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 19 Oct 2014 21:49:12 +0200
 
 openmediavault-zfs (0.6.3.1) testing; urgency=low
 

@@ -2,6 +2,7 @@
 require_once("Exception.php");
 require_once("openmediavault/util.inc");
 require_once("Snapshot.php");
+require_once("Utils.php");
 
 /**
  * XXX detailed description
@@ -28,6 +29,14 @@ class OMVModuleZFSZvol {
 	 * @access private
 	 */
 	private $size;
+
+	/**
+	 * Used of Zvol
+	 *
+	 * @var string $used
+	 * @access private
+	 */
+	private $used;
 
 	/**
 	 * Array with properties assigned to the Zvol
@@ -63,7 +72,6 @@ class OMVModuleZFSZvol {
 		try {
 			$this->exec($cmd, $out, $res);
 			$this->updateAllProperties();
-			$this->size = $this->properties["volsize"]["value"];
 		}
 		catch (OMVModuleZFSException $e) {
 			$zvol_exists = false;
@@ -74,6 +82,10 @@ class OMVModuleZFSZvol {
 			foreach ($out2 as $line2) {
 				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
 			}
+			$cmd = "zfs get -o value -Hp volsize,written $name 2>&1";
+			$this->exec($cmd, $out2, $res2);
+			$this->size = $out2[0];
+			$this->used = $out2[1];
 		}
 
 	}
@@ -118,7 +130,27 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function getSize() {
-		return $this->size;
+		return OMVModuleZFSUtil::bytesToSize($this->size);
+	}
+
+	/**
+	 * Get the available size of the Zvol
+	 *
+	 * @return string $size
+	 * @access public
+	 */
+	public function getAvailable() {
+		return OMVModuleZFSUtil::bytesToSize($this->size - $this->used);
+	}
+
+	/**
+	 * Get the used size of the Zvol
+	 *
+	 * @return string $size
+	 * @access public
+	 */
+	public function getUsed() {
+		return OMVModuleZFSUtil::bytesToSize($this->used);
 	}
 
 	/**

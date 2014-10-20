@@ -353,8 +353,8 @@ class OMVModuleZFSUtil {
 				}
 				$tmp['type']= ucfirst($type);
 				$tmp['size'] = $vol->getSize();
-				$tmp['used'] = "n/a";
-				$tmp['available'] = "n/a";
+				$tmp['used'] = $vol->getUsed();
+				$tmp['available'] = $vol->getAvailable();
 				$tmp['mountpoint'] = "n/a";
 				$tmp['device'] = OMVModuleZFSUtil::getZvolDev($path);
 				array_push($objects,$tmp);
@@ -442,6 +442,37 @@ class OMVModuleZFSUtil {
 			throw new OMVModuleZFSException(implode("\n", $out));
 		}
 		return $tmp;
+	}
+
+	/**
+	 * Convert bytes to human readable format
+	 *
+	 * @param integer bytes Size in bytes to convert
+	 * @return string
+	 */
+	public static function bytesToSize($bytes, $precision = 2) {	
+		$kilobyte = 1024;
+		$megabyte = $kilobyte * 1024;
+		$gigabyte = $megabyte * 1024;
+		$terabyte = $gigabyte * 1024;
+		
+		if (($bytes >= 0) && ($bytes < $kilobyte)) {
+			return $bytes . 'B';
+	
+		} elseif (($bytes >= $kilobyte) && ($bytes < $megabyte)) {
+			return round($bytes / $kilobyte, $precision) . 'K';
+	
+		} elseif (($bytes >= $megabyte) && ($bytes < $gigabyte)) {
+			return round($bytes / $megabyte, $precision) . 'MB';
+	
+		} elseif (($bytes >= $gigabyte) && ($bytes < $terabyte)) {
+			return round($bytes / $gigabyte, $precision) . 'GB';
+	
+		} elseif ($bytes >= $terabyte) {
+			return round($bytes / $terabyte, $precision) . 'TB';
+		} else {
+			return $bytes . 'B';
+		}
 	}
 
 }

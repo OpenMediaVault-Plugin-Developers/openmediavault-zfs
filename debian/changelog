@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.3.3) testing; urgency=low
+
+  * add available and used to Zvol
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 21 Oct 2014 00:49:12 +0200
+
 openmediavault-zfs (0.6.3.2) testing; urgency=low
 
   * Fix broken "Add object" dialog

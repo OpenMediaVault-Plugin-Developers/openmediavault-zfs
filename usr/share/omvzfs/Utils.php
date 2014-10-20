@@ -12,6 +12,17 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Gets the Zvol device name (zdX) from volume name
+	 * 
+	 */
+	public static function getZvolDev($name) {
+		$cmd = "ls -la /dev/zvol/" . $name . " 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		preg_match('/(zd[0-9]+)$/', $out[0], $match);
+		return($match[1]);
+	}
+
+	/**
 	 * Sets a GPT label on a disk to prevent the zpool command from generating
 	 * errors.
 	 *
@@ -292,6 +303,7 @@ class OMVModuleZFSUtil {
 					$tmp['used'] = $pool->getAttribute("allocated");
 					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
+					$tmp['device'] = "n/a";
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -317,6 +329,7 @@ class OMVModuleZFSUtil {
 					$available = $ds->getProperty("available");
 					$tmp['available'] = $available['value'];
 					$tmp['mountpoint'] = $ds->getMountPoint();
+					$tmp['device'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -343,6 +356,7 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
+				$tmp['device'] = OMVModuleZFSUtil::getZvolDev($path);
 				array_push($objects,$tmp);
 				break;
 
@@ -362,6 +376,7 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
+				$tmp['device'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

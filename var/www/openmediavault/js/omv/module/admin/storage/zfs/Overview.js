@@ -921,6 +921,12 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'mountpoint'
 	},{
+		text: _("Device"),
+		dataIndex: 'device',
+		sortable: true,
+		flex: 1,
+		stateId: 'device'
+	},{
 		text: _("Details"),
 		xtype: 'actioncolumn',
 		tooltip: 'Details',
@@ -956,8 +962,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },
-						{ name: "pool_type", type: "string"},
-						{ name: "nr_disks", type: "string"}
+						{ name: "device", type: "string"}
 					]
 				}),
 				proxy: {

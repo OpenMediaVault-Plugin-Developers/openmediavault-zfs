@@ -28,6 +28,7 @@ require_once("/usr/share/omvzfs/Snapshot.php");
 require_once("/usr/share/omvzfs/Zvol.php");
 require_once("/usr/share/omvzfs/Zpool.php");
 require_once("/usr/share/omvzfs/NotifyListener.php");
+require_once("/usr/share/omvzfs/OMVStorageZvol.php");
 
 class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function getName() {

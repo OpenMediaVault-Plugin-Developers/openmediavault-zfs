@@ -82,7 +82,7 @@ class OMVModuleZFSZvol {
 			foreach ($out2 as $line2) {
 				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
 			}
-			$cmd = "zfs get -o value -Hp volsize,written $name 2>&1";
+			$cmd = "zfs get -o value -Hp volsize,logicalused $name 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			$this->size = $out2[0];
 			$this->used = $out2[1];

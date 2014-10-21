@@ -16,7 +16,7 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 	autoLoadData: true,
 	hideResetButton: true,
 	hideCancelButton: true,
-	width: 550,
+	width: 600,
 	height: 350,
 	layout: 'fit',
 	okButtonText: _("Ok"),
@@ -31,7 +31,11 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 			anchor: '100%',
 			readOnly: true,
 			preventScrollbars: true,
-			growMax: "2000"
+			growMax: "2000",
+			fieldStyle: {
+				fontFamily: "courier",
+				fontSize: "12px"
+			}
 		}];
 
 	}

@@ -410,7 +410,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "comment":{"type":"string"},
 				  "mode":{"type":"string","enum":["700","750","755",'.
 				  	'"770","775","777"],"optional":true},
-				  "mountpoint":{"type":"string"}
+				  "mountpoint":{"type":"string"},
+				  "sharesub":{"type":"boolean"}
 			  }
 		  }');
 
@@ -443,8 +444,13 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$mntentref = $mountpoint['uuid'];
 
 		$uuid = OMVUtil::uuid();
-		$pathName = $dir . "/" . trim($params['mountpoint'], "/");
-		$reldirpath = trim($params['mountpoint'], "/");
+		if ($params['sharesub']) {
+			$pathName = $dir . "/" . trim($params['mountpoint'], "/");
+			$reldirpath = trim($params['mountpoint'], "/");
+		} else {
+			$pathName = $dir;
+			$reldirpath = "";
+		}
 		$object = array(
 			"uuid" => $uuid,
 			"name" => $params['sharename'],

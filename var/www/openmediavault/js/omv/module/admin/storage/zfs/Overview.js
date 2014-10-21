@@ -807,11 +807,31 @@ Ext.define("OMV.module.admin.storage.zfs.CreateShare", {
 			fieldLabel: _("Name"),
 			allowBlank: false,
 		},{
+			xtype: "checkbox",
+			name: "sharesub",
+			fieldLabel: _("Share sub-folder"),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Share a sub-folder in the dataset.")
+			}],
+			listeners: {
+				scope: me,
+				change: function(combo, value) {
+					var mountpoint = this.findField("mountpoint");
+					if (value === true) {
+						mountpoint.show();
+					} else {
+						mountpoint.hide();
+					}
+				}
+			}
+		},{
 			xtype: "textfield",
 			name: "mountpoint",
 			fieldLabel: _("Path"),
 			allowBlank: true,
-			readOnly: false
+			readOnly: false,
+			hidden: true
 		},{
 			xtype: "combo",
 			name: "mode",

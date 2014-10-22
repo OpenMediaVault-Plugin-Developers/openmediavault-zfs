@@ -1,13 +1,15 @@
 <?php
 require_once("openmediavault/system.inc");
 
+define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
+
 /**
  * Implements the storage device backend for ZFS Zvol devices.
  * @ingroup api
  */
 class OMVStorageDeviceBackendZvol extends OMVStorageDeviceBackendAbstract {
     function getType() {
-        return OMV_STORAGE_DEVICE_TYPE_HBA;
+        return OMV_STORAGE_DEVICE_TYPE_ZVOL;
     }
 
     function enumerate() {
@@ -28,6 +30,11 @@ class OMVStorageDeviceBackendZvol extends OMVStorageDeviceBackendAbstract {
 
     function baseDeviceFile($deviceFile) {
         return preg_replace("/(p\d+)$/", "", $deviceFile);
+    }
+
+    function fsDeviceFile($deviceFile) {
+        // E.g. /dev/zd0p1
+        return sprintf("%sp1", $deviceFile);
     }
 }
 

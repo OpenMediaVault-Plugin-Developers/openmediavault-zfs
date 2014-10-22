@@ -22,6 +22,7 @@ require_once("openmediavault/error.inc");
 require_once("openmediavault/util.inc");
 require_once("openmediavault/rpcservice.inc");
 require_once("openmediavault/notify.inc");
+require_once("/usr/share/openmediavault/engined/rpc/filesystemmgmt.inc");
 require_once("/usr/share/omvzfs/Utils.php");
 require_once("/usr/share/omvzfs/Dataset.php");
 require_once("/usr/share/omvzfs/Snapshot.php");
@@ -49,6 +50,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("createShare");
 		$this->registermethod("getObjectDetails");
 		$this->registermethod("expandPool");
+		$this->registerMethod("getCandidates");
 	}
 
 	public function addPool($params, $context) {
@@ -639,6 +641,24 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$pool->export();
 		$pool->import($pool->getName());
 	}
+
+	public function getCandidates($params, $context) {
+		global $xmlConfig;
+		// Validate the RPC caller context.
+		$this->validateMethodContext($context, array(
+			"role" => OMV_ROLE_ADMINISTRATOR
+		));
+		$fs = new OMVRpcServiceFileSystemMgmt();
+		$objects = $fs->getCandidates($params, $context);
+		$devs = array();
+		foreach ($objects as $object) {
+			if (!(preg_match('/zd[0-9]+(p\d+)?$/', $object['devicefile']))) {
+				$devs[] = $object;
+			}
+		}
+		return $devs;
+	}
+
 }
 
 // Register the RPC service.

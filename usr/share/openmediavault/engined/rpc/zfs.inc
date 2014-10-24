@@ -214,9 +214,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$tmp = new OMVModuleZFSDataset($name);
 			OMVModuleZFSUtil::deleteShares($name);
 			$mountpoint = $tmp->getMountPoint();
-			$poolname = OMVModuleZFSUtil::getPoolname($name);
-			$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
-			$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and type='zfs' and dir='" . $mountpoint . "']";
+			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and type='zfs' and dir='" . $mountpoint . "']";
 			$object = $xmlConfig->get($xpath);
 			$xmlConfig->delete($xpath);
 			$tmp->destroy();
@@ -435,13 +433,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
 		}
-
-		$poolname = OMVModuleZFSUtil::getPoolname($params['name']);
-		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
+		
 		$dir = $tmp->getMountPoint();
-
 		//Get the mntent object and fetch it's uuid.
-		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
+		$xpath = "//system/fstab/mntent[fsname='" . $params['name'] . "' and type='zfs']";
 		$mountpoint = $xmlConfig->get($xpath);
 		$mntentref = $mountpoint['uuid'];
 

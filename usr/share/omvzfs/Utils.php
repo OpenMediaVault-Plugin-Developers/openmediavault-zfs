@@ -243,16 +243,14 @@ class OMVModuleZFSUtil {
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
 			if (preg_match('/[\/]+/', $name)) {
-				$poolname = OMVModuleZFSUtil::getPoolname($name);
-				$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 				$ds = new OMVModuleZFSDataset($name);
 				$dir = $ds->getMountPoint();
-				$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
+				$xpath = "//system/fstab/mntent[fsname='" . $name . "' and dir='" . $dir . "' and type='zfs']";
 				if (!($xmlConfig->exists($xpath))) {
 					$uuid = OMVUtil::uuid();
 					$object = array(
 						"uuid" => $uuid,
-						"fsname" => $pooluuid,
+						"fsname" => $name,
 						"dir" => $dir,
 						"type" => "zfs",
 						"opts" => "rw,relatime,xattr,noacl",

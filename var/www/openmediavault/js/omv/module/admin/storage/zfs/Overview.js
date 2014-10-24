@@ -785,99 +785,6 @@ Ext.define("OMV.module.admin.storage.zfs.EditProperties", {
 
 });
 
-
-Ext.define("OMV.module.admin.storage.zfs.CreateShare", {
-	extend: "OMV.workspace.window.Form",
-	uses: [
-		"OMV.data.Store",
-		"OMV.data.Model",
-		"OMV.data.proxy.Rpc",
-		"OMV.data.reader.RpcArray"
-	],
-
-	rpcService: "ZFS",
-	rpcSetMethod: "createShare",
-	width: 500,
-
-	getFormItems: function() {
-		var me = this;
-		return [{
-			xtype: "textfield",
-			name: "sharename",
-			fieldLabel: _("Name"),
-			allowBlank: false,
-		},{
-			xtype: "checkbox",
-			name: "sharesub",
-			fieldLabel: _("Share sub-folder"),
-			plugins: [{
-				ptype: "fieldinfo",
-				text: _("Share a sub-folder in the dataset.")
-			}],
-			listeners: {
-				scope: me,
-				change: function(combo, value) {
-					var mountpoint = this.findField("mountpoint");
-					if (value === true) {
-						mountpoint.show();
-					} else {
-						mountpoint.hide();
-					}
-				}
-			}
-		},{
-			xtype: "textfield",
-			name: "mountpoint",
-			fieldLabel: _("Path"),
-			allowBlank: true,
-			readOnly: false,
-			hidden: true
-		},{
-			xtype: "combo",
-			name: "mode",
-			fieldLabel: _("Permissions"),
-			queryMode: "local",
-			store: Ext.create("Ext.data.ArrayStore", {
-				fields: [ "value", "text" ],
-				data: [
-					[ "700", _("Administrator: read/write, Users: no access, Others: no access") ],
-					[ "750", _("Administrator: read/write, Users: read-only, Others: no access") ],
-					[ "770", _("Administrator: read/write, Users: read/write, Others: no access") ],
-					[ "755", _("Administrator: read/write, Users: read-only, Others: read-only") ],
-					[ "775", _("Administrator: read/write, Users: read/write, Others: read-only") ],
-					[ "777", _("Everyone: read/write") ]
-				]
-			}),
-			displayField: "text",
-			valueField: "value",
-			allowBlank: false,
-			editable: false,
-			showItemTooltip: true,
-			triggerAction: "all",
-			value: "775",
-			plugins: [{
-				ptype: "fieldinfo",
-				text: _("The file mode of the shared folder path.")
-			}]
-		},{
-			xtype: "textarea",
-			name: "comment",
-			fieldLabel: _("Comment"),
-			allowBlank: true
-		},{
-			xtype: "textarea",
-			name: "name",
-			hidden: true
-		},{
-			xtype: "textarea",
-			name: "type",
-			hidden: true
-		}];
-	}
-});
-
-
-
 Ext.define("OMV.module.admin.storage.zfs.Overview", {
 	extend: "OMV.module.admin.storage.zfs.TreePanel",
 
@@ -1060,21 +967,6 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		}).show();
 	},
 	
-	onShareButton: function() {
-		var me = this;
-		var sm = me.getSelectionModel();
-		var records = sm.getSelection();
-		var record = records[0];
-		Ext.create("OMV.module.admin.storage.zfs.CreateShare", {
-			title: _("Create shared folder"),
-			rpcGetMethod: "getSharedParams",
-			rpcGetParams: {
-				name: record.get('path'),
-				type: record.get('type')
-			},
-		}).show();
-	},
-
 	doDeletion: function(record) {
 		var me = this;
 		OMV.Rpc.request({
@@ -1100,6 +992,3 @@ OMV.WorkspaceManager.registerPanel({
 	position: 10,
 	className: "OMV.module.admin.storage.zfs.Overview"
 });
-
-
-

@@ -286,14 +286,6 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		if(me.hideTopToolbar)
 			return;
 		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand" ];
-		var tbarBtnDisabled = {
-			"addobj": false,
-			"edit": false,
-			"delete": false,
-			"expand": false,
-			"up": true,
-			"down": true,
-		};
 		var tbarBtnHidden = {
 			"addobj": true,
 			"edit": true,
@@ -304,69 +296,51 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		};
 		// Enable/disable buttons depending on the number of selected rows.
 		if(records.length <= 0) {
-			tbarBtnDisabled["addobj"] = true;
-			tbarBtnDisabled["edit"] = true;
-			tbarBtnDisabled["delete"] = true;
-			tbarBtnDisabled["up"] = true;
-			tbarBtnDisabled["down"] = true;
-			tbarBtnDisabled["expand"] = true;
           	tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = true;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["up"] = true;
+			tbarBtnHidden["down"] = true;
 		} else if(records.length == 1) {
-			tbarBtnDisabled["addobj"] = false;
-			tbarBtnDisabled["edit"] = false;
-			tbarBtnDisabled["delete"] = false;
-			tbarBtnDisabled["up"] = false;
-			tbarBtnDisabled["down"] = false;
-			tbarBtnDisabled["expand"] = false;
 			tbarBtnHidden["addobj"] = false;
 			tbarBtnHidden["edit"] = false;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = false;
+			tbarBtnHidden["up"] = true;
+			tbarBtnHidden["down"] = true;
+			// Disable 'Delete' button if a selected node is not a leaf
+			Ext.Array.each(records, function(record) {
+				if(false === record.get("leaf")) {
+					tbarBtnHidden["delete"] = true;
+					return false;
+				}
+			});
+			//Disable 'ExpandPool' button if selected row is not a Pool
+			Ext.Array.each(records, function(record) {
+				if("Pool" !== record.get("type")) {
+					tbarBtnHidden["expand"] = true;
+					return false;
+				}
+			});
 		} else {
-			tbarBtnDisabled["addobj"] = true;
-			tbarBtnDisabled["edit"] = true;
-			tbarBtnDisabled["delete"] = false;
-			tbarBtnDisabled["up"] = false;
-			tbarBtnDisabled["down"] = false;
-			tbarBtnDisabled["expand"] = true;
 			tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["up"] = true;
+			tbarBtnHidden["down"] = true;
 		}
-		// Disable 'Delete' button if a selected node is not a leaf
-		Ext.Array.each(records, function(record) {
-			if(false === record.get("leaf")) {
-				tbarBtnDisabled["delete"] = true;
-				tbarBtnHidden["delete"] = true;
-			return false;
-			}
-		});
-		
-		//Disable 'ExpandPool' button if selected row is not a Pool
-		Ext.Array.each(records, function(record) {
-			if("Pool" !== record.get("type")) {
-				tbarBtnDisabled["expand"] = true;
-				tbarBtnHidden["expand"] = true;
-				return false;
-			}
-		});
 		
 		// Update the button controls.
 		Ext.Array.each(tbarBtnName, function(name) {
 			var tbarBtnCtrl = me.queryById(me.getId() + "-" + name);
 			if(!Ext.isEmpty(tbarBtnCtrl)) {
-				if(true == tbarBtnDisabled[name]) {
-					tbarBtnCtrl.disable();
-				} else {
-					tbarBtnCtrl.enable();
-				}
 				if(true == tbarBtnHidden[name]) {
+					tbarBtnCtrl.disable();
 					tbarBtnCtrl.hide();
 				} else {
+					tbarBtnCtrl.enable();
 					tbarBtnCtrl.show();
 				}
 			}
@@ -633,7 +607,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.mode === "remote") {
 			me.doReload();
-		}
+		};
 	},
 
 	/**

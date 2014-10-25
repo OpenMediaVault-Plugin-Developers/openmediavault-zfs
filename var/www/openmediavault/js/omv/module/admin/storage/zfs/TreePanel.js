@@ -605,6 +605,8 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	 */
 	afterDeletion: function() {
 		var me = this;
+		var sm = me.getSelectionModel();
+		sm.deselectAll();
 		if(me.mode === "remote") {
 			me.doReload();
 		};

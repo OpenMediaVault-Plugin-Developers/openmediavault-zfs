@@ -242,24 +242,22 @@ class OMVModuleZFSUtil {
 		$cmd = "zfs list -H -o name -t filesystem";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
-			if (preg_match('/[\/]+/', $name)) {
-				$ds = new OMVModuleZFSDataset($name);
-				$dir = $ds->getMountPoint();
-				$xpath = "//system/fstab/mntent[fsname='" . $name . "' and dir='" . $dir . "' and type='zfs']";
-				if (!($xmlConfig->exists($xpath))) {
-					$uuid = OMVUtil::uuid();
-					$object = array(
-						"uuid" => $uuid,
-						"fsname" => $name,
-						"dir" => $dir,
-						"type" => "zfs",
-						"opts" => "rw,relatime,xattr,noacl",
-						"freq" => "0",
-						"passno" => "0",
-						"hidden" => "1"
-					);
-					$xmlConfig->set("//system/fstab",array("mntent" => $object));
-				}
+			$ds = new OMVModuleZFSDataset($name);
+			$dir = $ds->getMountPoint();
+			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and dir='" . $dir . "' and type='zfs']";
+			if (!($xmlConfig->exists($xpath))) {
+				$uuid = OMVUtil::uuid();
+				$object = array(
+					"uuid" => $uuid,
+					"fsname" => $name,
+					"dir" => $dir,
+					"type" => "zfs",
+					"opts" => "rw,relatime,xattr,noacl",
+					"freq" => "0",
+					"passno" => "0",
+					"hidden" => "1"
+				);
+				$xmlConfig->set("//system/fstab",array("mntent" => $object));
 			}
 		}
 		return null;

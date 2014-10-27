@@ -232,6 +232,12 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$tmp->destroy();
 			break;
 		case "Pool":
+			$tmp = new OMVModuleZFSDataset($name);
+			OMVModuleZFSUtil::deleteShares($name);
+			$mountpoint = $tmp->getMountPoint();
+			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and type='zfs' and dir='" . $mountpoint . "']";
+			$object = $xmlConfig->get($xpath);
+			$xmlConfig->delete($xpath);
 			$disks = OMVModuleZFSUtil::getDevDisksByPool($name);
 			$tmp = new OMVModuleZFSZpool($name);
 			$tmp->destroy();

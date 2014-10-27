@@ -460,7 +460,23 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
 			}
 		}
         return FALSE;
-    }
+	}
+
+	public function enumerate() {
+		$cmd = "zfs list -H -o name -t filesystem 2>&1";
+		OMVUtil::exec($cmd, $out, $res);
+		if (!(($result == 0) || ($result == 2)))
+			return FALSE;
+		$result = array();
+		foreach ($out as $name) {
+			$data = array("devicefile" => $name,
+							"uuid" => "",
+							"label" => $name,
+							"type" => "zfs");
+			$result[$name] = $data;
+		}
+		return $result;
+	}
 }
 
 OMVStorageDevices::registerBackend(new OMVStorageDeviceBackendZvol());

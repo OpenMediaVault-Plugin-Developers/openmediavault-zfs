@@ -68,6 +68,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "ashiftval":{"type":"string"}
 			  }
 		  }');
+		if (preg_match('/[\s]+/', $params['name'])) {
+			throw new OMVModuleZFSException("Spaces are not allowed in pool name");
+		}
 		switch ($params['pooltype']) {
 		case "basic":
 			$pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
@@ -97,7 +100,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$opts .= "-o ashift=" . $params['ashiftval'] . " ";
 		}
 		if (strlen($params['mountpoint']) > 0) {
-			$opts .= "-m " . $params['mountpoint'] . " ";
+			$opts .= "-m \"" . $params['mountpoint'] . "\" ";
 		}
 
 		$disks = preg_split("/[,;]/", $params['devices']);
@@ -166,6 +169,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "mountpoint":{"type":"string"}
 			  }
 		  }');
+		if (preg_match('/[\s]+/', $params['name'])) {
+			throw new OMVModuleZFSException("Spaces are not allowed in object names");
+		}
 		switch ($params['type']) {
 		case "clone":
 			$tmp = new OMVModuleZFSSnapshot($params['path']);
@@ -390,29 +396,29 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		switch ($params['type']) {
 		case "Filesystem":
 			$output .= "Filesystem details (zfs get all):\n\r\n\r";
-			$cmd = "zfs get all {$params['name']}";
+			$cmd = "zfs get all \"{$params['name']}\"";
 			break;
 		case "Volume":
 			$output .= "Volume details (zfs get all):\n\r\n\r";
-			$cmd = "zfs get all {$params['name']}";
+			$cmd = "zfs get all \"{$params['name']}\"";
 			break;
 		case "Snapshot":
 			$output .= "Snapshot details (zfs get all):\n\r\n\r";
-			$cmd = "zfs get all {$params['name']}";
+			$cmd = "zfs get all \"{$params['name']}\"";
 			break;
 		case "Pool":
 			$output .= "Pool status (zpool status):\n\r\n\r";
-			$cmd = "zpool status {$params['name']}";
+			$cmd = "zpool status \"{$params['name']}\"";
 			OMVModuleZFSUtil::exec($cmd,$out,$res);
 			$output .= implode("\n\r", $out);
 			unset($out);
 			$output .= "\n\r\n\rPool details (zpool get all):\n\r\n\r";
-			$cmd = "zpool get all {$params['name']}";
+			$cmd = "zpool get all \"{$params['name']}\"";
 			OMVModuleZFSUtil::exec($cmd,$out,$res);
 			$output .= implode("\n\r", $out);
 			unset($out);
 			$output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
-			$cmd = "zfs get all {$params['name']}";
+			$cmd = "zfs get all \"{$params['name']}\"";
 			break;
 		default:
 			throw new OMVModuleZFSException("Incorrect type provided");

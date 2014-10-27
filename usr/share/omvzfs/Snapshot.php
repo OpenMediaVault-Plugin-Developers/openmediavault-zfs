@@ -41,7 +41,7 @@ class OMVModuleZFSSnapshot {
 	public function __construct($name) {
 		$snap_exists = true;
 		$this->name = $name;
-		$cmd = "zfs list -H -t snapshot " .$name . " 2>&1";
+		$cmd = "zfs list -H -t snapshot \"" .$name . "\" 2>&1";
 		try {
 			$this->exec($cmd, $out, $res);
 			$this->updateAllProperties();
@@ -96,7 +96,7 @@ class OMVModuleZFSSnapshot {
 	 */
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
-			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name . " 2>&1";
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " \"" . $this->name . "\" 2>&1";
 			$this->exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
@@ -110,7 +110,7 @@ class OMVModuleZFSSnapshot {
 	 * @access private
 	 */
 	private function updateProperty($property) {
-		$cmd = "zfs get -H " . $property . " " . $this->name . " 2>&1";
+		$cmd = "zfs get -H " . $property . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
@@ -123,7 +123,7 @@ class OMVModuleZFSSnapshot {
 	 * @access private
 	 */
 	private function updateAllProperties() {
-		$cmd = "zfs get -H all " . $this->name . " 2>&1";
+		$cmd = "zfs get -H all \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
@@ -143,7 +143,7 @@ class OMVModuleZFSSnapshot {
 	 * @access private
 	 */
 	private function create() {
-		$cmd = "zfs snapshot " . $this->name . " 2>&1";
+		$cmd = "zfs snapshot \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
 	}
@@ -155,7 +155,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function destroy() {
-		$cmd = "zfs destroy " . $this->name . " 2>&1";
+		$cmd = "zfs destroy \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 
@@ -166,7 +166,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function rollback() {
-		$cmd = "zfs rollback " . $this->name . " 2>&1";
+		$cmd = "zfs rollback \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 
@@ -178,7 +178,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function clonesnap($newname) {
-		$cmd = "zfs clone -p " . $this->name . " " . $newname . " 2>&1";
+		$cmd = "zfs clone -p \"" . $this->name . "\" \"" . $newname . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 

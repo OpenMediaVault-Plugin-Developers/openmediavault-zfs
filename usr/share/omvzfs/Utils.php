@@ -16,7 +16,7 @@ class OMVModuleZFSUtil {
 	 * 
 	 */
 	public static function getZvolDev($name) {
-		$cmd = "ls -la /dev/zvol/" . $name . " 2>&1";
+		$cmd = "ls -la \"/dev/zvol/" . $name . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		preg_match('/(zd[0-9]+)$/', $out[0], $match);
 		return($match[1]);
@@ -217,7 +217,7 @@ class OMVModuleZFSUtil {
 	 * @return string UUID of the pool
 	 */
 	public static function getUUIDbyName($poolname) {
-		$cmd = "zpool get guid " . $poolname . " 2>&1";
+		$cmd = "zpool get guid \"" . $poolname . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		if (isset($out)) {
 			$headers = preg_split('/[\s]+/', $out[0]);

@@ -58,7 +58,7 @@ class OMVModuleZFSDataset {
 	public function __construct($name) {
 		$ds_exists = true;
 		$this->name = $name;
-		$cmd = "zfs list -H -t filesystem " . $name . " 2>&1";
+		$cmd = "zfs list -H -t filesystem \"" . $name . "\" 2>&1";
 		try {
 			$this->exec($cmd, $out, $res);
 			$this->updateAllProperties();
@@ -68,7 +68,7 @@ class OMVModuleZFSDataset {
 			$ds_exists = false;
 		}
 		if ($ds_exists) {
-			$cmd = "zfs list -r -d 1 -o name -H -t snapshot " . $name . " 2>&1";
+			$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			foreach ($out2 as $line2) {
 					$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
@@ -144,7 +144,7 @@ class OMVModuleZFSDataset {
 	 */
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
-			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name . " 2>&1";
+			$cmd = "zfs set " . $newpropertyk . "=\"" . $newpropertyv . "\" \"" . $this->name . "\" 2>&1";
 			$this->exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
@@ -157,7 +157,7 @@ class OMVModuleZFSDataset {
 	 * @access private
 	 */ 
 	private function updateAllProperties() {
-		$cmd = "zfs get -H all " . $this->name . " 2>&1";
+		$cmd = "zfs get -H all \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
@@ -174,7 +174,7 @@ class OMVModuleZFSDataset {
 	 * @access private
 	 */
 	private function updateProperty($property) {
-		$cmd = "zfs get -H " . $property . " " . $this->name . " 2>&1";
+		$cmd = "zfs get -H " . $property . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
@@ -187,7 +187,7 @@ class OMVModuleZFSDataset {
 	 * @access private
 	 */
 	private function create() {
-		$cmd = "zfs create -p " . $this->name . " 2>&1";
+		$cmd = "zfs create -p \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
 		$this->mountPoint = $this->properties["mountpoint"]["value"];
@@ -200,7 +200,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function destroy() {
-		$cmd = "zfs destroy " . $this->name . " 2>&1";
+		$cmd = "zfs destroy \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 
@@ -212,7 +212,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function rename($newname) {
-		$cmd = "zfs rename -p " . $this->name . " " . $newname . " 2>&1";
+		$cmd = "zfs rename -p \"" . $this->name . "\" \"" . $newname . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->name = $newname;
 	}
@@ -226,7 +226,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function inherit($property) {
-		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
+		$cmd = "zfs inherit " . $property . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty($property);
 	}
@@ -238,7 +238,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function upgrade() {
-		$cmd = "zfs upgrade " . $this->name . " 2>&1";
+		$cmd = "zfs upgrade \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 
@@ -249,7 +249,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function mount() {
-		$cmd = "zfs mount " . $this->name . " 2>&1";
+		$cmd = "zfs mount \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty("mounted");
 	}
@@ -261,7 +261,7 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function unmount() {
-		$cmd = "zfs unmount " . $this->name . " 2>&1";
+		$cmd = "zfs unmount \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty("mounted");
 	}
@@ -331,7 +331,7 @@ class OMVModuleZFSDataset {
 	*/
 	public function promote() {
 		if ($this->isClone()) {
-			$cmd = "zfs promote " . $this->name . " 2>&1";
+			$cmd = "zfs promote \"" . $this->name . "\" 2>&1";
 			$this->exec($cmd,$out,$res);
 		}
 	}

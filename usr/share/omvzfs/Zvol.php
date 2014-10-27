@@ -68,7 +68,7 @@ class OMVModuleZFSZvol {
 	public function __construct($name) {
 		$zvol_exists = true;
 		$this->name = $name;
-		$cmd = "zfs list -H -t volume " . $name . " 2>&1";
+		$cmd = "zfs list -H -t volume \"" . $name . "\" 2>&1";
 		try {
 			$this->exec($cmd, $out, $res);
 			$this->updateAllProperties();
@@ -77,12 +77,12 @@ class OMVModuleZFSZvol {
 			$zvol_exists = false;
 		}
 		if ($zvol_exists) {
-			$cmd = "zfs list -r -d 1 -o name -H -t snapshot " . $name . " 2>&1";
+			$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			foreach ($out2 as $line2) {
 				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
 			}
-			$cmd = "zfs get -o value -Hp volsize,logicalused $name 2>&1";
+			$cmd = "zfs get -o value -Hp volsize,logicalused \"$name\" 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			$this->size = $out2[0];
 			$this->used = $out2[1];
@@ -176,7 +176,7 @@ class OMVModuleZFSZvol {
 	 */
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
-			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " " . $this->name . " 2>&1";
+			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " \"" . $this->name . "\" 2>&1";
 			$this->exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
@@ -189,7 +189,7 @@ class OMVModuleZFSZvol {
 	 * @access private
 	 */
 	private function updateAllProperties() {
-		$cmd = "zfs get -H all " . $this->name . " 2>&1";
+		$cmd = "zfs get -H all \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
@@ -206,7 +206,7 @@ class OMVModuleZFSZvol {
 	 * @access private
 	 */
 	private function updateProperty($property) {
-		$cmd = "zfs get -H " . $property . " " . $this->name . " 2>&1";
+		$cmd = "zfs get -H " . $property . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
@@ -226,7 +226,7 @@ class OMVModuleZFSZvol {
 		if ((isset($sparse)) && ($sparse == true)) {
 			$cmd .= "-s ";
 		}	
-		$cmd .= "-V " . $size . " " . $this->name . " 2>&1";
+		$cmd .= "-V " . $size . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateAllProperties();
 		$this->setProperties($properties);
@@ -240,7 +240,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function destroy() {
-		$cmd = "zfs destroy " . $this->name . " 2>&1";
+		$cmd = "zfs destroy \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 	}
 
@@ -252,7 +252,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function rename($newname) {
-		$cmd = "zfs rename -p " . $this->name . " " . $newname . " 2>&1";
+		$cmd = "zfs rename -p \"" . $this->name . "\" \"" . $newname . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->name = $newname;
 	}
@@ -266,7 +266,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function inherit($property) {
-		$cmd = "zfs inherit " . $property . " " . $this->name . " 2>&1";
+		$cmd = "zfs inherit " . $property . " \"" . $this->name . "\" 2>&1";
 		$this->exec($cmd,$out,$res);
 		$this->updateProperty($property);
 	}
@@ -336,7 +336,7 @@ class OMVModuleZFSZvol {
 	*/
 	public function promote() {
 		if ($this->isClone()) {
-			$cmd = "zfs promote " . $this->name . " 2>&1";
+			$cmd = "zfs promote \"" . $this->name . "\" 2>&1";
 			$this->exec($cmd,$out,$res);
 		}
 	}

@@ -63,7 +63,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 		$this->type = "zfs";
 		$this->dataCached = FALSE;
 		$this->partEntry['scheme'] = "gpt";
-		$this->usage = "raid";
+		$this->usage = "filesystem";
 	}
 
 	/**
@@ -378,7 +378,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * @return TRUE if successful, otherwise FALSE.
      */
     public function mount($options = "") {
-		$cmd = "zfs mount " . $this->deviceFile . " 2>&1";
+		$cmd = "zfs mount \"" . $this->deviceFile . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		return TRUE;
     }
@@ -390,7 +390,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * @return TRUE if successful, otherwise FALSE.
      */
     public function umount($force = FALSE, $lazy = FALSE) {
-		$cmd = "zfs unmount " . $this->deviceFile . " 2>&1";
+		$cmd = "zfs unmount \"" . $this->deviceFile . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		return TRUE;
 	}

@@ -63,7 +63,6 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 		$this->label = $fsName;
 		$this->type = "zfs";
 		$this->dataCached = FALSE;
-		$this->partEntry['scheme'] = "gpt";
 		$this->usage = "filesystem";
 	}
 
@@ -75,18 +74,12 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 	private function getData() {
 		if ($this->dataCached !== FALSE)
 			return TRUE;
-
-		$ds = new OMVModuleZFSDataset($this->deviceFile);
-		$used = $ds->getProperty("used");
-
 		$data = array(
 			"devicefile" => $this->deviceFile,
 			"label" => $this->label,
 			"type" => $this->type,
 			"usage" => $this->usage,
-			"part_entry_scheme"  => $this->partEntry['scheme']
 		);
-
 		// Set flag to mark information has been successfully read.
 		$this->dataCached = TRUE;
 		return TRUE;
@@ -133,9 +126,11 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * Check if the filesystem has a label.
 	 * @return Returns TRUE 
 	 */
-    public function hasLabel() {
-            return TRUE;
-    }
+	public function hasLabel() {
+		if (FALSE === ($label = $this->getLabel()))
+			return FALSE;
+		return !empty($label);
+	}
 
     /**
      * Get the filesystem label.
@@ -170,11 +165,9 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * Get the partition scheme, e.g. 'gpt', 'mbr', 'apm' or 'dos'.
      * @return The filesystem type, otherwise FALSE.
      */
-    public function getPartitionScheme() {
-        if ($this->getData() === FALSE)
-            return FALSE;
-        return $this->partEntry['scheme'];
-    }
+	public function getPartitionScheme() {
+		return FALSE;
+	}
 
 
     /**
@@ -193,11 +186,9 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      *   \em flags, \em number, \em offset, \em size and \em disk,
      *   otherwise FALSE.
      */
-    public function getPartitionEntry() {
-        if ($this->getData() === FALSE)
-            return FALSE;
-        return $this->partEntry;
-    }
+	public function getPartitionEntry() {
+		return FALSE;
+	}
 
     /**
      * Get the device path of the filesystem, e.g /dev/sdb1.
@@ -213,7 +204,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * Get the canonical device file, e.g. /dev/root -> /dev/sde1
      */
     public function getCanonicalDeviceFile() {
-        return realpath($this->deviceFile);
+        return $this->deviceFile;
     }
 
     /**
@@ -224,14 +215,8 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      *   otherwise /dev/xxx will be returned. In case of an error FALSE
      *   will be returned.
      */
-    public function getDeviceFileByUuid() {
-        if ($this->getData() === FALSE)
-            return FALSE;
-        $deviceFileByUuid = sprintf("/dev/disk/by-uuid/%s",
-          $this->getUuid());
-        if (is_block($deviceFileByUuid))
-            return $deviceFileByUuid;
-        return $this->getDeviceFile();
+	public function getDeviceFileByUuid() {
+		return FALSE;
     }
 
     /**
@@ -251,8 +236,8 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
         // The following line is not necessary but will be kept to be safe.
         // If the device file looks like /dev/disk/by-(id|label|path|uuid)/*
         // then it is necessary to get the /dev/xxx equivalent.
-        if (1 == preg_match("/^\/dev\/disk\/by-.+$/", $deviceFile))
-            $deviceFile = realpath($deviceFile);
+        //if (1 == preg_match("/^\/dev\/disk\/by-.+$/", $deviceFile))
+        //    $deviceFile = realpath($deviceFile);
         // Truncate the partition appendix, e.g.:
         // - /dev/sdb1 => /dev/sdb
         // - /dev/cciss/c0d0p2 => /dev/cciss/c0d0
@@ -269,8 +254,10 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * Get the filesystem block size.
      * @return The block size, otherwise FALSE.
      */
-    public function getBlockSize() {
-        if ($this->getData() === FALSE)
+	public function getBlockSize() {
+		return FALSE;
+		/*
+		if ($this->getData() === FALSE)
             return FALSE;
         $cmd = sprintf("export LANG=C; blockdev --getbsz %s",
           escapeshellarg($this->getDeviceFile()));
@@ -279,7 +266,8 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
             $this->setLastError($output);
             return FALSE;
         }
-        return intval($output[0]);
+		return intval($output[0]);
+		 */
     }
 
     /**
@@ -431,13 +419,16 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
     public static function hasFileSystem($deviceFile) {
         // An alternative implementation is:
         // blkid -p -u filesystem <devicefile>
-        // Scan output for tag PTTYPE.
+		// Scan output for tag PTTYPE.
+		return TRUE;
+		/*
         $cmd = sprintf("export LANG=C; blkid | grep -E '^%s[0-9]*:.+$'",
           $deviceFile);
         @OMVUtil::exec($cmd, $output, $result);
         if($result !== 0)
             return FALSE;
-        return TRUE;
+		return TRUE;
+		*/
     }
 }
 

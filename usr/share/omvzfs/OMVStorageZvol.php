@@ -2,6 +2,7 @@
 require_once("openmediavault/system.inc");
 require_once("/usr/share/omvzfs/Utils.php");
 require_once("/usr/share/omvzfs/Dataset.php");
+require_once("/usr/share/omvzfs/Exception.php");
 
 define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
 
@@ -452,21 +453,16 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
     }
 
 	public function isTypeOf($fsName) {
-		$cmd = "zfs list -H -o name -t filesystem 2>&1";
-		OMVUtil::exec($cmd, $out, $res);
-		foreach ($out as $name) {
-			if (strcmp($name, $fsName) === 0) {
-				return TRUE;
-			}
-		}
-        return FALSE;
+		$cmd = "zfs list -H -o name -t filesystem \"$fsName\"";
+		OMVModuleZFSUtil::exec($cmd, $out, $res);
+		if ($res == 0)
+			return TRUE;
+		return FALSE;
 	}
 
 	public function enumerate() {
 		$cmd = "zfs list -H -o name -t filesystem 2>&1";
-		OMVUtil::exec($cmd, $out, $res);
-		if (!(($result == 0) || ($result == 2)))
-			return FALSE;
+		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		$result = array();
 		foreach ($out as $name) {
 			$data = array("devicefile" => $name,
@@ -477,6 +473,11 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
 		}
 		return $result;
 	}
+
+	public function isBlkidEnumerated() {
+		return FALSE;
+	}
+
 }
 
 OMVStorageDevices::registerBackend(new OMVStorageDeviceBackendZvol());

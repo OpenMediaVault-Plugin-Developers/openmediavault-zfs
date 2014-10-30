@@ -299,7 +299,6 @@ class OMVModuleZFSUtil {
 					$tmp['used'] = $pool->getAttribute("allocated");
 					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
-					$tmp['device'] = "n/a";
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -325,7 +324,6 @@ class OMVModuleZFSUtil {
 					$available = $ds->getProperty("available");
 					$tmp['available'] = $available['value'];
 					$tmp['mountpoint'] = $ds->getMountPoint();
-					$tmp['device'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -352,7 +350,6 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = $vol->getUsed();
 				$tmp['available'] = $vol->getAvailable();
 				$tmp['mountpoint'] = "n/a";
-				$tmp['device'] = OMVModuleZFSUtil::getZvolDev($path);
 				array_push($objects,$tmp);
 				break;
 
@@ -372,7 +369,6 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
-				$tmp['device'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

@@ -50,9 +50,12 @@ class OMVStorageDeviceZvol extends OMVStorageDeviceAbstract {
      * Get the description of the device.
      * @return The device description, FALSE on failure.
      */
-    public function getDescription() {
-        return sprintf(gettext("ZFS Zvol [%s, %s]"),
-          $this->getDeviceFile(), binary_format($this->getSize()));
+	public function getDescription() {
+		$cmd = "/lib/udev/zvol_id \"" . $this->getDeviceFile() . "\"";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		$name = $out[0];
+        return sprintf(gettext("Zvol %s [%s, %s]"),
+          $name, $this->getDeviceFile(), binary_format($this->getSize()));
     }
 }
 
@@ -147,9 +150,9 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
      * @return The filesystem type, otherwise FALSE.
      */
     public function getType() {
-        if ($this->getData() === FALSE)
-            return FALSE;
-        return $this->type;
+		if ($this->getData() === FALSE)
+			return FALSE;
+		return $this->type;             
     }
 
     /**
@@ -461,6 +464,8 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
 							"label" => $name,
 							"type" => "zfs");
 			$result[$name] = $data;
+			// Add devicefile to cache
+			OMVFilesystems::addToCache($name, new OMVFilesystemBackendZFS());
 		}
 		return $result;
 	}

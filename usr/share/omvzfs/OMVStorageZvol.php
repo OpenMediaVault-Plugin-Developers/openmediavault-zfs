@@ -464,8 +464,6 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
 							"label" => $name,
 							"type" => "zfs");
 			$result[$name] = $data;
-			// Add devicefile to cache
-			OMVFilesystems::addToCache($name, new OMVFilesystemBackendZFS());
 		}
 		return $result;
 	}

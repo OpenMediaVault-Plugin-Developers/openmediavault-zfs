@@ -959,7 +959,40 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			}
 		}).show();
 	},
-	
+
+    onScrubButton: function() {
+        var me = this;
+		var sm = me.getSelectionModel();
+		var records = sm.getSelection();
+		var record = records[0];
+        var msg = _("Do you really want to scrub the pool?");
+        OMV.MessageBox.show({
+            title: _("Confirmation"),
+            msg: msg,
+            buttons: Ext.Msg.YESNO,
+            icon: Ext.Msg.QUESTION,
+            scope: me,
+            fn: function(answer) {
+                if(answer !== "yes")
+                    return;
+                OMV.Rpc.request({
+                    scope: me,
+                    callback: function(id, success, response) {
+                        me.doReload();
+                    },
+                    relayErrors: false,
+                    rpcData: {
+                        service: "ZFS",
+                        method: "scrubPool",
+                        params: {
+                            name: record.get("path")
+                        }
+                    }
+                });
+            }
+        });
+    },
+
 	doDeletion: function(record) {
 		var me = this;
 		OMV.Rpc.request({

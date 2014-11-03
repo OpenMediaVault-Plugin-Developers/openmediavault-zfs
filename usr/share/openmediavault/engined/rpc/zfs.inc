@@ -48,6 +48,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("inherit");
 		$this->registermethod("getObjectDetails");
 		$this->registermethod("expandPool");
+		$this->registermethod("scrubPool");
 		$this->registerMethod("getCandidates");
 	}
 
@@ -495,6 +496,34 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
 		$pool->export();
 		$pool->import($pool->getName());
+	}
+
+	public function scrubPool($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "name":{"type":"string"}
+			  }
+		}');
+        // Create a background process.
+        $bgStatusFilename = $this->createBgProcStatus();
+        $pid = $this->fork();
+        if($pid > 0) { // Parent process.
+            $this->initializeBgProcStatus($bgStatusFilename, $pid);
+            return $bgStatusFilename;
+        }
+        // Child process.
+        try {
+			$pool = new OMVModuleZFSZpool($params['name']);
+			$pool->scrub();
+            $this->finalizeBgProcStatus($bgStatusFilename, $output);
+            exit(0);
+        } catch(Exception $e) {
+            $this->finalizeBgProcStatus($bgStatusFilename, "", $e);
+            exit(1);
+        }
 	}
 
 	public function getCandidates($params, $context) {

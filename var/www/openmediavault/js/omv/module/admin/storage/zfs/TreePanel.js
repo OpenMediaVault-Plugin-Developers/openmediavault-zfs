@@ -106,9 +106,11 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideApplyButton: true,
 	hideRefreshButton: true,
 	hideExpandPoolButton: true,
+	hideScrubButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
 	expandPoolButtonText: _("Expand"),
+	scrubButtonText: _("Scrub"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
 	upButtonText: _("Up"),
@@ -226,6 +228,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			scope: me,
 			disabled: true
 		},{
+			id: me.getId() + "-scrub",
+			xtype: "button",
+			text: me.scrubButtonText,
+			icon: "images/zfs_scrub.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideScrubButton,
+			handler: Ext.Function.bind(me.onScrubButton, me, [ me ]),
+			scope: me,
+			disabled: true
+		},{
 			id: me.getId() + "-delete",
 			xtype: "button",
 			text: me.deleteButtonText,
@@ -285,12 +297,13 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.hideTopToolbar)
 			return;
-		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand" ];
+		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "scrub" ];
 		var tbarBtnHidden = {
 			"addobj": true,
 			"edit": true,
 			"delete": true,
 			"expand": true,
+			"scrub": true,
 			"up": true,
 			"down": true
 		};
@@ -300,6 +313,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = true;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["scrub"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 		} else if(records.length == 1) {
@@ -307,6 +321,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["edit"] = false;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = false;
+			tbarBtnHidden["scrub"] = false;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 			// Disable 'Delete' button if a selected node is not a leaf
@@ -316,10 +331,11 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 					return false;
 				}
 			});
-			//Disable 'ExpandPool' button if selected row is not a Pool
+			//Disable buttons if selected row is not a Pool
 			Ext.Array.each(records, function(record) {
 				if("Pool" !== record.get("type")) {
 					tbarBtnHidden["expand"] = true;
+					tbarBtnHidden["scrub"] = true;
 					return false;
 				}
 			});
@@ -328,6 +344,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["edit"] = true;
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = true;
+			tbarBtnHidden["scrub"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 		}

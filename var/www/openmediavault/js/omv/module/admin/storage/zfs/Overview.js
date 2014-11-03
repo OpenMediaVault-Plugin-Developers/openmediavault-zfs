@@ -887,6 +887,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },
+						{ name: "lastscrub", type: "string" }
 					]
 				}),
 				proxy: {
@@ -965,7 +966,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		var sm = me.getSelectionModel();
 		var records = sm.getSelection();
 		var record = records[0];
-        var msg = _("Do you really want to scrub the pool?");
+        var msg = _("Do you really want to scrub the pool? Latest scrub: " + record.get('lastscrub'));
         OMV.MessageBox.show({
             title: _("Confirmation"),
             msg: msg,

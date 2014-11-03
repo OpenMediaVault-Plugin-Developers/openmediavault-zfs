@@ -12,6 +12,23 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Returns the latest time a pool was scrubbed.
+	 *
+	 */
+	public static function latestScrub($name) {
+		$cmd = "zpool status \"" . $name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			if (preg_match('/none requested/', $line)) 
+				return "Never";
+			if (preg_match('/with [\d]+ errors on (.*)/', $line, $matches))
+				return $matches[1];
+			if (preg_match('/scrub (in progress since .*)/', $line, $matches))
+				return $matches[1];
+		}
+	}
+
+	/**
 	 * Gets the Zvol device name (zdX) from volume name
 	 * 
 	 */
@@ -299,6 +316,7 @@ class OMVModuleZFSUtil {
 					$tmp['used'] = $pool->getAttribute("allocated");
 					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
+					$tmp['lastscrub'] = OMVModuleZFSUtil::latestScrub($path);
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -324,6 +342,7 @@ class OMVModuleZFSUtil {
 					$available = $ds->getProperty("available");
 					$tmp['available'] = $available['value'];
 					$tmp['mountpoint'] = $ds->getMountPoint();
+					$tmp['lastscrub'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -350,6 +369,7 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = $vol->getUsed();
 				$tmp['available'] = $vol->getAvailable();
 				$tmp['mountpoint'] = "n/a";
+				$tmp['lastscrub'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 
@@ -369,6 +389,7 @@ class OMVModuleZFSUtil {
 				$tmp['used'] = "n/a";
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
+				$tmp['lastscrub'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

@@ -217,6 +217,20 @@ class OMVModuleZFSUtil {
 		}
 	}
 
+    /**
+     * Get /dev/disk/by-id from /dev/sdX
+     *
+     * @return string Disk identifier
+     */
+    public static function getDiskId($disk) {
+        preg_match("/^.*\/([A-Za-z0-9]+)$/", $disk, $identifier);
+        $cmd = "ls -la /dev/disk/by-id | grep '$identifier[1]$'";
+        OMVModuleZFSUtil::exec($cmd, $out, $res);
+        if (is_array($out)) {
+            $cols = preg_split('/[\s]+/', $out[0]);
+            return($cols[count($cols)-3]);
+        }
+    }
 
 	/**
 	 * Get poolname from name of dataset/volume etc.

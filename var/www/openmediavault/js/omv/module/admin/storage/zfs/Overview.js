@@ -56,7 +56,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,
-	height: 450,
+	height: 460,
 
 	getFormItems: function() {
 		var me = this;
@@ -185,12 +185,26 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 				text: _("Optional mountpoint for the pool. Default is to use pool name.")
 			}]
 		},{
-			xtype: "checkbox",
-			name: "diskpath",
-			fieldLabel: _("Disk-by-path"),
+			xtype: "combo",
+			name: "devalias",
+			fieldLabel: _("Device alias"),
+			queryMode: "local",
+			store: Ext.create("Ext.data.ArrayStore", {
+				fields: [ "value", "text" ],
+				data: [
+					[ "path", _("By Path") ],
+					[ "id", _("By Id") ],
+					[ "dev", _("None") ]
+				]
+			}),
+			displayField: "text",
+			valueField: "value",
+			allowBlank: false,
+			editable: false,
+			value: "path",
 			plugins: [{
 				ptype: "fieldinfo",
-				text: _("Don't use /dev/disk/by-path when creating the pool. Not recommended.")
+				text: _("Specifies which device alias should be used. Don't change unless needed.")
 			}]
 		},{
 			xtype: "checkbox",
@@ -576,12 +590,26 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 				}]
 			}
 		},{
-			xtype: "checkbox",
-			name: "diskpath",
-			fieldLabel: _("Disk-by-path"),
+			xtype: "combo",
+			name: "devalias",
+			fieldLabel: _("Device alias"),
+			queryMode: "local",
+			store: Ext.create("Ext.data.ArrayStore", {
+				fields: [ "value", "text" ],
+				data: [
+					[ "path", _("By Path") ],
+					[ "id", _("By Id") ],
+					[ "dev", _("None") ]
+				]
+			}),
+			displayField: "text",
+			valueField: "value",
+			allowBlank: false,
+			editable: false,
+			value: "path",
 			plugins: [{
 				ptype: "fieldinfo",
-				text: _("Don't use /dev/disk/by-path when creating the vdev. Not recommended.")
+				text: _("Specifies which device alias should be used. Don't change unless needed.")
 			}]
 		},{
 			xtype: "checkbox",

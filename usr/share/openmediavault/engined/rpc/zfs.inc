@@ -64,7 +64,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "mountpoint":{"type":"string"},
 				  "name":{"type":"string"},
 				  "devices":{"type":"string"},
-				  "diskpath":{"type":"boolean"},
+				  "devalias":{"type":"string"},
 				  "ashift":{"type":"boolean"},
 				  "ashiftval":{"type":"string"}
 			  }
@@ -108,8 +108,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		foreach ($disks as $disk) {
 			OMVModuleZFSUtil::setGPTLabel($disk);
 		}
-		//Use /dev/disk/by-path as suggested in ZoL FAQ.
-		if (!($params['diskpath'])) {
+		switch ($params['devalias']) {
+		case "path":
 			try {
 				if (file_exists("/dev/disk/by-path/")) {
 					$tmp_disks = array();
@@ -119,8 +119,24 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					$disks = $tmp_disks;
 				}
 			} catch (OMVModuleZFSException $e) {
-				//Do nothing if an excpetion is thrown
+				//Do nothing if an excpetion is thrown (fallback on /dev/)
 			}
+			break;
+		case "id":
+            try {
+                if (file_exists("/dev/disk/by-id/")) {
+                    $tmp_disks = array();
+                    foreach ($disks as $disk) {
+                        $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
+                    }
+                    $disks = $tmp_disks;
+                }
+            } catch (OMVModuleZFSException $e) {
+                //Do nothing if an excpetion is thrown (fallback on /dev/)
+            }
+			break;
+		case "none":
+			break;
 		}
 
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
@@ -446,7 +462,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "name":{"type":"string"},
 				  "devices":{"type":"string"},
 				  "force":{"type":"boolean"},
-				  "diskpath":{"type":"boolean"}
+				  "devalias":{"type":"string"}
 			  }
 		}');
 		$pool = new OMVModuleZFSZpool($params['name']);
@@ -477,20 +493,37 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		foreach ($disks as $disk) {
 			OMVModuleZFSUtil::setGPTLabel($disk);
 		}
-		//Use /dev/disk/by-path as suggested in ZoL FAQ.
-		if (!($params['diskpath'])) {
-			try {
-				if (file_exists("/dev/disk/by-path/")) {
-					$tmp_disks = array();
-					foreach ($disks as $disk) {
-						$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
-					}
-					$disks = $tmp_disks;
-				}
-			} catch (OMVModuleZFSException $e) {
-				//Do nothing if an exception is thrown
-			}
-		}
+        switch ($params['devalias']) {
+        case "path":
+            try {
+                if (file_exists("/dev/disk/by-path/")) {
+                    $tmp_disks = array();
+                    foreach ($disks as $disk) {
+                        $tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
+                    }
+                    $disks = $tmp_disks;
+                }
+            } catch (OMVModuleZFSException $e) {
+                //Do nothing if an excpetion is thrown (fallback on /dev/)
+            }
+            break;
+        case "id":
+            try {
+                if (file_exists("/dev/disk/by-id/")) {
+                    $tmp_disks = array();
+                    foreach ($disks as $disk) {
+                        $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
+                    }
+                    $disks = $tmp_disks;
+                }
+            } catch (OMVModuleZFSException $e) {
+                //Do nothing if an excpetion is thrown (fallback on /dev/)
+            }
+            break;
+        case "none":
+            break;
+        }
+
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool->addVdev($vdev, $opts);
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools

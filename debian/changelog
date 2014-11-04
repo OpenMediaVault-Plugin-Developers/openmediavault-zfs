@@ -1,8 +1,17 @@
 openmediavault-zfs (0.6.3.3) testing; urgency=low
 
-  * add available and used to Zvol
+  * Add available and used to Zvol
+  * Integrated with new OMV filesystem and storage device backends.
+  * Better formatting of output when viewing status on pools/objects.
+  * Prevent Zvols from showing up in the Add Pool dialog.
+  * Changed the information stored in OMV mntent objects in config.xml.
+  * Removed the old share folder implementation. Core OMV function can now be used.
+  * Prepared support for whitespaces in pool/object names.
+  * Disallow whitespaces in pool/object names until bug is fixed in ZoL.
+  * Added button to scrub pool.
+  * Added combobox to allow selection of disk device alias to use when creating pools.
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 21 Oct 2014 00:49:12 +0200
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 04 Nov 2014 13:29:22 +0100
 
 openmediavault-zfs (0.6.3.2) testing; urgency=low
 

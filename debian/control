@@ -8,7 +8,7 @@ Homepage: http://omv-extras.org/
 
 Package: openmediavault-zfs
 Architecture: amd64
-Depends: ${misc:Depends}, openmediavault (>= 1.0.27), debian-zfs,
+Depends: ${misc:Depends}, openmediavault (>= 1.0.30), debian-zfs,
  build-essential
 Description: OpenMediaVault plugin for ZFS
  ZFS is a combined file system and logical volume manager designed

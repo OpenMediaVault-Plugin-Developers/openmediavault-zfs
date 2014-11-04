@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# songming <by@songming.me>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-16 06:17-0500\n"
-"PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2014-11-04 07:22-0600\n"
+"PO-Revision-Date: 2014-11-04 13:25+0000\n"
+"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/projects/p/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,246 +19,230 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "% completed ..."
-msgstr ""
+msgstr "完成 % ..."
 
 msgid "100% completed ..."
-msgstr ""
-
-msgid "A shared folder with the given name already exists"
-msgstr ""
+msgstr "完成100% ..."
 
 msgid "Add Object"
-msgstr ""
+msgstr "添加对象"
 
 msgid "Add Pool"
+msgstr "添加池"
+
+msgid "Ashift value"
 msgstr ""
 
-msgid "Administrator: read/write, Users: no access, Others: no access"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read-only, Others: no access"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read-only, Others: read-only"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read/write, Others: no access"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read/write, Others: read-only"
+msgid "Ashift value to use."
 msgstr ""
 
 msgid "Available"
-msgstr ""
+msgstr "可用"
 
 msgid "Basic"
+msgstr "基础"
+
+msgid "By Id"
+msgstr ""
+
+msgid "By Path"
 msgstr ""
 
 msgid "Capacity"
-msgstr ""
+msgstr "容量"
 
 msgid "Clone name"
-msgstr ""
-
-msgid "Comment"
-msgstr ""
+msgstr "克隆名称"
 
 msgid "Confirmation"
-msgstr ""
+msgstr "确认"
 
-msgid "Create ZFS pool"
-msgstr ""
-
-msgid "Create shared folder"
+msgid "Create ZFS Pool"
 msgstr ""
 
 msgid "Delete"
-msgstr ""
+msgstr "删除"
 
 msgid "Deleting selected item(s)"
-msgstr ""
+msgstr "删除选中项(可复选)"
 
 msgid "Details"
-msgstr ""
+msgstr "详情"
 
 msgid "Device"
+msgstr "设备"
+
+msgid "Device alias"
 msgstr ""
 
 msgid "Devices"
-msgstr ""
-
-msgid "Disk-by-path"
-msgstr ""
+msgstr "设备"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr ""
+msgstr "显示条目 {0} - {1} 全部 {2}"
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr ""
+msgstr "确认要创建ZFS池吗？"
 
 msgid "Do you really want to delete the selected item(s)?"
+msgstr "确认要删除选中项(可复选)吗？"
+
+msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr ""
 
 msgid "Down"
-msgstr ""
+msgstr "向下"
 
 msgid "Edit"
-msgstr ""
+msgstr "编辑"
 
 msgid "Edit properties"
-msgstr ""
-
-msgid "Everyone: read/write"
-msgstr ""
+msgstr "编辑特性"
 
 msgid "Expand"
-msgstr ""
+msgstr "扩展"
 
 msgid "Expand Pool"
-msgstr ""
+msgstr "扩展池"
 
 msgid "Force creation"
-msgstr ""
+msgstr "强制创建"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "即使报错也强制创建Vdev，请谨慎使用该设置！"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "即使报错也强制创建池，请谨慎使用该设置！"
 
 msgid "Mirror"
-msgstr ""
+msgstr "镜像"
 
 msgid "Modified"
-msgstr ""
+msgstr "修改"
 
 msgid "Mountpoint"
-msgstr ""
+msgstr "挂载点"
 
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr ""
+msgstr "克隆的新名称，它可以放在ZFS层级构架的任何位置。"
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr ""
+msgstr "前缀将放在新对象的名称前，请省略前面的  /"
 
 msgid "New"
-msgstr ""
+msgstr "新增"
 
 msgid "No items to display"
+msgstr "没有项目显示"
+
+msgid "None"
 msgstr ""
 
 msgid "Object Type"
-msgstr ""
+msgstr "对象类型"
 
 msgid "Object details"
-msgstr ""
+msgstr "对象详情"
 
 msgid "Ok"
-msgstr ""
+msgstr "OK"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr ""
+msgstr "可选池的挂载点，默认使用池名称挂载。"
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr ""
+msgstr "可选文件系统的挂载点，如果留空则父挂载点将作为文件系统名称的前缀。"
 
 msgid "Overview"
-msgstr ""
-
-msgid "Path"
-msgstr ""
-
-msgid "Permissions"
-msgstr ""
+msgstr "概览"
 
 msgid "Pool type"
-msgstr ""
+msgstr "池类型"
 
 msgid "Prefix"
-msgstr ""
+msgstr "前缀"
 
 msgid "Property"
-msgstr ""
+msgstr "特性"
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr ""
+msgstr "刷新"
 
 msgid "Save"
+msgstr "保存"
+
+msgid "Scrub"
 msgstr ""
 
 msgid "Serial Number"
-msgstr ""
+msgstr "序列号"
 
-msgid "Share folder"
-msgstr ""
-
-msgid "Shared"
+msgid "Set ashift"
 msgstr ""
 
 msgid "Size"
-msgstr ""
+msgstr "大小"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr ""
+msgstr "卷的大小，如5mb、100gb、1tb等"
 
 msgid "Snapshot to clone"
-msgstr ""
+msgstr "快照克隆"
 
 msgid "Source"
+msgstr "源"
+
+msgid ""
+"Specifies which device alias should be used. Don't change unless needed."
 msgstr ""
 
-msgid "The field '%s' contains forbidden two-dot symbols"
-msgstr ""
-
-msgid "The file mode of the shared folder path."
+msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr ""
 
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 msgid "Up"
-msgstr ""
+msgstr "向上"
 
 msgid "Updating property..."
-msgstr ""
-
-msgid "Use /dev/disk/by-path when creating the pool. Recommended."
-msgstr ""
-
-msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
-msgstr ""
+msgstr "更新属性 ..."
 
 msgid "Used"
-msgstr ""
+msgstr "使用"
 
 msgid "Value"
-msgstr ""
+msgstr "值"
 
 msgid "Vdev type"
-msgstr ""
+msgstr "Vdev类型"
 
 msgid "Vendor"
-msgstr ""
+msgstr "供应商"
 
 msgid "ZFS"
+msgstr "ZFS"
+
+#, php-format
+msgid "Zvol %s [%s, %s]"
 msgstr ""

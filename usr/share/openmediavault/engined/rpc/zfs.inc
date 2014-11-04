@@ -135,7 +135,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
                 //Do nothing if an excpetion is thrown (fallback on /dev/)
             }
 			break;
-		case "none":
+		case "dev":
 			break;
 		}
 
@@ -520,7 +520,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
                 //Do nothing if an excpetion is thrown (fallback on /dev/)
             }
             break;
-        case "none":
+        case "dev":
             break;
         }
 

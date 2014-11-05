@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Cyryl Sochacki <cyrylsochacki@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-16 06:17-0500\n"
-"PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2014-11-04 07:22-0600\n"
+"PO-Revision-Date: 2014-11-04 13:25+0000\n"
+"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.com/projects/p/openmediavault-zfs/language/pl_PL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,76 +19,64 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "% completed ..."
-msgstr ""
+msgstr "% uończonych ..."
 
 msgid "100% completed ..."
-msgstr ""
-
-msgid "A shared folder with the given name already exists"
-msgstr ""
+msgstr "100% ukończonych ..."
 
 msgid "Add Object"
-msgstr ""
+msgstr "Dodaj obiekt"
 
 msgid "Add Pool"
 msgstr ""
 
-msgid "Administrator: read/write, Users: no access, Others: no access"
+msgid "Ashift value"
 msgstr ""
 
-msgid "Administrator: read/write, Users: read-only, Others: no access"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read-only, Others: read-only"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read/write, Others: no access"
-msgstr ""
-
-msgid "Administrator: read/write, Users: read/write, Others: read-only"
+msgid "Ashift value to use."
 msgstr ""
 
 msgid "Available"
-msgstr ""
+msgstr "Dostępne"
 
 msgid "Basic"
+msgstr ""
+
+msgid "By Id"
+msgstr ""
+
+msgid "By Path"
 msgstr ""
 
 msgid "Capacity"
 msgstr ""
 
 msgid "Clone name"
-msgstr ""
-
-msgid "Comment"
-msgstr ""
+msgstr "Klonuj nazwę"
 
 msgid "Confirmation"
 msgstr ""
 
-msgid "Create ZFS pool"
-msgstr ""
-
-msgid "Create shared folder"
+msgid "Create ZFS Pool"
 msgstr ""
 
 msgid "Delete"
-msgstr ""
+msgstr "Usuń"
 
 msgid "Deleting selected item(s)"
 msgstr ""
 
 msgid "Details"
-msgstr ""
+msgstr "Szczegóły"
 
 msgid "Device"
+msgstr "Urządzenie"
+
+msgid "Device alias"
 msgstr ""
 
 msgid "Devices"
-msgstr ""
-
-msgid "Disk-by-path"
-msgstr ""
+msgstr "Urządzenia"
 
 msgid "Displaying items {0} - {1} of {2}"
 msgstr ""
@@ -98,16 +87,16 @@ msgstr ""
 msgid "Do you really want to delete the selected item(s)?"
 msgstr ""
 
+msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
+msgstr ""
+
 msgid "Down"
 msgstr ""
 
 msgid "Edit"
-msgstr ""
+msgstr "Edytuj"
 
 msgid "Edit properties"
-msgstr ""
-
-msgid "Everyone: read/write"
 msgstr ""
 
 msgid "Expand"
@@ -130,7 +119,7 @@ msgid ""
 msgstr ""
 
 msgid "Mirror"
-msgstr ""
+msgstr "Lustro"
 
 msgid "Modified"
 msgstr ""
@@ -139,7 +128,7 @@ msgid "Mountpoint"
 msgstr ""
 
 msgid "Name"
-msgstr ""
+msgstr "Nazwa"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
@@ -150,9 +139,12 @@ msgid ""
 msgstr ""
 
 msgid "New"
-msgstr ""
+msgstr "Nowy"
 
 msgid "No items to display"
+msgstr ""
+
+msgid "None"
 msgstr ""
 
 msgid "Object Type"
@@ -162,7 +154,7 @@ msgid "Object details"
 msgstr ""
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr ""
@@ -175,12 +167,6 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-msgid "Path"
-msgstr ""
-
-msgid "Permissions"
-msgstr ""
-
 msgid "Pool type"
 msgstr ""
 
@@ -191,31 +177,31 @@ msgid "Property"
 msgstr ""
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr ""
+msgstr "Odśwież"
 
 msgid "Save"
+msgstr "Zapisz"
+
+msgid "Scrub"
 msgstr ""
 
 msgid "Serial Number"
 msgstr ""
 
-msgid "Share folder"
-msgstr ""
-
-msgid "Shared"
+msgid "Set ashift"
 msgstr ""
 
 msgid "Size"
-msgstr ""
+msgstr "Rozmiar"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr ""
@@ -224,16 +210,17 @@ msgid "Snapshot to clone"
 msgstr ""
 
 msgid "Source"
+msgstr "Źródło"
+
+msgid ""
+"Specifies which device alias should be used. Don't change unless needed."
 msgstr ""
 
-msgid "The field '%s' contains forbidden two-dot symbols"
-msgstr ""
-
-msgid "The file mode of the shared folder path."
+msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr ""
 
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 msgid "Up"
 msgstr ""
@@ -241,17 +228,11 @@ msgstr ""
 msgid "Updating property..."
 msgstr ""
 
-msgid "Use /dev/disk/by-path when creating the pool. Recommended."
-msgstr ""
-
-msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
-msgstr ""
-
 msgid "Used"
-msgstr ""
+msgstr "Użyty"
 
 msgid "Value"
-msgstr ""
+msgstr "Wartość"
 
 msgid "Vdev type"
 msgstr ""
@@ -260,4 +241,8 @@ msgid "Vendor"
 msgstr ""
 
 msgid "ZFS"
+msgstr "ZFS"
+
+#, php-format
+msgid "Zvol %s [%s, %s]"
 msgstr ""

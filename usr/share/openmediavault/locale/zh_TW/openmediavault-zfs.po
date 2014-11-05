@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-16 06:17-0500\n"
-"PO-Revision-Date: 2014-10-16 19:36+0000\n"
-"Last-Translator: kochin <kochinc@outlook.com>\n"
+"POT-Creation-Date: 2014-11-04 07:22-0600\n"
+"PO-Revision-Date: 2014-11-04 13:25+0000\n"
+"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,29 +24,17 @@ msgstr "% 完成 ..."
 msgid "100% completed ..."
 msgstr "100% 完成 ..."
 
-msgid "A shared folder with the given name already exists"
-msgstr "所給名稱的共享檔案夾已經存在"
-
 msgid "Add Object"
 msgstr "新增物件"
 
 msgid "Add Pool"
 msgstr "新增集用場"
 
-msgid "Administrator: read/write, Users: no access, Others: no access"
-msgstr "管理員：讀/寫，用戶：無法存取，其他：無法存取"
+msgid "Ashift value"
+msgstr ""
 
-msgid "Administrator: read/write, Users: read-only, Others: no access"
-msgstr "管理員：讀/寫，用戶：唯讀，其他：無法存取"
-
-msgid "Administrator: read/write, Users: read-only, Others: read-only"
-msgstr "管理員：讀/寫，用戶：唯讀，其他：唯讀"
-
-msgid "Administrator: read/write, Users: read/write, Others: no access"
-msgstr "管理員：讀/寫，用戶：讀/寫，其他：無法存取"
-
-msgid "Administrator: read/write, Users: read/write, Others: read-only"
-msgstr "管理員：讀/寫，用戶：讀/寫，其他：唯讀"
+msgid "Ashift value to use."
+msgstr ""
 
 msgid "Available"
 msgstr "可用"
@@ -54,23 +42,23 @@ msgstr "可用"
 msgid "Basic"
 msgstr "基本"
 
+msgid "By Id"
+msgstr ""
+
+msgid "By Path"
+msgstr ""
+
 msgid "Capacity"
 msgstr "容量"
 
 msgid "Clone name"
 msgstr "複件名稱"
 
-msgid "Comment"
-msgstr "註釋"
-
 msgid "Confirmation"
 msgstr "確認"
 
-msgid "Create ZFS pool"
-msgstr "建立 ZFS 集用場"
-
-msgid "Create shared folder"
-msgstr "建立共享檔案夾"
+msgid "Create ZFS Pool"
+msgstr ""
 
 msgid "Delete"
 msgstr "刪除"
@@ -84,11 +72,11 @@ msgstr "詳細資料"
 msgid "Device"
 msgstr "裝置"
 
+msgid "Device alias"
+msgstr ""
+
 msgid "Devices"
 msgstr "裝置"
-
-msgid "Disk-by-path"
-msgstr "以路徑取用磁碟"
 
 msgid "Displaying items {0} - {1} of {2}"
 msgstr "顯示項目 {0} - {1} 全部 {2}"
@@ -99,6 +87,9 @@ msgstr "您真的要建立 ZFS 集用場嗎？"
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "您真的要刪除所選項目嗎？"
 
+msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
+msgstr ""
+
 msgid "Down"
 msgstr "停止"
 
@@ -107,9 +98,6 @@ msgstr "編輯"
 
 msgid "Edit properties"
 msgstr "編輯特性"
-
-msgid "Everyone: read/write"
-msgstr "任何人：讀/寫"
 
 msgid "Expand"
 msgstr "擴展"
@@ -156,6 +144,9 @@ msgstr "新增"
 msgid "No items to display"
 msgstr "無項目可顯示"
 
+msgid "None"
+msgstr ""
+
 msgid "Object Type"
 msgstr "物件型式"
 
@@ -175,12 +166,6 @@ msgstr "給檔案系統的選用性掛載點。如果留空白，上層掛載點
 
 msgid "Overview"
 msgstr "概觀"
-
-msgid "Path"
-msgstr "路徑"
-
-msgid "Permissions"
-msgstr "權限"
 
 msgid "Pool type"
 msgstr "集用場型式"
@@ -206,14 +191,14 @@ msgstr "更新"
 msgid "Save"
 msgstr "儲存"
 
+msgid "Scrub"
+msgstr ""
+
 msgid "Serial Number"
 msgstr "序號"
 
-msgid "Share folder"
-msgstr "共享檔案夾"
-
-msgid "Shared"
-msgstr "共享"
+msgid "Set ashift"
+msgstr ""
 
 msgid "Size"
 msgstr "大小"
@@ -227,11 +212,12 @@ msgstr "攝取快照到複件"
 msgid "Source"
 msgstr "來源"
 
-msgid "The field '%s' contains forbidden two-dot symbols"
-msgstr "欄位 '%s' 內含有禁止的兩點符號"
+msgid ""
+"Specifies which device alias should be used. Don't change unless needed."
+msgstr ""
 
-msgid "The file mode of the shared folder path."
-msgstr "共享檔案夾路徑的檔案模式。"
+msgid "Specify ashift value. Only use if you are sure you need it."
+msgstr ""
 
 msgid "Type"
 msgstr "型式"
@@ -241,12 +227,6 @@ msgstr "啟動"
 
 msgid "Updating property..."
 msgstr "更新特性 ..."
-
-msgid "Use /dev/disk/by-path when creating the pool. Recommended."
-msgstr "當建立集用場時，使用 /dev/disk/by-path。建議使用。"
-
-msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
-msgstr "當建立 vdev 時，使用 /dev/disk/by-path。建議使用。"
 
 msgid "Used"
 msgstr "已被使用"
@@ -262,3 +242,7 @@ msgstr "供應商"
 
 msgid "ZFS"
 msgstr "ZFS"
+
+#, php-format
+msgid "Zvol %s [%s, %s]"
+msgstr ""

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-16 06:17-0500\n"
-"PO-Revision-Date: 2014-10-17 06:26+0000\n"
-"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>\n"
+"POT-Creation-Date: 2014-11-04 07:22-0600\n"
+"PO-Revision-Date: 2014-11-04 13:25+0000\n"
+"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/openmediavault-zfs/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,29 +24,17 @@ msgstr "% completado ..."
 msgid "100% completed ..."
 msgstr "100% completado ..."
 
-msgid "A shared folder with the given name already exists"
-msgstr "Ya existe una carpeta compartida con el mismo nombre"
-
 msgid "Add Object"
 msgstr "Añadir objeto"
 
 msgid "Add Pool"
 msgstr "Añadir Pool"
 
-msgid "Administrator: read/write, Users: no access, Others: no access"
-msgstr "Administrador: Lectura/Escritura, Usuarios: Sin acceso, Otros:Sin acceso."
+msgid "Ashift value"
+msgstr ""
 
-msgid "Administrator: read/write, Users: read-only, Others: no access"
-msgstr "Administrador: Lectura/Escritura, Usuarios: Solo Lectura, Otros:Sin acceso."
-
-msgid "Administrator: read/write, Users: read-only, Others: read-only"
-msgstr "Administrador: Lectura/Escritura, Usuarios: Solo Lectura, Otros:Solo Lectura."
-
-msgid "Administrator: read/write, Users: read/write, Others: no access"
-msgstr "Administrador: Lectura/Escritura, Usuarios: Lectura/Escritura, Otros:Sin acceso."
-
-msgid "Administrator: read/write, Users: read/write, Others: read-only"
-msgstr "Administrador: Lectura/Escritura, Usuarios: Lectura/Escritura, Otros:Solo Lectura."
+msgid "Ashift value to use."
+msgstr ""
 
 msgid "Available"
 msgstr "Disponible"
@@ -54,23 +42,23 @@ msgstr "Disponible"
 msgid "Basic"
 msgstr "Basico"
 
+msgid "By Id"
+msgstr ""
+
+msgid "By Path"
+msgstr ""
+
 msgid "Capacity"
 msgstr "Capacidad"
 
 msgid "Clone name"
 msgstr "Nombre del Clon"
 
-msgid "Comment"
-msgstr "Comentario"
-
 msgid "Confirmation"
 msgstr "Confirmación"
 
-msgid "Create ZFS pool"
-msgstr "Crear un Pool ZFS"
-
-msgid "Create shared folder"
-msgstr "Crear una carpeta compartida"
+msgid "Create ZFS Pool"
+msgstr ""
 
 msgid "Delete"
 msgstr "Borrar"
@@ -84,11 +72,11 @@ msgstr "Detalles"
 msgid "Device"
 msgstr "Dispositivo"
 
+msgid "Device alias"
+msgstr ""
+
 msgid "Devices"
 msgstr "Dispositivos"
-
-msgid "Disk-by-path"
-msgstr "Disco by-path"
 
 msgid "Displaying items {0} - {1} of {2}"
 msgstr "Mostrando elementos {0} - {1} of {2}"
@@ -99,6 +87,9 @@ msgstr "¿Realmente desea crear un Pool ZFS?"
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "¿Realmente desea borrar los elemento(s) seleccionados?"
 
+msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
+msgstr ""
+
 msgid "Down"
 msgstr "Bajar"
 
@@ -107,9 +98,6 @@ msgstr "Editar"
 
 msgid "Edit properties"
 msgstr "Editar propiedades"
-
-msgid "Everyone: read/write"
-msgstr "Todos: Lectura/Escritura"
 
 msgid "Expand"
 msgstr "Expandir"
@@ -156,6 +144,9 @@ msgstr "Nuevo"
 msgid "No items to display"
 msgstr "Nada que mostrar"
 
+msgid "None"
+msgstr ""
+
 msgid "Object Type"
 msgstr "Tipo de Objeto"
 
@@ -175,12 +166,6 @@ msgstr "Punto de montaje del sistema de archivos (opcional). Si se deja en blanc
 
 msgid "Overview"
 msgstr "Resumen"
-
-msgid "Path"
-msgstr "Ruta"
-
-msgid "Permissions"
-msgstr "Permisos"
 
 msgid "Pool type"
 msgstr "Tipo de Pool"
@@ -206,14 +191,14 @@ msgstr "Refrescar"
 msgid "Save"
 msgstr "Salvar"
 
+msgid "Scrub"
+msgstr ""
+
 msgid "Serial Number"
 msgstr "Nº de Serie"
 
-msgid "Share folder"
-msgstr "Carpeta compartida"
-
-msgid "Shared"
-msgstr "Compartidos"
+msgid "Set ashift"
+msgstr ""
 
 msgid "Size"
 msgstr "Tamaño"
@@ -227,11 +212,12 @@ msgstr "Instantaneas a clonar"
 msgid "Source"
 msgstr "Origen"
 
-msgid "The field '%s' contains forbidden two-dot symbols"
-msgstr "El campo '%s' contiene el simbolo prohibido \":\""
+msgid ""
+"Specifies which device alias should be used. Don't change unless needed."
+msgstr ""
 
-msgid "The file mode of the shared folder path."
-msgstr "El modo de la ruta de la carpeta compartida"
+msgid "Specify ashift value. Only use if you are sure you need it."
+msgstr ""
 
 msgid "Type"
 msgstr "tipo"
@@ -241,12 +227,6 @@ msgstr "Arriba"
 
 msgid "Updating property..."
 msgstr "Actualizando propiedad..."
-
-msgid "Use /dev/disk/by-path when creating the pool. Recommended."
-msgstr "Usar /dev/disk/by-path Cuando se cree el Pool. Recomendado."
-
-msgid "Use /dev/disk/by-path when creating the vdev. Recommended."
-msgstr "Usar /dev/disk/by-path Cuando se cree el Vdev. Recomendado."
 
 msgid "Used"
 msgstr "Usado"
@@ -262,3 +242,7 @@ msgstr "Fabricante"
 
 msgid "ZFS"
 msgstr "ZFS"
+
+#, php-format
+msgid "Zvol %s [%s, %s]"
+msgstr ""

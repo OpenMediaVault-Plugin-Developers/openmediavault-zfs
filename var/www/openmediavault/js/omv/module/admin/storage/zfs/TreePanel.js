@@ -106,11 +106,13 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideApplyButton: true,
 	hideRefreshButton: true,
 	hideExpandPoolButton: true,
+	hideImportPoolButton: false,
 	hideScrubButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
 	expandPoolButtonText: _("Expand"),
 	scrubButtonText: _("Scrub"),
+	importPoolButtonText: _("Import Pool"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
 	upButtonText: _("Up"),
@@ -196,6 +198,15 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
 			hidden: me.hideAddButton,
 			handler: Ext.Function.bind(me.onAddButton, me, [ me ]),
+			scope: me
+		},{
+			id: me.getId() + "-import",
+			xtype: "button",
+			text: me.importPoolButtonText,
+			icon: "images/zfs_import.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideImportPoolButton,
+			handler: Ext.Function.bind(me.onImportPoolButton, me, [ me ]),
 			scope: me
 		},{
 			id: me.getId() + "-edit",

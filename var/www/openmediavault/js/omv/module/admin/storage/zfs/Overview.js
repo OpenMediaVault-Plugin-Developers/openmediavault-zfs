@@ -37,7 +37,42 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 				fontSize: "12px"
 			}
 		}];
+	}
+});
 
+Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
+	extend: "OMV.workspace.window.Form",
+	requires: [
+		"OMV.data.Store",
+		"OMV.data.Model",
+		"OMV.data.proxy.Rpc",
+	],
+
+	rpcService: "ZFS",
+	rpcSetMethod: "importPool",
+	title: _("Import ZFS Pool(s)"),
+	autoLoadData: false,
+	hideResetButton: true,
+	width: 550,
+	height: 150,
+
+	getFormItems: function() {
+		var me = this;
+		return [{
+			xtype: "textfield",
+			name: "poolname",
+			fieldLabel: _("Pool Name"),
+			allowBlank: true
+		},{
+			xtype: "checkbox",
+			name: "all",
+			fieldLabel: _("Import all"),
+			checked: false,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Import all missing pools. Overrides pool specification above.")
+			}]
+		}];
 	}
 });
 
@@ -1021,6 +1056,18 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
             }
         });
     },
+
+	onImportPoolButton: function() {
+		var me = this;
+		Ext.create("OMV.module.admin.storage.zfs.ImportPool", {
+			listeners: {
+				scope: me,
+				submit: function() {
+					this.doReload();
+				}
+			}
+		}).show();
+	},
 
 	doDeletion: function(record) {
 		var me = this;

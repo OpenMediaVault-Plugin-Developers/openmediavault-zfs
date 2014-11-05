@@ -39,6 +39,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	/* Initialize the RPC service. Different methods of the RPC service are declared here*/
 	public function initialize() {
 		$this->registerMethod("addPool");
+		$this->registerMethod("importPool");
 		$this->registerMethod("getObjectTree");
 		$this->registermethod("passParam");
 		$this->registermethod("addObject");
@@ -144,6 +145,26 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
 		$pool->export();
 		$pool->import($pool->getName());
+	}
+
+	public function importPool($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "poolname":{"type":"string"},
+				  "all":{"type":"boolean"}
+			  }
+		}');
+		if ($params['all']) {
+			$cmd = "zpool import -a 2>&1";
+		} elseif (strlen($params['poolname']) !== 0) {
+			$cmd = "zpool import \"" . $params['poolname'] . "\" 2>&1";
+		} else {
+			throw new OMVModuleZFSException("Specify either pool name or to import all missing pools");
+		}
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
 
 	public function getObjectTree($params, $context) {

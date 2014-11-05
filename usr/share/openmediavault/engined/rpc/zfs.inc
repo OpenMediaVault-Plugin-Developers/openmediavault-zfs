@@ -40,6 +40,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	public function initialize() {
 		$this->registerMethod("addPool");
 		$this->registerMethod("importPool");
+		$this->registerMethod("exportPool");
 		$this->registerMethod("getObjectTree");
 		$this->registermethod("passParam");
 		$this->registermethod("addObject");
@@ -165,6 +166,19 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			throw new OMVModuleZFSException("Specify either pool name or to import all missing pools");
 		}
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
+	}
+	
+	public function exportPool($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "name":{"type":"string"}
+			  }
+		}');
+		$pool = new OMVModuleZFSZpool($params['name']);
+		$pool->export();
 	}
 
 	public function getObjectTree($params, $context) {

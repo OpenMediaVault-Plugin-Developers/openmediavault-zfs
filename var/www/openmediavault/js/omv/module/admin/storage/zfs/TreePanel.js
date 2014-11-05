@@ -108,11 +108,13 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideExpandPoolButton: true,
 	hideImportPoolButton: false,
 	hideScrubButton: true,
+	hideExportPoolButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
 	expandPoolButtonText: _("Expand"),
 	scrubButtonText: _("Scrub"),
 	importPoolButtonText: _("Import Pool"),
+	exportPoolButtonText: _("Export Pool"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
 	upButtonText: _("Up"),
@@ -249,6 +251,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			scope: me,
 			disabled: true
 		},{
+			id: me.getId() + "-export",
+			xtype: "button",
+			text: me.exportPoolButtonText,
+			icon: "images/zfs_export.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideExportPoolButton,
+			handler: Ext.Function.bind(me.onExportPoolButton, me, [ me ]),
+			scope: me,
+			disabled: true
+		},{
 			id: me.getId() + "-delete",
 			xtype: "button",
 			text: me.deleteButtonText,
@@ -308,13 +320,14 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.hideTopToolbar)
 			return;
-		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "scrub" ];
+		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "scrub", "export" ];
 		var tbarBtnHidden = {
 			"addobj": true,
 			"edit": true,
 			"delete": true,
 			"expand": true,
 			"scrub": true,
+			"export": true,
 			"up": true,
 			"down": true
 		};
@@ -325,6 +338,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["delete"] = true;
 			tbarBtnHidden["expand"] = true;
 			tbarBtnHidden["scrub"] = true;
+			tbarBtnHidden["export"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 		} else if(records.length == 1) {
@@ -333,6 +347,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = false;
 			tbarBtnHidden["scrub"] = false;
+			tbarBtnHidden["export"] = false;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 			// Disable 'Delete' button if a selected node is not a leaf
@@ -347,6 +362,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 				if("Pool" !== record.get("type")) {
 					tbarBtnHidden["expand"] = true;
 					tbarBtnHidden["scrub"] = true;
+					tbarBtnHidden["export"] = true;
 					return false;
 				}
 			});
@@ -356,6 +372,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["delete"] = false;
 			tbarBtnHidden["expand"] = true;
 			tbarBtnHidden["scrub"] = true;
+			tbarBtnHidden["export"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
 		}

@@ -12,6 +12,19 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Returns the state of a pool.
+	 *
+	 */
+	public static function getPoolState($name) {
+		$cmd = "zpool status \"" . $name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			if (preg_match('/state: (.*)/', $line, $match))
+				return $match[1];
+		}
+	}
+
+	/**
 	 * Returns TRUE or FALSE depending on if the volume is thin provisioned or not.
 	 *
 	 */
@@ -346,6 +359,7 @@ class OMVModuleZFSUtil {
 					$tmp['available'] = $pool->getAttribute("free");
 					$tmp['mountpoint'] = $pool->getMountPoint();
 					$tmp['lastscrub'] = OMVModuleZFSUtil::latestScrub($path);
+					$tmp['state'] = OMVModuleZFSUtil::getPoolState($path);
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -372,6 +386,7 @@ class OMVModuleZFSUtil {
 					$tmp['available'] = $available['value'];
 					$tmp['mountpoint'] = $ds->getMountPoint();
 					$tmp['lastscrub'] = "n/a";
+					$tmp['state'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -403,6 +418,7 @@ class OMVModuleZFSUtil {
 				} else {
 					$tmp['icon'] = "images/zfs_thinvol.png";
 				}
+				$tmp['state'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 
@@ -423,6 +439,7 @@ class OMVModuleZFSUtil {
 				$tmp['available'] = "n/a";
 				$tmp['mountpoint'] = "n/a";
 				$tmp['lastscrub'] = "n/a";
+				$tmp['state'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

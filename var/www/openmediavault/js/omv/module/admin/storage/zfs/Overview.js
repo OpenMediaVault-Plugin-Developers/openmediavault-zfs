@@ -926,6 +926,19 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		flex: 1,
 		stateId: 'mountpoint'
 	},{
+		text: _("State"),
+		dataIndex: 'state',
+		sortable: true,
+		flex: 1,
+		stateId: 'state',
+		renderer: function(value, p, r){
+			if (r.data['state'] === "n/a") {
+				return '';
+			} else {
+				return r.data['state'];
+			}
+		}
+	},{
 		text: _("Details"),
 		xtype: 'actioncolumn',
 		tooltip: 'Details',
@@ -961,7 +974,8 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 						{ name: "id", type: "string" },
 						{ name: "path", type: "string" },
 						{ name: "origin", type: "string", defaultValue: "none" },
-						{ name: "lastscrub", type: "string" }
+						{ name: "lastscrub", type: "string" },
+						{ name: "state", type: "string" }
 					]
 				}),
 				proxy: {

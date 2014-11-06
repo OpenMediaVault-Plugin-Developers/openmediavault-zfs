@@ -357,6 +357,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 					var cloneField = this.findField("clonename");
 					var nameField = this.findField("name");
 					var mountField = this.findField("mountpoint");
+					var thinField = this.findField("thinvol");
 					switch(value) {
 						case "filesystem":
 							sizeField.hide();
@@ -364,6 +365,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.hide();
 							nameField.show();
 							mountField.show();
+							thinField.hide();
 						break;
 						case "volume":
 							sizeField.show();
@@ -371,6 +373,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.hide();
 							nameField.show();
 							mountField.hide();
+							thinField.show();
 						break;
 						case "clone":
 							sizeField.hide();
@@ -378,6 +381,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.show();
 							nameField.hide();
 							mountField.hide();
+							thinField.hide();
 						break;
 						default:
 							sizeField.hide();
@@ -385,6 +389,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 							cloneField.hide();
 							nameField.show();
 							mountField.hide();
+							thinField.hide();
 						break;
 					}
 					sizeField.validate();
@@ -485,6 +490,12 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 				ptype: "fieldinfo",
 				text: _("Size of the volume e.g. 5mb,100gb,1tb etc")
 			}]
+		},{
+			xtype: "checkbox",
+			name: "thinvol",
+			fieldLabel: _("Thin provisioning"),
+			checked: false,
+			hidden: true
 		}];
 	}
 });

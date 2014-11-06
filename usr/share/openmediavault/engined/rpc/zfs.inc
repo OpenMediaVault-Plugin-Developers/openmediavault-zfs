@@ -218,8 +218,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "name":{"type":"string"},
 				  "size":{"type":"string"},
 				  "clonename":{"type":"string"},
-				  "mountpoint":{"type":"string"}
-			  }
+				  "mountpoint":{"type":"string"},
+				  "thinvol":{"type":"boolean"}
+				}
 		  }');
 		if (preg_match('/[\s]+/', $params['name'])) {
 			throw new OMVModuleZFSException("Spaces are not allowed in object names");
@@ -244,7 +245,11 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		case "volume":
 			$name = $params['path'] . "/" . $params['name'];
 			$tmp = new OMVModuleZFSZvol($name);
-			$tmp->create($params['size']);
+			if ($params['thinvol']) {
+				$tmp->create($params['size'], null, true);
+			} else {
+				$tmp->create($params['size'], null, false);
+			}
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);

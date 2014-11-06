@@ -12,6 +12,18 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Returns TRUE or FALSE depending on if the volume is thin provisioned or not.
+	 *
+	 */
+	public static function isThinVol($name) {
+		$vol = new OMVModuleZFSZvol($name);
+		$property = $vol->getProperty("refreservation");
+		if (strcmp($property['value'], "none") === 0)
+			return TRUE;
+		return FALSE;
+	}
+
+	/**
 	 * Returns the latest time a pool was scrubbed.
 	 *
 	 */
@@ -367,7 +379,6 @@ class OMVModuleZFSUtil {
 					'parentid'=>$prefix . $result[1],
 					'name'=>$result[2],
 					'type'=>ucfirst($type),
-					'icon'=>"images/save.png",
 					'path'=>$path,
 					'expanded'=>$expanded);
 				$vol = new OMVModuleZFSZvol($path);
@@ -384,6 +395,11 @@ class OMVModuleZFSUtil {
 				$tmp['available'] = $vol->getAvailable();
 				$tmp['mountpoint'] = "n/a";
 				$tmp['lastscrub'] = "n/a";
+				if (!(OMVModuleZFSUtil::isThinVol($path))) {
+					$tmp['icon'] = "images/save.png";
+				} else {
+					$tmp['icon'] = "images/zfs_thinvol.png";
+				}
 				array_push($objects,$tmp);
 				break;
 

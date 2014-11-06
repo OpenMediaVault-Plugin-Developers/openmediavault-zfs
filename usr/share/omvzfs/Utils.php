@@ -12,6 +12,22 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Returns the status of a pool.
+	 *
+	 */
+	public static function getPoolStatus($name) {
+		$cmd = "zpool status \"" . $name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			if (preg_match('/errors: (.*)/', $line, $match)) {
+				if (strcmp($match[1], "No known data errors") === 0)
+					return "OK";
+				return "Error";
+			}
+		}
+	}
+
+	/**
 	 * Returns the state of a pool.
 	 *
 	 */
@@ -19,7 +35,7 @@ class OMVModuleZFSUtil {
 		$cmd = "zpool status \"" . $name . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		foreach ($out as $line) {
-			if (preg_match('/state: (.*)/', $line, $match))
+			if (preg_match('/[\s]+state: (.*)/', $line, $match))
 				return $match[1];
 		}
 	}
@@ -360,6 +376,7 @@ class OMVModuleZFSUtil {
 					$tmp['mountpoint'] = $pool->getMountPoint();
 					$tmp['lastscrub'] = OMVModuleZFSUtil::latestScrub($path);
 					$tmp['state'] = OMVModuleZFSUtil::getPoolState($path);
+					$tmp['status'] = OMVModuleZFSUtil::getPoolStatus($path);
 					array_push($objects,$tmp);
 				} else {
 					//This is a Filesystem
@@ -387,6 +404,7 @@ class OMVModuleZFSUtil {
 					$tmp['mountpoint'] = $ds->getMountPoint();
 					$tmp['lastscrub'] = "n/a";
 					$tmp['state'] = "n/a";
+					$tmp['status'] = "n/a";
 					array_push($objects,$tmp);
 				}
 				break;
@@ -419,6 +437,7 @@ class OMVModuleZFSUtil {
 					$tmp['icon'] = "images/zfs_thinvol.png";
 				}
 				$tmp['state'] = "n/a";
+				$tmp['status'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 
@@ -440,6 +459,7 @@ class OMVModuleZFSUtil {
 				$tmp['mountpoint'] = "n/a";
 				$tmp['lastscrub'] = "n/a";
 				$tmp['state'] = "n/a";
+				$tmp['status'] = "n/a";
 				array_push($objects,$tmp);
 				break;
 

@@ -104,8 +104,11 @@ class OMVModuleZFSUtil {
 		foreach ($vdevs as $vdev) {
 			$vdisks = $vdev->getDisks();
 			foreach ($vdisks as $vdisk) {
-				if (preg_match('/^sd[a-z]{1}$/', $vdisk)) {
+				if (preg_match('/^(sd[a-z]{1})|(fio[a-z]{1})$/', $vdisk)) {
 					$disks[] = "/dev/" . $vdisk . "1";
+					continue;
+				} else if (preg_match('/^c[0-9]+d[0-9]+$/', $vdisk)) {
+					$disks[] = "/dev/cciss/" . $vdisk . "p1";
 					continue;
 				} else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
 					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
@@ -148,7 +151,7 @@ class OMVModuleZFSUtil {
 		$cmd = "ls -la /dev/disk/by-id/" . $id;
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		if (count($out) === 1) {
-			if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+			if (preg_match('/^.*\/([a-z0-9]+.*)$/', $out[0], $match)) {
 				$disk = $match[1];
 				return($disk);
 			}
@@ -164,7 +167,7 @@ class OMVModuleZFSUtil {
 		$cmd = "ls -la /dev/disk/by-path/" . $path;
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		if (count($out) === 1) {
-			if (preg_match('/^.*\/([a-z0-9]+)$/', $out[0], $match)) {
+			if (preg_match('/^.*\/([a-z0-9]+.*)$/', $out[0], $match)) {
 				$disk = $match[1];
 				return($disk);
 			}
@@ -220,8 +223,8 @@ class OMVModuleZFSUtil {
 	 * @return string Disk identifier
 	 */
 	public static function getDiskPath($disk) {
-		preg_match("/^.*\/([A-Za-z0-9]+)$/", $disk, $identifier);
-		$cmd = "ls -la /dev/disk/by-path | grep '$identifier[1]$'";
+		preg_match("/^\/dev\/(.*)$/", $disk, $identifier);
+		$cmd = "ls -la /dev/disk/by-path | grep '" . preg_quote($identifier[1]) . "$'";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		if (is_array($out)) {
 			$cols = preg_split('/[\s]+/', $out[0]);
@@ -236,7 +239,7 @@ class OMVModuleZFSUtil {
      */
     public static function getDiskId($disk) {
         preg_match("/^.*\/([A-Za-z0-9]+)$/", $disk, $identifier);
-        $cmd = "ls -la /dev/disk/by-id | grep '$identifier[1]$'";
+		$cmd = "ls -la /dev/disk/by-id | grep '" . preg_quote($identifier[1]) . "$'";
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         if (is_array($out)) {
             $cols = preg_split('/[\s]+/', $out[0]);

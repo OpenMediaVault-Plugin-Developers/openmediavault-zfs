@@ -1,3 +1,16 @@
+openmediavault-zfs (0.6.3.4) testing; urgency=low
+
+  * Update locales
+  * Add functionality to import/export pools
+  * Support thin provisioning of Zvols
+  * Add support for more storage devices
+  * Add pool state to overview
+  * Add pool error status to overview
+  * Show filesystem quota to overview
+  * Create and expand pools in background processes
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 07 Nov 2014 09:57:05 +0100
+
 openmediavault-zfs (0.6.3.3) testing; urgency=low
 
   * Add available and used to Zvol

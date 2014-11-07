@@ -12,6 +12,19 @@ require_once("Zpool.php");
 class OMVModuleZFSUtil {
 
 	/**
+	 * Returns the quota (if set) of a filesystem.
+	 *
+	 */
+	public static function getFsQuota($name) {
+		$ds = new OMVModuleZFSDataset($name);
+		$property = $ds->getProperty("quota");
+		$quota = $property['value'];
+		if (strcmp($quota, "none") === 0)
+			return "n/a";
+		return $quota;
+	}
+
+	/**
 	 * Returns the status of a pool.
 	 *
 	 */
@@ -396,7 +409,7 @@ class OMVModuleZFSUtil {
 						$tmp['origin'] = "n/a";
 					}
 					$tmp['type']= ucfirst($type);
-					$tmp['size'] = "n/a";
+					$tmp['size'] = OMVModuleZFSUtil::getFsQuota($path);
 					$used = $ds->getProperty("used");
 					$tmp['used'] = $used['value'];
 					$available = $ds->getProperty("available");

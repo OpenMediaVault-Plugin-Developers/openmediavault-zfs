@@ -125,6 +125,8 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	deletionWaitMsg: _("Deleting selected item(s)"),
 	mode: "remote",
 	rememberSelected: false,
+	autoReload: false,
+    reloadInterval: 1000, // 10 seconds
 
 	initComponent: function() {
 		var me = this;
@@ -183,6 +185,32 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 				}
 			});
 		}
+        // Auto-reload the grid content?
+        if(me.autoReload) {
+            var fnActivateTask = function() {
+                if(Ext.isEmpty(me.reloadTask)) {
+                    me.reloadTask = Ext.util.TaskManager.start({
+                        run: me.doReload,
+                        scope: me,
+                        interval: me.reloadInterval,
+                        fireOnStart: true
+                    });
+                }
+            };
+            var fnDeactivateTask = function() {
+                if(!Ext.isEmpty(me.reloadTask)) {
+                    Ext.util.TaskManager.stop(me.reloadTask);
+                    delete me.reloadTask;
+                }
+            }
+            me.on({
+                render: fnActivateTask,
+                beforedestroy: fnDeactivateTask,
+                activate: fnActivateTask,
+                deactivate: fnDeactivateTask,
+                scope: me
+            });
+        }
 	},
 
 	/**

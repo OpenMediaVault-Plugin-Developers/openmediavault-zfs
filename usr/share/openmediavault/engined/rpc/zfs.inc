@@ -142,10 +142,27 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		}
 
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		$pool = new OMVModuleZFSZpool($vdev, $opts);
-		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
-		$pool->export();
-		$pool->import($pool->getName());
+		// Create a background process.
+		$bgStatusFilename = $this->createBgProcStatus();
+		$pid = $this->fork();
+		if($pid > 0) { // Parent process.
+			$this->initializeBgProcStatus($bgStatusFilename, $pid);
+			return $bgStatusFilename;
+		}
+		// Child process.
+		try {
+			$bgOutputFilename = $this->createBgProcOutput();
+			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
+			$pool = new OMVModuleZFSZpool($vdev, $opts);
+			//Ugly fix to solve the problem of blkid not displaying info on newly created pools
+			$pool->export();
+			$pool->import($pool->getName());
+			$this->finalizeBgProcStatus($bgStatusFilename, $output);
+			exit(0);
+		} catch(Exception $e) {
+			$this->finalizeBgProcStatus($bgStatusFilename, "", $e);
+			exit(1);
+		}
 	}
 
 	public function importPool($params, $context) {
@@ -565,10 +582,27 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
         }
 
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		$pool->addVdev($vdev, $opts);
-		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
-		$pool->export();
-		$pool->import($pool->getName());
+		// Create a background process.
+		$bgStatusFilename = $this->createBgProcStatus();
+		$pid = $this->fork();
+		if($pid > 0) { // Parent process.
+			$this->initializeBgProcStatus($bgStatusFilename, $pid);
+			return $bgStatusFilename;
+		}
+		// Child process.
+		try {
+			$bgOutputFilename = $this->createBgProcOutput();
+			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
+			$pool->addVdev($vdev, $opts);
+			//Ugly fix to solve the problem of blkid not displaying info on newly created pools
+			$pool->export();
+			$pool->import($pool->getName());
+			$this->finalizeBgProcStatus($bgStatusFilename, $output);
+			exit(0);
+		} catch(Exception $e) {
+			$this->finalizeBgProcStatus($bgStatusFilename, "", $e);
+			exit(1);
+		}
 	}
 
 	public function scrubPool($params, $context) {

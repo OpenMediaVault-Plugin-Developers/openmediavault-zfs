@@ -288,7 +288,9 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 		var me = this;
 		OMV.MessageBox.show({
 			title: _("Confirmation"),
-			msg: _("Do you really want to create the ZFS pool?"),
+			msg: _("Do you really want to create the ZFS pool?<br/><br/>" +
+				   "The process will take some time and no change will be displayed until it is completed.<br/>" +
+				   "Please reload the page to update any changes."),
 			buttons: Ext.Msg.YESNO,
 			fn: function(answer) {
 				if(answer === "no")
@@ -667,6 +669,24 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 				text: _("Forces the creation of the Vdev even if errors are reported. Use with extreme caution!")
 			}]
 		}];
+	},
+
+	doSubmit: function() {
+		var me = this;
+		OMV.MessageBox.show({
+			title: _("Confirmation"),
+			msg: _("Do you really want to expand the ZFS pool?<br/><br/>" +
+				   "The process will take some time and no change will be displayed until it is completed.<br/>" +
+				   "Please reload the page to update any changes."),
+			buttons: Ext.Msg.YESNO,
+			fn: function(answer) {
+				if(answer === "no")
+					return;
+				me.superclass.doSubmit.call(me);
+			},
+			scope: me,
+			icon: Ext.Msg.QUESTION
+		});
 	}
 });
 

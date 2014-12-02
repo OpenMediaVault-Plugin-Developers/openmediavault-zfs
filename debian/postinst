@@ -18,7 +18,8 @@ case "$1" in
       omv_config_add_element "/config/services" "zfs" "${object}" true
     fi
 
-    insserv -r zfs-mount
+    insserv -rf zfs-mount || :
+
     mkdir -p ${OVERRIDE_DIR}
 
     cat <<EOF > ${OVERRIDE_DIR}/zfs-mount

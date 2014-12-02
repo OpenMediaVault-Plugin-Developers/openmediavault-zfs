@@ -21,7 +21,7 @@ case "$1" in
     insserv -r zfs-mount
     mkdir -p ${OVERRIDE_DIR}
 
-    cat <<EOF >> ${OVERRIDE_DIR}/zfs-mount
+    cat <<EOF > ${OVERRIDE_DIR}/zfs-mount
 ### BEGIN INIT INFO
 # Provides:       zvol zfs zfs-mount
 # Required-Start: $local_fs

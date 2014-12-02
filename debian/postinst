@@ -8,12 +8,38 @@ set -e
 
 case "$1" in
   configure)
+
+    OVERRIDE_DIR="/etc/insserv/overrides"
+
     if ! omv_config_exists "/config/services/zfs"; then
       echo "Initialize configuration"
       object="<enable>0</enable>"
       object="${object}<numberfield1>827</numberfield1>"
       omv_config_add_element "/config/services" "zfs" "${object}" true
     fi
+
+    insserv -r zfs-mount
+    mkdir -p ${OVERRIDE_DIR}
+
+    cat <<EOF >> ${OVERRIDE_DIR}/zfs-mount
+### BEGIN INIT INFO
+# Provides:       zvol zfs zfs-mount
+# Required-Start: $local_fs
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# X-Start-After:
+# X-Stop-After:   umountfs
+# Default-Start:  S
+# Default-Stop:   0 6
+# Short-Description: Import and mount ZFS pools, filesystems and volumes
+# Description: Run the `zfs import`, `zfs mount -a`, `zfs umount -a` or
+#              `zfs export` command.
+### END INIT INFO
+EOF
+
+    update-rc.d zfs-mount defaults
+
     ;;
 
   abort-upgrade|abort-remove|abort-deconfigure)

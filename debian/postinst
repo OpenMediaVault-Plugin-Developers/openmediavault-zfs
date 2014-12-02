@@ -34,8 +34,8 @@ case "$1" in
 # Default-Start:  S
 # Default-Stop:   0 6
 # Short-Description: Import and mount ZFS pools, filesystems and volumes
-# Description: Run the `zfs import`, `zfs mount -a`, `zfs umount -a` or
-#              `zfs export` command.
+# Description: Run the 'zfs import', 'zfs mount -a', 'zfs umount -a' or
+#              'zfs export' command.
 ### END INIT INFO
 EOF
 

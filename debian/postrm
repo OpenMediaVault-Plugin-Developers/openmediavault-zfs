@@ -18,6 +18,9 @@ case "$1" in
     if ! omv_config_exists $CONFIG; then
       echo "Configuration Deleted"
     fi
+
+    rm -f /etc/insserv/overrides/zfs-mount
+
     ;;
 
   *)

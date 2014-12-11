@@ -41,6 +41,9 @@ EOF
 
     update-rc.d zfs-mount defaults
 
+    dpkg-trigger update-fixperms
+    dpkg-trigger update-locale
+
     ;;
 
   abort-upgrade|abort-remove|abort-deconfigure)

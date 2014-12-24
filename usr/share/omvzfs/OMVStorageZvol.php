@@ -71,10 +71,10 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 
 	/**
 	 * Get the filesystem detailed information.
-	 * @private
+	 * @protected
 	 * @return TRUE if successful, otherwise FALSE.
 	 */
-	private function getData() {
+	protected function getData() {
 		if ($this->dataCached !== FALSE)
 			return TRUE;
 		$data = array(
@@ -127,7 +127,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 
     /**
      * Check if the filesystem has a label.
-	 * @return Returns TRUE 
+	 * @return Returns TRUE
 	 */
 	public function hasLabel() {
 		if (FALSE === ($label = $this->getLabel()))
@@ -152,7 +152,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
     public function getType() {
 		if ($this->getData() === FALSE)
 			return FALSE;
-		return $this->type;             
+		return $this->type;
     }
 
     /**
@@ -333,22 +333,6 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
     }
 
     /**
-     * Does the filesystem support POSIX ACL.
-     * @return TRUE if the filesystem supports POSIX ACL, otherwise FALSE.
-     */
-    public function hasPosixAclSupport() {
-        if ($this->getData() === FALSE)
-            return FALSE;
-        if (NULL == ($backend = OMVFilesystems::getBackendByType(
-          $this->getType())))
-            return FALSE;
-        // The list of POSIX ACL supporting filesystems. See:
-        // - http://de.wikipedia.org/wiki/Access_Control_List
-        // - http://www.suse.de/~agruen/acl/linux-acls/online
-        return $backend->hasPosixAclSupport();
-    }
-
-    /**
      * Check if a filesystem is mounted.
      * @return TRUE if the filesystem is mounted, otherwise FALSE.
      */
@@ -362,7 +346,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
 		} else {
 			return FALSE;
 		}
-	}	
+	}
 
     /**
      * Mount the filesystem by its device file or UUID.

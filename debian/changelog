@@ -1,3 +1,10 @@
+openmediavault-zfs (0.6.3.5) testing; urgency=low
+
+  * Fix for OMV 1.7
+  * Update locales
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 24 Dec 2014 08:23:42 -0600
+
 openmediavault-zfs (0.6.3.4) testing; urgency=low
 
   * Update locales

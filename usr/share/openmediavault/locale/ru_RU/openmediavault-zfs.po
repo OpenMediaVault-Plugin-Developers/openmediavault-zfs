@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Napalkov Sergey <nsv102@mail.ru>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-04 13:25+0000\n"
-"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
+"PO-Revision-Date: 2014-11-16 11:54+0000\n"
+"Last-Translator: Napalkov Sergey <nsv102@mail.ru>\n"
 "Language-Team: Russian (http://www.transifex.com/projects/p/openmediavault-zfs/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,230 +19,230 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 msgid "% completed ..."
-msgstr ""
+msgstr "% завершения"
 
 msgid "100% completed ..."
-msgstr ""
+msgstr "100% завершение"
 
 msgid "Add Object"
-msgstr ""
+msgstr "Добавить объект"
 
 msgid "Add Pool"
-msgstr ""
+msgstr "Добавить пул"
 
 msgid "Ashift value"
-msgstr ""
+msgstr "Значение Ashift"
 
 msgid "Ashift value to use."
-msgstr ""
+msgstr "Использовать значение Ashift."
 
 msgid "Available"
-msgstr ""
+msgstr "Доступно"
 
 msgid "Basic"
-msgstr ""
+msgstr "Основное"
 
 msgid "By Id"
-msgstr ""
+msgstr "По id"
 
 msgid "By Path"
-msgstr ""
+msgstr "По пути"
 
 msgid "Capacity"
-msgstr ""
+msgstr "Ёмкость"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Имя клона"
 
 msgid "Confirmation"
-msgstr ""
+msgstr "Потверждение"
 
 msgid "Create ZFS Pool"
-msgstr ""
+msgstr "Создать ZFS пул"
 
 msgid "Delete"
-msgstr ""
+msgstr "Удалить"
 
 msgid "Deleting selected item(s)"
-msgstr ""
+msgstr "Удалить выбранный элемент(ы)"
 
 msgid "Details"
-msgstr ""
+msgstr "Свойства"
 
 msgid "Device"
-msgstr ""
+msgstr "Устройство"
 
 msgid "Device alias"
-msgstr ""
+msgstr "Псевдонимы устройства"
 
 msgid "Devices"
-msgstr ""
+msgstr "Устройства"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr ""
+msgstr "Отобразить объекты {0} - {1} из {2}"
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr ""
+msgstr "Вы действительно хотите создать ZFS пул?"
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr ""
+msgstr "Вы действительно хотите удалить выбранный объект(ы)?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr ""
+msgstr "Вы действительно хотите произвести очистку пула? Последняя очистка:"
 
 msgid "Down"
-msgstr ""
+msgstr "Опустить"
 
 msgid "Edit"
-msgstr ""
+msgstr "Редактировать"
 
 msgid "Edit properties"
-msgstr ""
+msgstr "Редактировать свойства"
 
 msgid "Expand"
-msgstr ""
+msgstr "Расширить"
 
 msgid "Expand Pool"
-msgstr ""
+msgstr "Расширить пул"
 
 msgid "Force creation"
-msgstr ""
+msgstr "Создать принудительно"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Создать принудительно, даже если Vdev выдаёт ошибку. Использовать с особой осторожностью!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Создать принудительно, даже если пул выдаёт ошибку. Использовать с особой осторожностью."
 
 msgid "Mirror"
-msgstr ""
+msgstr "Зеркало"
 
 msgid "Modified"
-msgstr ""
+msgstr "Изменить"
 
 msgid "Mountpoint"
-msgstr ""
+msgstr "Точка монтирования"
 
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr ""
+msgstr "Имя нового Клона. Он может быть размещён в любой месте в пределах ZFS иерархии."
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr ""
+msgstr "Имя нового объекта. Префикс будет добавлен к имени. Не используйте символ \"/\""
 
 msgid "New"
-msgstr ""
+msgstr "Новый"
 
 msgid "No items to display"
-msgstr ""
+msgstr "Нет элементов для отображения"
 
 msgid "None"
-msgstr ""
+msgstr "Ни один"
 
 msgid "Object Type"
-msgstr ""
+msgstr "Тип объекта"
 
 msgid "Object details"
-msgstr ""
+msgstr "Детали объекта"
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr ""
+msgstr "Опция точки монтирования пула. По умолчанию будет использовано имя пула."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr ""
+msgstr "Опция точки монтирования файловой системы. По умолчанию будет использована предшествующее имя файловой системы."
 
 msgid "Overview"
-msgstr ""
+msgstr "Обзор"
 
 msgid "Pool type"
-msgstr ""
+msgstr "Тип пула"
 
 msgid "Prefix"
-msgstr ""
+msgstr "Префикс"
 
 msgid "Property"
-msgstr ""
+msgstr "Свойства"
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr ""
+msgstr "Обновить"
 
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 msgid "Scrub"
-msgstr ""
+msgstr "Scrub"
 
 msgid "Serial Number"
-msgstr ""
+msgstr "Серийный номер"
 
 msgid "Set ashift"
-msgstr ""
+msgstr "Установить Ashift."
 
 msgid "Size"
-msgstr ""
+msgstr "Размер"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr ""
+msgstr "Размер, например 5mb,100gb,1tb и т.д."
 
 msgid "Snapshot to clone"
-msgstr ""
+msgstr "Копировать снимок"
 
 msgid "Source"
-msgstr ""
+msgstr "Источник"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr ""
+msgstr "Использовать для каждого устройства псевдонимы. Не изменяйте без необходимости."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr ""
+msgstr "Укажите значение Ashift. Используйте только если уверены."
 
 msgid "Type"
-msgstr ""
+msgstr "Тип"
 
 msgid "Up"
-msgstr ""
+msgstr "Поднять"
 
 msgid "Updating property..."
-msgstr ""
+msgstr "Обновить свойства"
 
 msgid "Used"
-msgstr ""
+msgstr "Использовано"
 
 msgid "Value"
-msgstr ""
+msgstr "Значение"
 
 msgid "Vdev type"
-msgstr ""
+msgstr "Тип Vdev"
 
 msgid "Vendor"
-msgstr ""
+msgstr "Поставщик"
 
 msgid "ZFS"
-msgstr ""
+msgstr "ZFS"
 
 #, php-format
 msgid "Zvol %s [%s, %s]"
-msgstr ""
+msgstr "Zvol %s [%s, %s]"

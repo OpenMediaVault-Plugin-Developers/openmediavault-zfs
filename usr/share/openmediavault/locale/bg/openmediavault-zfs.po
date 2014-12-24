@@ -3,44 +3,43 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# songming <by@songming.me>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-04 13:41+0000\n"
-"Last-Translator: songming <by@songming.me>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/openmediavault-zfs/language/zh_CN/)\n"
+"PO-Revision-Date: 2014-10-16 11:20+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Bulgarian (http://www.transifex.com/projects/p/openmediavault-zfs/language/bg/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: zh_CN\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: bg\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "% completed ..."
-msgstr "完成 % ..."
+msgstr ""
 
 msgid "100% completed ..."
-msgstr "完成100% ..."
+msgstr ""
 
 msgid "Add Object"
-msgstr "添加对象"
+msgstr ""
 
 msgid "Add Pool"
-msgstr "添加池"
+msgstr ""
 
 msgid "Ashift value"
-msgstr "Ashift值"
+msgstr ""
 
 msgid "Ashift value to use."
-msgstr "使用的Ashift值。"
+msgstr ""
 
 msgid "Available"
-msgstr "可用"
+msgstr ""
 
 msgid "Basic"
-msgstr "基础"
+msgstr ""
 
 msgid "By Id"
 msgstr ""
@@ -49,200 +48,200 @@ msgid "By Path"
 msgstr ""
 
 msgid "Capacity"
-msgstr "容量"
+msgstr ""
 
 msgid "Clone name"
-msgstr "克隆名称"
+msgstr ""
 
 msgid "Confirmation"
-msgstr "确认"
+msgstr ""
 
 msgid "Create ZFS Pool"
-msgstr "创建ZFS池"
+msgstr ""
 
 msgid "Delete"
-msgstr "删除"
+msgstr ""
 
 msgid "Deleting selected item(s)"
-msgstr "删除选中项(可复选)"
+msgstr ""
 
 msgid "Details"
-msgstr "详情"
+msgstr ""
 
 msgid "Device"
-msgstr "设备"
+msgstr ""
 
 msgid "Device alias"
-msgstr "设备别名"
+msgstr ""
 
 msgid "Devices"
-msgstr "设备"
+msgstr ""
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr "显示条目 {0} - {1} 全部 {2}"
+msgstr ""
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr "确认要创建ZFS池吗？"
+msgstr ""
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr "确认要删除选中项(可复选)吗？"
+msgstr ""
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr ""
 
 msgid "Down"
-msgstr "向下"
+msgstr ""
 
 msgid "Edit"
-msgstr "编辑"
+msgstr ""
 
 msgid "Edit properties"
-msgstr "编辑特性"
+msgstr ""
 
 msgid "Expand"
-msgstr "扩展"
+msgstr ""
 
 msgid "Expand Pool"
-msgstr "扩展池"
+msgstr ""
 
 msgid "Force creation"
-msgstr "强制创建"
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr "即使报错也强制创建Vdev，请谨慎使用该设置！"
+msgstr ""
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "即使报错也强制创建池，请谨慎使用该设置！"
+msgstr ""
 
 msgid "Mirror"
-msgstr "镜像"
+msgstr ""
 
 msgid "Modified"
-msgstr "修改"
+msgstr ""
 
 msgid "Mountpoint"
-msgstr "挂载点"
+msgstr ""
 
 msgid "Name"
-msgstr "名称"
+msgstr ""
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "克隆的新名称，它可以放在ZFS层级构架的任何位置。"
+msgstr ""
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "前缀将放在新对象的名称前，请省略前面的  /"
+msgstr ""
 
 msgid "New"
-msgstr "新增"
+msgstr ""
 
 msgid "No items to display"
-msgstr "没有项目显示"
+msgstr ""
 
 msgid "None"
-msgstr "无"
+msgstr ""
 
 msgid "Object Type"
-msgstr "对象类型"
+msgstr ""
 
 msgid "Object details"
-msgstr "对象详情"
+msgstr ""
 
 msgid "Ok"
-msgstr "OK"
+msgstr ""
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "可选池的挂载点，默认使用池名称挂载。"
+msgstr ""
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr "可选文件系统的挂载点，如果留空则父挂载点将作为文件系统名称的前缀。"
+msgstr ""
 
 msgid "Overview"
-msgstr "概览"
+msgstr ""
 
 msgid "Pool type"
-msgstr "池类型"
+msgstr ""
 
 msgid "Prefix"
-msgstr "前缀"
+msgstr ""
 
 msgid "Property"
-msgstr "特性"
+msgstr ""
 
 msgid "RAID-Z1"
-msgstr "RAID-Z1"
+msgstr ""
 
 msgid "RAID-Z2"
-msgstr "RAID-Z2"
+msgstr ""
 
 msgid "RAID-Z3"
-msgstr "RAID-Z3"
+msgstr ""
 
 msgid "Refresh"
-msgstr "刷新"
+msgstr ""
 
 msgid "Save"
-msgstr "保存"
+msgstr ""
 
 msgid "Scrub"
 msgstr ""
 
 msgid "Serial Number"
-msgstr "序列号"
+msgstr ""
 
 msgid "Set ashift"
-msgstr "设置ashift"
+msgstr ""
 
 msgid "Size"
-msgstr "大小"
+msgstr ""
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "卷的大小，如5mb、100gb、1tb等"
+msgstr ""
 
 msgid "Snapshot to clone"
-msgstr "快照克隆"
+msgstr ""
 
 msgid "Source"
-msgstr "源"
+msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "指定设备的别名，如果你不了解就不建议设置。"
+msgstr ""
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "指定ashift值，如果你清楚该值的意义才调整它。"
+msgstr ""
 
 msgid "Type"
-msgstr "类型"
+msgstr ""
 
 msgid "Up"
-msgstr "向上"
+msgstr ""
 
 msgid "Updating property..."
-msgstr "更新属性 ..."
+msgstr ""
 
 msgid "Used"
-msgstr "使用"
+msgstr ""
 
 msgid "Value"
-msgstr "值"
+msgstr ""
 
 msgid "Vdev type"
-msgstr "Vdev类型"
+msgstr ""
 
 msgid "Vendor"
-msgstr "供应商"
+msgstr ""
 
 msgid "ZFS"
-msgstr "ZFS"
+msgstr ""
 
 #, php-format
 msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgstr ""

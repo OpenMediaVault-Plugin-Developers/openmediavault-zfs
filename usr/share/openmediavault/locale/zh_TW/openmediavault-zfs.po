@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-04 13:25+0000\n"
-"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
+"PO-Revision-Date: 2014-11-19 21:35+0000\n"
+"Last-Translator: kochin <kochinc@outlook.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,10 +31,10 @@ msgid "Add Pool"
 msgstr "新增集用場"
 
 msgid "Ashift value"
-msgstr ""
+msgstr "Ashift 數值"
 
 msgid "Ashift value to use."
-msgstr ""
+msgstr "所要使用的 Ashift 數值。"
 
 msgid "Available"
 msgstr "可用"
@@ -43,10 +43,10 @@ msgid "Basic"
 msgstr "基本"
 
 msgid "By Id"
-msgstr ""
+msgstr "以 Id"
 
 msgid "By Path"
-msgstr ""
+msgstr "以路徑"
 
 msgid "Capacity"
 msgstr "容量"
@@ -58,7 +58,7 @@ msgid "Confirmation"
 msgstr "確認"
 
 msgid "Create ZFS Pool"
-msgstr ""
+msgstr "建立 ZFS 集用場"
 
 msgid "Delete"
 msgstr "刪除"
@@ -73,7 +73,7 @@ msgid "Device"
 msgstr "裝置"
 
 msgid "Device alias"
-msgstr ""
+msgstr "裝置別名"
 
 msgid "Devices"
 msgstr "裝置"
@@ -88,7 +88,7 @@ msgid "Do you really want to delete the selected item(s)?"
 msgstr "您真的要刪除所選項目嗎？"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr ""
+msgstr "您真的要擦除該集用場嗎？<br/><br/>最近擦除："
 
 msgid "Down"
 msgstr "停止"
@@ -145,7 +145,7 @@ msgid "No items to display"
 msgstr "無項目可顯示"
 
 msgid "None"
-msgstr ""
+msgstr "無"
 
 msgid "Object Type"
 msgstr "物件型式"
@@ -192,13 +192,13 @@ msgid "Save"
 msgstr "儲存"
 
 msgid "Scrub"
-msgstr ""
+msgstr "擦除"
 
 msgid "Serial Number"
 msgstr "序號"
 
 msgid "Set ashift"
-msgstr ""
+msgstr "設定 ashift"
 
 msgid "Size"
 msgstr "大小"
@@ -214,10 +214,10 @@ msgstr "來源"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr ""
+msgstr "指定哪一個裝置別名應被使用。除非需要，不要更改。"
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr ""
+msgstr "指定 ashift 數值。只有當你確定需要時才使用。"
 
 msgid "Type"
 msgstr "型式"
@@ -245,4 +245,4 @@ msgstr "ZFS"
 
 #, php-format
 msgid "Zvol %s [%s, %s]"
-msgstr ""
+msgstr "Zvol %s [%s, %s]"

@@ -3,178 +3,178 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Stefan Thrane Overby <stoverby@gmail.com>, 2014
+# okpail <okpail@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-12-05 07:15+0000\n"
-"Last-Translator: Stefan Thrane Overby <stoverby@gmail.com>\n"
-"Language-Team: Danish (http://www.transifex.com/projects/p/openmediavault-zfs/language/da/)\n"
+"PO-Revision-Date: 2014-11-04 21:23+0000\n"
+"Last-Translator: okpail <okpail@gmail.com>\n"
+"Language-Team: Dutch (http://www.transifex.com/projects/p/openmediavault-zfs/language/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: da\n"
+"Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "% completed ..."
-msgstr "% færdiggjort ..."
+msgstr "% afgewerkt..."
 
 msgid "100% completed ..."
-msgstr "100% færdiggjort ..."
+msgstr "100% verwerkt ..."
 
 msgid "Add Object"
-msgstr "Tilføj Objekt"
+msgstr "Voeg een Object toe"
 
 msgid "Add Pool"
-msgstr "Tilføj Pool"
+msgstr "Voeg een Pool toe"
 
 msgid "Ashift value"
-msgstr "Ashift værdi"
+msgstr "Ashift waarde"
 
 msgid "Ashift value to use."
-msgstr "Ashift værdi til brug."
+msgstr "Te gebruiken Ashift waarde"
 
 msgid "Available"
-msgstr "Tilgængelig"
+msgstr "Beschikbaar"
 
 msgid "Basic"
-msgstr "Grundlæggende"
+msgstr "Basis"
 
 msgid "By Id"
-msgstr "Ved Id"
+msgstr "Door middel van Id"
 
 msgid "By Path"
-msgstr "Ved Sti"
+msgstr "Door middel van het pad"
 
 msgid "Capacity"
-msgstr "Kapacitet"
+msgstr "Capaciteit"
 
 msgid "Clone name"
-msgstr "Klon navn"
+msgstr "Kloon naam"
 
 msgid "Confirmation"
-msgstr "Bekræftelse"
+msgstr "Bevestiging"
 
 msgid "Create ZFS Pool"
-msgstr "Opret ZFS Pool"
+msgstr "Creer ZFS Pool"
 
 msgid "Delete"
-msgstr "Slet"
+msgstr "Verwijder"
 
 msgid "Deleting selected item(s)"
-msgstr "Sletter valgte emne(r)"
+msgstr "Verwijder geselecteerde item(s)"
 
 msgid "Details"
-msgstr "Detaljer"
+msgstr "Details"
 
 msgid "Device"
-msgstr "Enhed"
+msgstr "Device"
 
 msgid "Device alias"
-msgstr "Enhed alias"
+msgstr "Device alias"
 
 msgid "Devices"
-msgstr "Enheder"
+msgstr "Devices"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr "Viser emner {0} - {1} af {2}"
+msgstr "Afbeelden van de items {0} - {1} van {2}"
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr "Er du sikker på at du vil oprette en ZFS pool?"
+msgstr "Wil je werkelijk de ZFS poel maken?"
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr "Er du sikker på, at du vil slette de(t) valgte emne(r)?"
+msgstr "Wil je werkelijk de geselecteerd item(s) verwijderen?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "Er du sikker på, at du vil udrens pool?<br/><br/>Seneste udrensning:"
+msgstr "Will je de pool werkelijk 'scrubben'?<br/><br/>Laatste scrub vond plaats op:"
 
 msgid "Down"
-msgstr "Nede"
+msgstr "Buiten werking"
 
 msgid "Edit"
-msgstr "Rediger"
+msgstr "Edit"
 
 msgid "Edit properties"
-msgstr "Rediger egenskaber"
+msgstr "Edit de eigenschappen"
 
 msgid "Expand"
-msgstr "Udvid"
+msgstr "Expandeer"
 
 msgid "Expand Pool"
-msgstr "Udvid Pool"
+msgstr "Expandeer de Pool"
 
 msgid "Force creation"
-msgstr "Tving oprettelse"
+msgstr "Kracht creatie"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Tving oprettelsen af Vdev, selvom der er rapporteret fejl. Brug med yderste forsigtighed!"
+msgstr "Forceer de creatie van de Vdev, zelfs als fouten worden gerapporteerd. Wees extreem voorzichtig!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Tving oprettelsen af pool, selvom der er rapporteret fejl. Brug med yderste forsigtighed!"
+msgstr "Forceer de creatie van de pool, zelfs als fouten worden gerapporteerd. Wees extreem voorzichtig!"
 
 msgid "Mirror"
-msgstr "Spejl"
+msgstr "Spiegel"
 
 msgid "Modified"
-msgstr "Ændret"
+msgstr "Aangepast"
 
 msgid "Mountpoint"
-msgstr "Monteringspunkt"
+msgstr "Mountpoint"
 
 msgid "Name"
-msgstr "Navn"
+msgstr "Naam"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "Navn på den nye Klon. Den kan placeres overalt indeni ZFS hierarkiet."
+msgstr "De naam van de nieuwe kloon. Deze kan overal in de ZFS hierarchy worden gehangen. "
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "Navn på det nye objekt. Præfiks vil tilføjes i begyndelsen af navnet. Udlad venligst ledende /"
+msgstr "De naam van het nieuwe object. De prefix zal voorafgaan aan de naam. Gebruik het teken / niet in de naamgeving."
 
 msgid "New"
-msgstr "Ny"
+msgstr "Nieuw"
 
 msgid "No items to display"
-msgstr "Ingen emner til visning"
+msgstr "Geen items die kunnen worden weergegeven"
 
 msgid "None"
-msgstr "Ingen"
+msgstr "Geen"
 
 msgid "Object Type"
-msgstr "Objekt Type"
+msgstr "Object Type"
 
 msgid "Object details"
-msgstr "Objekt detaljer"
+msgstr "Object details"
 
 msgid "Ok"
 msgstr "Ok"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "Valgfrit monteringspunkt for pool. Standard er at bruge pool navn."
+msgstr "Optioneel mount point voor de pool. Gebruikelijk wordt de pool naam gebruikt."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr "Valgfrit monteringspunkt for filsystemet. Hvis det efterlades tomt vil forældre monteringspunkt tilføjes i begyndelsen af navnet på filsystemet."
+msgstr "Optioneel mount point van het filesystem. Als er niets wordt ingevuld zal het 'ouder' mount point automatisch vooraan aan de naam van het filesysteem worden toegevoegd. "
 
 msgid "Overview"
-msgstr "Oversigt"
+msgstr "Overzicht"
 
 msgid "Pool type"
 msgstr "Pool type"
 
 msgid "Prefix"
-msgstr "Fortegn"
+msgstr "Prefix"
 
 msgid "Property"
-msgstr "Egenskaber"
+msgstr "Eigenschap"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -186,59 +186,59 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr "Genopfrisk"
+msgstr "Informatie Vernieuwen"
 
 msgid "Save"
-msgstr "Gem"
+msgstr "Opslaan"
 
 msgid "Scrub"
-msgstr "Udrens"
+msgstr "Scrub"
 
 msgid "Serial Number"
 msgstr "Serie Nummer"
 
 msgid "Set ashift"
-msgstr "Indstil ashift"
+msgstr "Stel ashift in"
 
 msgid "Size"
-msgstr "Størrelse"
+msgstr "Grootte"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "Størrelse på drevet f.eks. 5mb,100gb,1tb osv"
+msgstr "Grootte van het volume bijv. 5mb,100gb,1tb etc"
 
 msgid "Snapshot to clone"
-msgstr "Snapshot, der skal klones"
+msgstr "Het Snapshot wat gekloond moet worden"
 
 msgid "Source"
-msgstr "Kilde"
+msgstr "Bron"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "Angiver hvilke enhed alias der skal bruges. Ændr ikke, medmindre det er nødvedigt."
+msgstr "Geeft aan welke device alias gebruikt moet worden. Verander niets tenzij nodig."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Angiver ashift værdi. Brug kun hvis du er sikker på, at du har brug for det."
+msgstr "Specificeer de shift waarde. Gebruik het alleen als je zeker weet dat je het nodig hebt."
 
 msgid "Type"
 msgstr "Type"
 
 msgid "Up"
-msgstr "Oppe"
+msgstr "Aan"
 
 msgid "Updating property..."
-msgstr "Opdater egenskaber ..."
+msgstr "Eigenschap vernieuwen..."
 
 msgid "Used"
-msgstr "Brugt"
+msgstr "Gebruikt"
 
 msgid "Value"
-msgstr "Værdi"
+msgstr "Waarde"
 
 msgid "Vdev type"
 msgstr "Vdev type"
 
 msgid "Vendor"
-msgstr "Producent"
+msgstr "Verkoper"
 
 msgid "ZFS"
 msgstr "ZFS"

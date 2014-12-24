@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Ettore Atalan <atalanttore@googlemail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-04 13:25+0000\n"
-"Last-Translator: Aaron Murray <aaron27@ryecoinc.com>\n"
+"PO-Revision-Date: 2014-12-11 00:26+0000\n"
+"Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/openmediavault-zfs/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,13 +19,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "% completed ..."
-msgstr ""
+msgstr "% fertiggestellt ..."
 
 msgid "100% completed ..."
-msgstr ""
+msgstr "100% fertiggestellt ..."
 
 msgid "Add Object"
-msgstr ""
+msgstr "Objekt hinzufügen"
 
 msgid "Add Pool"
 msgstr ""
@@ -36,46 +37,46 @@ msgid "Ashift value to use."
 msgstr ""
 
 msgid "Available"
-msgstr ""
+msgstr "Verfügbar"
 
 msgid "Basic"
-msgstr ""
+msgstr "Basis"
 
 msgid "By Id"
-msgstr ""
+msgstr "Nach Kennung"
 
 msgid "By Path"
-msgstr ""
+msgstr "Nach Pfad"
 
 msgid "Capacity"
-msgstr ""
+msgstr "Kapazität"
 
 msgid "Clone name"
 msgstr ""
 
 msgid "Confirmation"
-msgstr ""
+msgstr "Bestätigung"
 
 msgid "Create ZFS Pool"
 msgstr ""
 
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 msgid "Deleting selected item(s)"
-msgstr ""
+msgstr "Ausgewählte(s) Element(e) wird/werden gelöscht"
 
 msgid "Details"
-msgstr ""
+msgstr "Details"
 
 msgid "Device"
-msgstr ""
+msgstr "Gerät"
 
 msgid "Device alias"
 msgstr ""
 
 msgid "Devices"
-msgstr ""
+msgstr "Geräte"
 
 msgid "Displaying items {0} - {1} of {2}"
 msgstr ""
@@ -93,19 +94,19 @@ msgid "Down"
 msgstr ""
 
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 msgid "Edit properties"
-msgstr ""
+msgstr "Eigenschaften bearbeiten"
 
 msgid "Expand"
-msgstr ""
+msgstr "Erweitern"
 
 msgid "Expand Pool"
 msgstr ""
 
 msgid "Force creation"
-msgstr ""
+msgstr "Erstellung erzwingen"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -118,16 +119,16 @@ msgid ""
 msgstr ""
 
 msgid "Mirror"
-msgstr ""
+msgstr "Spiegelserver"
 
 msgid "Modified"
-msgstr ""
+msgstr "Geändert"
 
 msgid "Mountpoint"
-msgstr ""
+msgstr "Einhängepunkt"
 
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
@@ -138,22 +139,22 @@ msgid ""
 msgstr ""
 
 msgid "New"
-msgstr ""
+msgstr "Neu"
 
 msgid "No items to display"
-msgstr ""
+msgstr "Keine anzuzeigenden Elemente"
 
 msgid "None"
-msgstr ""
+msgstr "Keine"
 
 msgid "Object Type"
-msgstr ""
+msgstr "Objekttyp"
 
 msgid "Object details"
-msgstr ""
+msgstr "Objektdetails"
 
 msgid "Ok"
-msgstr ""
+msgstr "OK"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr ""
@@ -164,52 +165,52 @@ msgid ""
 msgstr ""
 
 msgid "Overview"
-msgstr ""
+msgstr "Übersicht"
 
 msgid "Pool type"
 msgstr ""
 
 msgid "Prefix"
-msgstr ""
+msgstr "Präfix"
 
 msgid "Property"
-msgstr ""
+msgstr "Eigenschaft"
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr ""
+msgstr "Aktualisieren"
 
 msgid "Save"
-msgstr ""
+msgstr "Speichern"
 
 msgid "Scrub"
 msgstr ""
 
 msgid "Serial Number"
-msgstr ""
+msgstr "Seriennummer"
 
 msgid "Set ashift"
 msgstr ""
 
 msgid "Size"
-msgstr ""
+msgstr "Größe"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr ""
+msgstr "Größe des Volumens, z.B. 5mb,100gb,1tb, usw."
 
 msgid "Snapshot to clone"
 msgstr ""
 
 msgid "Source"
-msgstr ""
+msgstr "Quelle"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -219,29 +220,29 @@ msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr ""
 
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 msgid "Up"
 msgstr ""
 
 msgid "Updating property..."
-msgstr ""
+msgstr "Eigenschaft wird aktualisiert..."
 
 msgid "Used"
-msgstr ""
+msgstr "Verwendet"
 
 msgid "Value"
-msgstr ""
+msgstr "Wert"
 
 msgid "Vdev type"
-msgstr ""
+msgstr "Vdev-Typ"
 
 msgid "Vendor"
-msgstr ""
+msgstr "Anbieter"
 
 msgid "ZFS"
-msgstr ""
+msgstr "ZFS"
 
 #, php-format
 msgid "Zvol %s [%s, %s]"
-msgstr ""
+msgstr "Zvol %s [%s, %s]"

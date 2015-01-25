@@ -2,6 +2,8 @@ openmediavault-zfs (0.6.3.5) testing; urgency=low
 
   * Fix for OMV 1.7
   * Update locales
+  * Support renaming of ZFS objects
+  * Minor fix for zvol size listing when there is a snapshot
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 24 Dec 2014 08:23:42 -0600
 

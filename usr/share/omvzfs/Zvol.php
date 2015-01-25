@@ -80,12 +80,12 @@ class OMVModuleZFSZvol {
 			$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
 			$this->exec($cmd, $out2, $res2);
 			foreach ($out2 as $line2) {
-				$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
+				$this->snapshots["$line2"] = new OMVModuleZFSSnapshot($line2);
 			}
 			$cmd = "zfs get -o value -Hp volsize,logicalused \"$name\" 2>&1";
-			$this->exec($cmd, $out2, $res2);
-			$this->size = $out2[0];
-			$this->used = $out2[1];
+			$this->exec($cmd, $out3, $res3);
+			$this->size = $out3[0];
+			$this->used = $out3[1];
 		}
 
 	}

@@ -183,6 +183,19 @@ class OMVModuleZFSSnapshot {
 	}
 
 	/**
+	 * Renames a Snapshot
+	 * 
+	 * @param string $newname New name of the Snapshot
+	 * @return void
+	 * @access public
+	 */
+	public function rename($newname) {
+		$cmd = "zfs rename \"" . $this->name . "\" \"" . $newname . "\" 2>&1";
+		$this->exec($cmd,$out,$res);
+		$this->name = $newname;
+	}
+
+	/**
 	 * Helper function to execute a command and throw an exception on error
 	 * (requires stderr redirected to stdout for proper exception message).
 	 * 

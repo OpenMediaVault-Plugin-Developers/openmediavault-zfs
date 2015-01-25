@@ -479,6 +479,24 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		}).show();
 	},
     
+	onRenameButton: function() {
+		var me = this;
+		var sm = me.getSelectionModel();
+		var records = sm.getSelection();
+		var record = records[0];
+		Ext.create("OMV.module.admin.storage.zfs.Rename", {
+			oldname: record.get("name"),
+			type: record.get("type"),
+			oldpath: record.get("path"),
+			listeners: {
+				scope: me,
+				submit: function() {
+					this.doReload();
+				}
+			}
+		}).show();
+	},
+    
 	onExportPoolButton: function() {
         var me = this;
 		var sm = me.getSelectionModel();

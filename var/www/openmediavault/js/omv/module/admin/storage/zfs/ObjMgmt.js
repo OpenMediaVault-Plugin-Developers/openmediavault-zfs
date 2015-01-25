@@ -197,3 +197,51 @@ Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 	}
 });
 
+Ext.define("OMV.module.admin.storage.zfs.Rename", {
+	extend: "OMV.workspace.window.Form",
+	requires: [
+		"OMV.data.Store",
+		"OMV.data.Model",
+		"OMV.data.proxy.Rpc",
+	],
+
+	rpcService: "ZFS",
+	rpcSetMethod: "rename",
+	title: _("Rename ZFS Object"),
+	autoLoadData: false,
+	hideResetButton: true,
+	width: 550,
+	height: 150,
+
+	getFormItems: function() {
+		var me = this;
+		return [{
+			xtype: "textfield",
+			name: "oldname",
+			fieldLabel: _("Old Name"),
+			allowBlank: false,
+			readOnly: true,
+			value: me.oldname
+		},{
+			xtype: "textfield",
+			name: "newname",
+			fieldLabel: _("New Name"),
+			allowBlank: false
+		},{
+			xtype: "textfield",
+			name: "type",
+			allowBlank: false,
+			readOnly: true,
+			value: me.type,
+			hidden: true
+		},{
+			xtype: "textfield",
+			name: "oldpath",
+			allowBlank: false,
+			readOnly: true,
+			value: me.oldpath,
+			hidden: true
+		}];
+	}
+});
+

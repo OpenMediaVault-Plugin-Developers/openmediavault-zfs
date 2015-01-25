@@ -52,6 +52,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("expandPool");
 		$this->registermethod("scrubPool");
 		$this->registerMethod("getCandidates");
+		$this->registerMethod("rename");
 	}
 
 	public function addPool($params, $context) {
@@ -650,6 +651,67 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		return $devs;
 	}
 
+	public function rename($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "newname":{"type":"string"},
+				  "oldname":{"type":"string"},
+				  "type":{"type":"string"},
+				  "oldpath":{"type":"string"}
+			  }
+		}');
+		global $xmlConfig;
+		
+		preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
+		$pre = "";
+		if (isset($matches[1])) {
+			$pre = $matches[1];
+		}
+		$newpath = $pre . $params['newname'];
+
+		switch($params['type']) {
+		case "Filesystem":
+			//Rename the object first
+			$ds = new OMVModuleZFSDataset($params['oldpath']);
+			$ds->rename($newpath);
+
+			//Locate all filesystems with the oldpath as subpath
+			$xpath = "//system/fstab/mntent[type='zfs']";
+			$objects = $xmlConfig->getList($xpath);
+			foreach($objects as $objectk => &$objectv) {
+				if(preg_match('/^' . preg_quote($params['oldpath'], "/") . '([\/]?.*)$/', $objectv['fsname'], $matches)) {
+					$post = "";
+					if (isset($matches[1])) {
+						$post = $matches[1];
+					}
+					unset($matches);
+					preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
+					$newpath = $matches[1] . $params['newname'] . $post;
+					unset($matches);
+					$objectv['fsname'] = $newpath;
+					$objectv['dir'] = "/" . $newpath;
+					$xmlConfig->replace("//system/fstab/mntent[uuid='" . $objectv['uuid'] . "']", $objectv);
+				}
+			}
+			break;
+
+		case "Volume":
+			$vol = new OMVModuleZFSZvol($params['oldpath']);
+			$vol->rename($newpath);
+			break;
+		
+		case "Snapshot":
+			$snap = new OMVModuleZFSSnapshot($params['oldpath']);
+			$snap->rename($newpath);
+			break;
+
+		default:
+			break;
+		}
+	}
 }
 
 // Register the RPC service.

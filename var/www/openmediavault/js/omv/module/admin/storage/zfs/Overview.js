@@ -1,7 +1,11 @@
-// require("js/omv/tree/Panel.js")
-// require("js/omv/module/admin/storage/zfs/TreePanel.js")
 // require("js/omv/workspace/window/Grid.js")
+// require("js/omv/workspace/window/Form.js")
+// require("js/omv/data/Store.js")
+// require("js/omv/data/Model.js")
+// require("js/omv/data/proxy/Rpc.js")
+// require("js/omv/tree/Panel.js")
 // require("js/omv/form/field/CheckboxGrid.js")
+// require("js/omv/module/admin/storage/zfs/TreePanel.js")
 // require("js/omv/module/admin/storage/zfs/PoolMgmt.js")
 // require("js/omv/module/admin/storage/zfs/ObjMgmt.js")
 

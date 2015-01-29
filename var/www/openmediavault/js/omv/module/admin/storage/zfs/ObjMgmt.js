@@ -1,3 +1,8 @@
+// require("js/omv/workspace/window/Form.js")
+// require("js/omv/data/Store.js")
+// require("js/omv/data/Model.js")
+// require("js/omv/data/proxy/Rpc.js")
+// require("js/omv/data/reader/RpcArray.js")
 Ext.define("OMV.module.admin.storage.zfs.AddObject", {
 	extend: "OMV.workspace.window.Form",
 	uses: [

@@ -1,3 +1,9 @@
+// require("js/omv/workspace/window/Form.js")
+// require("js/omv/data/Store.js")
+// require("js/omv/data/Model.js")
+// require("js/omv/data/proxy/Rpc.js")
+// require("js/omv/data/reader/RpcArray.js")
+// require("js/omv/form/field/CheckboxGrid.js")
 Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
 	extend: "OMV.workspace.window.Form",
 	requires: [

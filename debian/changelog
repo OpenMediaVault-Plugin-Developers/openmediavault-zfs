@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.3.6) testing; urgency=low
+
+  * js fixes
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 31 Jan 2015 07:01:37 -0600
+
 openmediavault-zfs (0.6.3.5) testing; urgency=low
 
   * Fix for OMV 1.7

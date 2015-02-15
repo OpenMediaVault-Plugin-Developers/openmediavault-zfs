@@ -1,3 +1,4 @@
+// require("js/omv/WorkspaceManager.js")
 OMV.WorkspaceManager.registerNode({
     id      : "zfs",
     path    : "/storage",

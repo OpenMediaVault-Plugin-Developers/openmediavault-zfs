@@ -1,6 +1,7 @@
 openmediavault-zfs (0.6.3.6) testing; urgency=low
 
   * js fixes
+  * Added missing include statements
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 31 Jan 2015 07:01:37 -0600
 

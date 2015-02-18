@@ -597,7 +597,7 @@ class OMVModuleZFSUtil {
 				case "B":
 					break;
 				case "K":
-					$num *= $kilebyte;
+					$num *= $kilobyte;
 					break;
 				case "M":
 					$num *= $megabyte;

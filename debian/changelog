@@ -1,3 +1,11 @@
+openmediavault-zfs (0.6.3.8) testing; urgency=low
+
+  * Fix displaying wrong pool size
+  * Fix calculation of available in Dataset
+  * Converting php files to unix format (\r\n to \n)
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 18 Feb 2015 01:32:49 +0100
+
 openmediavault-zfs (0.6.3.7) testing; urgency=low
 
   * Added missing include statements

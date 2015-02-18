@@ -19,8 +19,10 @@ class OMVModuleZFSUtil {
 		$ds = new OMVModuleZFSDataset($name);
 		$property = $ds->getProperty("quota");
 		$quota = $property['value'];
-		if (strcmp($quota, "none") === 0)
-			return "n/a";
+		if (strcmp($quota, "none") === 0) {
+			$property = $ds->getProperty("available");
+			$quota = $property['value'];
+		}
 		return $quota;
 	}
 
@@ -384,8 +386,8 @@ class OMVModuleZFSUtil {
 					$pool = new OMVModuleZFSZpool($path);
 					$tmp['origin'] = "n/a";
 					$tmp['size'] = $pool->getSize();
-					$tmp['used'] = $pool->getAttribute("allocated");
-					$tmp['available'] = $pool->getAttribute("free");
+					$tmp['used'] = $pool->getAttribute("used");
+					$tmp['available'] = $pool->getAvailable();
 					$tmp['mountpoint'] = $pool->getMountPoint();
 					$tmp['lastscrub'] = OMVModuleZFSUtil::latestScrub($path);
 					$tmp['state'] = OMVModuleZFSUtil::getPoolState($path);
@@ -571,7 +573,49 @@ class OMVModuleZFSUtil {
 		}
 	}
 
-}
+        /**
+         * Convert human readable format to bytes
+         *
+         * @param string $humanformat Size in human readble format
+         * @return integer
+         */
+        public static function SizeTobytes($humanformat) {
+		$units = array("B", "K", "M", "G", "T");
+                $kilobyte = 1024;
+                $megabyte = $kilobyte * 1024;
+                $gigabyte = $megabyte * 1024;
+                $terabyte = $gigabyte * 1024;
 
+		$unit = substr($humanformat, -1);
+		$num = substr($humanformat, 0, strlen($humanformat) - 1);
+
+		if (is_numeric($unit)) {
+			return int($humanformat);
+		}
+		if (in_array($unit, $units)) {
+			switch ($unit) {
+				case "B":
+					break;
+				case "K":
+					$num *= $kilebyte;
+					break;
+				case "M":
+					$num *= $megabyte;
+					break;
+				case "G":
+					$num *= $gigabyte;
+					break;
+				case "T":
+					$num *= $terabyte;
+					break;
+			}
+		} else {
+			throw new OMVModuleZFSException("Unknown size unit"); 
+		}
+                
+		return $num;
+        }
+
+}
 
 ?>

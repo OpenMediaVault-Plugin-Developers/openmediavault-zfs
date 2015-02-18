@@ -156,7 +156,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 					$this->vdevs = $vdev;
 				else
 					array_push ($this->vdevs, $vdev);
-				$this->size = $this->getAttribute("size");
+				$this->setSize();
 				$this->mountPoint = $this->getAttribute("mountpoint");
 			}
 		} else {
@@ -199,7 +199,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			throw new OMVModuleZFSException(implode("\n", $output));
 		else
 			$this->vdevs = array_merge($this->vdevs, $vdevs);
-		$this->size = $this->getAttribute("size");
+		$this->setSize();
     }
 
     /**
@@ -394,6 +394,26 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      */
     public function getSize() {
         return $this->size;
+    }
+
+    /**
+     *
+     * @return int
+     * @access private
+     */
+    private function setSize() {
+        $used = OMVModuleZFSUtil::SizeTobytes($this->getAttribute("used")[0]);
+        $avail = OMVModuleZFSUtil::SizeTobytes($this->getAvailable());
+	$this->size = OMVModuleZFSUtil::bytesToSize($avail + $used);
+    }
+
+    /**
+     *
+     * @return int
+     * @access public
+     */
+    public function getAvailable() {
+        return $this->getAttribute("available")[0];
     }
 
     /**
@@ -783,7 +803,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 				}
 			}
 		}
-		$this->size = $this->getAttribute("size");
+		$this->setSize();
 		$this->mountPoint = $this->getAttribute("mountpoint");
 	}
 

@@ -3,178 +3,178 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Raul Fernandez Garcia <raulfg3@gmail.com>, 2014
+# Andi Chandler <andi@gowling.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-05 20:46+0000\n"
-"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>\n"
-"Language-Team: Spanish (http://www.transifex.com/projects/p/openmediavault-zfs/language/es/)\n"
+"PO-Revision-Date: 2015-05-04 00:56+0000\n"
+"Last-Translator: Andi Chandler <andi@gowling.com>\n"
+"Language-Team: English (United Kingdom) (http://www.transifex.com/projects/p/openmediavault-zfs/language/en_GB/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: es\n"
+"Language: en_GB\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "% completed ..."
-msgstr "% completado ..."
+msgstr "% completed ..."
 
 msgid "100% completed ..."
-msgstr "100% completado ..."
+msgstr "100% completed ..."
 
 msgid "Add Object"
-msgstr "Añadir objeto"
+msgstr "Add Object"
 
 msgid "Add Pool"
-msgstr "Añadir Pool"
+msgstr "Add Pool"
 
 msgid "Ashift value"
-msgstr "Valor de Ashift"
+msgstr "Ashift value"
 
 msgid "Ashift value to use."
-msgstr "Valor de Ashift a usar."
+msgstr "Ashift value to use."
 
 msgid "Available"
-msgstr "Disponible"
+msgstr "Available"
 
 msgid "Basic"
-msgstr "Basico"
+msgstr "Basic"
 
 msgid "By Id"
-msgstr "Por Id"
+msgstr "By Id"
 
 msgid "By Path"
-msgstr "Por ruta"
+msgstr "By Path"
 
 msgid "Capacity"
-msgstr "Capacidad"
+msgstr "Capacity"
 
 msgid "Clone name"
-msgstr "Nombre del Clon"
+msgstr "Clone name"
 
 msgid "Confirmation"
-msgstr "Confirmación"
+msgstr "Confirmation"
 
 msgid "Create ZFS Pool"
-msgstr "Crear un pool ZFS"
+msgstr "Create ZFS Pool"
 
 msgid "Delete"
-msgstr "Borrar"
+msgstr "Delete"
 
 msgid "Deleting selected item(s)"
-msgstr "Borrar elemento(s) seleccionado(s)"
+msgstr "Deleting selected item(s)"
 
 msgid "Details"
-msgstr "Detalles"
+msgstr "Details"
 
 msgid "Device"
-msgstr "Dispositivo"
+msgstr "Device"
 
 msgid "Device alias"
-msgstr "Alias de Dispositivo"
+msgstr "Device alias"
 
 msgid "Devices"
-msgstr "Dispositivos"
+msgstr "Devices"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr "Mostrando elementos {0} - {1} of {2}"
+msgstr "Displaying items {0} - {1} of {2}"
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr "¿Realmente desea crear un Pool ZFS?"
+msgstr "Do you really want to create the ZFS pool?"
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr "¿Realmente desea borrar los elemento(s) seleccionados?"
+msgstr "Do you really want to delete the selected item(s)?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "¿Realmente desea ejecutar un scrub al pool? <br/><br/>Ultimo scrub: "
+msgstr "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 
 msgid "Down"
-msgstr "Bajar"
+msgstr "Down"
 
 msgid "Edit"
-msgstr "Editar"
+msgstr "Edit"
 
 msgid "Edit properties"
-msgstr "Editar propiedades"
+msgstr "Edit properties"
 
 msgid "Expand"
-msgstr "Expandir"
+msgstr "Expand"
 
 msgid "Expand Pool"
-msgstr "Expandir el Pool"
+msgstr "Expand Pool"
 
 msgid "Force creation"
-msgstr "Forzar"
+msgstr "Force creation"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Fuerza la creacción de un Vdev incluso si hay errores. !Usar con precaución!"
+msgstr "Forces the creation of the Vdev even if errors are reported. Use with extreme caution!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Fuerza la creacción de un Pool incluso si hay errores. !Usar con precaución!"
+msgstr "Forces the creation of the pool even if errors are reported. Use with extreme caution!"
 
 msgid "Mirror"
-msgstr "Espejo"
+msgstr "Mirror"
 
 msgid "Modified"
-msgstr "Modificado"
+msgstr "Modified"
 
 msgid "Mountpoint"
-msgstr "Punto de Montaje"
+msgstr "Mountpoint"
 
 msgid "Name"
-msgstr "Nombre"
+msgstr "Name"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "Nombre del nuevo Clon. Puede ser creado en cualquier lugar del sistema ZFS"
+msgstr "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "Nombre del nuevo Objeto. El prefijo se le añadirá al nombre. Omita empezar por \"/\""
+msgstr "Name of the new object. Prefix will prepend the name. Please omit leading /"
 
 msgid "New"
-msgstr "Nuevo"
+msgstr "New"
 
 msgid "No items to display"
-msgstr "Nada que mostrar"
+msgstr "No items to display"
 
 msgid "None"
-msgstr "Ninguno"
+msgstr "None"
 
 msgid "Object Type"
-msgstr "Tipo de Objeto"
+msgstr "Object Type"
 
 msgid "Object details"
-msgstr "Detalles del Objeto"
+msgstr "Object details"
 
 msgid "Ok"
 msgstr "Ok"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "Punto de montaje opcional. Por defecto se usa el nombre del pool."
+msgstr "Optional mountpoint for the pool. Default is to use pool name."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr "Punto de montaje del sistema de archivos (opcional). Si se deja en blanco se añade el padre al nombre del sistema de archivos."
+msgstr "Optional mountpoint of the filesystem. If left blank parent mountpoint will be prepended to name of the filesystem."
 
 msgid "Overview"
-msgstr "Resumen"
+msgstr "Overview"
 
 msgid "Pool type"
-msgstr "Tipo de Pool"
+msgstr "Pool type"
 
 msgid "Prefix"
-msgstr "Prefijo"
+msgstr "Prefix"
 
 msgid "Property"
-msgstr "Propiedad"
+msgstr "Property"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -186,59 +186,59 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refresh"
-msgstr "Refrescar"
+msgstr "Refresh"
 
 msgid "Save"
-msgstr "Salvar"
+msgstr "Save"
 
 msgid "Scrub"
 msgstr "Scrub"
 
 msgid "Serial Number"
-msgstr "Nº de Serie"
+msgstr "Serial Number"
 
 msgid "Set ashift"
-msgstr "Forzar ashift"
+msgstr "Set ashift"
 
 msgid "Size"
-msgstr "Tamaño"
+msgstr "Size"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "Tamaño del volumen Ej: 5mb,100gb,1tb etc"
+msgstr "Size of the volume e.g. 5MB, 100GB, 1TB, etc"
 
 msgid "Snapshot to clone"
-msgstr "Instantaneas a clonar"
+msgstr "Snapshot to clone"
 
 msgid "Source"
-msgstr "Origen"
+msgstr "Source"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "Especifica que alias de dispositivo debe ser usado. No cambiar a menos que sea necesario."
+msgstr "Specifies which device alias should be used. Don't change unless needed."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Especifica el valor de ashift. Solo usar si esta seguro de que se necesita."
+msgstr "Specify ashift value. Only use if you are sure you need it."
 
 msgid "Type"
-msgstr "tipo"
+msgstr "Type"
 
 msgid "Up"
-msgstr "Arriba"
+msgstr "Up"
 
 msgid "Updating property..."
-msgstr "Actualizando propiedad..."
+msgstr "Updating property..."
 
 msgid "Used"
-msgstr "Usado"
+msgstr "Used"
 
 msgid "Value"
-msgstr "Valor"
+msgstr "Value"
 
 msgid "Vdev type"
-msgstr "Tipo de Vdev"
+msgstr "Vdev type"
 
 msgid "Vendor"
-msgstr "Fabricante"
+msgstr "Vendor"
 
 msgid "ZFS"
 msgstr "ZFS"

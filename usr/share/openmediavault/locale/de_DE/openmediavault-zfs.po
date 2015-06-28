@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# David Hönel <davidh1990@gmx.de>, 2015
 # Ettore Atalan <atalanttore@googlemail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-12-11 00:26+0000\n"
-"Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
+"PO-Revision-Date: 2015-05-25 15:04+0000\n"
+"Last-Translator: David Hönel <davidh1990@gmx.de>\n"
 "Language-Team: German (http://www.transifex.com/projects/p/openmediavault-zfs/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,13 +29,13 @@ msgid "Add Object"
 msgstr "Objekt hinzufügen"
 
 msgid "Add Pool"
-msgstr ""
+msgstr "Pool hinzufügen"
 
 msgid "Ashift value"
-msgstr ""
+msgstr "Ashift Wert"
 
 msgid "Ashift value to use."
-msgstr ""
+msgstr "Zu benutzender Ashift Wert."
 
 msgid "Available"
 msgstr "Verfügbar"
@@ -52,13 +53,13 @@ msgid "Capacity"
 msgstr "Kapazität"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Klonname"
 
 msgid "Confirmation"
 msgstr "Bestätigung"
 
 msgid "Create ZFS Pool"
-msgstr ""
+msgstr "Erstelle ZFS Pool"
 
 msgid "Delete"
 msgstr "Löschen"
@@ -73,7 +74,7 @@ msgid "Device"
 msgstr "Gerät"
 
 msgid "Device alias"
-msgstr ""
+msgstr "Geräte Alias"
 
 msgid "Devices"
 msgstr "Geräte"
@@ -82,10 +83,10 @@ msgid "Displaying items {0} - {1} of {2}"
 msgstr ""
 
 msgid "Do you really want to create the ZFS pool?"
-msgstr ""
+msgstr "Möchtest du den ZFS Pool wirklich erstellen?"
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr ""
+msgstr "Möchtest du die ausgewählten Objekt(e) wirklich löschen?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr ""
@@ -103,7 +104,7 @@ msgid "Expand"
 msgstr "Erweitern"
 
 msgid "Expand Pool"
-msgstr ""
+msgstr "Pool Erweitern"
 
 msgid "Force creation"
 msgstr "Erstellung erzwingen"

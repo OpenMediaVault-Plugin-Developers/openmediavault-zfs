@@ -498,7 +498,7 @@ class OMVModuleZFSUtil {
 		foreach ($parent as $k=>$l){
 			if(isset($list[$l['id']])){
 				$l['leaf'] = false;
-				$l['children'] = OMVModuleZFSUtil::createTree($list, $list[$l['id']]);
+				$l['data'] = OMVModuleZFSUtil::createTree($list, $list[$l['id']]);
 			} else {
 				$l['leaf'] = true;
 			}

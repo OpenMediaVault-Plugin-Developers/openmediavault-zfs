@@ -206,7 +206,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		foreach ($objects as $a){
 			$new[$a['parentid']][] = $a;
 		}
-		$tree = OMVModuleZFSUtil::createTree($new, $new['root']);
+		$tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
 		OMVModuleZFSUtil::addMissingOMVMntEnt(); //Adds missing ZFS filesystems to the OMV core
 		return $tree;
 	}

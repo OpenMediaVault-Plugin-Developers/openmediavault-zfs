@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.3.9) testing; urgency=low
+
+  * Added compatibility with OMV 2.x (breaks 1.x compatibility)
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 28 Jun 2015 21:32:42 +0200
+
 openmediavault-zfs (0.6.3.8) testing; urgency=low
 
   * Fix displaying wrong pool size

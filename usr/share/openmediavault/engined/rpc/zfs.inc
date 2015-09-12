@@ -53,6 +53,8 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		$this->registermethod("scrubPool");
 		$this->registerMethod("getCandidates");
 		$this->registerMethod("rename");
+		$this->registerMethod("getSettings");
+		$this->registerMethod("setSettings");
 	}
 
 	public function addPool($params, $context) {
@@ -255,6 +257,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				$properties = array("mountpoint"=>$params['mountpoint']);
 				$tmp->setProperties($properties);
 			}
+			
+			// Notify NFS since this may need to be exported as a new
+			// filesystem. TODO: Make this smarter so we only run it
+			// if we're sure it's a new filesystem nested within an NFS
+			// shared filesystem.
+			$dispatcher = &OMVNotifyDispatcher::getInstance();
+			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			  "org.openmediavault.services.nfs", $object);
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
@@ -297,6 +307,18 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$object = $xmlConfig->get($xpath);
 			$xmlConfig->delete($xpath);
 			$tmp->destroy();
+			
+			// Notify NFS since this may need to be exported as a new
+			// filesystem. TODO: Make this smarter so we only run it
+			// if we're sure it's a new filesystem nested within an NFS
+			// shared filesystem.
+			//
+			// Note that we need to do this here despite deleting
+			// shares above since there won't be a share for nested
+			// filesystems, only the parent.
+			$dispatcher = &OMVNotifyDispatcher::getInstance();
+			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			  "org.openmediavault.services.nfs", $object);
 			break;
 		case "Snapshot":
 			$tmp = new OMVModuleZFSSnapshot($name);
@@ -696,6 +718,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					$xmlConfig->replace("//system/fstab/mntent[uuid='" . $objectv['uuid'] . "']", $objectv);
 				}
 			}
+			
+			// Notify NFS since this may need to be exported as a new
+			// filesystem. TODO: Make this smarter so we only run it
+			// if we're sure it's a new filesystem nested within an NFS
+			// shared filesystem.
+			$dispatcher = &OMVNotifyDispatcher::getInstance();
+			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			  "org.openmediavault.services.nfs", $object);
 			break;
 
 		case "Volume":
@@ -711,6 +741,81 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		default:
 			break;
 		}
+	}
+	
+	/**
+	 * Get the general ZFS configuration settings.
+	 * 
+	 * @param params The method params
+	 * @param context The context of the caller.
+	 * @return A JSON object containing the fields required
+	 *	to configure Kerberos.
+	 * @throw E_CONFIG_GET_OBJECT_FAILED
+	 */
+	function getSettings($params, $context) {
+		global $xmlConfig;
+
+		// Validate the RPC caller context.
+		$this -> validateMethodContext($context, array(
+				"role" => OMV_ROLE_ADMINISTRATOR
+		));
+
+		// Get the configuration object.
+		$xpath = "//services/zfs";
+		$object = $xmlConfig -> get($xpath);
+		if(is_null($object)) {
+			throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED);
+		}
+
+		// Modify result object.
+		$object['autoShareNestedEnabled'] = boolvalEx($object['autoShareNestedEnabled']);
+
+		return $object;
+	}
+
+	/**
+	 * Set the general ZFS configuration settings.
+	 *
+	 * @param params An array containing all of the fields and values.
+	 * @param context The context of the caller.
+	 * @return The stored configuration object.
+	 * @throw E_CONFIG_SET_OBJECT_FAILED
+	 */
+	function setSettings($params, $context) {
+		global $xmlConfig;
+
+		// Validate the RPC caller context
+		$this -> validateMethodContext($context, array(
+			"role" => OMV_ROLE_ADMINISTRATOR
+		));
+
+		// Validate the parameters of the RPC servicemethod.
+		$this -> validateMethodParams($params, '{
+			"type": "object",
+			"properties": {
+				"autoShareNestedEnabled": {"type": "boolean"},
+				"autoShareNestedProperty": {"type": "string", "optional": true}
+			}
+		}');
+
+		// Prepare the configuration object.
+		$object = array(
+			"autoShareNestedEnabled" => array_boolval($params, 'autoShareNestedEnabled'),
+			"autoShareNestedProperty" => trim($params['autoShareNestedProperty'])
+		);
+
+		// Set the configuration object
+		$xpath = "//services/zfs";
+		if(FALSE === $xmlConfig -> replace($xpath, $object)) {
+			throw new OMVException(OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED);
+		}
+
+		// Notify NFS since this may change what is exported
+		$dispatcher = &OMVNotifyDispatcher::getInstance();
+		$dispatcher->notify(OMV_NOTIFY_MODIFY,
+		  "org.openmediavault.services.nfs", $object);
+
+		return $object;
 	}
 }
 

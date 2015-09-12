@@ -1,3 +1,16 @@
+openmediavault-zfs (0.6.5) UNRELEASED; urgency=low
+
+  * Increased width of object details window a bit.
+  * Added ability to automatically add NFS exports of filesystems
+    nested inside an existing NFS share. Previously, when sharing
+    a filesystem via OMV's built in NFS UI, nested filesystems would
+    show up empty. It turns out that each nested filesystem needs to
+    be shared as well. This provides a mechanism to do that as well
+    as various controls to modify the behavior.
+  * Added a settings popup to control the above behavior.
+
+ -- Ilya Kogan <ikogan@flarecode.com>  Sat, 12 Sep 2015 02:48:50 -0400
+
 openmediavault-zfs (0.6.4) testing; urgency=low
 
   * Fix for OMV 2.x

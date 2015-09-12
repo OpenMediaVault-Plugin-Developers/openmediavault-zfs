@@ -30,6 +30,11 @@ OMV_NFSD_CONFIG=${OMV_NFSD_CONFIG:-"/etc/exports"}
 OMV_NFSD_DEFAULT_EXPORT_OPTIONS=${OMV_NFSD_DEFAULT_EXPORT_OPTIONS:-""}
 OMV_SED_REMOVE_HIDE_EXPR='s/,(no)?hide//g'
 
+[ "$(omv_config_get "//services/zfs/autoShareNestedEnabled")" = "0" ] && exit 0
+
+# Load up our settings
+OMV_ZFS_AUTOSHARE_PROPERTY=$(omv_config_get "//services/zfs/autoShareNestedProperty")
+
 # Hokay, prepare for excitement. What we're trying to do is see if any
 # of the shared folders are on ZFS and, if they are, see if there are
 # any nested ZFS filesystems within them. For all such cases, create an
@@ -53,18 +58,61 @@ for INDEX in $(seq 1 ${OMV_NFS_SHARE_COUNT}); do
         # We need to figure out the shared folder's name and mount path so we
         # can look for nested ZFS filesystems and so we can generate the export
         # path.
+        OMV_BASE_SHARED_FOLDER_FS_NAME=$(omv_config_get "//fstab/mntent/uuid[text()=\"${OMV_SHARED_FOLDER_MNT_REF}\"]/../fsname")
         OMV_BASE_SHARED_FOLDER_NAME=$(omv_get_sharedfolder_name ${OMV_SHARED_FOLDER_REF})
         OMV_BASE_SHARED_FOLDER_MNT_PATH=$(omv_config_get "//fstab/mntent/uuid[text()=\"${OMV_SHARED_FOLDER_MNT_REF}\"]/../dir")
        
+        # If we have the autoshare property set, check to make sure it's either
+        # unset on this share, or set to "true". If it's set to false, skip it, if
+        # it's set to anything else, puke.
+        if [[ ! -z "${OMV_ZFS_AUTOSHARE_PROPERTY}" ]]; then
+            OMV_ZFS_AUTOSHARE=$(zfs get -H ${OMV_ZFS_AUTOSHARE_PROPERTY} "${OMV_BASE_SHARED_FOLDER_FS_NAME}" | awk '{print tolower($3)}')
+            
+            if [[ "${OMV_ZFS_AUTOSHARE}" = "-" || "${OMV_ZFS_AUTOSHARE}" = "false" ]]; then
+                continue
+            elif [[ ! "${OMV_ZFS_AUTOSHARE}" = "true" ]]; then
+                echo "${OMV_ZFS_AUTOSHARE} is not a valid setting for ${OMV_ZFS_AUTOSHARE_PROPERTY} on ${OMV_BASE_SHARED_FOLDER_FS_NAME}." 1>&2
+                exit 1
+            fi
+        fi
+       
         # Ask ZFS for the list of filesystems and grep for any that are contained by
         # the file system we're looking at.
-        for CHILD_MNT_PATH in $(zfs list | grep "${OMV_BASE_SHARED_FOLDER_MNT_PATH}/" | awk '{ print $5 }'); do
+        #
+        # A little about the insane command here, here's what we're doing:
+        # - List all ZFS filesystems
+        # - Filter them to only those that have the base mount path in them
+        # - Use awk to print the last column, but the last column is the mountpoint,
+        #   which could contain spaces. So:
+        # - Iterate over all columns after the 5th and concatenate them into "s".
+        #   But this is going to leave a space on the end. So:
+        # - Take the substring of everything except the last character. However,
+        #   now the string passed to the for loop might have spaces. So:
+        # - Store the delimiter value IFS into SAVEIFS, reset it to newlines.
+        # - Be sure to restore it after the for loop.
+        SAVEIFS=${IFS}
+        IFS=$(echo -en "\n\b")
+        for CHILD_MNT_PATH in $(zfs list | grep "${OMV_BASE_SHARED_FOLDER_MNT_PATH}/" |  awk '{s=""; for(i=5;i<=NF;i++) s=s $i " "; s=substr(s, 0, length(s)); print s }'); do
             # We need to make sure that this nested FS hasn't been manually
             # exported by someone. We'll find it's mount reference, if it exists,
             # then check to see if there are any shared folders.
             OMV_CHILD_MNT_REF=$(omv_config_get "//fstab/mntent/dir[text()=\"${CHILD_MNT_PATH}\"]/../uuid")
     
             if [[ -z "${OMV_CHILD_MNT_REF}" || $(omv_config_get_count "//services/nfs/shares/share/mntentref[text()=\"${OMV_CHILD_MNT_REF}\"]") = "0" ]]; then
+                # If we have the autoshare property set, check to make sure it's
+                # set to true on this child. It cannot be unset as that would mean
+                # it's also unset on the parent.
+                if [[ ! -z "${OMV_ZFS_AUTOSHARE_PROPERTY}" ]]; then
+                    OMV_ZFS_AUTOSHARE=$(zfs get -H ${OMV_ZFS_AUTOSHARE_PROPERTY} "${CHILD_MNT_PATH}" | awk '{print tolower($3)}')
+                    
+                    if [[ "${OMV_ZFS_AUTOSHARE}" = "false" ]]; then
+                        continue
+                    elif [[ ! "${OMV_ZFS_AUTOSHARE}" = "true" ]]; then
+                        echo "${OMV_ZFS_AUTOSHARE} is not a valid setting for ${OMV_ZFS_AUTOSHARE_PROPERTY} on ${CHILD_MNT_PATH}." 1>&2
+                        exit 1
+                    fi
+                fi
+            
                 # Get the relative path, then make sure we cut off any leading slashes.
                 OMV_CHILD_RELATIVE_PATH=${CHILD_MNT_PATH:${#OMV_BASE_SHARED_FOLDER_MNT_PATH}}
            
@@ -94,11 +142,13 @@ for INDEX in $(seq 1 ${OMV_NFS_SHARE_COUNT}); do
                 # file.
                 xmlstarlet sel -t \
                     -m "//services/nfs/shares/share[${INDEX}]" \
-                        -o "${OMV_NFSD_EXPORT_DIR}/${OMV_BASE_SHARED_FOLDER_NAME}/${OMV_CHILD_RELATIVE_PATH}" \
+                        -o "\"${OMV_NFSD_EXPORT_DIR}/${OMV_BASE_SHARED_FOLDER_NAME}/${OMV_CHILD_RELATIVE_PATH}\"" \
                         -v "concat(' ',normalize-space(client),'(','${OMV_CHILD_EXPORT_OPTIONS}',')')" \
 	                -b \
 	                ${OMV_CONFIG_FILE} | xmlstarlet unesc >> ${OMV_NFSD_CONFIG}
             fi
         done
+        
+        IFS=${SAVEIFS}
     fi
 done

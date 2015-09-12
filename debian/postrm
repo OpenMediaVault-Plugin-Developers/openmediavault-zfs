@@ -8,7 +8,7 @@ set -e
 CONFIG="/config/services/zfs"
 
 case "$1" in
-  purge|remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+  purge)
 
     if omv_config_exists $CONFIG; then
       echo "Deleting Configuration"
@@ -18,9 +18,12 @@ case "$1" in
     if ! omv_config_exists $CONFIG; then
       echo "Configuration Deleted"
     fi
-
+    
     rm -f /etc/insserv/overrides/zfs-mount
+    ;;
 
+  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    rm -f /etc/insserv/overrides/zfs-mount
     ;;
 
   *)

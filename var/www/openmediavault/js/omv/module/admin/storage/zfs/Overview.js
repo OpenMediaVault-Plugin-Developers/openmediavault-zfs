@@ -88,15 +88,15 @@ Ext.define("OMV.module.admin.storage.zfs.Settings", {
 			fieldLabel: _("Enable Automatic Sharing of Nested Properties"),
 			checked: true,
 			plugins: [{
-                ptype: "fieldinfo",
-                text: _("When sharing a ZFS filesystem over NFS, normally any " +
-                "nested filesystems within the shared filesystem will not be " +
-                "shared and, instead, will appear as empty folders. This setting, " +
-                "when enabled, will automatically create shares for any nested " +
-                "filesystems of this filesystem. Note: this only applies to " +
-                "filesystems shared via OMV's shared folders and not those " +
-                "shared with the \"sharenfs\" ZFS property.")
-            }]
+				ptype: "fieldinfo",
+				text: _("When sharing a ZFS filesystem over NFS, normally any " +
+				"nested filesystems within the shared filesystem will not be " +
+				"shared and, instead, will appear as empty folders. This setting, " +
+				"when enabled, will automatically create shares for any nested " +
+				"filesystems of this filesystem. Note: this only applies to " +
+				"filesystems shared via OMV's shared folders and not those " +
+				"shared with the \"sharenfs\" ZFS property.")
+			}]
 		}, {
 			xtype: "textfield",
 			name: "autoShareNestedProperty",
@@ -110,19 +110,19 @@ Ext.define("OMV.module.admin.storage.zfs.Settings", {
 				"must also contain at least one ':' character to distinguish them " +
 				"from native properties."),
 			plugins: [{
-                ptype: "fieldinfo",
-                text: _("Property to look for on filesystems that, when present, " +
-                "will indicate whether this filesystem and it's children should be " +
-                "included in automatic sharing. If this is left blank, all " + 
-                "shared filesystems will have their nested children automatically " +
-                "shared. If it's set, then only filesystems with the property " +
-                "set to true will be automatically shared while filesystems " +
-                "with this set to false will not be shared. This latter behavior " +
-                "is useful when trying to omit a single nested filesystem from being shared " +
-                "when it's parent is autosharing it's children. See " +
-                "<a href='https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gdrcw/index.html'>" +
-                "ZFS User Properties</a> for more information.")
-            }]
+				ptype: "fieldinfo",
+				text: _("Property to look for on filesystems that, when present, " +
+				"will indicate whether this filesystem and it's children should be " +
+				"included in automatic sharing. If this is left blank, all " + 
+				"shared filesystems will have their nested children automatically " +
+				"shared. If it's set, then only filesystems with the property " +
+				"set to true will be automatically shared while filesystems " +
+				"with this set to false will not be shared. This latter behavior " +
+				"is useful when trying to omit a single nested filesystem from being shared " +
+				"when it's parent is autosharing it's children. See " +
+				"<a href='https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gdrcw/index.html'>" +
+				"ZFS User Properties</a> for more information.")
+			}]
 		}]
 	}
 });

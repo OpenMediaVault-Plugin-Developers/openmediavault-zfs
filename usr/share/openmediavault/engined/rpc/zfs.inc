@@ -258,13 +258,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				$tmp->setProperties($properties);
 			}
 			
-			// Notify NFS since this may need to be exported as a new
-			// filesystem. TODO: Make this smarter so we only run it
-			// if we're sure it's a new filesystem nested within an NFS
-			// shared filesystem.
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.services.nfs", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $object);
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
@@ -308,17 +304,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$xmlConfig->delete($xpath);
 			$tmp->destroy();
 			
-			// Notify NFS since this may need to be exported as a new
-			// filesystem. TODO: Make this smarter so we only run it
-			// if we're sure it's a new filesystem nested within an NFS
-			// shared filesystem.
-			//
-			// Note that we need to do this here despite deleting
-			// shares above since there won't be a share for nested
-			// filesystems, only the parent.
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.services.nfs", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $object);
 			break;
 		case "Snapshot":
 			$tmp = new OMVModuleZFSSnapshot($name);
@@ -719,13 +707,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				}
 			}
 			
-			// Notify NFS since this may need to be exported as a new
-			// filesystem. TODO: Make this smarter so we only run it
-			// if we're sure it's a new filesystem nested within an NFS
-			// shared filesystem.
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.services.nfs", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $object);
 			break;
 
 		case "Volume":

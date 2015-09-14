@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Volker Theile <volker.theile@openmediavault.org>
+# @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+# @author	 Ilya Kogan <ikogan@flarecode.com>
+# @copyright Copyright (c) 2009-2013 Volker Theile
+# @copyright Copyright (c) 2013-2014 OpenMediaVault Plugin Developers
+# @copyright Copyright (c) 2015		 Ilya Kogan
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+. /usr/share/openmediavault/scripts/zfs-helpers
+
+OMV_NFSD_CONFIG=${OMV_NFSD_CONFIG:-"/etc/exports"}
+
+declare -a OMV_NFSD_MOUNTS
+
+function generate_fstab_entries() {
+    # If this mount directory exists and it's not mounted, mount it.
+    if [[ -d "${1}" && -z "$(mount | grep ${1})" ]]; then
+        mount -o bind "${1}" "${2}"
+    fi
+    
+    # Simply echo a simple mount bind line
+    echo "${2}" "${1}" none bind 0 0
+}
+
+function unmount_old_share() {
+    # It's ok if the unmount fails, maybe it's already unmounted or maybe it's
+    # in use. We can't do much about it if it's in use.
+    umount "${1}" 2>/dev/null || true
+}
+
+if [[ "$(omv_config_get "//services/zfs/autoShareNestedEnabled")" = "1" ]]; then
+    # Generate fstab entries and mount all child shares while unmounting any that
+    # shouldn't be mounted.
+    omv_zfs_for_child_shares generate_fstab_entries unmount_old_share
+else
+    # Since everything is disabled, we'll need to just unmount everything.
+    omv_zfs_for_child_shares unmount_old_share unmount_old_share
+fi

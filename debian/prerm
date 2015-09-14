@@ -12,6 +12,7 @@ case "$1" in
     echo "Removing all automatically shared NFS exports..."
     omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
     /usr/share/openmediavault/mkconf/nfsd
+    /usr/share/openmediavault/mkconf/fstab
     ;;
 
   *)

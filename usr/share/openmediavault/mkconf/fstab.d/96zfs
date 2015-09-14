@@ -34,7 +34,7 @@ declare -a OMV_NFSD_MOUNTS
 function generate_fstab_entries() {
     # If this mount directory exists and it's not mounted, mount it.
     if [[ -d "${1}" && -z "$(mount | grep ${1})" ]]; then
-        mount -o bind "${1}" "${2}"
+        mount -o bind "${1}" "${2}" >/dev/null
     fi
     
     # Simply echo a simple mount bind line

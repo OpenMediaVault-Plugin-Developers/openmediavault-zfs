@@ -241,7 +241,7 @@ msgid "Enable Automatic Sharing of Nested Properties"
 msgstr ""
 
 msgid "When sharing a ZFS filesystem over NFS, normally any nested filesystems within the shared filesystem will not be shared and, instead, will appear as empty folders. This setting, when enabled, will automatically create shares for any nested filesystems of this filesystem. Note: this only applies to filesystems shared via OMV's shared folders and not those shared with the "sharenfs" ZFS property.
-mststr ""
+msgstr ""
 
 msgid "AutoShare Filesystem Property"
 msgstr ""

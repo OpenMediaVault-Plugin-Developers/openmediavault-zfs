@@ -59,7 +59,9 @@ function omv_zfs_for_child_shares() {
                 local OMV_ZFS_AUTOSHARE=$(zfs get -H ${OMV_ZFS_AUTOSHARE_PROPERTY} "${OMV_BASE_SHARED_FOLDER_FS_NAME}" | awk '{print tolower($3)}')
                 
                 if [[ "${OMV_ZFS_AUTOSHARE}" = "-" || "${OMV_ZFS_AUTOSHARE}" = "false" ]]; then
-                    $2 "${OMV_NFSD_EXPORT_DIR}/${OMV_BASE_SHARED_FOLDER_NAME}/*" "${OMV_BASE_SHARED_FOLDER_MNT_PATH}" 
+                    if [[ ! -z $2 ]]; then
+                        $2 "${OMV_NFSD_EXPORT_DIR}/${OMV_BASE_SHARED_FOLDER_NAME}/*" "${OMV_BASE_SHARED_FOLDER_MNT_PATH}"
+                    fi
                     continue
                 elif [[ ! "${OMV_ZFS_AUTOSHARE}" = "true" ]]; then
                     echo "${OMV_ZFS_AUTOSHARE} is not a valid setting for ${OMV_ZFS_AUTOSHARE_PROPERTY} on ${OMV_BASE_SHARED_FOLDER_FS_NAME}." 1>&2
@@ -107,7 +109,9 @@ function omv_zfs_for_child_shares() {
                         local OMV_ZFS_AUTOSHARE=$(zfs get -H ${OMV_ZFS_AUTOSHARE_PROPERTY} "${CHILD_MNT_PATH}" | awk '{print tolower($3)}')
                         
                         if [[ "${OMV_ZFS_AUTOSHARE}" = "false" ]]; then
-                            $2 "${OMV_CHILD_EXPORT_PATH}" "${CHILD_MNT_PATH}"
+                            if [[ ! -z $2 ]]; then
+                                $2 "${OMV_CHILD_EXPORT_PATH}" "${CHILD_MNT_PATH}"
+                            fi
                             continue
                         elif [[ ! "${OMV_ZFS_AUTOSHARE}" = "true" ]]; then
                             echo "${OMV_ZFS_AUTOSHARE} is not a valid setting for ${OMV_ZFS_AUTOSHARE_PROPERTY} on ${CHILD_MNT_PATH}." 1>&2
@@ -120,7 +124,9 @@ function omv_zfs_for_child_shares() {
                     local OMV_NFS_SHARE_UUID=$(omv_config_get "//services/nfs/shares/share[${INDEX}]/uuid")
                     $1 "${OMV_CHILD_EXPORT_PATH}" "${CHILD_MNT_PATH}" "${OMV_NFS_SHARE_UUID}" 
                 else
-                    $2 "${OMV_CHILD_EXPORT_PATH}" "${CHILD_MNT_PATH}"
+                    if [[ ! -z $2 ]]; then
+                        $2 "${OMV_CHILD_EXPORT_PATH}" "${CHILD_MNT_PATH}"
+                    fi
                 fi
             done
             

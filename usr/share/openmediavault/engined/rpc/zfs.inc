@@ -260,7 +260,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.storage.zfs.filesystem", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
@@ -306,7 +306,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.storage.zfs.filesystem", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 		case "Snapshot":
 			$tmp = new OMVModuleZFSSnapshot($name);
@@ -421,6 +421,13 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			if ((strcmp($property['property'], "mountpoint") === 0) && (strcmp($params['type'], "Filesystem") === 0)) {
 				OMVModuleZFSUtil::relocateFilesystem($params['name']);
 			}
+		}
+		
+		// If we updated a dataset, we should notify.
+		if(get_class($tmp) == 'OMVModuleZFSDataset') {
+			$dispatcher = &OMVNotifyDispatcher::getInstance();
+			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			  "org.openmediavault.storage.zfs.filesystem", $context);
 		}
 	}
 
@@ -709,7 +716,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			
 			$dispatcher = &OMVNotifyDispatcher::getInstance();
 			$dispatcher->notify(OMV_NOTIFY_MODIFY,
-			  "org.openmediavault.storage.zfs.filesystem", $object);
+			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 
 		case "Volume":
@@ -797,7 +804,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		// Notify NFS since this may change what is exported
 		$dispatcher = &OMVNotifyDispatcher::getInstance();
 		$dispatcher->notify(OMV_NOTIFY_MODIFY,
-		  "org.openmediavault.services.nfs", $object);
+		  "org.openmediavault.storage.zfs.filesystem", $context);
 
 		return $object;
 	}

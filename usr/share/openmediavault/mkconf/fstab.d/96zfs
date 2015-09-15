@@ -34,7 +34,7 @@ declare -a OMV_NFSD_MOUNTS
 function generate_fstab_entries() {
     # If this mount directory exists and it's not mounted, mount it.
     if [[ -d "${1}" && -z "$(mount | grep ${1})" ]]; then
-        mount -o bind "${1}" "${2}" >/dev/null
+        mount -o bind "${2}" "${1}" >/dev/null
     fi
     
     # Simply echo a simple mount bind line
@@ -47,7 +47,7 @@ function unmount_old_share() {
     umount "${1}" 2>/dev/null || true
 }
 
-if [[ "$(omv_config_get "//services/zfs/autoShareNestedEnabled")" = "1" ]]; then
+if [[ $(omv_config_get "//services/zfs/autoShareNestedEnabled") = "1" ]]; then
     # Generate fstab entries and mount all child shares while unmounting any that
     # shouldn't be mounted.
     omv_zfs_for_child_shares generate_fstab_entries unmount_old_share

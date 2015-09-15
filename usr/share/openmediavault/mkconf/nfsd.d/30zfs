@@ -78,4 +78,4 @@ function export_child() {
         ${OMV_CONFIG_FILE} | xmlstarlet unesc >> ${OMV_NFSD_CONFIG}   
 }
 
-omv_zfs_for_child_shares export_child
+omv_zfs_for_child_shares export_child 

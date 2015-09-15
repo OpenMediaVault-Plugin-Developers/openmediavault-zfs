@@ -35,10 +35,7 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 			xtype: "textareafield",
 			name: "details",
 			grow: true,
-			anchor: '100%',
 			readOnly: true,
-			preventScrollbars: true,
-			growMax: "2000",
 			fieldStyle: {
 				fontFamily: "courier",
 				fontSize: "12px"

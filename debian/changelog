@@ -1,4 +1,4 @@
-openmediavault-zfs (0.6.5) TESTING; urgency=low
+openmediavault-zfs (0.6.5) testing; urgency=low
 
   * Increased width of object details window a bit.
   * Added ability to automatically add NFS exports of filesystems
@@ -9,7 +9,13 @@ openmediavault-zfs (0.6.5) TESTING; urgency=low
     as various controls to modify the behavior.
   * Added a settings popup to control the above behavior.
 
- -- Ilya Kogan <ikogan@flarecode.com>  Sat, 12 Sep 2015 02:48:50 -0400
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 12 Sep 2015 02:48:50 -0400
+
+openmediavault-zfs (0.6.4.1) UNRELEASED; urgency=low
+
+  * Fix layout issue on object details view 
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 15 Sep 2015 19:19:00 +0200
 
 openmediavault-zfs (0.6.4) testing; urgency=low
 

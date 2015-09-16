@@ -1,8 +1,8 @@
-openmediavault-zfs (0.6.4.1) UNRELEASED; urgency=low
+openmediavault-zfs (0.6.4.1) testing; urgency=low
 
   * Fix layout issue on object details view 
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 15 Sep 2015 19:19:00 +0200
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 16 Sep 2015 19:29:26 +0200
 
 openmediavault-zfs (0.6.4) testing; urgency=low
 

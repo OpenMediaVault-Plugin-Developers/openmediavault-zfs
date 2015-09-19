@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.4.2) testing; urgency=low
+
+  * Fix zfs-mount insserv override
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 18 Sep 2015 23:12:59 +0200
+
 openmediavault-zfs (0.6.4.1) testing; urgency=low
 
   * Fix layout issue on object details view 

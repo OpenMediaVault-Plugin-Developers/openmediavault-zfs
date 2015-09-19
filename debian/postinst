@@ -24,22 +24,19 @@ case "$1" in
 
     cat <<EOF > ${OVERRIDE_DIR}/zfs-mount
 ### BEGIN INIT INFO
-# Provides:       zvol zfs zfs-mount
-# Required-Start: $local_fs
-# Required-Stop:
-# Should-Start:
-# Should-Stop:
-# X-Start-After:
-# X-Stop-After:   umountfs
-# Default-Start:  S
-# Default-Stop:   0 6
-# Short-Description: Import and mount ZFS pools, filesystems and volumes
-# Description: Run the 'zfs import', 'zfs mount -a', 'zfs umount -a' or
-#              'zfs export' command.
+# Provides:          zfs-mount
+# Required-Start:    $local_fs zfs-import
+# Required-Stop:     $local_fs zfs-import
+# Default-Start:     S
+# Default-Stop:      0 6
+# X-Stop-After:      zfs-zed
+# Short-Description: Mount ZFS filesystems and volumes
+# Description: Run the 'zfs mount -a' or 'zfs umount -a' commands.
 ### END INIT INFO
 EOF
 
     update-rc.d zfs-mount defaults
+    /sbin/modprobe zfs
 
     dpkg-trigger update-fixperms
     dpkg-trigger update-locale

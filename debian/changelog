@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.4.4) testing; urgency=low
+
+  * Remove insserv override
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 15 Oct 2015 20:10:07 +0200
+
 openmediavault-zfs (0.6.4.3) testing; urgency=low
 
   * Add support for Posix ACL

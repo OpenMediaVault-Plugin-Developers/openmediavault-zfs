@@ -25,11 +25,10 @@ set -e
 . /usr/share/openmediavault/scripts/helper-functions
 . /usr/share/openmediavault/scripts/zfs-helpers
 
-OMV_NFSD_CONFIG=${OMV_NFSD_CONFIG:-"/etc/exports"}
-
-declare -a OMV_NFSD_MOUNTS
-
 function generate_fstab_entries() {
+    # If this mount directory doesn't exist, create it.
+    mkdir -p "${1}"
+    
     # If this mount directory exists and it's not mounted, mount it.
     if [[ -d "${1}" && -z "$(mount | grep ${1})" ]]; then
         mount -o bind "${2}" "${1}" >/dev/null

@@ -8,9 +8,6 @@ set -e
 
 case "$1" in
   configure)
-
-    OVERRIDE_DIR="/etc/insserv/overrides"
-
     SERVICE_XPATH_NAME="zfs"
     SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 
@@ -22,29 +19,6 @@ case "$1" in
       omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
       omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
     fi
-
-    insserv -rf zfs-mount || :
-
-    mkdir -p ${OVERRIDE_DIR}
-
-    cat <<EOF > ${OVERRIDE_DIR}/zfs-mount
-### BEGIN INIT INFO
-# Provides:       zvol zfs zfs-mount
-# Required-Start: $local_fs
-# Required-Stop:
-# Should-Start:
-# Should-Stop:
-# X-Start-After:
-# X-Stop-After:   umountfs
-# Default-Start:  S
-# Default-Stop:   0 6
-# Short-Description: Import and mount ZFS pools, filesystems and volumes
-# Description: Run the 'zfs import', 'zfs mount -a', 'zfs umount -a' or
-#              'zfs export' command.
-### END INIT INFO
-EOF
-
-    update-rc.d zfs-mount defaults
 
     dpkg-trigger update-fixperms
     dpkg-trigger update-locale

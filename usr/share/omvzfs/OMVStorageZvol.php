@@ -423,7 +423,7 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
     public function __construct() {
         parent::__construct();
         $this->type = "zfs";
-        $this->properties = self::PROP_NONE;
+        $this->properties = self::PROP_POSIX_ACL;
     }
 
     public function getImpl($args) {

@@ -20,6 +20,28 @@ case "$1" in
       omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
     fi
 
+    OVERRIDE_DIR="/etc/insserv/overrides"
+
+    insserv -rf zfs-mount || :
+
+    mkdir -p ${OVERRIDE_DIR}
+
+    cat <<EOF > ${OVERRIDE_DIR}/zfs-mount
+### BEGIN INIT INFO
+# Provides:          zfs-mount
+# Required-Start:    $local_fs zfs-import
+# Required-Stop:     $local_fs zfs-import
+# Default-Start:     S
+# Default-Stop:      0 6
+# X-Stop-After:      zfs-zed
+# Short-Description: Mount ZFS filesystems and volumes
+# Description: Run the 'zfs mount -a' or 'zfs umount -a' commands.
+### END INIT INFO
+EOF
+
+    update-rc.d zfs-mount defaults
+    /sbin/modprobe zfs
+
     dpkg-trigger update-fixperms
     dpkg-trigger update-locale
 

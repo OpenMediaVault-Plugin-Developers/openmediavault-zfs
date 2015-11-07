@@ -1,3 +1,9 @@
+openmediavault-zfs (0.6.4.5) UNRELEASED; urgency=low
+
+  * Re-insert insserv override
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Nov 2015 21:04:24 +0100
+
 openmediavault-zfs (0.6.4.4) testing; urgency=low
 
   * Remove insserv override

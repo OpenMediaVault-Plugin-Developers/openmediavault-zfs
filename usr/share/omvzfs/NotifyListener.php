@@ -25,6 +25,8 @@ class OMVModuleZFS extends OMVModuleAbstract
 	}
 
     public function bindListeners(OMVNotifyDispatcher $dispatcher) {
+    	$moduleMgr = &OMVModuleMgr::getInstance();
+    	
 		// Update service if configuration has been modified
 		$dispatcher->addListener(
 		  OMV_NOTIFY_MODIFY,
@@ -42,6 +44,17 @@ class OMVModuleZFS extends OMVModuleAbstract
 		  OMV_NOTIFY_MODIFY,
 		  "org.openmediavault.services.nfs.shares.share",
 		  array($this, "onUpdateNFSShare"));
+		  
+		// Make sure we notify NFS and fstab when we get updated.
+		$dispatcher->addListener(
+          OMV_NOTIFY_MODIFY,
+          "org.openmediavault.storage.zfs.filesystem",
+          array($moduleMgr->getModule("nfs"), "setDirty"));
+        $dispatcher->addListener(
+          OMV_NOTIFY_MODIFY,
+          "org.openmediavault.storage.zfs.filesystem",
+          array($moduleMgr->getModule("fstab"), "setDirty"));
+		  
 		$this->debug(sprintf("bindListeners %s", var_export($dispatcher, true)));
     }
 

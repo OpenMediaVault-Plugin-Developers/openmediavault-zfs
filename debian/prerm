@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+CONFIG="/config/services/zfs"
+
+case "$1" in
+  purge)
+    echo "Removing all automatically shared NFS exports..."
+    omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
+    /usr/share/openmediavault/mkconf/nfsd
+    /usr/share/openmediavault/mkconf/fstab
+    ;;
+
+  *)
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

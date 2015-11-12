@@ -8,15 +8,19 @@ set -e
 
 case "$1" in
   configure)
-    
-    OVERRIDE_DIR="/etc/insserv/overrides"
+    SERVICE_XPATH_NAME="zfs"
+    SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 
-    if ! omv_config_exists "/config/services/zfs"; then
-      echo "Initialize configuration"
-      object="<enable>0</enable>"
-      object="${object}<numberfield1>827</numberfield1>"
-      omv_config_add_element "/config/services" "zfs" "${object}" true
+    if ! omv_config_exists "${SERVICE_XPATH}"; then
+      omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}"
+      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "1"
+      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""
+    elif ! omv_config_exists "${SERVICE_XPATH}/autoShareNestedEnabled"; then
+      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
+      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
     fi
+
+    OVERRIDE_DIR="/etc/insserv/overrides"
 
     insserv -rf zfs-mount || :
 

@@ -23,7 +23,7 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 	autoLoadData: true,
 	hideResetButton: true,
 	hideCancelButton: true,
-	width: 600,
+	width: 700,
 	height: 350,
 	layout: 'fit',
 	okButtonText: _("Ok"),
@@ -43,6 +43,86 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 				fontSize: "12px"
 			}
 		}];
+	}
+});
+
+/**
+ * @class OMV.module.admin.storage.zfs.Settings
+ * @derived OMV.workspace.window.Form
+ *
+ * Edit general ZFS settings.
+ */
+Ext.define("OMV.module.admin.storage.zfs.Settings", {
+	extend: "OMV.workspace.window.Form",
+
+	title: _("Settings"),
+	hideTopToolbar: true,
+	rpcService: "ZFS",
+	rpcGetMethod: "getSettings",
+	rpcSetMethod: "setSettings",
+
+	plugins: [{
+		ptype: "linkedfields",
+		correlations: [{
+			name: "autoShareNestedProperty",
+			conditions: [
+				{ name: "autoShareNestedEnabled", value: true }
+			],
+			properties: ["enabled"]
+		},{
+			name: "omitShareNestedProperty",
+			conditions: [
+				{ name: "autoShareNestedEnabled", value: true }
+			],
+			properties: ["enabled"]
+		}]
+	}],
+
+	getFormItems: function() {
+		var me = this;
+
+		return [{
+			xtype: "checkbox",
+			name: "autoShareNestedEnabled",
+			fieldLabel: _("Enable Automatic Sharing of Nested Properties"),
+			checked: true,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("When sharing a ZFS filesystem over NFS, normally any " +
+				"nested filesystems within the shared filesystem will not be " +
+				"shared and, instead, will appear as empty folders. This setting, " +
+				"when enabled, will automatically create shares for any nested " +
+				"filesystems of this filesystem. Note: this only applies to " +
+				"filesystems shared via OMV's shared folders and not those " +
+				"shared with the \"sharenfs\" ZFS property.")
+			}]
+		}, {
+			xtype: "textfield",
+			name: "autoShareNestedProperty",
+			fieldLabel: _("AutoShare Filesystem Property"),
+			value: me.autoShareNestedProperty,
+			allowBlank: true,
+			maxLength: 256,
+			regex: new RegExp('[a-z0-9\:\+\._]+\:[a-z0-9\:\+\._]'),
+			regexText: _("ZFS user properties may only contain lowercase letters, " +
+				"numbers, and the following punctionation: ':','+','.','_'. They " +
+				"must also contain at least one ':' character to distinguish them " +
+				"from native properties."),
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Property to look for on filesystems that, when present, " +
+				"will indicate whether this filesystem and it's children should be " +
+				"included in automatic sharing. If this is left blank, all " + 
+				"shared filesystems will have their nested children automatically " +
+				"shared. If it's set, then only filesystems with the property " +
+				"set to true will be automatically shared while filesystems " +
+				"with this set to false will not be shared. This latter behavior " +
+				"is useful when trying to omit a single nested filesystem from being shared " +
+				"when it's parent is autosharing it's children. See " +
+				"<a href='https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gdrcw/index.html'>" +
+				"ZFS User Properties</a> for more information.")
+			}]
+		}]
 	}
 });
 
@@ -548,8 +628,12 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 				}
 			}
 		});
+	},
+	
+	onSettingsButton: function() {
+		var me = this;
+		Ext.create("OMV.module.admin.storage.zfs.Settings", {}).show();
 	}
-
 });
 
 OMV.WorkspaceManager.registerPanel({

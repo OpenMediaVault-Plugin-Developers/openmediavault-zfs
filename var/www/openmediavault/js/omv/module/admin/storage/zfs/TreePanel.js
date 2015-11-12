@@ -98,6 +98,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideTopToolbar: false,
 	hidePagingToolbar: true,
 	hideAddButton: false,
+	hideSettingsButtoon: false,
 	hideAddObjButton: true,
 	hideEditButton: true,
 	hideDeleteButton: true,
@@ -112,6 +113,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideRenameButton: true,
 	addButtonText: _("Add Pool"),
 	addObjButtonText: _("Add Object"),
+	settingsButtonText: _("Settings"),
 	expandPoolButtonText: _("Expand"),
 	scrubButtonText: _("Scrub"),
 	importPoolButtonText: _("Import Pool"),
@@ -346,6 +348,15 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
 			hidden: me.hideRefreshButton,
 			handler: Ext.Function.bind(me.onRefreshButton, me, [ me ]),
+			scope: me
+		},{
+			id: me.getId() + "-settings",
+			xtype: "button",
+			text: me.settingsButtonText,
+			icon: "images/preferences.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideSettingsButtoon,
+			handler: Ext.Function.bind(me.onSettingsButton, me, [ me ]),
 			scope: me
 		}]
 	},
@@ -623,6 +634,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		} else {
 			me.startDeletion(records);
 		}
+	},
+
+	/**
+	 * Handler for the settings button. Pops up a dialog displaying
+	 * general settings for ZFS Override this method to customize the
+	 * default behavior.
+	 * @param this The grid itself.
+	 */
+	onSettingsButton: function() {
+		// Nothing to do here
 	},
 
 	/**

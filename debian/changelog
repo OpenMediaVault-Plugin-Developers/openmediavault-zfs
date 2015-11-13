@@ -1,5 +1,6 @@
-openmediavault-zfs (0.6.5.2) testing; urgency=low
+openmediavault-zfs (0.6.4.5) testing; urgency=low
 
+  * Re-insert insserv override
   * Increased width of object details window a bit.
   * Added ability to automatically add NFS exports of filesystems
     nested inside an existing NFS share. Previously, when sharing
@@ -9,13 +10,7 @@ openmediavault-zfs (0.6.5.2) testing; urgency=low
     as various controls to modify the behavior.
   * Added a settings popup to control the above behavior.
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Nov 2015 15:58:50 -0400
-
-openmediavault-zfs (0.6.4.5) UNRELEASED; urgency=low
-
-  * Re-insert insserv override
-
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Nov 2015 21:04:24 +0100
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 13 Nov 2015 10:57:41 +0100
 
 openmediavault-zfs (0.6.4.4) testing; urgency=low
 

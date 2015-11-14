@@ -1,3 +1,10 @@
+openmediavault-zfs (2.1.0) testing; urgency=low
+
+  * Bump version number to avoid conflicts with ZoL numbering
+  * Fix to allow ZFS bind mounts in fstab
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 14 Nov 2015 21:49:45 +0100
+
 openmediavault-zfs (0.6.4.5) testing; urgency=low
 
   * Re-insert insserv override

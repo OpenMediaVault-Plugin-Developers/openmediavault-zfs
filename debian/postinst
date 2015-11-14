@@ -33,6 +33,7 @@ case "$1" in
 # Required-Stop:     $local_fs zfs-import
 # Default-Start:     S
 # Default-Stop:      0 6
+# X-Start-Before:    checkfs
 # X-Stop-After:      zfs-zed
 # Short-Description: Mount ZFS filesystems and volumes
 # Description: Run the 'zfs mount -a' or 'zfs umount -a' commands.

@@ -1,4 +1,4 @@
-openmediavault-zfs (2.1.0) testing; urgency=low
+openmediavault-zfs (2.1.0) stable; urgency=low
 
   * Bump version number to avoid conflicts with ZoL numbering
   * Fix to allow ZFS bind mounts in fstab

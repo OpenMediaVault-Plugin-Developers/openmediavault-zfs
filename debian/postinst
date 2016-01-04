@@ -7,54 +7,36 @@ set -e
 
 
 case "$1" in
-  configure)
-    SERVICE_XPATH_NAME="zfs"
-    SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
+    configure)
+        SERVICE_XPATH_NAME="zfs"
+        SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 
-    if ! omv_config_exists "${SERVICE_XPATH}"; then
-      omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}"
-      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "1"
-      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""
-    elif ! omv_config_exists "${SERVICE_XPATH}/autoShareNestedEnabled"; then
-      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
-      omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
-    fi
+        if ! omv_config_exists "${SERVICE_XPATH}"; then
+            omv_config_add_element "/config/services" "${SERVICE_XPATH_NAME}"
+            omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "1"
+            omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""
+        elif ! omv_config_exists "${SERVICE_XPATH}/autoShareNestedEnabled"; then
+            omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedEnabled" "0"
+            omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
+        fi
 
-    OVERRIDE_DIR="/etc/insserv/overrides"
+        #Remove deprectaed stuff to ensure clean installation
+        rm -f /etc/insserv/overrides/zfs-mount
 
-    insserv -rf zfs-mount || :
+        /sbin/modprobe zfs
 
-    mkdir -p ${OVERRIDE_DIR}
+        dpkg-trigger update-fixperms
+        dpkg-trigger update-locale
 
-    cat <<EOF > ${OVERRIDE_DIR}/zfs-mount
-### BEGIN INIT INFO
-# Provides:          zfs-mount
-# Required-Start:    $local_fs zfs-import
-# Required-Stop:     $local_fs zfs-import
-# Default-Start:     S
-# Default-Stop:      0 6
-# X-Start-Before:    checkfs
-# X-Stop-After:      zfs-zed
-# Short-Description: Mount ZFS filesystems and volumes
-# Description: Run the 'zfs mount -a' or 'zfs umount -a' commands.
-### END INIT INFO
-EOF
+        ;;
 
-    update-rc.d zfs-mount defaults
-    /sbin/modprobe zfs
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
 
-    dpkg-trigger update-fixperms
-    dpkg-trigger update-locale
-
-    ;;
-
-  abort-upgrade|abort-remove|abort-deconfigure)
-    ;;
-
-  *)
-    echo "postinst called with unknown argument \`$1'" >&2
-    exit 1
-    ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
 esac
 
 #DEBHELPER#

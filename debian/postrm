@@ -8,28 +8,26 @@ set -e
 CONFIG="/config/services/zfs"
 
 case "$1" in
-  purge)
+    purge)
 
-    if omv_config_exists $CONFIG; then
-      echo "Deleting Configuration"
-      omv_config_delete $CONFIG;
-    fi
+        if omv_config_exists $CONFIG; then
+            echo "Deleting Configuration"
+            omv_config_delete $CONFIG;
+        fi
 
-    if ! omv_config_exists $CONFIG; then
-      echo "Configuration Deleted"
-    fi
-    
-    rm -f /etc/insserv/overrides/zfs-mount
-    ;;
+        if ! omv_config_exists $CONFIG; then
+            echo "Configuration Deleted"
+        fi
 
-  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-    rm -f /etc/insserv/overrides/zfs-mount
-    ;;
+        ;;
 
-  *)
-    echo "postrm called with unknown argument \`$1'" >&2
-    exit 1
-    ;;
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
 esac
 
 #DEBHELPER#

@@ -1,4 +1,4 @@
-openmediavault-zfs (3.0.0) UNRELEASED; urgency=medium
+openmediavault-zfs (3.0.0) stable; urgency=medium
 
   * Make plugin OMV 3.x compatible
 

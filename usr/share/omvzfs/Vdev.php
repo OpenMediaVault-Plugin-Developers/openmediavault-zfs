@@ -1,7 +1,7 @@
 <?php
 require_once("Exception.php");
 require_once("VdevType.php");
-require_once("openmediavault/util.inc");
+use OMV\System\Process;
 
 /**
  * Contains a Vdev
@@ -83,7 +83,8 @@ class OMVModuleZFSVdev {
 	 * @throws E_EXEC_FAILED
 	 */
 	private function exec($command, &$output = NULL) {
-		OMVUtil::exec($command, $output, $result);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
 		return $result;
 	}
 

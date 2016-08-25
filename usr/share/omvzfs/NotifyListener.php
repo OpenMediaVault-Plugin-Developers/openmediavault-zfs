@@ -1,6 +1,9 @@
 <?php
-require_once('openmediavault/object.inc');
-require_once('openmediavault/module.inc');
+use OMV\Engine\Module\ServiceAbstract;
+use OMV\Engine\Module\Manager;
+use OMV\Engine\Notify\IListener;
+use OMV\Engine\Notify\Dispatcher;
+
 require_once("Exception.php");
 
 /**
@@ -10,8 +13,9 @@ require_once("Exception.php");
  * @version   0.1
  * @copyright Michael Rasmussen <mir@datanom.net>
  */
-class OMVModuleZFS extends OMVModuleAbstract
-		implements OMVINotifyListener {
+class OMVModuleZFS extends ServiceAbstract
+		implements IListener {
+	use OMV\Debugable;
 
 	private $pools;
 
@@ -24,9 +28,9 @@ class OMVModuleZFS extends OMVModuleAbstract
 		return "zfs";
 	}
 
-    public function bindListeners(OMVNotifyDispatcher $dispatcher) {
-    	$moduleMgr = &OMVModuleMgr::getInstance();
-    	
+    public function bindListeners(Dispatcher $dispatcher) {
+		$moduleMgr = Manager::getInstance();
+
 		// Update service if configuration has been modified
 		$dispatcher->addListener(
 		  OMV_NOTIFY_MODIFY,
@@ -107,7 +111,4 @@ class OMVModuleZFS extends OMVModuleAbstract
 	}
 }
 
-	// Register module.
-	$moduleMgr = &OMVModuleMgr::getInstance();
-	$moduleMgr->registerModule(new OMVModuleZFS());
 ?>

@@ -1,16 +1,29 @@
 <?php
 require_once("Exception.php");
-require_once("openmediavault/util.inc");
 require_once("Dataset.php");
 require_once("Zvol.php");
 require_once("Vdev.php");
 require_once("Zpool.php");
+use OMV\System\Process;
+use OMV\Rpc\Rpc;
+use OMV\Uuid;
+
 
 /**
  * Helper class for ZFS module
  */
 class OMVModuleZFSUtil {
 
+	public static function getZFSShares($context,$name,$dir){
+			$objects = Rpc::call("FsTab","enumerateEntries",[],$context);
+			$result=NULL;
+			foreach($objects as $object){
+				if($object['fsname']==$name && $object['dir']==$dir && $object['type']=='zfs'){
+					$result=$object;
+				}
+			}
+			return $result;
+	}
 	/**
 	 * Returns the quota (if set) of a filesystem.
 	 *
@@ -110,16 +123,14 @@ class OMVModuleZFSUtil {
 	 * Needed when the user changes mountpoint of a filesystem in the GUI.
 	 *
 	 */
-	public static function relocateFilesystem($name) {
-		global $xmlConfig;
+	public static function relocateFilesystem($context,$name) {
 		$poolname = OMVModuleZFSUtil::getPoolname($name);
 		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 		$ds = new OMVModuleZFSDataset($name);
 		$dir = $ds->getMountPoint();
-		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
-		$object = $xmlConfig->get($xpath);
+		$object=OMVModuleZFSUtil::getZFSShares($context,$pooluuid,$dir);
 		$object['dir'] = $property['value'];
-		$xmlConfig->replace($xpath, $object);
+		Rpc::call("FsTab","set", $object, $context);
 		return null;
 	}
 	
@@ -223,26 +234,29 @@ class OMVModuleZFSUtil {
 	 * Deletes all shared folders pointing to the specifc path
 	 *
 	 */
-	public static function deleteShares($name) {
-		global $xmlConfig;
+	public static function deleteShares($context,$dispatcher,$name) {
 		$poolname = OMVModuleZFSUtil::getPoolname($name);
 		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 		$ds = new OMVModuleZFSDataset($name);
 		$dir = $ds->getMountPoint();
-		$xpath = "//system/fstab/mntent[fsname='" . $pooluuid . "' and dir='" . $dir . "' and type='zfs']";
-		$mountpoint = $xmlConfig->get($xpath);
+		$mountpoint =OMVModuleZFSUtil::getZFSShares($context,$pooluuid,$dir);
 		$mntentuuid = $mountpoint['uuid'];
-		$xpath = "//system/shares/sharedfolder[mntentref='" . $mntentuuid . "']";
-		$objects = $xmlConfig->getList($xpath);
+		$shares=Rpc::call("ShareMgmt","enumerateSharedFolders", [], $context);
+		$objects=[];
+		foreach($shares as $share){
+			if($share['mntentref']==$mntentuuid){
+				$objects[]=$share;
+			}
+		}
 		foreach ($objects as $object) {
-			$tmpxpath = sprintf("//*[contains(name(),'sharedfolderref')]".
-				"[contains(.,'%s')]", $object['uuid']);
-			if ($xmlConfig->exists($tmpxpath)) {
+			if($object['_used']){
 				throw new OMVModuleZFSException("The Filesystem is shared and in use. Please delete all references and try again.");
 			}
 		}
-		$xmlConfig->delete($xpath);
-		$dispatcher = &OMVNotifyDispatcher::getInstance();
+		foreach ($objects as $object) {
+			Rpc::call("FsTab","delete", ["uuid"=>$object['uuid']], $context);
+		}
+
 		$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.shares.sharedfolder",$object);
 	}
 
@@ -327,27 +341,25 @@ class OMVModuleZFSUtil {
 	 * Add any missing ZFS filesystems to the OMV backend
 	 *
 	 */
-	public static function addMissingOMVMntEnt() {
-		global $xmlConfig;
+	public static function addMissingOMVMntEnt($context) {
 		$cmd = "zfs list -H -o name -t filesystem";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		foreach($out as $name) {
 			$ds = new OMVModuleZFSDataset($name);
 			$dir = $ds->getMountPoint();
-			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and dir='" . $dir . "' and type='zfs']";
-			if (!($xmlConfig->exists($xpath))) {
-				$uuid = OMVUtil::uuid();
+			$object=OMVModuleZFSUtil::getZFSShares($context,$name,$dir);
+			if (!$object) {
+				$uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
 				$object = array(
 					"uuid" => $uuid,
 					"fsname" => $name,
 					"dir" => $dir,
 					"type" => "zfs",
 					"opts" => "rw,relatime,xattr,noacl",
-					"freq" => "0",
-					"passno" => "0",
-					"hidden" => "1"
+					"freq" => 0,
+					"passno" => 0
 				);
-				$xmlConfig->set("//system/fstab",array("mntent" => $object));
+				Rpc::call("FsTab","set", $object, $context);
 			}
 		}
 		return null;
@@ -535,10 +547,8 @@ class OMVModuleZFSUtil {
 	 * @access public
 	 */
 	public static function exec($cmd, &$out = null, &$res = null) {
-		$tmp = OMVUtil::exec($cmd, $out, $res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$process = new Process($cmd);
+		$process->execute($out,$res);
 		return $tmp;
 	}
 

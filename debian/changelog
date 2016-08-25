@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.2) stable; urgency=low
+
+  * Porting to OMV 3.0.26
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 26 Aug 2016 10:49:05 +0900
+
 openmediavault-zfs (3.0.1) stable; urgency=low
 
   * Changed dependency of OMV Package to = 3.0.13 to avoid accidental

@@ -1,6 +1,6 @@
 <?php
-require_once('openmediavault/object.inc');
-require_once('openmediavault/module.inc');
+use OMV\Engine\Module\ServiceAbstract;
+use OMV\System\Process;
 require_once("Vdev.php");
 require_once("Snapshot.php");
 require_once("Dataset.php");
@@ -16,7 +16,7 @@ require_once("Exception.php");
  * @version   0.1
  * @copyright Michael Rasmussen <mir@datanom.net>
  */
-class OMVModuleZFSZpool extends OMVModuleAbstract {
+class OMVModuleZFSZpool {
     // Attributes
     /**
      * Name of pool
@@ -145,20 +145,16 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 		$this->features = array();
 		if ($create_pool) {
 			$cmd = "zpool create $opts\"$name\" $cmd 2>&1";
-
-			OMVUtil::exec($cmd, $output, $result);
-			if ($result)
-				throw new OMVModuleZFSException(implode("\n", $output));
-			else {
-				$this->name = $name;
-				$this->type = $type;
-				if (is_array($vdev))
-					$this->vdevs = $vdev;
-				else
-					array_push ($this->vdevs, $vdev);
-				$this->setSize();
-				$this->mountPoint = $this->getAttribute("mountpoint");
-			}
+			$process = new Process($cmd);
+			$process->execute($output,$result);
+			$this->name = $name;
+			$this->type = $type;
+			if (is_array($vdev))
+				$this->vdevs = $vdev;
+			else
+				array_push ($this->vdevs, $vdev);
+			$this->setSize();
+			$this->mountPoint = $this->getAttribute("mountpoint");
 		} else {
 			$this->assemblePool($vdev);
 		}
@@ -194,11 +190,9 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      */
     public function addVdev(array $vdevs, $opts= "") {
 		$cmd = "zpool add \"" . $this->name . "\" " . $opts . $this->getCommandString($vdevs) . " 2>&1";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException(implode("\n", $output));
-		else
-			$this->vdevs = array_merge($this->vdevs, $vdevs);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
+		$this->vdevs = array_merge($this->vdevs, $vdevs);
 		$this->setSize();
     }
 
@@ -227,9 +221,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			throw new OMVModuleZFSException("Only a plain Vdev can be added as cache");
 
 		$cmd = "zpool add \"" . $this->name . "\" cache " . $this->getCommandString($vdevs);
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
 
 		$disks = $cache->getDisks();
 		foreach ($disks as $disk) {
@@ -253,13 +246,10 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			$dist_str .= "$disk ";
 
 		$cmd = "zpool remove \"" . $this->name . "\" $dist_str";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
-		else {
-			foreach ($disks as $disk)
-				$this->cache = $this->removeDisk($this->cache, $disk);
-		}
+		$process = new Process($cmd);
+		$process->execute($output,$result);
+		foreach ($disks as $disk)
+			$this->cache = $this->removeDisk($this->cache, $disk);
     }
 
     /**
@@ -284,9 +274,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
         if ($log->getType() == OMVModuleZFSVdevType::OMVMODULEZFSPLAIN ||
 			$log->getType() == OMVModuleZFSVdevType::OMVMODULEZFSMIRROR) {
 			$cmd = "zpool add \"" . $this->name . "\" log " . $this->getCommandString($vdevs);
-			OMVUtil::exec($cmd, $output, $result);
-			if ($result)
-				throw new OMVModuleZFSException($output);
+			$process = new Process($cmd);
+			$process->execute($output,$result);
 
 			$this->log = $log;
 		} else
@@ -310,11 +299,9 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 					$dist_str .= "$disk ";
 				$cmd = "zpool remove \"" . $this->name . "\" $disk_str";
 			}
-			OMVUtil::exec($cmd, $output, $result);
-			if ($result)
-				throw new OMVModuleZFSException($output);
-			else
-				$this->log = array();
+			$process = new Process($cmd);
+			$process->execute($output,$result);
+			$this->log = array();
 		}
     }
 
@@ -341,9 +328,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			throw new OMVModuleZFSException("Only a plain Vdev can be added as spares");
 
 		$cmd = "zpool add \"" . $this->name . "\" spare " . $this->getCommandString($vdevs);
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
 
 		$disks = $spares->getDisks();
 		foreach ($disks as $disk) {
@@ -367,13 +353,10 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			$dist_str .= "$disk ";
 
 		$cmd = "zpool remove \"" . $this->name . "\" $dist_str";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
-		else {
-			foreach ($disks as $disk)
-				$this->spare = $this->removeDisk($this->spare, $disk);
-		}
+		$process = new Process($cmd);
+		$process->execute($output,$result);
+		foreach ($disks as $disk)
+			$this->spare = $this->removeDisk($this->spare, $disk);
     }
 
     /**
@@ -437,9 +420,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
     public function setFeatures(array $features) {
 		foreach ($features as $feature => $value) {
 			$cmd = "zpool set $feature=$value \"" . $this->name . "\"";
-			OMVUtil::exec($cmd, $output, $result);
-			if ($result)
-				throw new OMVModuleZFSException($output);
+			$process = new Process($cmd);
+			$process->execute($output,$result);
 		}
 		$this->features = $this->getAllAttributes();
     }
@@ -493,9 +475,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      */
     public function export() {
         $cmd = "zpool export \"" . $this->name . "\"";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
     }
 
     /**
@@ -511,9 +492,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 			$cmd = "zpool import \"$name\"";
 		else
 			$cmd = "zpool import";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
     }
 
     /**
@@ -525,9 +505,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      */
     public function scrub() {
         $cmd = "zpool scrub \"" . $this->name . "\"";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
     }
 
     /**
@@ -539,9 +518,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
      */
     public function status() {
         $cmd = "zpool status \"" . $this->name . "\"";
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
     }
 
 	/**
@@ -593,7 +571,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 	 */
 	public function destroy() {
 		$cmd = "zpool destroy \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
 
 	/**
@@ -606,7 +584,7 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 	 */
 	public function inherit($property) {
 		$cmd = "zfs inherit " . $property . " \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$attr = $this->getAttribute($newpropertyk);
 		$this->features[$newpropertyk] = $attr;
 	}
@@ -658,10 +636,14 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 	 */
 	public function getAttribute($attribute) {
 		$cmd = "zpool list -H -o $attribute \"{$this->name}\"";
-		OMVUtil::exec($cmd, $output, $result);
+		$process = new Process($cmd);
+		$process->setQuiet();
+		$process->execute($output,$result);
 		if ($result) {
 			$cmd = "zfs list -H -o $attribute \"{$this->name}\"";
-			OMVUtil::exec($cmd, $output, $result);
+			$process = new Process($cmd);
+			$process->setQuiet();
+			$process->execute($output,$result);
 			if ($result)
 				return null;
 		}
@@ -678,11 +660,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 		$attrs = array();
 		$cmd = "zfs get -H all \"{$this->name}\"";
 
-		try {
-			OMVUtil::exec($cmd, $output, $result);
-		} catch (OMVModuleZFSException $e) {}
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
 		$output = implode("\n", $output);
 		$res = preg_match_all("/{$this->name}\s+(\w+)\s+([\w\d\.]+)\s+(\w+).*/", $output, $matches, PREG_SET_ORDER);
 		if ($res == false || $res == 0)
@@ -738,9 +717,8 @@ class OMVModuleZFSZpool extends OMVModuleAbstract {
 		$cache = false;
 		$start = true;
 
-		OMVUtil::exec($cmd, $output, $result);
-		if ($result)
-			throw new OMVModuleZFSException($output);
+		$process = new Process($cmd);
+		$process->execute($output,$result);
 
 		$this->name = $name;
 		foreach($output as $line) {

@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-require_once("openmediavault/object.inc");
-require_once("openmediavault/config.inc");
-require_once("openmediavault/error.inc");
-require_once("openmediavault/util.inc");
-require_once("openmediavault/rpcservice.inc");
-require_once("openmediavault/notify.inc");
-require_once("/usr/share/openmediavault/engined/rpc/filesystemmgmt.inc");
+ 
+use OMV\Config\Database;
+use OMV\Config\ConfigObject;
+use OMV\Exception;
+use OMV\Rpc\Rpc;
+use OMV\Rpc\ServiceAbstract;
+use OMV\Engine\Notify\Dispatcher;
+//require_once("/usr/share/openmediavault/engined/rpc/filesystemmgmt.inc");
 require_once("/usr/share/omvzfs/Utils.php");
 require_once("/usr/share/omvzfs/Dataset.php");
 require_once("/usr/share/omvzfs/Snapshot.php");
@@ -31,9 +31,16 @@ require_once("/usr/share/omvzfs/Zpool.php");
 require_once("/usr/share/omvzfs/NotifyListener.php");
 require_once("/usr/share/omvzfs/OMVStorageZvol.php");
 
-class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
+class OMVRpcServiceZFS extends ServiceAbstract {
+	private $dataModelPath = "conf.service.zfs";
+
+	public function __construct(Database $database = null, Dispatcher $dispatcher = null){
+		$this->database = $database ? $database : Database::getInstance();
+		$this->dispatcher = $dispatcher ? $dispatcher : Dispatcher::getInstance();
+	}
+
 	public function getName() {
-		return "ZFS";  // RPC Service name. Same as in .js files
+		return "ZFS";
 	}
 
 	/* Initialize the RPC service. Different methods of the RPC service are declared here*/
@@ -209,7 +216,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$new[$a['parentid']][] = $a;
 		}
 		$tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
-		OMVModuleZFSUtil::addMissingOMVMntEnt(); //Adds missing ZFS filesystems to the OMV core
+		OMVModuleZFSUtil::addMissingOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
 		return $tree;
 	}
 
@@ -258,8 +265,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				$tmp->setProperties($properties);
 			}
 			
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 		case "snapshot":
@@ -292,20 +298,16 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "name":{"type":"string"}
 			  }
 		  }');
-		global $xmlConfig;
 		$name = $params['name'];
 		switch ($params['type']) {
 		case "Filesystem":
 			$tmp = new OMVModuleZFSDataset($name);
-			OMVModuleZFSUtil::deleteShares($name);
+			OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$name);
 			$mountpoint = $tmp->getMountPoint();
-			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and type='zfs' and dir='" . $mountpoint . "']";
-			$object = $xmlConfig->get($xpath);
-			$xmlConfig->delete($xpath);
+			$mntent = OMVModuleZFSUtil::getZFSShares($context,$name,$mountpoint);
+			Rpc::call("FsTab","delete", ["uuid"=>$mntent['uuid']],$context);
 			$tmp->destroy();
-			
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 		case "Snapshot":
@@ -318,11 +320,10 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			break;
 		case "Pool":
 			$tmp = new OMVModuleZFSDataset($name);
-			OMVModuleZFSUtil::deleteShares($name);
+			OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$name);
 			$mountpoint = $tmp->getMountPoint();
-			$xpath = "//system/fstab/mntent[fsname='" . $name . "' and type='zfs' and dir='" . $mountpoint . "']";
-			$object = $xmlConfig->get($xpath);
-			$xmlConfig->delete($xpath);
+			$mntent = OMVModuleZFSUtil::getZFSShares($context,$name,$mountpoint);
+			Rpc::call("FsTab","delete", ["uuid"=>$mntent['uuid']],$context);
 			$disks = OMVModuleZFSUtil::getDevDisksByPool($name);
 			$tmp = new OMVModuleZFSZpool($name);
 			$tmp->destroy();
@@ -395,7 +396,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 							"value":{"type":"string"}}}}
 				}
 		}');
-		global $xmlConfig;
 		switch ($params['type']) {
 		case "Filesystem":
 			$tmp = new OMVModuleZFSDataset($params['name']);
@@ -419,14 +419,13 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$objects[$property['property']] = $property['value'];
 			$tmp->setProperties($objects);
 			if ((strcmp($property['property'], "mountpoint") === 0) && (strcmp($params['type'], "Filesystem") === 0)) {
-				OMVModuleZFSUtil::relocateFilesystem($params['name']);
+				OMVModuleZFSUtil::relocateFilesystem($context,$params['name']);
 			}
 		}
 		
 		// If we updated a dataset, we should notify.
 		if(get_class($tmp) == 'OMVModuleZFSDataset') {
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 		}
 	}
@@ -652,7 +651,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	}
 
 	public function getCandidates($params, $context) {
-		global $xmlConfig;
 		// Validate the RPC caller context.
 		$this->validateMethodContext($context, array(
 			"role" => OMV_ROLE_ADMINISTRATOR
@@ -680,7 +678,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 				  "oldpath":{"type":"string"}
 			  }
 		}');
-		global $xmlConfig;
+
 		
 		preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
 		$pre = "";
@@ -696,10 +694,9 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			$ds->rename($newpath);
 
 			//Locate all filesystems with the oldpath as subpath
-			$xpath = "//system/fstab/mntent[type='zfs']";
-			$objects = $xmlConfig->getList($xpath);
+			$objects = Rpc::call("FsTab","enumerateEntries",[],$context);
 			foreach($objects as $objectk => &$objectv) {
-				if(preg_match('/^' . preg_quote($params['oldpath'], "/") . '([\/]?.*)$/', $objectv['fsname'], $matches)) {
+				if($objectv['type']=='zfs' && preg_match('/^' . preg_quote($params['oldpath'], "/") . '([\/]?.*)$/', $objectv['fsname'], $matches)) {
 					$post = "";
 					if (isset($matches[1])) {
 						$post = $matches[1];
@@ -710,12 +707,12 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 					unset($matches);
 					$objectv['fsname'] = $newpath;
 					$objectv['dir'] = "/" . $newpath;
-					$xmlConfig->replace("//system/fstab/mntent[uuid='" . $objectv['uuid'] . "']", $objectv);
+					$config = new ConfigObject('conf.system.filesystem.mountpoint');
+					$config->setAssoc($objectv);
 				}
 			}
 			
-			$dispatcher = &OMVNotifyDispatcher::getInstance();
-			$dispatcher->notify(OMV_NOTIFY_MODIFY,
+			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 
@@ -744,7 +741,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	 * @throw E_CONFIG_GET_OBJECT_FAILED
 	 */
 	function getSettings($params, $context) {
-		global $xmlConfig;
+
 
 		// Validate the RPC caller context.
 		$this -> validateMethodContext($context, array(
@@ -752,11 +749,7 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 		));
 
 		// Get the configuration object.
-		$xpath = "//services/zfs";
-		$object = $xmlConfig -> get($xpath);
-		if(is_null($object)) {
-			throw new OMVException(OMVErrorMsg::E_CONFIG_GET_OBJECT_FAILED);
-		}
+		$object = $this->database->getAssoc($this->dataModelPath);
 
 		// Modify result object.
 		$object['autoShareNestedEnabled'] = boolvalEx($object['autoShareNestedEnabled']);
@@ -773,7 +766,6 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 	 * @throw E_CONFIG_SET_OBJECT_FAILED
 	 */
 	function setSettings($params, $context) {
-		global $xmlConfig;
 
 		// Validate the RPC caller context
 		$this -> validateMethodContext($context, array(
@@ -795,21 +787,14 @@ class OMVRpcServiceZFS extends OMVRpcServiceAbstract {
 			"autoShareNestedProperty" => trim($params['autoShareNestedProperty'])
 		);
 
-		// Set the configuration object
-		$xpath = "//services/zfs";
-		if(FALSE === $xmlConfig -> replace($xpath, $object)) {
-			throw new OMVException(OMVErrorMsg::E_CONFIG_SET_OBJECT_FAILED);
-		}
+		$config = new ConfigObject($this->dataModelPath);
+		$config->setAssoc($object);
+		$this->database->set($config);
 
 		// Notify NFS since this may change what is exported
-		$dispatcher = &OMVNotifyDispatcher::getInstance();
-		$dispatcher->notify(OMV_NOTIFY_MODIFY,
+		$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 		  "org.openmediavault.storage.zfs.filesystem", $context);
 
 		return $object;
 	}
 }
-
-// Register the RPC service.
-$rpcServiceMgr = &OMVRpcServiceMgr::getInstance(); // Get the "root" instance for the Services
-$rpcServiceMgr->registerService(new OMVRpcServiceZFS()); // Register a new instance of the RPC service described above

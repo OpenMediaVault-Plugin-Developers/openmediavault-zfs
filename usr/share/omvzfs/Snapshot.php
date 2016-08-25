@@ -1,6 +1,7 @@
 <?php
 require_once("Exception.php");
-require_once("openmediavault/util.inc");
+use OMV\System\Process;
+
 
 /**
  * XXX detailed description
@@ -46,7 +47,7 @@ class OMVModuleZFSSnapshot {
 			$this->exec($cmd, $out, $res);
 			$this->updateAllProperties();
 		}
-		catch (OMVModuleZFSException $e) {
+		catch (\OMV\ExecException $e) {
 			$snap_exists = false;
 		}
 		if (!$snap_exists) {
@@ -203,14 +204,12 @@ class OMVModuleZFSSnapshot {
 	 * @param array &$out If provided will contain output in an array
 	 * @param int &$res If provided will contain Exit status of the command
 	 * @return string Last line of output when executing the command
-	 * @throws OMVModuleZFSException
+	 * @throws \OMV\ExecException
 	 * @access private
 	 */
 	private function exec($cmd, &$out = null, &$res = null) {
-		$tmp = OMVUtil::exec($cmd, $out, $res);
-		if ($res) {
-			throw new OMVModuleZFSException(implode("\n", $out));
-		}
+		$process = new Process($cmd);
+		$tmp = $process->execute($out,$res);
 		return $tmp;
 	}
 }

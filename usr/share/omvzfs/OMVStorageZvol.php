@@ -1,5 +1,7 @@
 <?php
-require_once("openmediavault/system.inc");
+
+use OMV\System;
+use OMV\System\Filesystem\Backend\Manager;
 require_once("/usr/share/omvzfs/Utils.php");
 require_once("/usr/share/omvzfs/Dataset.php");
 require_once("/usr/share/omvzfs/Exception.php");
@@ -10,7 +12,7 @@ define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
  * Implements the storage device backend for ZFS Zvol devices.
  * @ingroup api
  */
-class OMVStorageDeviceBackendZvol extends OMVStorageDeviceBackendAbstract {
+class OMVStorageDeviceBackendZvol extends System\Storage\Backend\BackendAbstract {
     function getType() {
         return OMV_STORAGE_DEVICE_TYPE_ZVOL;
     }
@@ -45,7 +47,7 @@ class OMVStorageDeviceBackendZvol extends OMVStorageDeviceBackendAbstract {
  * This class provides a simple interface to handle ZFS Zvol devices.
  * @ingroup api
  */
-class OMVStorageDeviceZvol extends OMVStorageDeviceAbstract {
+class OMVStorageDeviceZvol extends System\Storage\StorageDevice {
     /**
      * Get the description of the device.
      * @return The device description, FALSE on failure.
@@ -59,7 +61,7 @@ class OMVStorageDeviceZvol extends OMVStorageDeviceAbstract {
     }
 }
 
-class OMVFilesystemZFS extends OMVFilesystemAbstract {
+class OMVFilesystemZFS extends System\Filesystem\Filesystem {
 
 	public function __construct($fsName) {
 		$this->deviceFile = $fsName;
@@ -203,6 +205,12 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
         return $this->deviceFile;
     }
 
+    public function getDeviceFiles() {
+        if ($this->getData() === FALSE)
+            return FALSE;
+        return $this->deviceFile;
+    }
+
     /**
      * Get the canonical device file, e.g. /dev/root -> /dev/sde1
      */
@@ -248,7 +256,7 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
         // - /dev/dm-0 => /dev/dm-0
         // - /dev/md0 => /dev/md0
         // - /dev/loop0 => /dev/loop0
-        if (NULL === ($backend = OMVStorageDevices::getBackend($deviceFile)))
+        if (NULL === ($backend = \OMV\System\Storage\Backend\Manager::getBackend($deviceFile)))
             return FALSE;
         return $backend->baseDeviceFile($deviceFile);
     }
@@ -419,15 +427,16 @@ class OMVFilesystemZFS extends OMVFilesystemAbstract {
     }
 }
 
-class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
+class OMVFilesystemBackendZFS extends System\Filesystem\Backend\BackendAbstract {
     public function __construct() {
-        parent::__construct();
         $this->type = "zfs";
         $this->properties = self::PROP_POSIX_ACL;
     }
 
     public function getImpl($args) {
-        return new OMVFilesystemZFS($args);
+        $object = new OMVFilesystemZFS($args);
+		$object->setBackend($this);
+		return $object;
     }
 
 	public function isTypeOf($fsName) {
@@ -458,6 +467,6 @@ class OMVFilesystemBackendZFS extends OMVFilesystemBackendAbstract {
 
 }
 
-OMVStorageDevices::registerBackend(new OMVStorageDeviceBackendZvol());
-OMVFilesystems::registerBackend(new OMVFilesystemBackendZFS());
+$mngr = Manager::getInstance();
+$mngr->registerBackend(new OMVFilesystemBackendZFS());
 ?>

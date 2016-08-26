@@ -1,7 +1,4 @@
 <?php
-
-use OMV\System;
-use OMV\System\Filesystem\Backend\Manager;
 require_once("/usr/share/omvzfs/Utils.php");
 require_once("/usr/share/omvzfs/Dataset.php");
 require_once("/usr/share/omvzfs/Exception.php");
@@ -12,7 +9,7 @@ define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
  * Implements the storage device backend for ZFS Zvol devices.
  * @ingroup api
  */
-class OMVStorageDeviceBackendZvol extends System\Storage\Backend\BackendAbstract {
+class OMVStorageDeviceBackendZvol extends \OMV\System\Storage\Backend\BackendAbstract {
     function getType() {
         return OMV_STORAGE_DEVICE_TYPE_ZVOL;
     }
@@ -47,7 +44,7 @@ class OMVStorageDeviceBackendZvol extends System\Storage\Backend\BackendAbstract
  * This class provides a simple interface to handle ZFS Zvol devices.
  * @ingroup api
  */
-class OMVStorageDeviceZvol extends System\Storage\StorageDevice {
+class OMVStorageDeviceZvol extends \OMV\System\Storage\StorageDevice {
     /**
      * Get the description of the device.
      * @return The device description, FALSE on failure.
@@ -61,7 +58,7 @@ class OMVStorageDeviceZvol extends System\Storage\StorageDevice {
     }
 }
 
-class OMVFilesystemZFS extends System\Filesystem\Filesystem {
+class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
 
 	public function __construct($fsName) {
 		$this->deviceFile = $fsName;
@@ -427,7 +424,7 @@ class OMVFilesystemZFS extends System\Filesystem\Filesystem {
     }
 }
 
-class OMVFilesystemBackendZFS extends System\Filesystem\Backend\BackendAbstract {
+class OMVFilesystemBackendZFS extends \OMV\System\Filesystem\Backend\BackendAbstract {
     public function __construct() {
         $this->type = "zfs";
         $this->properties = self::PROP_POSIX_ACL;
@@ -467,6 +464,8 @@ class OMVFilesystemBackendZFS extends System\Filesystem\Backend\BackendAbstract 
 
 }
 
-$mngr = Manager::getInstance();
+$mngr = \OMV\System\Storage\Backend\Manager::getInstance();
+$mngr->registerBackend(new OMVStorageDeviceBackendZvol());
+$mngr = \OMV\System\Filesystem\Backend\Manager::getInstance();
 $mngr->registerBackend(new OMVFilesystemBackendZFS());
 ?>

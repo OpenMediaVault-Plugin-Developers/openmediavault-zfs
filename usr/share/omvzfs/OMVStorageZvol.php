@@ -124,7 +124,7 @@ class OMVFilesystemZFS extends System\Filesystem\Filesystem {
 	 * @return FALSE.
 	 */
 	public function getUuid() {
-		return FALSE;
+		return NULL;
 	}
 
     /**

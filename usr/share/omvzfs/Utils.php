@@ -15,14 +15,12 @@ use OMV\Uuid;
 class OMVModuleZFSUtil {
 
 	public static function getZFSShares($context,$name,$dir){
-			$objects = Rpc::call("FsTab","enumerateEntries",[],$context);
-			$result=NULL;
-			foreach($objects as $object){
-				if($object['fsname']==$name && $object['dir']==$dir && $object['type']=='zfs'){
-					$result=$object;
-				}
-			}
-			return $result;
+		$object = Rpc::call("FsTab","getByFsName",["fsname"=>$name],$context);
+		$result=NULL;
+		if($object['type']=='zfs' and $object['dir']==$dir){
+			$result=$object;
+		}
+		return $result;
 	}
 	/**
 	 * Returns the quota (if set) of a filesystem.
@@ -116,22 +114,6 @@ class OMVModuleZFSUtil {
 	public static function setGPTLabel($disk) {
 		$cmd = "parted -s " . $disk . " mklabel gpt 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
-	}
-
-	/**
-	 * Manages relocation of ZFS filesystem mountpoints in the OMV backend.
-	 * Needed when the user changes mountpoint of a filesystem in the GUI.
-	 *
-	 */
-	public static function relocateFilesystem($context,$name) {
-		$poolname = OMVModuleZFSUtil::getPoolname($name);
-		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
-		$ds = new OMVModuleZFSDataset($name);
-		$dir = $ds->getMountPoint();
-		$object=OMVModuleZFSUtil::getZFSShares($context,$pooluuid,$dir);
-		$object['dir'] = $property['value'];
-		Rpc::call("FsTab","set", $object, $context);
-		return null;
 	}
 	
 	/**
@@ -236,10 +218,9 @@ class OMVModuleZFSUtil {
 	 */
 	public static function deleteShares($context,$dispatcher,$name) {
 		$poolname = OMVModuleZFSUtil::getPoolname($name);
-		$pooluuid = OMVModuleZFSUtil::getUUIDbyName($poolname);
 		$ds = new OMVModuleZFSDataset($name);
 		$dir = $ds->getMountPoint();
-		$mountpoint =OMVModuleZFSUtil::getZFSShares($context,$pooluuid,$dir);
+		$mountpoint =OMVModuleZFSUtil::getZFSShares($context,$poolname,$dir);
 		$mntentuuid = $mountpoint['uuid'];
 		$shares=Rpc::call("ShareMgmt","enumerateSharedFolders", [], $context);
 		$objects=[];
@@ -254,7 +235,7 @@ class OMVModuleZFSUtil {
 			}
 		}
 		foreach ($objects as $object) {
-			Rpc::call("FsTab","delete", ["uuid"=>$object['uuid']], $context);
+			Rpc::call("ShareMgmt","delete", ["uuid"=>$object['uuid']], $context);
 		}
 
 		$dispatcher->notify(OMV_NOTIFY_DELETE,"org.openmediavault.system.shares.sharedfolder",$object);
@@ -362,6 +343,7 @@ class OMVModuleZFSUtil {
 				Rpc::call("FsTab","set", $object, $context);
 			}
 		}
+
 		return null;
 	}
 
@@ -626,6 +608,11 @@ class OMVModuleZFSUtil {
 		return $num;
         }
 
+		public static function isReferenced($mntent) {
+			$mntent = $db->get("conf.system.filesystem.mountpoint",$mntent['uuid']);
+			if ($db->isReferenced($mntent))
+				return true;
+		}
 }
 
 ?>

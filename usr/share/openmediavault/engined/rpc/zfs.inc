@@ -130,7 +130,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 					}
 					$disks = $tmp_disks;
 				}
-			} catch (OMVModuleZFSException $e) {
+			} catch (Exception $e) {
 				//Do nothing if an excpetion is thrown (fallback on /dev/)
 			}
 			break;
@@ -143,7 +143,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                     }
                     $disks = $tmp_disks;
                 }
-            } catch (OMVModuleZFSException $e) {
+            } catch (Exception $e) {
                 //Do nothing if an excpetion is thrown (fallback on /dev/)
             }
 			break;
@@ -152,27 +152,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		}
 
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		// Create a background process.
-		$bgStatusFilename = $this->createBgProcStatus();
-		$pid = $this->fork();
-		if($pid > 0) { // Parent process.
-			$this->initializeBgProcStatus($bgStatusFilename, $pid);
-			return $bgStatusFilename;
-		}
-		// Child process.
-		try {
-			$bgOutputFilename = $this->createBgProcOutput();
-			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
-			$pool = new OMVModuleZFSZpool($vdev, $opts);
-			//Ugly fix to solve the problem of blkid not displaying info on newly created pools
-			$pool->export();
-			$pool->import($pool->getName());
-			$this->finalizeBgProcStatus($bgStatusFilename, $output);
-			exit(0);
-		} catch(Exception $e) {
-			$this->finalizeBgProcStatus($bgStatusFilename, "", $e);
-			exit(1);
-		}
+		$pool = new OMVModuleZFSZpool($vdev, $opts);
+
 	}
 
 	public function importPool($params, $context) {
@@ -270,7 +251,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
-			$tmp = new OMVModuleZFSSnapshot($name);
+			$tmp = OMVModuleZFSSnapshot::create($name);
 			break;
 		case "volume":
 			$name = $params['path'] . "/" . $params['name'];
@@ -299,6 +280,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			  }
 		  }');
 		$name = $params['name'];
+	
 		switch ($params['type']) {
 		case "Filesystem":
 			$tmp = new OMVModuleZFSDataset($name);
@@ -417,10 +399,12 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			unset($objects);
 			$objects = array();
 			$objects[$property['property']] = $property['value'];
-			$tmp->setProperties($objects);
-			if ((strcmp($property['property'], "mountpoint") === 0) && (strcmp($params['type'], "Filesystem") === 0)) {
-				OMVModuleZFSUtil::relocateFilesystem($context,$params['name']);
+			if ((strcmp($property['property'], "mountpoint") === 0)) {
+				$object=OMVModuleZFSUtil::getZFSShares($context,$tmp->getName(),$tmp->getMountPoint());
+				OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$tmp->getName());
+				Rpc::call("FsTab","delete", ["uuid"=>$object['uuid']],$context);
 			}
+			$tmp->setProperties($objects);
 		}
 		
 		// If we updated a dataset, we should notify.
@@ -599,27 +583,10 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
 
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		// Create a background process.
-		$bgStatusFilename = $this->createBgProcStatus();
-		$pid = $this->fork();
-		if($pid > 0) { // Parent process.
-			$this->initializeBgProcStatus($bgStatusFilename, $pid);
-			return $bgStatusFilename;
-		}
-		// Child process.
-		try {
-			$bgOutputFilename = $this->createBgProcOutput();
-			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
-			$pool->addVdev($vdev, $opts);
-			//Ugly fix to solve the problem of blkid not displaying info on newly created pools
-			$pool->export();
-			$pool->import($pool->getName());
-			$this->finalizeBgProcStatus($bgStatusFilename, $output);
-			exit(0);
-		} catch(Exception $e) {
-			$this->finalizeBgProcStatus($bgStatusFilename, "", $e);
-			exit(1);
-		}
+		$pool->addVdev($vdev, $opts);
+		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
+		$pool->export();
+		$pool->import($pool->getName());
 	}
 
 	public function scrubPool($params, $context) {
@@ -717,7 +684,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			break;
 
 		case "Volume":
-			$vol = new OMVModuleZFSZvol($params['oldpath']);
+			$vol = new OMVModuleZFSZvol();
+			$vol->load($params['oldpath']);
 			$vol->rename($newpath);
 			break;
 		

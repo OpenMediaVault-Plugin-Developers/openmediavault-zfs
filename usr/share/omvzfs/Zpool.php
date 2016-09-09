@@ -385,7 +385,7 @@ class OMVModuleZFSZpool {
      * @access private
      */
     private function setSize() {
-        $used = OMVModuleZFSUtil::SizeTobytes($this->getAttribute("used")[0]);
+        $used = OMVModuleZFSUtil::SizeTobytes($this->getAttribute("used"));
         $avail = OMVModuleZFSUtil::SizeTobytes($this->getAvailable());
 	$this->size = OMVModuleZFSUtil::bytesToSize($avail + $used);
     }
@@ -396,7 +396,7 @@ class OMVModuleZFSZpool {
      * @access public
      */
     public function getAvailable() {
-        return $this->getAttribute("available")[0];
+        return $this->getAttribute("available");
     }
 
     /**
@@ -638,14 +638,15 @@ class OMVModuleZFSZpool {
 		$cmd = "zpool list -H -o $attribute \"{$this->name}\"";
 		$process = new Process($cmd);
 		$process->setQuiet();
-		$process->execute($output,$result);
+		$output = $process->execute($dummy,$result);
 		if ($result) {
 			$cmd = "zfs list -H -o $attribute \"{$this->name}\"";
 			$process = new Process($cmd);
 			$process->setQuiet();
-			$process->execute($output,$result);
+			$output = $process->execute($dummy,$result);
 			if ($result)
 				return null;
+			return $output;
 		}
 
 		return $output;
@@ -659,17 +660,12 @@ class OMVModuleZFSZpool {
 	private function getAllAttributes() {
 		$attrs = array();
 		$cmd = "zfs get -H all \"{$this->name}\"";
-
 		$process = new Process($cmd);
-		$process->execute($output,$result);
-		$output = implode("\n", $output);
-		$res = preg_match_all("/{$this->name}\s+(\w+)\s+([\w\d\.]+)\s+(\w+).*/", $output, $matches, PREG_SET_ORDER);
-		if ($res == false || $res == 0)
-			throw new OMVModuleZFSException("Error return by zpool get all: $output");
-		foreach ($matches as $match) {
-			$attrs[$match[1]] = array('value' => $match[2], 'source' => $match[3]);
+		$process->execute($out,$result);
+		foreach ($out as $line) {
+			$tmpary = preg_split('/\t+/', $line);
+			$attrs["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
 		}
-
 		return $attrs;
 	}
 

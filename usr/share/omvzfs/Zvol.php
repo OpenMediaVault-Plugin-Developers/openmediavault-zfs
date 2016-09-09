@@ -70,17 +70,27 @@ class OMVModuleZFSZvol {
 		$cmd = "zfs list -H -t volume \"" . $name . "\" 2>&1";
 		try {
 			$this->exec($cmd, $out, $res);
-			$this->updateAllProperties();
 		}
 		catch (\OMV\ExecException $e) {
 			$zvol_exists = false;
 		}
 		if ($zvol_exists) {
-			$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
-			$this->exec($cmd, $out2, $res2);
-			foreach ($out2 as $line2) {
-				$this->snapshots["$line2"] = new OMVModuleZFSSnapshot($line2);
+			#$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
+			$cmd = "zfs get all | grep " . $name . "@ 2>&1";
+			$this->exec($cmd, $out, $res);
+			$snapshots=array();
+
+			foreach ($out as $line) {
+				$ary = preg_split('/\t/', $line);
+				$name = $ary[0];
+				$snapshots[$name][]=$line;
 			}
+
+			foreach ($snapshots as $key => $snapshot){
+				$tmp = new OMVModuleZFSSnapshot();
+				$tmp->loadfrom($key,$snapshot);
+			}
+
 			$cmd = "zfs get -o value -Hp volsize,logicalused \"$name\" 2>&1";
 			$this->exec($cmd, $out3, $res3);
 			$this->size = $out3[0];
@@ -108,6 +118,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function getProperty($property) {
+		$this->updateAllProperties();
 		return $this->properties["$property"];
 	}
 
@@ -119,6 +130,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function getProperties() {
+		$this->updateAllProperties();
 		return $this->properties;
 	}
 
@@ -280,6 +292,7 @@ class OMVModuleZFSZvol {
 	 * @access public
 	 */
 	public function addSnapshot($snap_name, array $properties = null) {
+		//not reachable method
 		$snap = new OMVModuleZFSSnapshot($snap_name);
 		$snap->create($properties);
 		$this->snapshots[$snap_name] = $snap;

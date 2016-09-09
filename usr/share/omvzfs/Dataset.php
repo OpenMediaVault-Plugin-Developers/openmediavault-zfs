@@ -275,7 +275,8 @@ class OMVModuleZFSDataset {
 	 * @access public
 	 */
 	public function addSnapshot($snap_name, array $properties = null) {
-		$snap = new OMVModuleZFSSnapshot($snap_name);
+		//not reachable method
+		$snap = new OMVModuleZFSSnapshot($snap_name,false);
 		$snap->create($properties);
 		$this->snapshots[$snap_name] = $snap;
 	}

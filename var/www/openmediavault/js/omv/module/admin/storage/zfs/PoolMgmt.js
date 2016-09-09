@@ -191,8 +191,8 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 			store: Ext.create("Ext.data.ArrayStore", {
 				fields: [ "value", "text" ],
 				data: [
-					[ "path", _("By Path") ],
 					[ "id", _("By Id") ],
+					[ "path", _("By Path") ],
 					[ "dev", _("None") ]
 				]
 			}),
@@ -200,7 +200,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 			valueField: "value",
 			allowBlank: false,
 			editable: false,
-			value: "path",
+			value: "id",
 			plugins: [{
 				ptype: "fieldinfo",
 				text: _("Specifies which device alias should be used. Don't change unless needed.")
@@ -410,8 +410,8 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 			store: Ext.create("Ext.data.ArrayStore", {
 				fields: [ "value", "text" ],
 				data: [
-					[ "path", _("By Path") ],
 					[ "id", _("By Id") ],
+					[ "path", _("By Path") ],
 					[ "dev", _("None") ]
 				]
 			}),
@@ -419,7 +419,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 			valueField: "value",
 			allowBlank: false,
 			editable: false,
-			value: "path",
+			value: "id",
 			plugins: [{
 				ptype: "fieldinfo",
 				text: _("Specifies which device alias should be used. Don't change unless needed.")

@@ -1,3 +1,12 @@
+openmediavault-zfs (3.0.3) stable; urgency=low
+
+  * Fix mountpoint when AddPool
+  * Fix deleteShares
+  * Improved snapshot handling
+  * Set By-Id as default
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 09 Sep 2016 22:43:27 +0900
+
 openmediavault-zfs (3.0.2) stable; urgency=low
 
   * Porting to OMV 3.0.26

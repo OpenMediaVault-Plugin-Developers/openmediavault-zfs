@@ -39,21 +39,12 @@ class OMVModuleZFSSnapshot {
 	 * @return void
 	 * @access public
 	 */
-	public function __construct($name) {
-		$snap_exists = true;
+
+
+	public function __construct($name){
 		$this->name = $name;
-		$cmd = "zfs list -H -t snapshot \"" .$name . "\" 2>&1";
-		try {
-			$this->exec($cmd, $out, $res);
-			$this->updateAllProperties();
-		}
-		catch (\OMV\ExecException $e) {
-			$snap_exists = false;
-		}
-		if (!$snap_exists) {
-			$this->create();
-		}
 	}
+
 
 	/**
 	 * Return name of the Snapshot
@@ -74,6 +65,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function getProperty($property) {
+		$this->updateProperty($property);
 		return $this->properties["$property"];
 	}
 
@@ -85,6 +77,7 @@ class OMVModuleZFSSnapshot {
 	 * @access public
 	 */
 	public function getProperties() {
+		$this->updateAllProperties();
 		return $this->properties;
 	}
 
@@ -143,10 +136,12 @@ class OMVModuleZFSSnapshot {
 	 * @return void
 	 * @access private
 	 */
-	private function create() {
-		$cmd = "zfs snapshot \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
-		$this->updateAllProperties();
+	public static function create($name) {
+		$cmd = "zfs snapshot \"" . $name . "\" 2>&1";
+		$process = new Process($cmd);
+		$process->execute($out,$res);
+		return new OMVModuleZFSSnapshot($name);
+		#$this->updateAllProperties();
 	}
 
 	/**

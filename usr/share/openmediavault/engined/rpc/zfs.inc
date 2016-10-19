@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 use OMV\Config\Database;
 use OMV\Config\ConfigObject;
 use OMV\Exception;
 use OMV\Rpc\Rpc;
 use OMV\Rpc\ServiceAbstract;
 use OMV\Engine\Notify\Dispatcher;
-//require_once("/usr/share/openmediavault/engined/rpc/filesystemmgmt.inc");
 require_once("/usr/share/omvzfs/Utils.php");
-require_once("/usr/share/omvzfs/Dataset.php");
 require_once("/usr/share/omvzfs/Snapshot.php");
 require_once("/usr/share/omvzfs/Zvol.php");
 require_once("/usr/share/omvzfs/Zpool.php");
+require_once("/usr/share/omvzfs/Filesystem.php");
 require_once("/usr/share/omvzfs/NotifyListener.php");
-require_once("/usr/share/omvzfs/OMVStorageZvol.php");
 
 class OMVRpcServiceZFS extends ServiceAbstract {
 	private $dataModelPath = "conf.service.zfs";
@@ -49,15 +47,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		$this->registerMethod("importPool");
 		$this->registerMethod("exportPool");
 		$this->registerMethod("getObjectTree");
-		$this->registermethod("passParam");
-		$this->registermethod("addObject");
-		$this->registermethod("deleteObject");
-		$this->registermethod("getProperties");
-		$this->registermethod("setProperties");
-		$this->registermethod("inherit");
-		$this->registermethod("getObjectDetails");
-		$this->registermethod("expandPool");
-		$this->registermethod("scrubPool");
+		$this->registerMethod("addObject");
+		$this->registerMethod("deleteObject");
+		$this->registerMethod("getProperties");
+		$this->registerMethod("setProperties");
+		$this->registerMethod("inherit");
+		$this->registerMethod("getObjectDetails");
+		$this->registerMethod("expandPool");
+		$this->registerMethod("scrubPool");
 		$this->registerMethod("getCandidates");
 		$this->registerMethod("rename");
 		$this->registerMethod("getSettings");
@@ -124,7 +121,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		case "path":
 			try {
 				if (file_exists("/dev/disk/by-path/")) {
-					$tmp_disks = array();
+					$tmp_disks = [];
 					foreach ($disks as $disk) {
 						$tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
 					}
@@ -137,7 +134,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		case "id":
             try {
                 if (file_exists("/dev/disk/by-id/")) {
-                    $tmp_disks = array();
+                    $tmp_disks = [];
                     foreach ($disks as $disk) {
                         $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
                     }
@@ -152,7 +149,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		}
 
 		$vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-		$pool = new OMVModuleZFSZpool($vdev, $opts);
+		$pool = OMVModuleZFSZpool::create($vdev, $opts);
 
 	}
 
@@ -175,7 +172,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		}
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
-	
+
 	public function exportPool($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		// Validate the parameters of the RPC service method.
@@ -192,26 +189,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 	public function getObjectTree($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
 		$objects = OMVModuleZFSUtil::getZFSFlatArray();
-		$new = array();
+		$new = [];
 		foreach ($objects as $a){
 			$new[$a['parentid']][] = $a;
 		}
 		$tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
-		OMVModuleZFSUtil::addMissingOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
+		OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
 		return $tree;
-	}
-
-	public function passParam($params, $context) {
-		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
-		// Validate the parameters of the RPC service method.
-		$this->validateMethodParams($params, '{
-			  "type":"object",
-			  "properties":{
-				  "key":{"type":"string"},
-				  "value":{"type":"string"}
-			  }
-		  }');
-		return array($params['key'] => $params['value']);
 	}
 
 	public function addObject($params, $context) {
@@ -240,26 +224,24 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			break;
 		case "filesystem":
 			$name = $params['path'] . "/" . $params['name'];
-			$tmp = new OMVModuleZFSDataset($name);
+			$tmp = OMVModuleZFSFilesystem::create($name);
 			if (strlen($params['mountpoint']) > 0) {
 				$properties = array("mountpoint"=>$params['mountpoint']);
 				$tmp->setProperties($properties);
 			}
-			
 			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
 		case "snapshot":
 			$name = $params['path'] . "@" . $params['name'];
-			$tmp = OMVModuleZFSSnapshot::create($name);
+			OMVModuleZFSSnapshot::create($name);
 			break;
 		case "volume":
 			$name = $params['path'] . "/" . $params['name'];
-			$tmp = new OMVModuleZFSZvol($name);
 			if ($params['thinvol']) {
-				$tmp->create($params['size'], null, true);
+				OMVModuleZFSZvol::create($name,$params['size'], null, true);
 			} else {
-				$tmp->create($params['size'], null, false);
+				OMVModuleZFSZvol::create($name,$params['size'], null, false);
 			}
 			break;
 		default:
@@ -280,14 +262,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			  }
 		  }');
 		$name = $params['name'];
-	
+
 		switch ($params['type']) {
 		case "Filesystem":
-			$tmp = new OMVModuleZFSDataset($name);
-			OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$name);
-			$mountpoint = $tmp->getMountPoint();
-			$mntent = OMVModuleZFSUtil::getZFSShares($context,$name,$mountpoint);
-			Rpc::call("FsTab","delete", ["uuid"=>$mntent['uuid']],$context);
+			$tmp = new OMVModuleZFSFilesystem($name);
+			if(OMVModuleZFSUtil::checkOMVShares($context,$tmp))
+				throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
+			OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
 			$tmp->destroy();
 			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
@@ -301,15 +282,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			$tmp->destroy();
 			break;
 		case "Pool":
-			$tmp = new OMVModuleZFSDataset($name);
-			OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$name);
-			$mountpoint = $tmp->getMountPoint();
-			$mntent = OMVModuleZFSUtil::getZFSShares($context,$name,$mountpoint);
-			Rpc::call("FsTab","delete", ["uuid"=>$mntent['uuid']],$context);
-			$disks = OMVModuleZFSUtil::getDevDisksByPool($name);
 			$tmp = new OMVModuleZFSZpool($name);
+			if(OMVModuleZFSUtil::checkOMVShares($context,$tmp))
+				throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
+			OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
+			$disks = $tmp->getDevDisks();
 			$tmp->destroy();
-			OMVModuleZFSUtil::clearZFSLabel($disks);
+			OMVModuleZFSZpool::clearZFSLabel($disks);
 			break;
 		default:
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
@@ -331,11 +310,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 				  "sortdir":{'.$GLOBALS['OMV_JSONSCHEMA_SORTDIR'].'}
 			  }
 		}');
-		$objects = array();
+		$objects = [];
 		$name = $params['name'];
 		switch ($params['type']) {
 		case "Filesystem":
-			$tmp = new OMVModuleZFSDataset($name);
+			$tmp = new OMVModuleZFSFilesystem($name);
 			break;
 		case "Snapshot":
 			$tmp = new OMVModuleZFSSnapshot($name);
@@ -350,7 +329,9 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
 			break;
 		}
+		$tmp->updateAllProperties();
 		$properties = $tmp->getProperties();
+
 		foreach ($properties as $propertyk => $propertyv) {
 			if (!(strcmp($propertyv['source'], "-") == 0)) {
 				$objects[] = array('property' => $propertyk,
@@ -380,7 +361,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		}');
 		switch ($params['type']) {
 		case "Filesystem":
-			$tmp = new OMVModuleZFSDataset($params['name']);
+			$tmp = new OMVModuleZFSFilesystem($params['name']);
 			break;
 		case "Snapshot":
 			$tmp = new OMVModuleZFSSnapshot($params['name']);
@@ -397,18 +378,18 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		}
 		foreach ($params['properties'] as $property) {
 			unset($objects);
-			$objects = array();
+			$objects = [];
 			$objects[$property['property']] = $property['value'];
-			if ((strcmp($property['property'], "mountpoint") === 0)) {
-				$object=OMVModuleZFSUtil::getZFSShares($context,$tmp->getName(),$tmp->getMountPoint());
-				OMVModuleZFSUtil::deleteShares($context,$this->dispatcher,$tmp->getName());
-				Rpc::call("FsTab","delete", ["uuid"=>$object['uuid']],$context);
-			}
 			$tmp->setProperties($objects);
+			if ((strcmp($property['property'], "mountpoint") === 0)) {
+				OMVModuleZFSUtil::relocateOMVMntEnt($context,$tmp);
+				$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
+					"org.openmediavault.conf.system.sharedfolder", $context);
+			}
 		}
-		
+
 		// If we updated a dataset, we should notify.
-		if(get_class($tmp) == 'OMVModuleZFSDataset') {
+		if($tmp instanceof OMVModuleZFSFilesystem) {
 			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 		}
@@ -439,7 +420,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			$this->updateBgProcStatus($bgStatusFilename, "outputfilename", $bgOutputFilename);
 			switch ($params['type']) {
 			case "Filesystem":
-				$tmp = new OMVModuleZFSDataset($params['name']);
+				$tmp = new OMVModuleZFSFilesystem($params['name']);
 				break;
 			case "Snapshot":
 				$tmp = new OMVModuleZFSSnapshot($params['name']);
@@ -555,7 +536,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         case "path":
             try {
                 if (file_exists("/dev/disk/by-path/")) {
-                    $tmp_disks = array();
+                    $tmp_disks = [];
                     foreach ($disks as $disk) {
                         $tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
                     }
@@ -568,7 +549,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         case "id":
             try {
                 if (file_exists("/dev/disk/by-id/")) {
-                    $tmp_disks = array();
+                    $tmp_disks = [];
                     foreach ($disks as $disk) {
                         $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
                     }
@@ -584,9 +565,6 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 
 		$vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
 		$pool->addVdev($vdev, $opts);
-		//Ugly fix to solve the problem of blkid not displaying info on newly created pools
-		$pool->export();
-		$pool->import($pool->getName());
 	}
 
 	public function scrubPool($params, $context) {
@@ -598,23 +576,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 				  "name":{"type":"string"}
 			  }
 		}');
-        // Create a background process.
-        $bgStatusFilename = $this->createBgProcStatus();
-        $pid = $this->fork();
-        if($pid > 0) { // Parent process.
-            $this->initializeBgProcStatus($bgStatusFilename, $pid);
-            return $bgStatusFilename;
-        }
-        // Child process.
-        try {
-			$pool = new OMVModuleZFSZpool($params['name']);
-			$pool->scrub();
-            $this->finalizeBgProcStatus($bgStatusFilename, $output);
-            exit(0);
-        } catch(Exception $e) {
-            $this->finalizeBgProcStatus($bgStatusFilename, "", $e);
-            exit(1);
-        }
+		$pool = new OMVModuleZFSZpool($params['name']);
+		$process = $pool->scrub();
 	}
 
 	public function getCandidates($params, $context) {
@@ -624,7 +587,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		));
 		$fs = new OMVRpcServiceFileSystemMgmt();
 		$objects = $fs->getCandidates($params, $context);
-		$devs = array();
+		$devs = [];
 		foreach ($objects as $object) {
 			if (!(preg_match('/zd[0-9]+(p\d+)?$/', $object['devicefile']))) {
 				$devs[] = $object;
@@ -646,7 +609,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			  }
 		}');
 
-		
+
 		preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
 		$pre = "";
 		if (isset($matches[1])) {
@@ -657,28 +620,9 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		switch($params['type']) {
 		case "Filesystem":
 			//Rename the object first
-			$ds = new OMVModuleZFSDataset($params['oldpath']);
+			$ds = new OMVModuleZFSFilesystem($params['oldpath']);
 			$ds->rename($newpath);
-
-			//Locate all filesystems with the oldpath as subpath
-			$objects = Rpc::call("FsTab","enumerateEntries",[],$context);
-			foreach($objects as $objectk => &$objectv) {
-				if($objectv['type']=='zfs' && preg_match('/^' . preg_quote($params['oldpath'], "/") . '([\/]?.*)$/', $objectv['fsname'], $matches)) {
-					$post = "";
-					if (isset($matches[1])) {
-						$post = $matches[1];
-					}
-					unset($matches);
-					preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
-					$newpath = $matches[1] . $params['newname'] . $post;
-					unset($matches);
-					$objectv['fsname'] = $newpath;
-					$objectv['dir'] = "/" . $newpath;
-					$config = new ConfigObject('conf.system.filesystem.mountpoint');
-					$config->setAssoc($objectv);
-				}
-			}
-			
+			renameOMVMntEnt($context,$ds);
 			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
@@ -688,7 +632,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			$vol->load($params['oldpath']);
 			$vol->rename($newpath);
 			break;
-		
+
 		case "Snapshot":
 			$snap = new OMVModuleZFSSnapshot($params['oldpath']);
 			$snap->rename($newpath);
@@ -698,10 +642,10 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Get the general ZFS configuration settings.
-	 * 
+	 *
 	 * @param params The method params
 	 * @param context The context of the caller.
 	 * @return A JSON object containing the fields required

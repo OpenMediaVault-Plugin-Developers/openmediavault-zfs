@@ -1,15 +1,53 @@
 <?php
-use OMV\System\Process;
+require_once("Utils.php");
 require_once("Snapshot.php");
+trait Cloneable {
+	/**
+	* Check if the Dataset is a clone or not.
+	*
+	* @return bool
+	* @access public
+	*/
+	public function isClone() {
+		$origin = $this->properties["origin"];
+		if (strlen($origin["value"]) > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-/**
- * XXX detailed description
- *
- * @author    XXX
- * @version   XXX
- * @copyright XXX
- */
-class OMVModuleZFSDataset {
+	/**
+	* Get the origin of the Dataset if it's a clone.
+	*
+	* @return string The name of the origin if it exists. Otherwise an empty string.
+	* @access public
+	*/
+	public function getOrigin() {
+		if ($this->isClone()) {
+			$origin = $this->properties["origin"];
+			return $origin['value'];
+		} else {
+			return "";
+		}
+	}
+
+	/**
+	* Promotes the Dataset if it's a clone.
+	*
+	* @return void
+	* @access public
+	*/
+	public function promote() {
+		if ($this->isClone()) {
+			$cmd = "zfs promote \"" . $this->name . "\" 2>&1";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+		}
+	}
+}
+
+abstract class OMVModuleZFSDataset {
+
     // Attributes
     /**
      * Name of Dataset
@@ -17,15 +55,7 @@ class OMVModuleZFSDataset {
      * @var    string $name
      * @access private
      */
-    private $name;
-	
-	/**
-     * Mountpoint of the Dataset
-     *
-     * @var    string $mountPoint
-     * @access private
-     */
-    private $mountPoint;
+    protected $name;
 
     /**
      * Array with properties assigned to the Dataset
@@ -33,49 +63,8 @@ class OMVModuleZFSDataset {
      * @var    array $properties
      * @access private
      */
-    private $properties;
+    protected $properties;
 
-	/**
-	 * Array with Snapshots associated to the Dataset
-	 *
-	 * @var 	array $snapshots
-	 * @access private
-	 */
-	private $snapshots;
-
-	// Associations
-	// Operations
-
-	/**
-	 * Constructor. If the Dataset already exists in the system the object will be updated with all
-	 * associated properties from commandline.
-	 *
-	 * @param string $name Name of the new Dataset
-	 * @return void
-	 * @access public
-	 */
-	public function __construct($name) {
-		$ds_exists = true;
-		$this->name = $name;
-		$cmd = "zfs list -H -t filesystem \"" . $name . "\" 2>&1";
-		try {
-			$this->exec($cmd, $out, $res);
-			$this->updateAllProperties();
-			$this->mountPoint = $this->properties["mountpoint"]["value"];
-		}
-		catch (\OMV\ExecException $e) {
-			$ds_exists = false;
-		}
-		if ($ds_exists) {
-			$cmd = "zfs list -r -d 1 -o name -H -t snapshot \"" . $name . "\" 2>&1";
-			$this->exec($cmd, $out2, $res2);
-			foreach ($out2 as $line2) {
-					$this->snapshots[$line2] = new OMVModuleZFSSnapshot($line2);
-			}
-		} else {
-			$this->create();
-		}
-	}
 
 	/**
 	 * Return name of the Dataset
@@ -83,37 +72,14 @@ class OMVModuleZFSDataset {
 	 * @return string $name
 	 * @access public
 	 */
+
 	public function getName() {
 		return $this->name;
 	}
 
 	/**
-	 * Get the mountpoint of the Dataset
-	 *
-	 * @return string $mountPoint
-	 * @access public
-	 */
-	public function getMountPoint() {
-		return $this->mountPoint;
-	}
-
-	/**
-	 * Get all Snapshots associated with the Dataset
-	 *
-	 * @return array $snapshots
-	 * @access public
-	 */
-	public function getSnapshots() {
-		if (isset($this->snapshots)) {
-			return $this->snapshots;
-		} else {
-			return array();
-		}
-	}
-
-	/**
 	 * Get a single property value associated with the Dataset
-	 * 
+	 *
 	 * @param string $property Name of the property to fetch
 	 * @return array The returned array with the property. The property is an associative array with
 	 * two elements, <value> and <source>.
@@ -125,7 +91,7 @@ class OMVModuleZFSDataset {
 
 	/**
 	 * Get an associative array of all properties associated with the Snapshot
-	 * 
+	 *
 	 * @return array $properties Each entry is an associative array with two elements
 	 * <value> and <source>
 	 * @access public
@@ -144,7 +110,7 @@ class OMVModuleZFSDataset {
 	public function setProperties($properties) {
 		foreach ($properties as $newpropertyk => $newpropertyv) {
 			$cmd = "zfs set " . $newpropertyk . "=\"" . $newpropertyv . "\" \"" . $this->name . "\" 2>&1";
-			$this->exec($cmd,$out,$res);
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
 			$this->updateProperty($newpropertyk);
 		}
 	}
@@ -154,10 +120,10 @@ class OMVModuleZFSDataset {
 	 *
 	 * @return void
 	 * @access private
-	 */ 
-	private function updateAllProperties() {
+	 */
+	public function updateAllProperties() {
 		$cmd = "zfs get -H all \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		unset($this->properties);
 		foreach ($out as $line) {
 			$tmpary = preg_split('/\t+/', $line);
@@ -172,35 +138,11 @@ class OMVModuleZFSDataset {
 	 * @return void
 	 * @access private
 	 */
-	private function updateProperty($property) {
+	public function updateProperty($property) {
 		$cmd = "zfs get -H " . $property . " \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$tmpary = preg_split('/\t+/', $out[0]);
 		$this->properties["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
-	}
-
-	/**
-	 * Craete a Dataset on commandline.
-	 *
-	 * @return void
-	 * @access private
-	 */
-	private function create() {
-		$cmd = "zfs create -p \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
-		$this->updateAllProperties();
-		$this->mountPoint = $this->properties["mountpoint"]["value"];
-	}
-
-	/**
-	 * Destroy the Dataset.
-	 *
-	 * @return void
-	 * @access public
-	 */
-	public function destroy() {
-		$cmd = "zfs destroy \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
 	}
 
 	/**
@@ -212,8 +154,19 @@ class OMVModuleZFSDataset {
 	 */
 	public function rename($newname) {
 		$cmd = "zfs rename -p \"" . $this->name . "\" \"" . $newname . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$this->name = $newname;
+	}
+
+	/**
+	 * Destroy the Dataset.
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function destroy() {
+		$cmd = "zfs destroy \"" . $this->name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
 
 	/**
@@ -226,133 +179,8 @@ class OMVModuleZFSDataset {
 	 */
 	public function inherit($property) {
 		$cmd = "zfs inherit " . $property . " \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$this->updateProperty($property);
 	}
 
-	/**
-	 * Upgrades the Dataset to latest filesystem version
-	 *
-	 * @return void
-	 * @access public
-	 */
-	public function upgrade() {
-		$cmd = "zfs upgrade \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
-	}
-
-	/**
-	 * Mount the Dataset
-	 *
-	 * @return void
-	 * @access public
-	 */
-	public function mount() {
-		$cmd = "zfs mount \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
-		$this->updateProperty("mounted");
-	}
-
-	/**
-	 * Unmount the Dataset
-	 *
-	 * @return void
-	 * @access public
-	 */
-	public function unmount() {
-		$cmd = "zfs unmount \"" . $this->name . "\" 2>&1";
-		$this->exec($cmd,$out,$res);
-		$this->updateProperty("mounted");
-	}
-
-	/**
-	 * Creates a Snapshot and adds it to the existing list of snapshots associated
-	 * with the Dataset.
-	 *
-	 * @param string $snap_name Name of the Snapshot to create.
-	 * @param array $properties Optional array of properties to set on Snapshot
-	 * @return void
-	 * @access public
-	 */
-	public function addSnapshot($snap_name, array $properties = null) {
-		//not reachable method
-		$snap = new OMVModuleZFSSnapshot($snap_name,false);
-		$snap->create($properties);
-		$this->snapshots[$snap_name] = $snap;
-	}
-
-	/**
-	 * Destroys a Snapshot on commandline and removes it from the Dataset.
-	 *
-	 * @param string $snap_name Name of the Snapshot to delete.
-	 * @return void
-	 * @access public
-	 */
-	public function deleteSnapshot($snap_name) {
-		$this->snapshots[$snap_name]->destroy();
-		unset($this->snapshots[$snap_name]);
-	}
-
-	/**
-	* Check if the Dataset is a clone or not.
-	*
-	* @return bool
-	* @access public
-	*/
-	public function isClone() {
-		$origin = $this->getProperty("origin");
-		if (strlen($origin["value"]) > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	* Get the origin of the Dataset if it's a clone.
-	*
-	* @return string The name of the origin if it exists. Otherwise an empty string.
-	* @access public
-	*/
-	public function getOrigin() {
-		if ($this->isClone()) {
-			$origin = $this->getProperty("origin");
-			return $origin['value'];
-		} else {
-			return "";
-		}
-	}
-
-	/**
-	* Promotes the Dataset if it's a clone.
-	*
-	* @return void
-	* @access public
-	*/
-	public function promote() {
-		if ($this->isClone()) {
-			$cmd = "zfs promote \"" . $this->name . "\" 2>&1";
-			$this->exec($cmd,$out,$res);
-		}
-	}
-
-	/**
-	 * Helper function to execute a command and throw an exception on error
-	 * (requires stderr redirected to stdout for proper exception message).
-	 *
-	 * @param string $cmd Command to execute
-	 * @param array &$out If provided will contain output in an array
-	 * @param int &$res If provided will contain Exit status of the command
-	 * @return string Last line of output when executing the command
-	 * @throws \OMV\ExecException
-	 * @access private
-	 */
-	private function exec($cmd, &$out = null, &$res = null) {
-		$process = new Process($cmd);
-		$tmp = $process->execute($out,$res);
-		return $tmp;
-	}
-
 }
-
-?>

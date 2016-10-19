@@ -30,7 +30,7 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 
 	getFormItems: function() {
 		var me = this;
-		
+
 		return [{
 			xtype: "textareafield",
 			name: "details",
@@ -112,7 +112,7 @@ Ext.define("OMV.module.admin.storage.zfs.Settings", {
 				ptype: "fieldinfo",
 				text: _("Property to look for on filesystems that, when present, " +
 				"will indicate whether this filesystem and it's children should be " +
-				"included in automatic sharing. If this is left blank, all " + 
+				"included in automatic sharing. If this is left blank, all " +
 				"shared filesystems will have their nested children automatically " +
 				"shared. If it's set, then only filesystems with the property " +
 				"set to true will be automatically shared while filesystems " +
@@ -497,10 +497,16 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		var record = records[0];
 		Ext.create("OMV.module.admin.storage.zfs.EditProperties", {
 			name: record.get("path"),
-			type: record.get("type")
+			type: record.get("type"),
+			listeners: {
+				scope: me,
+				submit: function() {
+					this.doReload();
+				}
+			}
 		}).show();
 	},
-	
+
 	onExpandPoolButton: function() {
 		var me = this;
 		var sm = me.getSelectionModel();
@@ -562,7 +568,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			}
 		}).show();
 	},
-    
+
 	onRenameButton: function() {
 		var me = this;
 		var sm = me.getSelectionModel();
@@ -580,7 +586,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			}
 		}).show();
 	},
-    
+
 	onExportPoolButton: function() {
         var me = this;
 		var sm = me.getSelectionModel();
@@ -629,7 +635,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 			}
 		});
 	},
-	
+
 	onSettingsButton: function() {
 		var me = this;
 		Ext.create("OMV.module.admin.storage.zfs.Settings", {}).show();

@@ -20,7 +20,7 @@ class OMVModuleZFS extends ServiceAbstract
 	private $pools;
 
 	public function __construct() {
-		$this->pools = array();
+		$this->pools = [];
 		$this->updatePools();
 	}
 
@@ -54,11 +54,12 @@ class OMVModuleZFS extends ServiceAbstract
           OMV_NOTIFY_MODIFY,
           "org.openmediavault.storage.zfs.filesystem",
           array($moduleMgr->getModule("nfs"), "setDirty"));
+		/*
         $dispatcher->addListener(
           OMV_NOTIFY_MODIFY,
           "org.openmediavault.storage.zfs.filesystem",
           array($moduleMgr->getModule("fstab"), "setDirty"));
-		  
+		*/ 
 		$this->debug(sprintf("bindListeners %s", var_export($dispatcher, true)));
     }
 

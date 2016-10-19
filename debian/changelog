@@ -1,8 +1,18 @@
+openmediavault-zfs (3.0.4) stable; urgency=low
+
+  * Refactor code
+  * Change dependencies
+  * Add mountpoint properties for filesystem
+  * Fix rename filesystem
+  * Fix Filesystem size information
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 05 Oct 2016 03:19:11 +0900
+
 openmediavault-zfs (3.0.3.5) stable; urgency=low
 
   * Fix Volume creating bug
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 05 Oct 2016 03:19:11 +0900 
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 05 Oct 2016 03:19:11 +0900
 
 openmediavault-zfs (3.0.3) stable; urgency=low
 
@@ -17,7 +27,7 @@ openmediavault-zfs (3.0.2) stable; urgency=low
 
   * Porting to OMV 3.0.26
   * Fix filesystem to show all dataset
-  * Fix Zvolume to appear in filesystem 
+  * Fix Zvolume to appear in filesystem
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 26 Aug 2016 10:49:05 +0900
 
@@ -75,7 +85,7 @@ openmediavault-zfs (0.6.4.2) stable; urgency=low
 
 openmediavault-zfs (0.6.4.1) testing; urgency=low
 
-  * Fix layout issue on object details view 
+  * Fix layout issue on object details view
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 16 Sep 2015 19:29:26 +0200
 

@@ -1,9 +1,6 @@
 <?php
-use OMV\Engine\Module\ServiceAbstract;
-use OMV\System\Process;
 require_once("Vdev.php");
-require_once("Snapshot.php");
-require_once("Dataset.php");
+require_once("Filesystem.php");
 require_once("Zvol.php");
 require_once("VdevType.php");
 require_once("Utils.php");
@@ -16,15 +13,9 @@ require_once("Exception.php");
  * @version   0.1
  * @copyright Michael Rasmussen <mir@datanom.net>
  */
-class OMVModuleZFSZpool {
+class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
+
     // Attributes
-    /**
-     * Name of pool
-     *
-     * @var    string $name
-     * @access private
-     */
-    private $name;
 
     /**
      * List of Vdev
@@ -63,49 +54,6 @@ class OMVModuleZFSZpool {
     private $cache;
 
     /**
-     * Pool size
-     *
-     * @var    int $size
-     * @access private
-     */
-    private $size;
-
-    /**
-     * Pool's mountpoint
-     *
-     * @var    string $mountPoint
-     * @access private
-     */
-    private $mountPoint;
-
-    /**
-     * List of features
-     *
-     * @var    array $features
-     * @access private
-     */
-    private $features;
-
-    // Associations
-    /**
-     * Array of OMVModuleZFSSnapshot.
-     *
-     * @var    array $snapshot
-     * @access private
-     * @association OMVModuleZFSSnapshot to snapshot
-     */
-    private $snapshot;
-
-    /**
-     * Array of OMVModuleZFSDataset
-     *
-     * @var    Dataset $dataset
-     * @access private
-     * @association OMVModuleZFSDataset to dataset
-     */
-    private $dataset;
-
-    /**
      * Array of OMVModuleZFSZvol
      *
      * @var    Zvol $zvol
@@ -122,53 +70,13 @@ class OMVModuleZFSZpool {
      * @throws OMVModuleZFSException
 	 */
 
-	public function __construct($vdev, $opts = "") {
-		$create_pool = true;
-
-		if (is_array($vdev)) {
-			$cmd = $this->getCommandString($vdev);
-			$name = $vdev[0]->getPool();
-			$type = $vdev[0]->getType();
-		} else if ($vdev instanceof OMVModuleZFSVdev) {
-			$cmd = $this->getCommandString(array($vdev));
-			$name = $vdev->getPool();
-			$type = $vdev->getType();
-		} else {
-			// Assume we make an instance of an existing pool
-			$create_pool = false;
-		}
-
-		$this->vdevs = array();
+	public function __construct($name) {
+		$this->vdevs = [];
 		$this->spare = null;
 		$this->log = null;
 		$this->cache = null;
-		$this->features = array();
-		if ($create_pool) {
-			$cmd = "zpool create $opts\"$name\" $cmd 2>&1";
-			$process = new Process($cmd);
-			$process->execute($output,$result);
-			$this->name = $name;
-			$this->type = $type;
-			if (is_array($vdev))
-				$this->vdevs = $vdev;
-			else
-				array_push ($this->vdevs, $vdev);
-			$this->setSize();
-			$this->mountPoint = $this->getAttribute("mountpoint");
-		} else {
-			$this->assemblePool($vdev);
-		}
+		$this->assemblePool($name);
 	}
-
-    /**
-     * Get pool name
-     *
-     * @return string
-     * @access public
-     */
-    public function getName() {
-        return $this->name;
-    }
 
     /**
      * Get array of Vdev
@@ -190,8 +98,7 @@ class OMVModuleZFSZpool {
      */
     public function addVdev(array $vdevs, $opts= "") {
 		$cmd = "zpool add \"" . $this->name . "\" " . $opts . $this->getCommandString($vdevs) . " 2>&1";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 		$this->vdevs = array_merge($this->vdevs, $vdevs);
 		$this->setSize();
     }
@@ -208,6 +115,40 @@ class OMVModuleZFSZpool {
         throw new OMVModuleZFSException("Cannot remove vdevs from a pool");
     }
 
+	/**
+	 * Return all disks in /dev/sdXX used by the pool
+	 *
+	 * @return array An array with all the disks
+	 */
+	public function getDevDisks() {
+		$disks = array();
+		$vdevs = $this->getVdevs();
+		foreach ($vdevs as $vdev) {
+			$vdisks = $vdev->getDisks();
+			foreach ($vdisks as $vdisk) {
+				if (preg_match('/^(sd[a-z]{1})|(fio[a-z]{1})$/', $vdisk)) {
+					$disks[] = "/dev/" . $vdisk . "1";
+					continue;
+				} else if (preg_match('/^c[0-9]+d[0-9]+$/', $vdisk)) {
+					$disks[] = "/dev/cciss/" . $vdisk . "p1";
+					continue;
+				} else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
+					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
+					continue;
+				} else if (!(OMVModuleZFSUtil::getDevByID($vdisk) === null)) {
+					$disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
+					continue;
+				} else if (preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $vdisk)) {
+					$disks[] = OMVModuleZFSUtil::getDevByUuid($vdisk);
+					continue;
+				} else {
+					throw new OMVModuleZFSException("Unknown disk identifier " . $vdisk);
+				}
+			}
+		}
+		return($disks);
+	}
+
     /**
      * XXX
      *
@@ -221,9 +162,7 @@ class OMVModuleZFSZpool {
 			throw new OMVModuleZFSException("Only a plain Vdev can be added as cache");
 
 		$cmd = "zpool add \"" . $this->name . "\" cache " . $this->getCommandString($vdevs);
-		$process = new Process($cmd);
-		$process->execute($output,$result);
-
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 		$disks = $cache->getDisks();
 		foreach ($disks as $disk) {
 			array_push ($this->cache, $disk);
@@ -246,8 +185,7 @@ class OMVModuleZFSZpool {
 			$dist_str .= "$disk ";
 
 		$cmd = "zpool remove \"" . $this->name . "\" $dist_str";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 		foreach ($disks as $disk)
 			$this->cache = $this->removeDisk($this->cache, $disk);
     }
@@ -274,9 +212,7 @@ class OMVModuleZFSZpool {
         if ($log->getType() == OMVModuleZFSVdevType::OMVMODULEZFSPLAIN ||
 			$log->getType() == OMVModuleZFSVdevType::OMVMODULEZFSMIRROR) {
 			$cmd = "zpool add \"" . $this->name . "\" log " . $this->getCommandString($vdevs);
-			$process = new Process($cmd);
-			$process->execute($output,$result);
-
+			OMVModuleZFSUtil::exec($cmd,$output,$result);
 			$this->log = $log;
 		} else
 			throw new OMVModuleZFSException("Only a plain Vdev or mirror Vdev can be added as log");
@@ -299,8 +235,7 @@ class OMVModuleZFSZpool {
 					$dist_str .= "$disk ";
 				$cmd = "zpool remove \"" . $this->name . "\" $disk_str";
 			}
-			$process = new Process($cmd);
-			$process->execute($output,$result);
+			OMVModuleZFSUtil::exec($cmd,$output,$result);
 			$this->log = array();
 		}
     }
@@ -328,9 +263,7 @@ class OMVModuleZFSZpool {
 			throw new OMVModuleZFSException("Only a plain Vdev can be added as spares");
 
 		$cmd = "zpool add \"" . $this->name . "\" spare " . $this->getCommandString($vdevs);
-		$process = new Process($cmd);
-		$process->execute($output,$result);
-
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 		$disks = $spares->getDisks();
 		foreach ($disks as $disk) {
 			array_push ($this->spare, $disk);
@@ -353,8 +286,7 @@ class OMVModuleZFSZpool {
 			$dist_str .= "$disk ";
 
 		$cmd = "zpool remove \"" . $this->name . "\" $dist_str";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 		foreach ($disks as $disk)
 			$this->spare = $this->removeDisk($this->spare, $disk);
     }
@@ -369,75 +301,10 @@ class OMVModuleZFSZpool {
         return $this->spare;
     }
 
-    /**
-     * XXX
-     *
-     * @return int
-     * @access public
-     */
-    public function getSize() {
-        return $this->size;
-    }
-
-    /**
-     *
-     * @return int
-     * @access private
-     */
-    private function setSize() {
-        $used = OMVModuleZFSUtil::SizeTobytes($this->getAttribute("used"));
-        $avail = OMVModuleZFSUtil::SizeTobytes($this->getAvailable());
-	$this->size = OMVModuleZFSUtil::bytesToSize($avail + $used);
-    }
-
-    /**
-     *
-     * @return int
-     * @access public
-     */
-    public function getAvailable() {
-        return $this->getAttribute("available");
-    }
-
-    /**
-     * XXX
-     *
-     * @return string
-     * @access public
-     */
-    public function getMountPoint() {
-        return $this->mountPoint;
-    }
-
-    /**
-     * XXX
-     *
-     * @param  array $features
-     * @return void
-	 * @throws OMVModuleZFSException
-     * @access public
-     */
-    public function setFeatures(array $features) {
-		foreach ($features as $feature => $value) {
-			$cmd = "zpool set $feature=$value \"" . $this->name . "\"";
-			$process = new Process($cmd);
-			$process->execute($output,$result);
-		}
-		$this->features = $this->getAllAttributes();
-    }
-
-    /**
-     * We only return array of features for which the user can
-     * change in GUI.
-     *
-     * @return array of features
-     * @access public
-     */
-    public function getFeatures($internal = true) {
-		$attrs = array();
-		$featureSet = array(
+	public function updateAllProperties(){
+		$featureSet = [
 			'recordsize', /* default 131072. 512 <= n^2 <=  131072*/
-			'checksum', /* on | off */
+			'checksum', /* on | 	 */
 			'compression', /* off | lzjb | gzip | zle | lz4 */
 			'atime', /* on | off */
 			'aclmode', /* discard | groupmask | passthrough | restricted */
@@ -447,24 +314,19 @@ class OMVModuleZFSZpool {
 			'secondarycache', /* all | none | metadata */
 			'logbias', /* latency | throughput */
 			'dedup', /* on | off */
-			'sync' /* standard | always | disabled */
-		);
-		if (count($this->features) < 1)
-			$this->features = $this->getAllAttributes();
-		if ($internal) {
-			foreach ($this->features as $attr => $val) {
-				if (in_array($attr, $featureSet))
-					$attrs[$attr] = $val['value'];
-			}
-		} else {
-			foreach ($this->features as $attr => $val) {
-				if (in_array($attr, $featureSet))
-					$attrs[$attr] = $val;
-			}
+			'sync', /* standard | always | disabled */
+			'mountpoint',
+			'used',
+			'available'
+		];
+		parent::updateAllProperties();
+		$attrs = [];
+		foreach ($this->properties as $attr => $val) {
+			if (in_array($attr, $featureSet))
+				$attrs[$attr] = $val;
 		}
-
-		return $attrs;
-    }
+		$this->properties=$attrs;
+	}
 
     /**
      * XXX
@@ -475,8 +337,7 @@ class OMVModuleZFSZpool {
      */
     public function export() {
         $cmd = "zpool export \"" . $this->name . "\"";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
     }
 
     /**
@@ -492,8 +353,7 @@ class OMVModuleZFSZpool {
 			$cmd = "zpool import \"$name\"";
 		else
 			$cmd = "zpool import";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
     }
 
     /**
@@ -505,88 +365,51 @@ class OMVModuleZFSZpool {
      */
     public function scrub() {
         $cmd = "zpool scrub \"" . $this->name . "\"";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
-    }
-
-    /**
-     * XXX
-     *
-     * @return string
-	 * @throws OMVModuleZFSException
-     * @access public
-     */
-    public function status() {
-        $cmd = "zpool status \"" . $this->name . "\"";
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		return OMVModuleZFSUtil::exec($cmd,$output,$result);
     }
 
 	/**
-	 * Get a single property value associated with the Dataset
+	 * Returns the latest time a pool was scrubbed.
 	 *
-	 * @param string $property Name of the property to fetch
-	 * @return array The returned array with the property. The property is an associative array with
-	 * two elements, <value> and <source>.
-	 * @access public
 	 */
-	public function getProperty($property) {
-		$attrs = $this->getFeatures(false);
-		return $attrs["$property"];
-	}
-
-	/**
-	 * Get an associative array of all properties associated with the Snapshot
-	 *
-	 * @return array $properties Each entry is an associative array with two elements
-	 * <value> and <source>
-	 * @access public
-	 */
-	public function getProperties() {
-		$attrs = $this->getFeatures(false);
-		return $attrs;
-	}
-
-	/**
-	 * Sets a number of Dataset properties. If a property is already set it will be updated with the new value.
-	 *
-	 * @param  array $properties An associative array with properties to set
-	 * @return void
-	 * @access public
-	 */
-	public function setProperties($properties) {
-		foreach ($properties as $newpropertyk => $newpropertyv) {
-			$cmd = "zfs set " . $newpropertyk . "=" . $newpropertyv . " \"" . $this->name . "\" 2>&1";
-			OMVModuleZFSUtil::exec($cmd,$out,$res);
-			$attr = $this->getAttribute($newpropertyk);
-			$this->features[$newpropertyk] = $attr;
+	public function getLatestScrub() {
+		$cmd = "zpool status \"" . $this->name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			if (preg_match('/none requested/', $line))
+				return "Never";
+			if (preg_match('/with [\d]+ errors on (.*)/', $line, $matches))
+				return $matches[1];
+			if (preg_match('/scrub (in progress since .*)/', $line, $matches))
+				return $matches[1];
 		}
 	}
 
 	/**
-	 * Destroy the Dataset.
+	 * Returns the status of a pool.
 	 *
-	 * @return void
-	 * @access public
 	 */
-	public function destroy() {
-		$cmd = "zpool destroy \"" . $this->name . "\" 2>&1";
+	public function getPoolStatus() {
+		$cmd = "zpool status \"" . $this->name . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			if (preg_match('/errors: (.*)/', $line, $match)) {
+				if (strcmp($match[1], "No known data errors") === 0)
+					return "OK";
+				return "Error";
+			}
+		}
 	}
 
 	/**
-	 * Clears a previously set proporty and specifies that it should be
-	 * inherited from it's parent.
+	 * Returns the state of a pool.
 	 *
-	 * @param string $property Name of the property to inherit.
-	 * @return void
-	 * @access public
 	 */
-	public function inherit($property) {
-		$cmd = "zfs inherit " . $property . " \"" . $this->name . "\" 2>&1";
+	public function getPoolState() {
+		$cmd = "zpool get -H health \"" . $this->name . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
-		$attr = $this->getAttribute($newpropertyk);
-		$this->features[$newpropertyk] = $attr;
+		$tmpary = preg_split('/\t+/', $out);
+		return $tmpary[2];
 	}
 
 	/**
@@ -596,7 +419,7 @@ class OMVModuleZFSZpool {
 	 * @return string
 	 * @throws OMVMODULEZFSException
 	 */
-	private function getCommandString(array $vdevs) {
+	public static function getCommandString(array $vdevs) {
 		$adds = array();
 
 		foreach ($vdevs as $vdev) {
@@ -626,57 +449,6 @@ class OMVModuleZFSZpool {
 		}
 
 		return implode(" ", $adds);
-	}
-
-	/**
-	 * Get an attribute from pool
-	 *
-	 * @param string $attribute
-	 * @return string value
-	 */
-	public function getAttribute($attribute) {
-		$cmd = "zpool list -H -o $attribute \"{$this->name}\"";
-		$process = new Process($cmd);
-		$process->setQuiet();
-		$output = $process->execute($dummy,$result);
-		if ($result) {
-			$cmd = "zfs list -H -o $attribute \"{$this->name}\"";
-			$process = new Process($cmd);
-			$process->setQuiet();
-			$output = $process->execute($dummy,$result);
-			if ($result)
-				return null;
-			return $output;
-		}
-
-		return $output;
-	}
-
-	/**
-	 * Get all attributes from pool
-	 * @return array of attributes
-	 * @throws OMVModuleZFSException
-	 */
-	private function getAllAttributes() {
-		$attrs = array();
-		$cmd = "zfs get -H all \"{$this->name}\"";
-		$process = new Process($cmd);
-		$process->execute($out,$result);
-		foreach ($out as $line) {
-			$tmpary = preg_split('/\t+/', $line);
-			$attrs["$tmpary[1]"] = array("value" => $tmpary[2], "source" => $tmpary[3]);
-		}
-		return $attrs;
-	}
-
-	/**
-	 * Get all Dataset properties from commandline and update object properties attribute
-	 *
-	 * @return void
-	 * @access private
-	 */
-	private function updateAllProperties() {
-		$this->features = $this->getAllAttributes();
 	}
 
 	/**
@@ -713,8 +485,7 @@ class OMVModuleZFSZpool {
 		$cache = false;
 		$start = true;
 
-		$process = new Process($cmd);
-		$process->execute($output,$result);
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
 
 		$this->name = $name;
 		foreach($output as $line) {
@@ -777,10 +548,32 @@ class OMVModuleZFSZpool {
 				}
 			}
 		}
-		$this->setSize();
-		$this->mountPoint = $this->getAttribute("mountpoint");
 	}
 
+	/**
+	 * Destroy the pool.
+	 *
+	 * @return void
+	 * @access public
+	 */
+	public function destroy() {
+		$cmd = "zpool destroy \"" . $this->name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+	}
+
+
+	public static function create($vdev,$opts=""){
+		if (is_array($vdev)) {
+			$cmd = OMVModuleZFSZpool::getCommandString($vdev);
+			$name = $vdev[0]->getPool();
+		} else if ($vdev instanceof OMVModuleZFSVdev) {
+			$cmd = OMVModuleZFSZpool::getCommandString(array($vdev));
+			$name = $vdev->getPool();
+		}
+		$cmd = "zpool create $opts \"$name\" $cmd 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$output,$result);
+		return new OMVModuleZFSZpool($name);
+	}
 	/**
 	 * Create pool config from parsed input
 	 *
@@ -839,5 +632,18 @@ class OMVModuleZFSZpool {
 		}
 	}
 
+
+	/**
+	 * Clears all ZFS labels on specified devices.
+	 * Needed for blkid to display proper data.
+	 *
+	 */
+	public static function clearZFSLabel($disks) {
+		foreach ($disks as $disk) {
+			$cmd = "zpool labelclear " . $disk . " 2>&1";
+			OMVModuleZFSUtil::exec($cmd,$out,$res);
+		}
+		return null;
+	}
 }
 ?>

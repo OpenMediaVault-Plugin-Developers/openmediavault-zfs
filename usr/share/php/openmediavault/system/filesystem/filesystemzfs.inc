@@ -1,64 +1,7 @@
 <?php
-require_once("/usr/share/omvzfs/Utils.php");
-require_once("/usr/share/omvzfs/Dataset.php");
-require_once("/usr/share/omvzfs/Exception.php");
+namespace OMV\System\Filesystem;
 
-define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
-
-/**
- * Implements the storage device backend for ZFS Zvol devices.
- * @ingroup api
- */
-class OMVStorageDeviceBackendZvol extends \OMV\System\Storage\Backend\BackendAbstract {
-    function getType() {
-        return OMV_STORAGE_DEVICE_TYPE_ZVOL;
-    }
-
-    function enumerate() {
-        return $this->enumerateProcFs("zd[0-9]+");
-    }
-
-    function isTypeOf($deviceFile) {
-        // Examples:
-        // - /dev/zd0
-        // - /dev/zd1p1
-        $regex = "zd[0-9]+(p[0-9]+)?";
-        return $this->isTypeOfByName($deviceFile, $regex);
-    }
-
-    function getImpl($args) {
-        return new OMVStorageDeviceZvol($args);
-    }
-
-    function baseDeviceFile($deviceFile) {
-        return preg_replace("/(p\d+)$/", "", $deviceFile);
-    }
-
-    function fsDeviceFile($deviceFile) {
-        // E.g. /dev/zd0p1
-        return sprintf("%sp1", $deviceFile);
-    }
-}
-
-/**
- * This class provides a simple interface to handle ZFS Zvol devices.
- * @ingroup api
- */
-class OMVStorageDeviceZvol extends \OMV\System\Storage\StorageDevice {
-    /**
-     * Get the description of the device.
-     * @return The device description, FALSE on failure.
-     */
-	public function getDescription() {
-		$cmd = "/lib/udev/zvol_id \"" . $this->getDeviceFile() . "\"";
-		OMVModuleZFSUtil::exec($cmd,$out,$res);
-		$name = $out[0];
-        return sprintf(gettext("Zvol %s [%s, %s]"),
-          $name, $this->getDeviceFile(), binary_format($this->getSize()));
-    }
-}
-
-class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
+class FilesystemZfs extends \OMV\System\Filesystem\Filesystem {
 
 	public function __construct($fsName) {
 		$this->deviceFile = $fsName;
@@ -66,6 +9,8 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
 		$this->type = "zfs";
 		$this->dataCached = FALSE;
 		$this->usage = "filesystem";
+		$this->filesystem = new \OMVModuleZFSFilesystem($this->deviceFile);
+
 	}
 
 	/**
@@ -285,11 +230,11 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
     public function getMountPoint() {
         if ($this->getData() === FALSE)
 			return FALSE;
-		$ds = new OMVModuleZFSDataset($this->deviceFile);
-		return $ds->getMountPoint();
+		$this->filesystem->updateProperty("mountpoint");
+		return $this->filesystem->getMountPoint();
 	}
 
-  	/**
+     /**
      * Get statistics from a mounted filesystem.
      * @return The filesystem statistics if successful, otherwise FALSE. The
      *   following fields are included: \em devicefile, \em type, \em blocks,
@@ -303,37 +248,23 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
         // Get the mount point of the filesystem.
         if (FALSE === ($mountPoint = $this->getMountPoint()))
             return FALSE;
-        OMVModuleZFSUtil::exec("export LANG=C; df -PT", $output, $result);
+        \OMVModuleZFSUtil::exec("export LANG=C; df -PT", $output, $result);
         if ($result !== 0) {
             $this->setLastError($output);
             return FALSE;
         }
-        // Parse command output:
-        // Filesystem                                             Type     1024-blocks    Used Available Capacity Mounted on
-        // rootfs                                                 rootfs      14801380 1392488  12657020      10% /
-        // udev                                                   devtmpfs       10240       0     10240       0% /dev
-        // tmpfs                                                  tmpfs         102356     324    102032       1% /run
-        // /dev/disk/by-uuid/128917b7-718a-4361-ab6f-6b1725564cb8 ext4        14801380 1392488  12657020      10% /
-        // tmpfs                                                  tmpfs           5120       0      5120       0% /run/lock
-        // tmpfs                                                  tmpfs         342320       0    342320       0% /run/shm
-        // tmpfs                                                  tmpfs         511768       4    511764       1% /tmp
-        // /dev/sdb1                                              ext4          100156    4164     95992       5% /media/b994e5e8-94ae-482c-ae54-70a0bbb2737e
         $result = FALSE;
-        foreach ($output as $outputk => $outputv) {
-            $matches = preg_split("/[\s,]+/", $outputv);
-            if (0 !== strcasecmp($mountPoint, $matches[6]))
-                continue;
-            $result = array(
-                "devicefile" => $this->deviceFile,
-                "type" => $matches[1],
-                "blocks" => $matches[2],
-                "size" => bcmul($matches[2], "1024", 0),
-                "used" => binary_convert($matches[3], "KiB", "B"),
-                "available" => binary_convert($matches[4], "KiB", "B"),
-                "percentage" => intval(trim($matches[5], "%")),
-                "mountpoint" => $matches[6]
-            );
-        }
+		$this->filesystem->updateAllProperties();
+		$result = [
+			"devicefile" => $this->deviceFile,
+			"type" => "zfs",
+			"blocks" => $this->filesystem->getSize()/1024,
+			"size" => $this->filesystem->getSize(),
+			"used" => $this->filesystem->getUsed(),
+			"available" => $this->filesystem->getAvailable(),
+			"percentage" => intval($this->filesystem->getUsed()/$this->filesystem->getSize()*100),
+			"mountpoint" => $this->filesystem->getMountPoint()
+		];
         return $result;
     }
 
@@ -344,8 +275,8 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
     public function isMounted() {
         if ($this->getData() === FALSE)
 			return FALSE;
-		$ds = new OMVModuleZFSDataset($this->deviceFile);
-		$mounted = $ds->getProperty("mounted");
+		$this->filesystem->updateProperty("mounted");
+		$mounted=$this->filesystem->getProperty("mounted");
 		if (strcmp($mounted['value'],"yes") === 0) {
 			return TRUE;
 		} else {
@@ -359,8 +290,7 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
      * @return TRUE if successful, otherwise FALSE.
      */
     public function mount($options = "") {
-		$cmd = "zfs mount \"" . $this->deviceFile . "\" 2>&1";
-		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		$this->filesystem->mount();
 		return TRUE;
     }
 
@@ -371,8 +301,7 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
      * @return TRUE if successful, otherwise FALSE.
      */
     public function umount($force = FALSE, $lazy = FALSE) {
-		$cmd = "zfs unmount \"" . $this->deviceFile . "\" 2>&1";
-		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		$this->filesystem->umount();
 		return TRUE;
 	}
 
@@ -423,49 +352,3 @@ class OMVFilesystemZFS extends \OMV\System\Filesystem\Filesystem {
 		*/
     }
 }
-
-class OMVFilesystemBackendZFS extends \OMV\System\Filesystem\Backend\BackendAbstract {
-    public function __construct() {
-        $this->type = "zfs";
-        $this->properties = self::PROP_POSIX_ACL;
-    }
-
-    public function getImpl($args) {
-        $object = new OMVFilesystemZFS($args);
-		$object->setBackend($this);
-		return $object;
-    }
-
-	public function isTypeOf($fsName) {
-		$cmd = "zfs list -H -o name -t filesystem \"$fsName\"";
-		OMVModuleZFSUtil::exec($cmd, $out, $res);
-		if ($res == 0)
-			return TRUE;
-		return FALSE;
-	}
-
-	public function enumerate() {
-		$cmd = "zfs list -H -o name -t filesystem 2>&1";
-		OMVModuleZFSUtil::exec($cmd, $out, $res);
-		$result = array();
-		foreach ($out as $name) {
-			$data = array("devicefile" => $name,
-							"uuid" => "",
-							"label" => $name,
-							"type" => "zfs");
-			$result[$name] = $data;
-		}
-		return $result;
-	}
-
-	public function isBlkidEnumerated() {
-		return FALSE;
-	}
-
-}
-
-$mngr = \OMV\System\Storage\Backend\Manager::getInstance();
-$mngr->registerBackend(new OMVStorageDeviceBackendZvol());
-$mngr = \OMV\System\Filesystem\Backend\Manager::getInstance();
-$mngr->registerBackend(new OMVFilesystemBackendZFS());
-?>

@@ -9,7 +9,11 @@ Homepage: http://omv-extras.org/
 
 Package: openmediavault-zfs
 Architecture: amd64
-Depends: ${misc:Depends}, openmediavault-omvextrasorg (>= 3.4), openmediavault (>= 3.0.34), zfs-dkms, zfsutils-linux
+Depends: openmediavault (>= 3.0.34),
+         openmediavault-omvextrasorg (>= 3.4),
+         zfs-dkms,
+         zfsutils-linux | zfsutils,
+         ${misc:Depends}
 Description: OpenMediaVault plugin for ZFS
  ZFS is a combined file system and logical volume manager designed
  by Sun Microsystems. The features of ZFS include protection against

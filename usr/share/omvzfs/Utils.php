@@ -171,7 +171,8 @@ class OMVModuleZFSUtil {
 			$filesystem->updateProperty("mountpoint");
 			$name = $filesystem->getName();
 			$mntpoint = $filesystem->getMountPoint();
-			$current[] = ["fsname"=>$name, "dir"=>$mntpoint];
+			if($mntpoint!="none")
+				$current[] = ["fsname"=>$name, "dir"=>$mntpoint];
 		}
 		$prev = Rpc::call("FsTab","enumerateEntries",[],$context);
 		$prev = array_filter($prev, function($element){

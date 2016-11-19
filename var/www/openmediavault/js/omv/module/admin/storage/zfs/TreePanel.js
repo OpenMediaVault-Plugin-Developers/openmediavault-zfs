@@ -121,6 +121,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	renameButtonText: _("Rename"),
 	editButtonText: _("Edit"),
 	deleteButtonText: _("Delete"),
+	rollbackButtonText: _("Rollback"),
 	upButtonText: _("Up"),
 	downButtonText: _("Down"),
 	applyButtonText: _("Save"),
@@ -313,6 +314,16 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			scope: me,
 			disabled: true
 		},{
+			id: me.getId() + "-rollback",
+			xtype: "button",
+			text: me.rollbackButtonText,
+			icon: "images/undo.png",
+			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
+			hidden: me.hideDeleteButton,
+			handler: Ext.Function.bind(me.onRollbackButton, me, [ me ]),
+			scope: me,
+			disabled: true
+		},{
 			id: me.getId() + "-up",
 			xtype: "button",
 			text: me.upButtonText,
@@ -371,7 +382,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 		var me = this;
 		if(me.hideTopToolbar)
 			return;
-		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "scrub", "export", "rename" ];
+		var tbarBtnName = [ "addobj", "edit", "delete", "up", "down", "expand", "scrub", "export", "rename","rollback" ];
 		var tbarBtnHidden = {
 			"addobj": true,
 			"edit": true,
@@ -381,7 +392,8 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			"export": true,
 			"rename": true,
 			"up": true,
-			"down": true
+			"down": true,
+			"rollback": true
 		};
 		// Enable/disable buttons depending on the number of selected rows.
 		if(records.length <= 0) {
@@ -394,6 +406,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["rename"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
+			tbarBtnHidden["rollback"] = true;
 		} else if(records.length == 1) {
 			tbarBtnHidden["addobj"] = false;
 			tbarBtnHidden["edit"] = false;
@@ -404,6 +417,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["rename"] = false;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
+			tbarBtnHidden["rollback"] = true;
 			// Disable 'Delete' button if selected node is not a leaf
 			Ext.Array.each(records, function(record) {
 				if(false === record.get("leaf")) {
@@ -427,6 +441,13 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 					return false;
 				}
 			});
+			//Enable 'Rollback' if selected row is Snapshot
+			Ext.Array.each(records, function(record) {
+				if("Snapshot" === record.get("type")) {
+					tbarBtnHidden["rollback"] = false;
+					return false;
+				}
+			});
 		} else {
 			tbarBtnHidden["addobj"] = true;
 			tbarBtnHidden["edit"] = true;
@@ -437,6 +458,7 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			tbarBtnHidden["rename"] = true;
 			tbarBtnHidden["up"] = true;
 			tbarBtnHidden["down"] = true;
+			tbarBtnHidden["rollback"] = true;
 		}
 		
 		// Update the button controls.

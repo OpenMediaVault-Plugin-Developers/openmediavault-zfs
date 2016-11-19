@@ -1,6 +1,7 @@
 openmediavault-zfs (3.0.6) stable; urgency=low
 
   * Fix snapshot creating
+  * Add snapshot rollback
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 19 Nov 2016 23:15:41 +0900
 

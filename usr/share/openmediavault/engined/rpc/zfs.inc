@@ -59,6 +59,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		$this->registerMethod("rename");
 		$this->registerMethod("getSettings");
 		$this->registerMethod("setSettings");
+		$this->registerMethod("rollbackSnapshot");
 	}
 
 	public function addPool($params, $context) {
@@ -708,5 +709,21 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		  "org.openmediavault.storage.zfs.filesystem", $context);
 
 		return $object;
+	}
+
+	public function rollbackSnapshot($params, $context) {
+		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));
+		// Validate the parameters of the RPC service method.
+		$this->validateMethodParams($params, '{
+			  "type":"object",
+			  "properties":{
+				  "name":{"type":"string"}
+			  }
+		}');
+
+		$snap = new OMVModuleZFSSnapshot($params['name']);
+		$snap->rollback();
+
+		return $snap;
 	}
 }

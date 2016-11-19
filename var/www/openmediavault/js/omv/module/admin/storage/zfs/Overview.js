@@ -636,6 +636,39 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 		});
 	},
 
+	onRollbackButton: function() {
+		var me = this;
+		var sm = me.getSelectionModel();
+		var records = sm.getSelection();
+		var record = records[0];
+		var msg = _("Do you really want to rollback the selected item?");
+		OMV.MessageBox.show({
+			title: _("Confirmation"),
+			msg: msg,
+			buttons: Ext.Msg.YESNO,
+			fn: function(answer) {
+				if(answer !== "yes")
+					return;
+				var me = this;
+				OMV.Rpc.request({
+					scope: me,
+					callback: callback: function(id, success, response) {
+                        me.doReload();
+                    },
+					rpcData: {
+						service: "ZFS",
+						method: "rollbackSnapshot",
+						params: {
+							name: record.get('path')
+						}
+					}
+				});
+			},
+			scope: me,
+			icon: Ext.Msg.QUESTION
+		});
+	},
+
 	onSettingsButton: function() {
 		var me = this;
 		Ext.create("OMV.module.admin.storage.zfs.Settings", {}).show();

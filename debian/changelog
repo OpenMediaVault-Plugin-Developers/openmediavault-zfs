@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.6) stable; urgency=low
+
+  * Fix snapshot creating
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 19 Nov 2016 23:15:41 +0900
+
 openmediavault-zfs (3.0.5) stable; urgency=low
 
   * Fix handling mountpoint none

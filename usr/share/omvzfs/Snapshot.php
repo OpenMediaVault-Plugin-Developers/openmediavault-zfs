@@ -38,8 +38,7 @@ class OMVModuleZFSSnapshot extends OMVModuleZFSDataset {
 	 */
 	public static function create($name) {
 		$cmd = "zfs snapshot \"" . $name . "\" 2>&1";
-		$process = new Process($cmd);
-		$process->execute($out,$res);
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		return new OMVModuleZFSSnapshot($name);
 	}
 

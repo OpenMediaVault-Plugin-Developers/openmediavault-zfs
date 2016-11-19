@@ -36,6 +36,15 @@ Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
 				ptype: "fieldinfo",
 				text: _("Import all missing pools. Overrides pool specification above.")
 			}]
+		},{
+			xtype: "checkbox",
+			name: "force",
+			fieldLabel: _("Force"),
+			checked: false,
+			plugins: [{
+				ptype: "fieldinfo",
+				text: _("Forces import, even if the pool appears to be potentially active.")
+			}]
 		}];
 	}
 });

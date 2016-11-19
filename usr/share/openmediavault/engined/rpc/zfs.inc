@@ -161,16 +161,20 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			  "type":"object",
 			  "properties":{
 				  "poolname":{"type":"string"},
-				  "all":{"type":"boolean"}
+				  "all":{"type":"boolean"},
+				  "force":{"type":"boolean"}
 			  }
 		}');
-		if ($params['all']) {
-			$cmd = "zpool import -a 2>&1";
-		} elseif (strlen($params['poolname']) !== 0) {
-			$cmd = "zpool import \"" . $params['poolname'] . "\" 2>&1";
-		} else {
-			throw new OMVModuleZFSException("Specify either pool name or to import all missing pools");
-		}
+
+		$cmd = "zpool import ";
+		if ($params['force'])
+			$cmd .= "-f ";
+		if ($params['all'])
+			$cmd .= "-a ";
+		else if (strlen($params['poolname']) !== 0)
+			$cmd .= "\"" . $params['poolname'] . "\" ";
+		$cmd .= "2>&1";
+
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 	}
 

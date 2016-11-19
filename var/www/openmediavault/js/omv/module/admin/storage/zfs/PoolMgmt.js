@@ -18,7 +18,7 @@ Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,
-	height: 150,
+	height: 200,
 
 	getFormItems: function() {
 		var me = this;

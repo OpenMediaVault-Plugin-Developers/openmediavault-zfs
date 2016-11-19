@@ -652,7 +652,7 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 				var me = this;
 				OMV.Rpc.request({
 					scope: me,
-					callback: callback: function(id, success, response) {
+					callback: function(id, success, response) {
                         me.doReload();
                     },
 					rpcData: {

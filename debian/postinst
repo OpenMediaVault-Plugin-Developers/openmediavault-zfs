@@ -20,6 +20,11 @@ case "$1" in
             omv_config_add_element "${SERVICE_XPATH}" "autoShareNestedProperty" ""    
         fi
 
+        object="<uuid>$(omv_uuid)</uuid>"
+        object="${object}<id>zfs</id>"
+        object="${object}<enable>0</enable>"
+        omv_config_add_node_data "/config/system/notification/notifications" "notification" "${object}"
+
         #Remove deprectaed stuff to ensure clean installation
         rm -f /etc/insserv/overrides/zfs-mount
 

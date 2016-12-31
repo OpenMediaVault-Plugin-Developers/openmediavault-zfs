@@ -653,7 +653,12 @@ Ext.define("OMV.module.admin.storage.zfs.Overview", {
 				OMV.Rpc.request({
 					scope: me,
 					callback: function(id, success, response) {
-                        me.doReload();
+						if(success) {
+							OMV.MessageBox.success(null, _("Successfully rollbacked!"));
+							me.doReload();
+						} else {
+							OMV.MessageBox.error(null, response);
+						}
                     },
 					rpcData: {
 						service: "ZFS",

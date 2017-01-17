@@ -98,7 +98,6 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 	hideTopToolbar: false,
 	hidePagingToolbar: true,
 	hideAddButton: false,
-	hideSettingsButtoon: false,
 	hideAddObjButton: true,
 	hideEditButton: true,
 	hideDeleteButton: true,
@@ -359,15 +358,6 @@ Ext.define("OMV.module.admin.storage.zfs.TreePanel", {
 			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
 			hidden: me.hideRefreshButton,
 			handler: Ext.Function.bind(me.onRefreshButton, me, [ me ]),
-			scope: me
-		},{
-			id: me.getId() + "-settings",
-			xtype: "button",
-			text: me.settingsButtonText,
-			icon: "images/preferences.png",
-			iconCls: Ext.baseCSSPrefix + "btn-icon-16x16",
-			hidden: me.hideSettingsButtoon,
-			handler: Ext.Function.bind(me.onSettingsButton, me, [ me ]),
 			scope: me
 		}]
 	},

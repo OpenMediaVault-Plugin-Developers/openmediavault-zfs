@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
  * @author    Volker Theile <volker.theile@openmediavault.org>
@@ -19,52 +19,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
- class OMVZFS extends \OMV\Engine\Module\ServiceAbstract
-    implements \OMV\Engine\Notify\IListener, \OMV\Engine\Module\INotification {
+ class OMVModuleZFS extends \OMV\Engine\Module\ServiceAbstract
+    implements \OMV\Engine\Notify\IListener {
     /**
      * Get the module name.
      */
     public function getName() {
-        return "ZFS-ZED";
+        return "zfs";
     }
-    /**
-     * Defines the modules that if present should start before the service
-     * provided by this module.
-     * @return An array of modules.
-     */
-    public function shouldStart() { return [ "email" ]; }
-    /**
-     * Generate the configuration.
-     * @throw E_EXEC_FAILED
-     */
-    public function applyConfig() {
-        $cmd = new \OMV\System\Process("omv-mkconf", "zed");
-        $cmd->setRedirect2to1();
-        $cmd->execute();
-    }
-    /**
-     * Get the notification configuration.
-     */
-    public function getNotificationConfig() {
-        return [
-            [
-                "id"    => "zfs",
-                "type"  => getText("Storage"),
-                "title" => gettext("ZFS ZED")
-            ]
-        ];
-    }
+
+	/**
+	 * Helper function to find out whether the given shared folder
+	 * configuration object is used. If it is used, then mark the
+	 * module as dirty.
+	 * @param type The event message type.
+	 * @param path The event message path.
+	 * @param object The configuration object.
+	 */
+	final public function onSharedFolder($type, $path, $object) {
+		$db = \OMV\Config\Database::getInstance();
+		$share = $db->getAssoc("conf.system.sharedfolder",$object['sharedfolderref']);
+		$mntent = $db->getAssoc("conf.system.filesystem.mountpoint",$share['mntentref']);
+		$bindmntent = $db->getAssoc("conf.system.filesystem.mountpoint",$object['mntentref']);
+
+		if(!strcmp($mntent['type'],'zfs')){
+			if((strpos($object['extraoptions'],'nohide') === false) and (strpos($object['extraoptions'],'crossmnt') === false)){
+				$object['extraoptions'] = $object['extraoptions'] . ",crossmnt";
+				$newshare = new \OMV\Config\ConfigObject("conf.service.nfs.share");
+				$newshare->setAssoc($object);
+				$db->set($newshare,TRUE);
+			}
+			if(strpos($bindmntent['opts'], '_netdev') === false){
+				$bindmntent['opts'] = $bindmntent['opts'] . ",_netdev";
+				$newbindmntent = new \OMV\Config\ConfigObject("conf.system.filesystem.mountpoint");
+				$newbindmntent->setAssoc($bindmntent);
+				$db->set($newbindmntent);
+				$moduleMngr = \OMV\Engine\Module\Manager::getInstance();
+				$fstab = $moduleMngr->getModule("fstab");
+				$fstab->setDirty();
+
+			}
+		}
+	}
+
     /**
      * Bind listeners.
      */
     function bindListeners(\OMV\Engine\Notify\Dispatcher $dispatcher) {
-        $dispatcher->addListener(
-            OMV_NOTIFY_MODIFY,
-            "org.openmediavault.conf.system.notification.email",
-            [ $this, "setDirty" ]);
-        $dispatcher->addListener(
-            OMV_NOTIFY_MODIFY,
-            "org.openmediavault.conf.system.notification.notification",
-            [ $this, "setDirty" ]);
+		$dispatcher->addListener(
+		  OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY,
+		  "org.openmediavault.conf.service.nfs.share",
+		  [ $this, "onSharedFolder" ]);
     }
 }

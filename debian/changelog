@@ -1,10 +1,11 @@
-openmediavault-zfs (3.0.7) UNRELEASED; urgency=medium
+openmediavault-zfs (3.0.7) stable; urgency=low
 
   * Fix fstab mount problem
   * Remove autoShareNestedProperty, use crossmnt, nohide in nfs share options
   * Fix nfs share prevent zfs-mount.service from mounting when booting
+  * Adapt to OMV 3.0.60
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 10 Jan 2017 13:34:26 +0900
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 14 Feb 2017 22:14:32 +0900
 
 openmediavault-zfs (3.0.6) stable; urgency=low
 

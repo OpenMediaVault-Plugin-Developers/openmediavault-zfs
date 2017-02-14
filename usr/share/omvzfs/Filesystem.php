@@ -35,6 +35,17 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 		}
 	}
 
+	public function exists(){
+		try {
+			$cmd = "zfs list -H -t filesystem \"" . $this->name . "\" 2>&1";
+			OMVModuleZFSUtil::exec($cmd, $out, $res);
+			return TRUE;
+		}
+		catch (\OMV\ExecException $e) {
+			return FALSE;
+		}
+	}
+
 	public static function getAllFilesystems(){
 		$cmd = "zfs list -H -o name,mountpoint -t filesystem";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);

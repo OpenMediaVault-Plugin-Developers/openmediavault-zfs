@@ -37,7 +37,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 	}
 
 	public function getName() {
-		return "ZFS";
+		return "zfs";
 	}
 
 	/* Initialize the RPC service. Different methods of the RPC service are declared here*/
@@ -273,7 +273,6 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 			if(OMVModuleZFSUtil::checkOMVShares($context,$tmp))
 				throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
 			OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
-			$tmp->destroy();
 			$this->dispatcher->notify(OMV_NOTIFY_MODIFY,
 			  "org.openmediavault.storage.zfs.filesystem", $context);
 			break;
@@ -291,7 +290,6 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 				throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
 			OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
 			$disks = $tmp->getDevDisks();
-			$tmp->destroy();
 			OMVModuleZFSZpool::clearZFSLabel($disks);
 			break;
 		default:

@@ -78,6 +78,10 @@ class OMVModuleZFSUtil {
 		$filesystem->updateProperty("mountpoint");
 		if($object and $object['type']=='zfs' and $object['dir']==$filesystem->getMountPoint()){
 			Rpc::call("FsTab","delete", ["uuid"=>$object['uuid']],$context);
+			Rpc::call("Config", "applyChanges", ["modules" => [ "fstab" ],"force" => TRUE], $context);
+			if($filesystem->exists()){
+				$filesystem->destroy();
+			}
 		}else{
 			throw new OMVModuleZFSException("No such Mntent exists");
 		}

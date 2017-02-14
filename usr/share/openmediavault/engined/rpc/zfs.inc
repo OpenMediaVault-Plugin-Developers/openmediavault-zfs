@@ -27,7 +27,6 @@ require_once("/usr/share/omvzfs/Snapshot.php");
 require_once("/usr/share/omvzfs/Zvol.php");
 require_once("/usr/share/omvzfs/Zpool.php");
 require_once("/usr/share/omvzfs/Filesystem.php");
-require_once("/usr/share/omvzfs/NotifyListener.php");
 
 class OMVRpcServiceZFS extends ServiceAbstract {
 	private $dataModelPath = "conf.service.zfs";

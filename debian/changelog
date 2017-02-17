@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.8) stable; urgency=low
+
+  * Change linux-header dependency
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 17 Feb 2017 07:10:45 -0600
+
 openmediavault-zfs (3.0.7) stable; urgency=low
 
   * Fix fstab mount problem

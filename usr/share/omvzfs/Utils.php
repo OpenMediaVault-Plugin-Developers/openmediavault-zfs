@@ -314,28 +314,6 @@ class OMVModuleZFSUtil {
 				array_push($objects,$tmp);
 				break;
 
-			case "snapshot":
-				preg_match('/(.*)\@(.*)$/', $path, $result);
-				$subdirs = preg_split('/\//',$result[1]);
-				$root = $subdirs[0];
-				$tmp = array('id'=>$prefix . $path,
-					'parentid'=>$prefix . $result[1],
-					'name'=>$result[2],
-					'type'=>ucfirst($type),
-					'icon'=>'images/zfs_snap.png',
-					'path'=>$path,
-					'expanded'=>$expanded);
-				$tmp['origin'] = "n/a";
-				$tmp['size'] = "n/a";
-				$tmp['used'] = "n/a";
-				$tmp['available'] = "n/a";
-				$tmp['mountpoint'] = "n/a";
-				$tmp['lastscrub'] = "n/a";
-				$tmp['state'] = "n/a";
-				$tmp['status'] = "n/a";
-				array_push($objects,$tmp);
-				break;
-
 			default:
 				break;
 			}
@@ -363,6 +341,42 @@ class OMVModuleZFSUtil {
 			$tree[] = $l;
 		}
 		return $tree;
+	}
+	
+	/**
+	 * Get an array with all ZFS objects
+	 *
+	 * @return An array with all ZFS objects
+	 */
+	public static function getAllSnapshots() {
+		$prefix = "root/pool-";
+		$objects = [];
+		$cmd = "zfs list -H -t snapshot -o name,used,refer 2>&1";
+
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		foreach ($out as $line) {
+			$parts = preg_split('/\t/',$line);
+			$path = $parts[0];
+			$used = $parts[1];
+			$refer = $parts[2];
+			$subdirs = preg_split('/\//',$path);
+			$root = $subdirs[0];
+			$tmp = [];
+
+			preg_match('/(.*)\@(.*)$/', $path, $result);
+			$subdirs = preg_split('/\//',$result[1]);
+			$root = $subdirs[0];
+			$tmp = array('id'=>$prefix . $path,
+				'parent'=>$result[1],
+				'name'=>$result[2],
+				'type'=>"Snapshot",
+				'icon'=>'images/zfs_snap.png',
+				'path'=>$path);
+			$tmp['used'] = OMVModuleZFSUtil::bytesToSize(OMVModuleZFSUtil::SizeTobytes($used));
+			$tmp['refer'] = OMVModuleZFSUtil::bytesToSize(OMVModuleZFSUtil::SizeTobytes($refer));
+			array_push($objects,$tmp);
+		}
+		return $objects;
 	}
 
 	/**
@@ -425,6 +439,10 @@ class OMVModuleZFSUtil {
                 $gigabyte = $megabyte * 1024;
                 $terabyte = $gigabyte * 1024;
 
+		if($humanformat === "0"){
+			return 0;
+		}
+		
 		$unit = substr($humanformat, -1);
 		$num = substr($humanformat, 0, strlen($humanformat) - 1);
 

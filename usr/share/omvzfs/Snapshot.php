@@ -41,6 +41,12 @@ class OMVModuleZFSSnapshot extends OMVModuleZFSDataset {
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		return new OMVModuleZFSSnapshot($name);
 	}
+	
+	public static function getAllSnapshots() {
+		$cmd = "zfs snapshot \"" . $name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+		return new OMVModuleZFSSnapshot($name);
+	}
 
 	/**
 	 * Rollback a Snapshot on commandline.

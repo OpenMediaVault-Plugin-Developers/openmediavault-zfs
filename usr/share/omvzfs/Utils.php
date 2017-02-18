@@ -372,14 +372,13 @@ class OMVModuleZFSUtil {
 	 * @param string $cmd Command to execute
 	 * @param array &$out If provided will contain output in an array
 	 * @param int &$res If provided will contain Exit status of the command
-	 * @return string Last line of output when executing the command
+	 * @return void
 	 * @throws OMVModuleZFSException
 	 * @access public
 	 */
 	public static function exec($cmd, &$out = null, &$res = null) {
 		$process = new Process($cmd);
 		$process->execute($out,$res);
-		return $tmp;
 	}
 
 	/**

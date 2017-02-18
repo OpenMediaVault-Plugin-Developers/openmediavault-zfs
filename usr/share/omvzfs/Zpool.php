@@ -408,7 +408,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
 	public function getPoolState() {
 		$cmd = "zpool get -H health \"" . $this->name . "\" 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
-		$tmpary = preg_split('/\t+/', $out);
+		$tmpary = preg_split('/\t+/', $out[0]);
 		return $tmpary[2];
 	}
 

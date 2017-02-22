@@ -307,8 +307,10 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
 			'checksum', /* on | 	 */
 			'compression', /* off | lzjb | gzip | zle | lz4 */
 			'atime', /* on | off */
+			'acltype', /* noacl | posixacl */
 			'aclmode', /* discard | groupmask | passthrough | restricted */
 			'aclinherit', /* discard | noallow | restricted | passthrough | passthrough-x */
+			'xattr', /* on | off | sa */
 			'casesensitivity', /* sensitive | insensitive | mixed */
 			'primarycache', /* all | none | metadata */
 			'secondarycache', /* all | none | metadata */

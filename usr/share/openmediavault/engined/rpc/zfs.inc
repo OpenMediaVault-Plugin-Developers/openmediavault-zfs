@@ -60,7 +60,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 		$this->registerMethod("getSettings");
 		$this->registerMethod("setSettings");
 		$this->registerMethod("rollbackSnapshot");
+        $this->registerMethod("set");
 	}
+
+    public function set($params, $context) {
+        // empty function for details window
+        // TODO:  change window type for details
+    }
 
 	public function addPool($params, $context) {
 		$this->validateMethodContext($context, array("role" => OMV_ROLE_ADMINISTRATOR));

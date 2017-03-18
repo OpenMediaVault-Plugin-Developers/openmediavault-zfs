@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.12) stable; urgency=low
+
+  * Improve foreign content handling
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 18 Mar 2017 12:05:13 -0500
+
 openmediavault-zfs (3.0.11) stable; urgency=low
 
   * Fix detail window closing error

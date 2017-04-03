@@ -146,6 +146,20 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate  {
 	}
 
 	/**
+	 * Get a predictable device file in the following order:
+	 * <ul>
+	 * \li /dev/disk/by-label/xxx
+	 * \li /dev/disk/by-id/xxx
+	 * \li /dev/disk/by-path/xxx
+	 * \li /dev/xxx
+	 * </ul>
+	 * @return Returns a device file.
+	 */
+	public function getPredictableDeviceFile() {
+		return $this->getDeviceFile;
+	}
+
+	/**
 	 * Get the special device file to present in the UI instead of the
 	 * value of the getDeviceFile method.
 	 * Get the special device file in the following preferred order:

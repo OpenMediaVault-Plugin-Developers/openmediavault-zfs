@@ -1,3 +1,10 @@
+openmediavault-zfs (3.0.13) stable; urgency=low
+
+  * Add missing \OMV\System\Filesystem\IFilesystem::getPredictableDeviceFile
+    method.
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 03 Apr 2017 18:29:21 +0200
+
 openmediavault-zfs (3.0.12) stable; urgency=low
 
   * Improve foreign content handling

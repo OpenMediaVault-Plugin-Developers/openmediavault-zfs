@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.14) stable; urgency=low
+
+  * Fix for docker legacy mounts
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 04 Apr 2017 06:20:51 -0500
+
 openmediavault-zfs (3.0.13) stable; urgency=low
 
   * Add missing \OMV\System\Filesystem\IFilesystem::getPredictableDeviceFile

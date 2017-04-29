@@ -1,0 +1,283 @@
+[{
+	"type": "rpc",
+	"id": "rpc.zfs.addpool",
+	"params": {
+		"type": "object",
+		"properties": {
+			"pooltype": {
+				"type": "string",
+				"enum": ["basic", "mirror", "raidz1", "raidz2", "raidz3"],
+				"required": true
+			},
+			"force": {
+				"type": "boolean",
+				"required": true
+			},
+			"mountpoint": {
+				"type": "string",
+				"required": true
+			},
+			"name": {
+				"type": "string",
+				"required": true
+			},
+			"devices": {
+				"type": "string",
+				"required": true
+			},
+			"devalias": {
+				"type": "string",
+				"required": true
+			},
+			"ashift": {
+				"type": "boolean",
+				"required": true
+			},
+			"ashiftval": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.importpool",
+	"params": {
+		"type": "object",
+		"properties": {
+			"poolname": {
+				"type": "string",
+				"required": true
+			},
+			"all": {
+				"type": "boolean",
+				"required": true
+			},
+			"force": {
+				"type": "boolean",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.name",
+	"params": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.setsettings",
+	"params": {
+		"type": "object",
+		"properties": {
+			"autoShareNestedEnabled": {
+				"type": "boolean",
+				"required": true
+			},
+			"autoShareNestedProperty": {
+				"type": "string",
+				"required": false
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.rename",
+	"params": {
+		"type": "object",
+		"properties": {
+			"newname": {
+				"type": "string",
+				"required": true
+			},
+			"oldname": {
+				"type": "string",
+				"required": true
+			},
+			"type": {
+				"type": "string",
+				"required": true
+			},
+			"oldpath": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.expandpool",
+	"params": {
+		"type": "object",
+		"properties": {
+			"vdevtype": {
+				"type": "string",
+				"enum": ["basic", "mirror", "raidz1", "raidz2", "raidz3"],
+				"required": true
+			},
+			"name": {
+				"type": "string",
+				"required": true
+			},
+			"devices": {
+				"type": "string",
+				"required": true
+			},
+			"force": {
+				"type": "boolean",
+				"required": true
+			},
+			"devalias": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.objectdetails",
+	"params": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"type": "string",
+				"required": true
+			},
+			"type": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.inherit",
+	"params": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string",
+				"enum": ["Filesystem", "Snapshot", "Volume", "Pool"],
+				"required": true
+			},
+			"name": {
+				"type": "string",
+				"required": true
+			},
+			"property": {
+				"type": "string",
+				"required": true
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.setproperties",
+	"params": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string",
+				"enum": ["Filesystem","Snapshot","Volume","Pool"]
+			},
+			"name": {
+				"type":"string"
+			},
+			"properties": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"property":{
+							"type":"string"
+						},
+						"value":{
+							"type":"string"
+						}
+					}
+				}
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.getproperties",
+	"params": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string"
+			},
+			"name": {
+				"type":"string"
+			},
+			"start": {
+				"type": "integer",
+				"required": true
+			},
+			"limit": {
+				"type": [ "integer", "null" ],
+				"required": true
+			},
+			"sortfield": {
+				"type": [ "string", "null" ]
+			},
+			"sortdir": {
+				"type": [ "string", "null" ],
+				"enum": [ "asc", "ASC", "desc", "DESC" ]
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.deleteobject",
+	"params": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string",
+				"enum": ["Filesystem","Snapshot","Volume","Pool"]
+			},
+			"name": {
+				"type":"string"
+			}
+		}
+	}
+},{
+	"type": "rpc",
+	"id": "rpc.zfs.addobject",
+	"params": {
+		"type": "object",
+		"properties": {
+			"type": {
+				"type": "string",
+				"enum": ["filesystem","snapshot","volume","clone"]
+			},
+			"path": {
+				"type": "string"
+			},
+			"name": {
+				"type": "string"
+			},
+			"size": {
+				"type": "string"
+			},
+			"clonename": {
+				"type": "string"
+			},
+			"mountpoint": {
+				"type": "string"
+			},
+			"thinvol": {
+				"type": "boolean"
+			}
+		}
+	}
+}]

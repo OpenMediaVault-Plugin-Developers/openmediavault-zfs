@@ -2,7 +2,7 @@
 namespace OMV\System\Filesystem;
 require_once("/usr/share/omvzfs/Filesystem.php");
 
-class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
+class FilesystemZfs implements IFilesystem, ISharedFolderCandidate
 {
     public function __construct($fsName)
     {
@@ -17,7 +17,7 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
     /**
      * Get the partition scheme, e.g. 'gpt', 'mbr', 'apm' or 'dos'.
      * @deprecated
-     * @return The filesystem type, otherwise FALSE.
+     * @return The filesystem type, otherwise NULL.
      */
     public function getPartitionType()
     {
@@ -26,11 +26,11 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
 
     /**
      * Get the partition scheme, e.g. 'gpt', 'mbr', 'apm' or 'dos'.
-     * @return The filesystem type, otherwise FALSE.
+     * @return The filesystem type, otherwise NULL.
      */
     public function getPartitionScheme()
     {
-        return FALSE;
+        return NULL;
     }
 
     /**
@@ -46,11 +46,11 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      * Get the partition entry information.
      * @return An array with the fields \em scheme, \em uuid, \em type,
      *   \em flags, \em number, \em offset, \em size and \em disk,
-     *   otherwise FALSE.
+     *   otherwise NULL.
      */
     public function getPartitionEntry()
     {
-        return FALSE;
+        return NULL;
     }
 
     /**
@@ -110,7 +110,7 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      */
     public function getCanonicalDeviceFile()
     {
-        return $this->deviceFile;
+        return realpath($this->deviceFile);
     }
 
     /**
@@ -130,32 +130,59 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      */
     public function getDeviceFileById()
     {
-
+		return NULL;
     }
+
+	/**
+	 * Check whether the device has a /dev/disk/by-id/xxx device path.
+	 * @return Returns TRUE if a disk/by-id device path exists,
+	 *   otherwise FALSE.
+	 */
+	public function hasDeviceFileById() {
+		return FALSE;
+	}
 
     /**
      * Get the device path by UUID, e.g.
      * \li /dev/disk/by-uuid/ad3ee177-777c-4ad3-8353-9562f85c0895
      * \li /dev/disk/by-uuid/2ED43920D438EC29 (NTFS)
-     * @return The device path (/dev/disk/by-uuid/xxx) if available,
-     *   otherwise /dev/xxx will be returned. In case of an error FALSE
-     *   will be returned.
+	 * @return The device file (/dev/disk/by-uuid/xxx) if available,
+	 *   otherwise NULL will be returned.
      */
     public function getDeviceFileByUuid()
     {
-        return FALSE;
+        return NULL;
     }
+
+	/**
+	 * Check whether the filesystem has a /dev/disk/by-uuid/xxx device path.
+	 * @return Returns TRUE if a disk/by-uuid device path exists,
+	 *   otherwise FALSE.
+	 */
+	public function hasDeviceFileByUuid() {
+		return FALSE;
+	}
 
     /**
      * Get the device path by label, e.g. <ul>
      * \li /dev/disk/by-label/data
      * </ul>
-     * @return The device path (/dev/disk/by-label/xxx).
+	 * @return The device file (/dev/disk/by-label/xxx) if available,
+	 *   otherwise NULL will be returned.
      */
     public function getDeviceFileByLabel()
     {
         return NULL;
     }
+
+	/**
+	 * Check whether the filesystem has a /dev/disk/by-label/xxx device path.
+	 * @return Returns TRUE if a disk/by-label device path exists,
+	 *   otherwise FALSE.
+	 */
+	public function hasDeviceFileByLabel() {
+		return FALSE;
+	}
 
     /**
      * Get a predictable device file in the following order:
@@ -169,7 +196,7 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      */
     public function getPredictableDeviceFile()
     {
-        return $this->getDeviceFile;
+        return $this->deviceFile;
     }
 
     /**
@@ -186,7 +213,7 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      */
     public function getPreferredDeviceFile()
     {
-        return $this->getDeviceFile;
+        return $this->deviceFile;
     }
 
     /**
@@ -218,7 +245,8 @@ class FilesystemZfs implements IFilesystem,ISharedFolderCandidate
      * \li /dev/sdb1 => /dev/sdb
      * \li /dev/cciss/c0d0p2 => /dev/cciss/c0d0
      * </ul>
-     * @return The device file of the underlying storage device.
+	 * @return The device file of the underlying storage device or NULL
+	 *   on failure.
      */
     public function getParentDeviceFile()
     {

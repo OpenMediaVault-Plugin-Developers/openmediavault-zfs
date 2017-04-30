@@ -1,8 +1,8 @@
-openmediavault-zfs (3.0.15) UNRELEASED; urgency=medium
+openmediavault-zfs (3.0.15) stable; urgency=low
 
-  * Use datamodels for rpc
+  * Mantis 0001731: Bug in filesystems view.
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 29 Apr 2017 11:58:29 -0500
+ -- Volker Theile <volker.theile@openmediavault.org>  Sun, 30 Apr 2017 18:12:45 +0200
 
 openmediavault-zfs (3.0.14) stable; urgency=low
 

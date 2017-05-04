@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.16) stable; urgency=low
+
+  * Fix enumerate function
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 04 May 2017 14:10:31 -0500
+
 openmediavault-zfs (3.0.15) stable; urgency=low
 
   * Mantis 0001731: Bug in filesystems view.

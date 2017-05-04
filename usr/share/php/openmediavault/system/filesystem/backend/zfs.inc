@@ -32,10 +32,11 @@ class Zfs extends BackendAbstract
         $filesystems = \OMVModuleZFSFilesystem::getAllFilesystems();
         $result = [];
         foreach ($filesystems as $filesystem) {
+            $name = $filesystem->getName();
             $data = [
-                "devicefile" => $filesystem->getName(),
+                "devicefile" => $name,
                 "uuid" => "",
-                "label" => $filesystem->getName(),
+                "label" => $name,
                 "type" => "zfs"
             ];
             $result[$name] = $data;

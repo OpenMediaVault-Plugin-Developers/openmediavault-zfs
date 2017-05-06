@@ -429,7 +429,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
     public function expandPool($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.exportpool');
+        $this->validateMethodParams($params, 'rpc.zfs.expandpool');
 
         $pool = new OMVModuleZFSZpool($params['name']);
         switch ($params['vdevtype']) {

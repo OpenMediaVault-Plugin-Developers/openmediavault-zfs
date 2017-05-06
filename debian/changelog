@@ -1,3 +1,9 @@
+openmediavault-zfs (3.0.17) stable; urgency=low
+
+  * Fix datamodel name
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 06 May 2017 09:07:34 -0500
+
 openmediavault-zfs (3.0.16) stable; urgency=low
 
   * Fix enumerate function

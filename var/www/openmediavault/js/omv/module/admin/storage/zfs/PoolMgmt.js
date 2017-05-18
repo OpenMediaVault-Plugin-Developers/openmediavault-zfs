@@ -160,7 +160,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
 					type: "rpc",
 					appendSortParams: false,
 					rpcData: {
-						service: "ZFS",
+						service: "RaidMgmt",
 						method: "getCandidates"
 					}
 				},
@@ -387,7 +387,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
 					type: "rpc",
 					appendSortParams: false,
 					rpcData: {
-						service: "ZFS",
+						service: "RaidMgmt",
 						method: "getCandidates"
 					}
 				},

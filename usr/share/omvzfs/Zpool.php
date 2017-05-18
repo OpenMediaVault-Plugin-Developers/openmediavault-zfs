@@ -100,7 +100,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         $cmd = "zpool add \"" . $this->name . "\" " . $opts . $this->getCommandString($vdevs) . " 2>&1";
         OMVModuleZFSUtil::exec($cmd,$output,$result);
         $this->vdevs = array_merge($this->vdevs, $vdevs);
-        $this->setSize();
+        //$this->setSize();
     }
 
     /**
@@ -121,7 +121,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @return array An array with all the disks
      */
     public function getDevDisks() {
-        $disks = array();
+        $disks = [];
         $vdevs = $this->getVdevs();
         foreach ($vdevs as $vdev) {
             $vdisks = $vdev->getDisks();
@@ -236,7 +236,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
                 $cmd = "zpool remove \"" . $this->name . "\" $disk_str";
             }
             OMVModuleZFSUtil::exec($cmd,$output,$result);
-            $this->log = array();
+            $this->log = [];
         }
     }
 
@@ -422,7 +422,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @throws OMVMODULEZFSException
      */
     public static function getCommandString(array $vdevs) {
-        $adds = array();
+        $adds = [];
 
         foreach ($vdevs as $vdev) {
             if (is_object($vdev) == false)
@@ -461,7 +461,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @return array
      */
     private function removeDisk(array $array, $disk) {
-        $new_disks = array();
+        $new_disks = [];
 
         foreach ($array as $item) {
             if (strcmp($item, $disk) != 0)

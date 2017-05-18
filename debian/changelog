@@ -1,3 +1,10 @@
+openmediavault-zfs (3.0.19) stable; urgency=low
+
+  * Remove setSize call since it doesn't exist and not needed
+  * Only show unused drives in add or expand pool
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 18 May 2017 09:33:00 -0500
+
 openmediavault-zfs (3.0.18) stable; urgency=low
 
   * Fix another rpc bug

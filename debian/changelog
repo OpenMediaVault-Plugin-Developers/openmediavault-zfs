@@ -1,8 +1,8 @@
-openmediavault-zfs (4.0) UNRELEASED; urgency=medium
+openmediavault-zfs (4.0) stable; urgency=low
 
   * Update for OMV 4.x
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 23 Sep 2017 11:46:12 -0500
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 23 Sep 2017 12:06:11 -0500
 
 openmediavault-zfs (3.0.19) stable; urgency=low
 

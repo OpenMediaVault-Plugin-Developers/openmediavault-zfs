@@ -586,7 +586,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @throws OMVModuleZFSException
      */
     private function output($part, $type, $dev) {
-        $disks = split(" ", $dev);
+        $disks = explode(" ", $dev);
         switch ($part) {
             case 'logs':
                 if ($type && $type != 'mirror')

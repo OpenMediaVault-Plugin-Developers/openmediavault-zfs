@@ -1,3 +1,9 @@
+openmediavault-zfs (4.0) UNRELEASED; urgency=medium
+
+  * Update for OMV 4.x
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 23 Sep 2017 11:46:12 -0500
+
 openmediavault-zfs (3.0.19) stable; urgency=low
 
   * Remove setSize call since it doesn't exist and not needed

@@ -232,7 +232,7 @@ Ext.define("OMV.module.admin.storage.zfs.Rename", {
 	autoLoadData: false,
 	hideResetButton: true,
 	width: 550,
-	height: 150,
+	height: 180,
 
 	getFormItems: function() {
 		var me = this;

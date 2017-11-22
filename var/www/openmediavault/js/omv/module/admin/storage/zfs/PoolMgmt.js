@@ -34,7 +34,7 @@ Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
     autoLoadData: false,
     hideResetButton: true,
     width: 550,
-    height: 200,
+    height: 220,
 
     getFormItems: function() {
         var me = this;
@@ -48,19 +48,13 @@ Ext.define("OMV.module.admin.storage.zfs.ImportPool", {
             name: "all",
             fieldLabel: _("Import all"),
             checked: false,
-            plugins: [{
-                ptype: "fieldinfo",
-                text: _("Import all missing pools. Overrides pool specification above.")
-            }]
+            boxLabel: _("Import all missing pools. Overrides pool specification above.")
         },{
             xtype: "checkbox",
             name: "force",
             fieldLabel: _("Force"),
             checked: false,
-            plugins: [{
-                ptype: "fieldinfo",
-                text: _("Forces import, even if the pool appears to be potentially active.")
-            }]
+            boxLabel: _("Forces import, even if the pool appears to be potentially active.")
         }];
     }
 });
@@ -80,7 +74,7 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
     autoLoadData: false,
     hideResetButton: true,
     width: 550,
-    height: 460,
+    height: 585,
 
     getFormItems: function() {
         var me = this;
@@ -235,18 +229,12 @@ Ext.define("OMV.module.admin.storage.zfs.AddPool", {
             name: "force",
             fieldLabel: _("Force creation"),
             checked: false,
-            plugins: [{
-                ptype: "fieldinfo",
-                text: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
-            }]
+            boxLabel: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
         },{
             xtype: "checkbox",
             name: "ashift",
             fieldLabel: _("Set ashift"),
-            plugins: [{
-                ptype: "fieldinfo",
-                text: _("Specify ashift value. Only use if you are sure you need it.")
-            }],
+            boxLabel: _("Specify ashift value. Only use if you are sure you need it."),
             listeners: {
                 scope: me,
                 change: function(combo, value) {
@@ -304,7 +292,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
     rpcService: "ZFS",
     rpcSetMethod: "expandPool",
     width: 550,
-    height: 350,
+    height: 430,
     autoLoadData: true,
 
     getFormItems: function() {
@@ -454,10 +442,7 @@ Ext.define("OMV.module.admin.storage.zfs.ExpandPool", {
             name: "force",
             fieldLabel: _("Force creation"),
             checked: false,
-            plugins: [{
-                ptype: "fieldinfo",
-                text: _("Forces the creation of the Vdev even if errors are reported. Use with extreme caution!")
-            }]
+            boxLabel: _("Forces the creation of the Vdev even if errors are reported. Use with extreme caution!")
         }];
     },
 

@@ -33,7 +33,7 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 	hideResetButton: true,
 	hideCancelButton: true,
 	width: 700,
-	height: 350,
+	height: 550,
 	layout: 'fit',
 	okButtonText: _("Ok"),
 
@@ -41,16 +41,13 @@ Ext.define("OMV.module.admin.storage.zfs.ShowDetails", {
 		var me = this;
 
 		return [{
-			xtype: "textareafield",
+			xtype: "textarea",
 			name: "details",
-            height: 270,
+            height: 450,
             anchor: '100%',
-			grow: false,
-			readOnly: true,
-			fieldStyle: {
-				fontFamily: "courier",
-				fontSize: "12px"
-			}
+			editable: false,
+			grow: true,
+			cls: "x-form-textarea-monospaced"
 		}];
 	}
 });

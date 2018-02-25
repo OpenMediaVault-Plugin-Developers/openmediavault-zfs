@@ -10,7 +10,7 @@ Homepage: http://omv-extras.org/
 Package: openmediavault-zfs
 Architecture: amd64
 Depends: linux-headers-amd64,
-         openmediavault (>= 4.0.5),
+         openmediavault (>= 4.1.0),
          openmediavault-omvextrasorg (>= 4.0.3),
          zfs-dkms,
          zfsutils-linux,

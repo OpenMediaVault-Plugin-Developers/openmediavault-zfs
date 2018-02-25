@@ -1,3 +1,9 @@
+openmediavault-zfs (4.0.1-1) stable; urgency=low
+
+  * Adapt to new API.
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 25 Feb 2018 13:17:54 +0100
+
 openmediavault-zfs (4.0) stable; urgency=low
 
   * Update for OMV 4.x

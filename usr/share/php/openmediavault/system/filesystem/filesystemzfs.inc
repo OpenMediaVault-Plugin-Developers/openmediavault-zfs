@@ -2,7 +2,8 @@
 namespace OMV\System\Filesystem;
 require_once("/usr/share/omvzfs/Filesystem.php");
 
-class FilesystemZfs implements IFilesystem, ISharedFolderCandidate
+class FilesystemZfs implements FilesystemInterface,
+	SharedFolderCandidateInterface
 {
     public function __construct($fsName)
     {

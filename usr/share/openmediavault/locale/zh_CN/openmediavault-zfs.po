@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
 # songming <by@songming.me>, 2014
@@ -8,19 +8,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2014-11-04 13:41+0000\n"
-"Last-Translator: songming <by@songming.me>\n"
-"Language-Team: Chinese (China) (http://www.transifex.com/projects/p/openmediavault-zfs/language/zh_CN/)\n"
+"POT-Creation-Date: 2018-04-06 07:45-0500\n"
+"PO-Revision-Date: 2018-04-06 12:45+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
+"Language-Team: Chinese (China) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#, javascript-format
 msgid "% completed ..."
 msgstr "完成 % ..."
 
+#, javascript-format
 msgid "100% completed ..."
 msgstr "完成100% ..."
 
@@ -50,6 +52,9 @@ msgstr ""
 
 msgid "Capacity"
 msgstr "容量"
+
+msgid "Clone"
+msgstr ""
 
 msgid "Clone name"
 msgstr "克隆名称"
@@ -81,11 +86,26 @@ msgstr "设备"
 msgid "Displaying items {0} - {1} of {2}"
 msgstr "显示条目 {0} - {1} 全部 {2}"
 
-msgid "Do you really want to create the ZFS pool?"
-msgstr "确认要创建ZFS池吗？"
+msgid ""
+"Do you really want to create the ZFS pool?<br/><br/>The process will take "
+"some time and no change will be displayed until it is completed.<br/>Please "
+"reload the page to update any changes."
+msgstr ""
 
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "确认要删除选中项(可复选)吗？"
+
+msgid ""
+"Do you really want to expand the ZFS pool?<br/><br/>The process will take "
+"some time and no change will be displayed until it is completed.<br/>Please "
+"reload the page to update any changes."
+msgstr ""
+
+msgid "Do you really want to export the pool?"
+msgstr ""
+
+msgid "Do you really want to rollback the selected item?"
+msgstr ""
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr ""
@@ -105,8 +125,20 @@ msgstr "扩展"
 msgid "Expand Pool"
 msgstr "扩展池"
 
+msgid "Export Pool"
+msgstr ""
+
+msgid "Filesystem/Volume"
+msgstr ""
+
+msgid "Force"
+msgstr ""
+
 msgid "Force creation"
 msgstr "强制创建"
+
+msgid "Forces import, even if the pool appears to be potentially active."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -117,6 +149,18 @@ msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "即使报错也强制创建池，请谨慎使用该设置！"
+
+msgid "Import Pool"
+msgstr ""
+
+msgid "Import ZFS Pool(s)"
+msgstr ""
+
+msgid "Import all"
+msgstr ""
+
+msgid "Import all missing pools. Overrides pool specification above."
+msgstr ""
 
 msgid "Mirror"
 msgstr "镜像"
@@ -141,6 +185,9 @@ msgstr "前缀将放在新对象的名称前，请省略前面的  /"
 msgid "New"
 msgstr "新增"
 
+msgid "New Name"
+msgstr ""
+
 msgid "No items to display"
 msgstr "没有项目显示"
 
@@ -156,6 +203,9 @@ msgstr "对象详情"
 msgid "Ok"
 msgstr "OK"
 
+msgid "Old Name"
+msgstr ""
+
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "可选池的挂载点，默认使用池名称挂载。"
 
@@ -166,6 +216,9 @@ msgstr "可选文件系统的挂载点，如果留空则父挂载点将作为文
 
 msgid "Overview"
 msgstr "概览"
+
+msgid "Pool Name"
+msgstr ""
 
 msgid "Pool type"
 msgstr "池类型"
@@ -185,8 +238,20 @@ msgstr "RAID-Z2"
 msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
+msgid "Refer"
+msgstr ""
+
 msgid "Refresh"
 msgstr "刷新"
+
+msgid "Rename"
+msgstr ""
+
+msgid "Rename ZFS Object"
+msgstr ""
+
+msgid "Rollback"
+msgstr ""
 
 msgid "Save"
 msgstr "保存"
@@ -200,6 +265,9 @@ msgstr "序列号"
 msgid "Set ashift"
 msgstr "设置ashift"
 
+msgid "Settings"
+msgstr ""
+
 msgid "Size"
 msgstr "大小"
 
@@ -208,6 +276,9 @@ msgstr "卷的大小，如5mb、100gb、1tb等"
 
 msgid "Snapshot to clone"
 msgstr "快照克隆"
+
+msgid "Snapshots"
+msgstr ""
 
 msgid "Source"
 msgstr "源"
@@ -218,6 +289,18 @@ msgstr "指定设备的别名，如果你不了解就不建议设置。"
 
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "指定ashift值，如果你清楚该值的意义才调整它。"
+
+msgid "State"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Successfully rollbacked!"
+msgstr ""
+
+msgid "Thin provisioning"
+msgstr ""
 
 msgid "Type"
 msgstr "类型"
@@ -243,6 +326,8 @@ msgstr "供应商"
 msgid "ZFS"
 msgstr "ZFS"
 
-#, php-format
+msgid "ZFS ZED"
+msgstr ""
+
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"

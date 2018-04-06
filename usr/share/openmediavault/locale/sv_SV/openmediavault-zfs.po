@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
+# Jonatan Nyberg, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
@@ -10,80 +11,80 @@ msgstr ""
 "POT-Creation-Date: 2018-04-06 07:45-0500\n"
 "PO-Revision-Date: 2018-04-06 12:45+0000\n"
 "Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
-"Language-Team: Catalan (Spain) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ca_ES/)\n"
+"Language-Team: Swedish (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ca_ES\n"
+"Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #, javascript-format
 msgid "% completed ..."
-msgstr ""
+msgstr "% slutförd ..."
 
 #, javascript-format
 msgid "100% completed ..."
-msgstr ""
+msgstr "100% slutförd ..."
 
 msgid "Add Object"
-msgstr ""
+msgstr "Lägg till objekt"
 
 msgid "Add Pool"
-msgstr ""
+msgstr "Lägg till pool"
 
 msgid "Ashift value"
-msgstr ""
+msgstr "Ashift-värde"
 
 msgid "Ashift value to use."
-msgstr ""
+msgstr "Ashift-värde att använda."
 
 msgid "Available"
-msgstr ""
+msgstr "Tillgänglig"
 
 msgid "Basic"
-msgstr ""
+msgstr "Grundläggande"
 
 msgid "By Id"
-msgstr ""
+msgstr "Efter id"
 
 msgid "By Path"
-msgstr ""
+msgstr "Efter sökväg"
 
 msgid "Capacity"
-msgstr ""
+msgstr "Kapacitet"
 
 msgid "Clone"
 msgstr ""
 
 msgid "Clone name"
-msgstr ""
+msgstr "Klonnamn"
 
 msgid "Confirmation"
-msgstr ""
+msgstr "Bekräftelse"
 
 msgid "Create ZFS Pool"
-msgstr ""
+msgstr "Skapa ZFS-pool"
 
 msgid "Delete"
-msgstr ""
+msgstr "Ta bort"
 
 msgid "Deleting selected item(s)"
-msgstr ""
+msgstr "Ta bort vald(a) post(er)"
 
 msgid "Details"
-msgstr ""
+msgstr "Detaljer"
 
 msgid "Device"
-msgstr ""
+msgstr "Enhet"
 
 msgid "Device alias"
-msgstr ""
+msgstr "Enhet alias"
 
 msgid "Devices"
-msgstr ""
+msgstr "Enheter"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr ""
+msgstr "Visar poster {0} - {1} of {2}"
 
 msgid ""
 "Do you really want to create the ZFS pool?<br/><br/>The process will take "
@@ -92,7 +93,7 @@ msgid ""
 msgstr ""
 
 msgid "Do you really want to delete the selected item(s)?"
-msgstr ""
+msgstr "Vill du verkligen ta bort de(t) vald(a) objekte(t/n)?"
 
 msgid ""
 "Do you really want to expand the ZFS pool?<br/><br/>The process will take "
@@ -107,22 +108,22 @@ msgid "Do you really want to rollback the selected item?"
 msgstr ""
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr ""
+msgstr "Vill du verkligen skrubba poolen?<br/><br/>Senaste skrubbning:"
 
 msgid "Down"
-msgstr ""
+msgstr "Ner"
 
 msgid "Edit"
-msgstr ""
+msgstr "Redigera"
 
 msgid "Edit properties"
-msgstr ""
+msgstr "Redigera egenskaper"
 
 msgid "Expand"
-msgstr ""
+msgstr "Expandera"
 
 msgid "Expand Pool"
-msgstr ""
+msgstr "Expandera pool"
 
 msgid "Export Pool"
 msgstr ""
@@ -134,7 +135,7 @@ msgid "Force"
 msgstr ""
 
 msgid "Force creation"
-msgstr ""
+msgstr "Force skapande"
 
 msgid "Forces import, even if the pool appears to be potentially active."
 msgstr ""
@@ -142,12 +143,12 @@ msgstr ""
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Tvinga skapandet av Vdev även om fel rapporteras. Använd med extrem försiktighet!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Krafter skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
 
 msgid "Import Pool"
 msgstr ""
@@ -162,51 +163,51 @@ msgid "Import all missing pools. Overrides pool specification above."
 msgstr ""
 
 msgid "Mirror"
-msgstr ""
+msgstr "Spegel"
 
 msgid "Modified"
-msgstr ""
+msgstr "Modifiera"
 
 msgid "Mountpoint"
-msgstr ""
+msgstr "Monteringspunkt"
 
 msgid "Name"
-msgstr ""
+msgstr "Namn"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr ""
+msgstr "Namn på den nya klonen. Den kan placeras var som helst inom ZFS-hierarkin."
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr ""
+msgstr "Namnet på det nya objektet. Prefix kommer infogas i namnet. Vänligen undvika ledande /"
 
 msgid "New"
-msgstr ""
+msgstr "Ny"
 
 msgid "New Name"
 msgstr ""
 
 msgid "No items to display"
-msgstr ""
+msgstr "Inga objekt att visa"
 
 msgid "None"
-msgstr ""
+msgstr "Inga"
 
 msgid "Object Type"
-msgstr ""
+msgstr "Objekttyp"
 
 msgid "Object details"
-msgstr ""
+msgstr "Objekt detaljer"
 
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 msgid "Old Name"
 msgstr ""
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr ""
+msgstr "Valfri monteringspunkt för poolen. Standard är att använda poolnamn."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
@@ -214,34 +215,34 @@ msgid ""
 msgstr ""
 
 msgid "Overview"
-msgstr ""
+msgstr "Översikt"
 
 msgid "Pool Name"
 msgstr ""
 
 msgid "Pool type"
-msgstr ""
+msgstr "Pool typ"
 
 msgid "Prefix"
-msgstr ""
+msgstr "Prefix"
 
 msgid "Property"
-msgstr ""
+msgstr "Egenskap"
 
 msgid "RAID-Z1"
-msgstr ""
+msgstr "RAID-Z1"
 
 msgid "RAID-Z2"
-msgstr ""
+msgstr "RAID-Z2"
 
 msgid "RAID-Z3"
-msgstr ""
+msgstr "RAID-Z3"
 
 msgid "Refer"
 msgstr ""
 
 msgid "Refresh"
-msgstr ""
+msgstr "Uppdatera"
 
 msgid "Rename"
 msgstr ""
@@ -253,25 +254,25 @@ msgid "Rollback"
 msgstr ""
 
 msgid "Save"
-msgstr ""
+msgstr "Spara"
 
 msgid "Scrub"
 msgstr ""
 
 msgid "Serial Number"
-msgstr ""
+msgstr "Serienummer"
 
 msgid "Set ashift"
-msgstr ""
+msgstr "Ställ in ashift"
 
 msgid "Settings"
 msgstr ""
 
 msgid "Size"
-msgstr ""
+msgstr "Storlek"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr ""
+msgstr "Volymens storlek, t.ex. 5mb,100gb,1tb o.s.v."
 
 msgid "Snapshot to clone"
 msgstr ""
@@ -280,14 +281,14 @@ msgid "Snapshots"
 msgstr ""
 
 msgid "Source"
-msgstr ""
+msgstr "Källa"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
 msgstr ""
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr ""
+msgstr "Ange ashift värde. Använd bara om du är säker på att du behöver det."
 
 msgid "State"
 msgstr ""
@@ -302,31 +303,31 @@ msgid "Thin provisioning"
 msgstr ""
 
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 msgid "Up"
-msgstr ""
+msgstr "Upp"
 
 msgid "Updating property..."
-msgstr ""
+msgstr "Uppdatering av egendom ..."
 
 msgid "Used"
-msgstr ""
+msgstr "Använd"
 
 msgid "Value"
-msgstr ""
+msgstr "Värde"
 
 msgid "Vdev type"
-msgstr ""
+msgstr "Vdev typ"
 
 msgid "Vendor"
 msgstr ""
 
 msgid "ZFS"
-msgstr ""
+msgstr "ZFS"
 
 msgid "ZFS ZED"
 msgstr ""
 
 msgid "Zvol %s [%s, %s]"
-msgstr ""
+msgstr "Zvol %s [%s, %s]"

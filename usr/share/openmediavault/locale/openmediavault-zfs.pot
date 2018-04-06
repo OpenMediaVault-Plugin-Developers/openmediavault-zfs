@@ -1,6 +1,6 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the openmediavault-zfs package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-04 07:22-0600\n"
+"POT-Creation-Date: 2018-04-06 07:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,9 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#, javascript-format
 msgid "% completed ..."
 msgstr ""
 
+#, javascript-format
 msgid "100% completed ..."
 msgstr ""
 
@@ -48,6 +50,9 @@ msgid "By Path"
 msgstr ""
 
 msgid "Capacity"
+msgstr ""
+
+msgid "Clone"
 msgstr ""
 
 msgid "Clone name"
@@ -80,10 +85,19 @@ msgstr ""
 msgid "Displaying items {0} - {1} of {2}"
 msgstr ""
 
-msgid "Do you really want to create the ZFS pool?"
+msgid "Do you really want to create the ZFS pool?<br/><br/>The process will take some time and no change will be displayed until it is completed.<br/>Please reload the page to update any changes."
 msgstr ""
 
 msgid "Do you really want to delete the selected item(s)?"
+msgstr ""
+
+msgid "Do you really want to expand the ZFS pool?<br/><br/>The process will take some time and no change will be displayed until it is completed.<br/>Please reload the page to update any changes."
+msgstr ""
+
+msgid "Do you really want to export the pool?"
+msgstr ""
+
+msgid "Do you really want to rollback the selected item?"
 msgstr ""
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
@@ -104,13 +118,37 @@ msgstr ""
 msgid "Expand Pool"
 msgstr ""
 
+msgid "Export Pool"
+msgstr ""
+
+msgid "Filesystem/Volume"
+msgstr ""
+
+msgid "Force"
+msgstr ""
+
 msgid "Force creation"
+msgstr ""
+
+msgid "Forces import, even if the pool appears to be potentially active."
 msgstr ""
 
 msgid "Forces the creation of the Vdev even if errors are reported. Use with extreme caution!"
 msgstr ""
 
 msgid "Forces the creation of the pool even if errors are reported. Use with extreme caution!"
+msgstr ""
+
+msgid "Import Pool"
+msgstr ""
+
+msgid "Import ZFS Pool(s)"
+msgstr ""
+
+msgid "Import all"
+msgstr ""
+
+msgid "Import all missing pools. Overrides pool specification above."
 msgstr ""
 
 msgid "Mirror"
@@ -134,6 +172,9 @@ msgstr ""
 msgid "New"
 msgstr ""
 
+msgid "New Name"
+msgstr ""
+
 msgid "No items to display"
 msgstr ""
 
@@ -149,6 +190,9 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
+msgid "Old Name"
+msgstr ""
+
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr ""
 
@@ -156,6 +200,9 @@ msgid "Optional mountpoint of the filesystem. If left blank parent mountpoint wi
 msgstr ""
 
 msgid "Overview"
+msgstr ""
+
+msgid "Pool Name"
 msgstr ""
 
 msgid "Pool type"
@@ -176,7 +223,19 @@ msgstr ""
 msgid "RAID-Z3"
 msgstr ""
 
+msgid "Refer"
+msgstr ""
+
 msgid "Refresh"
+msgstr ""
+
+msgid "Rename"
+msgstr ""
+
+msgid "Rename ZFS Object"
+msgstr ""
+
+msgid "Rollback"
 msgstr ""
 
 msgid "Save"
@@ -191,6 +250,9 @@ msgstr ""
 msgid "Set ashift"
 msgstr ""
 
+msgid "Settings"
+msgstr ""
+
 msgid "Size"
 msgstr ""
 
@@ -200,6 +262,9 @@ msgstr ""
 msgid "Snapshot to clone"
 msgstr ""
 
+msgid "Snapshots"
+msgstr ""
+
 msgid "Source"
 msgstr ""
 
@@ -207,6 +272,18 @@ msgid "Specifies which device alias should be used. Don't change unless needed."
 msgstr ""
 
 msgid "Specify ashift value. Only use if you are sure you need it."
+msgstr ""
+
+msgid "State"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Successfully rollbacked!"
+msgstr ""
+
+msgid "Thin provisioning"
 msgstr ""
 
 msgid "Type"
@@ -233,21 +310,8 @@ msgstr ""
 msgid "ZFS"
 msgstr ""
 
-#, php-format
+msgid "ZFS ZED"
+msgstr ""
+
 msgid "Zvol %s [%s, %s]"
-msgstr ""
-
-msgid "Enable Automatic Sharing of Nested Properties"
-msgstr ""
-
-msgid "When sharing a ZFS filesystem over NFS, normally any nested filesystems within the shared filesystem will not be shared and, instead, will appear as empty folders. This setting, when enabled, will automatically create shares for any nested filesystems of this filesystem. Note: this only applies to filesystems shared via OMV's shared folders and not those shared with the "sharenfs" ZFS property.
-msgstr ""
-
-msgid "AutoShare Filesystem Property"
-msgstr ""
-
-msgid "ZFS user properties may only contain lowercase letters, numbers, and the following punctionation: ':','+','.','_'. They must also contain at least one ':' character to distinguish them from native properties."
-msgstr ""
-
-msgid "Property to look for on filesystems that, when present, will indicate whether this filesystem and it's children should be included in automatic sharing. If this is left blank, all shared filesystems will have their nested children automatically shared. If it's set, then only filesystems with the property set to true will be automatically shared while filesystems with this set to false will not be shared. This latter behavior is useful when trying to omit a single nested filesystem from being shared when it's parent is autosharing it's children. See <a href='https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gdrcw/index.html'>ZFS User Properties</a> for more information.
 msgstr ""

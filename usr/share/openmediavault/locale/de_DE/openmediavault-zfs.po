@@ -1,27 +1,31 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
 # David Hönel <davidh1990@gmx.de>, 2015
-# Ettore Atalan <atalanttore@googlemail.com>, 2014
+# Ettore Atalan <atalanttore@googlemail.com>, 2014,2016
+# Niklas Wagner, 2017
+# WastlJ, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-04 07:22-0600\n"
-"PO-Revision-Date: 2015-05-25 15:04+0000\n"
-"Last-Translator: David Hönel <davidh1990@gmx.de>\n"
-"Language-Team: German (http://www.transifex.com/projects/p/openmediavault-zfs/language/de/)\n"
+"POT-Creation-Date: 2018-04-06 07:45-0500\n"
+"PO-Revision-Date: 2018-04-06 12:45+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
+"Language-Team: German (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#, javascript-format
 msgid "% completed ..."
 msgstr "% fertiggestellt ..."
 
+#, javascript-format
 msgid "100% completed ..."
 msgstr "100% fertiggestellt ..."
 
@@ -52,6 +56,9 @@ msgstr "Nach Pfad"
 msgid "Capacity"
 msgstr "Kapazität"
 
+msgid "Clone"
+msgstr ""
+
 msgid "Clone name"
 msgstr "Klonname"
 
@@ -80,19 +87,34 @@ msgid "Devices"
 msgstr "Geräte"
 
 msgid "Displaying items {0} - {1} of {2}"
-msgstr ""
+msgstr "Zeige Items {0} - {1} von {2}"
 
-msgid "Do you really want to create the ZFS pool?"
-msgstr "Möchtest du den ZFS Pool wirklich erstellen?"
+msgid ""
+"Do you really want to create the ZFS pool?<br/><br/>The process will take "
+"some time and no change will be displayed until it is completed.<br/>Please "
+"reload the page to update any changes."
+msgstr ""
 
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "Möchtest du die ausgewählten Objekt(e) wirklich löschen?"
 
-msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
+msgid ""
+"Do you really want to expand the ZFS pool?<br/><br/>The process will take "
+"some time and no change will be displayed until it is completed.<br/>Please "
+"reload the page to update any changes."
 msgstr ""
 
-msgid "Down"
+msgid "Do you really want to export the pool?"
 msgstr ""
+
+msgid "Do you really want to rollback the selected item?"
+msgstr ""
+
+msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
+msgstr "Möchten Sie wirklich den Pool scrubben?<br/><br/>Letzter scrub: "
+
+msgid "Down"
+msgstr "Runter"
 
 msgid "Edit"
 msgstr "Bearbeiten"
@@ -106,17 +128,41 @@ msgstr "Erweitern"
 msgid "Expand Pool"
 msgstr "Pool Erweitern"
 
+msgid "Export Pool"
+msgstr ""
+
+msgid "Filesystem/Volume"
+msgstr ""
+
+msgid "Force"
+msgstr ""
+
 msgid "Force creation"
 msgstr "Erstellung erzwingen"
+
+msgid "Forces import, even if the pool appears to be potentially active."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Forciert die Erstellung von Vdev, auch wenn Fehler auftreten. Mit extremer Vorsicht zu verwenden!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
+msgstr "Forciert die Erstellung eines Pools, auch wenn Fehler auftreten. Mit extremer Vorsicht verwenden!"
+
+msgid "Import Pool"
+msgstr ""
+
+msgid "Import ZFS Pool(s)"
+msgstr ""
+
+msgid "Import all"
+msgstr ""
+
+msgid "Import all missing pools. Overrides pool specification above."
 msgstr ""
 
 msgid "Mirror"
@@ -133,14 +179,17 @@ msgstr "Name"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr ""
+msgstr "Name des neuen Klons. Dieser kann beliebig in der ZFS Hierarchie plaziert werden."
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr ""
+msgstr "Name des neuen Objekts. Das Präfix wird dem Namen vorangestellt. Bitte führende \"/\" weglassen!"
 
 msgid "New"
 msgstr "Neu"
+
+msgid "New Name"
+msgstr ""
 
 msgid "No items to display"
 msgstr "Keine anzuzeigenden Elemente"
@@ -157,8 +206,11 @@ msgstr "Objektdetails"
 msgid "Ok"
 msgstr "OK"
 
-msgid "Optional mountpoint for the pool. Default is to use pool name."
+msgid "Old Name"
 msgstr ""
+
+msgid "Optional mountpoint for the pool. Default is to use pool name."
+msgstr "Optionaler Einhängepunkt für den Poll. Standard ist die Verwendung des Poolnamens."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
@@ -168,8 +220,11 @@ msgstr ""
 msgid "Overview"
 msgstr "Übersicht"
 
-msgid "Pool type"
+msgid "Pool Name"
 msgstr ""
+
+msgid "Pool type"
+msgstr "Pool Typ"
 
 msgid "Prefix"
 msgstr "Präfix"
@@ -186,19 +241,34 @@ msgstr "RAID-Z2"
 msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
+msgid "Refer"
+msgstr ""
+
 msgid "Refresh"
 msgstr "Aktualisieren"
+
+msgid "Rename"
+msgstr ""
+
+msgid "Rename ZFS Object"
+msgstr ""
+
+msgid "Rollback"
+msgstr ""
 
 msgid "Save"
 msgstr "Speichern"
 
 msgid "Scrub"
-msgstr ""
+msgstr "Scrub"
 
 msgid "Serial Number"
 msgstr "Seriennummer"
 
 msgid "Set ashift"
+msgstr "Setzte ashift"
+
+msgid "Settings"
 msgstr ""
 
 msgid "Size"
@@ -208,6 +278,9 @@ msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "Größe des Volumens, z.B. 5mb,100gb,1tb, usw."
 
 msgid "Snapshot to clone"
+msgstr "Zu klonender Schnappschuss"
+
+msgid "Snapshots"
 msgstr ""
 
 msgid "Source"
@@ -215,16 +288,28 @@ msgstr "Quelle"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr ""
+msgstr "Gibt an, welcher Gerätealias verwendet werden soll. Nicht ändern, wenn es nicht nötig ist."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
+msgstr "Eigenen ashift-Wert definieren. Nur verwenden, wenn Sie sicher sind, dass Sie es brauchen."
+
+msgid "State"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Successfully rollbacked!"
+msgstr ""
+
+msgid "Thin provisioning"
 msgstr ""
 
 msgid "Type"
 msgstr "Typ"
 
 msgid "Up"
-msgstr ""
+msgstr "Hoch"
 
 msgid "Updating property..."
 msgstr "Eigenschaft wird aktualisiert..."
@@ -244,6 +329,8 @@ msgstr "Anbieter"
 msgid "ZFS"
 msgstr "ZFS"
 
-#, php-format
+msgid "ZFS ZED"
+msgstr ""
+
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"

@@ -43,7 +43,7 @@ Ext.define("OMV.module.admin.storage.zfs.Snapshots", {
 	selModel: "checkboxmodel",
 	columns: [{
         xtype: "textcolumn",
-		text: _("Filesystem/Voulume"),
+		text: _("Filesystem/Volume"),
 		dataIndex: 'parent',
 		sortable: true,
 		stateId: 'parent',

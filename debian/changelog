@@ -1,3 +1,10 @@
+openmediavault-zfs (4.0.2-1) stable; urgency=low
+
+  * Update locales
+  * Fix zfs root issue
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Apr 2018 07:31:56 -0500
+
 openmediavault-zfs (4.0.1-1) stable; urgency=low
 
   * Adapt to new API.

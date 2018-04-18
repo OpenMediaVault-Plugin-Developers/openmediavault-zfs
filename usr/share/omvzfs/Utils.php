@@ -204,7 +204,7 @@ class OMVModuleZFSUtil {
             $config = $db->get("conf.system.filesystem.mountpoint", $object['uuid']);
             $db->delete($config, TRUE);
         }
-
+        // print_r($add);
         foreach($add as $object) {
             $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
             $object = array(
@@ -216,7 +216,29 @@ class OMVModuleZFSUtil {
                 "freq" => 0,
                 "passno" => 0
             );
-            Rpc::call("FsTab","set", $object, $context);
+            \OMV\Rpc\Rpc::call("FsTab","set", $object, $context);
+        }
+        $zfs_mntent = \OMV\Rpc\Rpc::call("FsTab","enumerateEntries",[],$context);
+        $zfs_mntent = array_filter($zfs_mntent, function($element){
+            if($element["type"]=="zfs")
+                return true;
+            else
+                return false;
+        });
+        $sf_objects = Rpc::Call("ShareMgmt", "enumerateSharedFolders",[],$context);
+        foreach ($zfs_mntent as $dataset) {
+            // Check if pool is available, otherwise errors are thrown
+            if (OMVModuleZFSUtil::isPoolImported(strstr($dataset['fsname'], "/", TRUE))) {
+                $tmp =  new OMVModuleZFSFilesystem($dataset['fsname']);
+                $tmp->updateAllProperties();
+                $old_uuid = $tmp->getProperty("omvzfsplugin:uuid")['value'];
+                $new_uuid = $dataset['uuid'];
+                if ($old_uuid != $new_uuid) {
+                    OMVModuleZFSUtil::fixOMVSharedFolders($old_uuid,$new_uuid,$sf_objects,$context);
+                }
+                OMVModuleZFSUtil::setMntentProperty($dataset['uuid'],$dataset['fsname']);
+            }
+
         }
     }
 
@@ -272,6 +294,8 @@ class OMVModuleZFSUtil {
                         'expanded'=>$expanded);
                     $ds =  new OMVModuleZFSFilesystem($path);
                     $ds->updateAllProperties();
+                    // $props = $ds->getProperties();
+                    // print_r($props);
                     if ($ds->isClone()) {
                         //This is a cloned Filesystem
                         $tmp['origin'] = $ds->getOrigin();
@@ -493,6 +517,55 @@ class OMVModuleZFSUtil {
             else
                 return false;
         }
+
+        /**
+         * Sets a custom property for storing mntent uuid. 
+         *
+         * @param  string internal database uuid of the mntent entry.
+         * @return void
+         * @access public
+         */
+        public static function setMntentProperty($mntent_uuid,$name) {
+            $cmd = "zfs set " . "omvzfsplugin:uuid" . "=\"" . $mntent_uuid . "\" \"" . $name . "\" 2>&1";
+            OMVModuleZFSUtil::exec($cmd,$out,$res);
+        }
+
+        /**
+         * Fix all shared folders that have a reference to the old uuid stored in the dataset property 
+         *
+         * @param  string uuid stored in the dataset property
+         * @return void
+         * @access public
+         */
+        public static function fixOMVSharedFolders($old_uuid,$new_uuid,$sf_objects,$context) {
+            $zfs_sfs = array_filter($sf_objects, function ($var) use ($old_uuid) {
+                return ($var['mntentref'] == $old_uuid);
+            });
+            foreach ($zfs_sfs as $zfs_sf) {
+                unset($zfs_sf['mntent'], $zfs_sf['_used'], $zfs_sf['privileges']);
+                $zfs_sf['mntentref'] = $new_uuid;
+                \OMV\Rpc\Rpc::Call("ShareMgmt", "set", $zfs_sf, $context);
+            }
+        }
+
+
+        /**
+         * Create pool config from parsed input
+         *
+         * @param string $name Pool name
+         * @return boolean
+         * @throws OMVModuleZFSException
+         */
+        public static function isPoolImported($name) {
+            $cmd = "zpool status " . $name . " &>/dev/null";
+            OMVModuleZFSUtil::exec($cmd,$out,$res);
+            if ($res === 0) {
+                return TRUE;
+            } else {
+                return FALSE;
+            }
+        }
+
 }
 
 ?>

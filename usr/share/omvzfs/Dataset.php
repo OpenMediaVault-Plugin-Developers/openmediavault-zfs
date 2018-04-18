@@ -183,4 +183,17 @@ abstract class OMVModuleZFSDataset {
 		$this->updateProperty($property);
 	}
 
+	/**
+	 * Sets a custom property for storing mntent uuid. 
+	 *
+	 * @param  string internal database uuid of the mntent entry.
+	 * @return void
+	 * @access public
+	 */
+	public function setMntentProperty($mntent_uuid) {
+		$cmd = "zfs set " . "omvzfsplugin:uuid" . "=\"" . $mntent_uuid . "\" \"" . $this->name . "\" 2>&1";
+		OMVModuleZFSUtil::exec($cmd,$out,$res);
+	}
+
+
 }

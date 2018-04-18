@@ -217,6 +217,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                     $properties = array("mountpoint"=>$params['mountpoint']);
                     $tmp->setProperties($properties);
                 }
+                // $mntent_uuid = \OMV\Uuid::uuid4();
+                // OMVModuleZFSUtil::setMntentProperty($mntent_uuid,$name);
                 $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
                   "org.openmediavault.storage.zfs.filesystem", $context);
                 break;

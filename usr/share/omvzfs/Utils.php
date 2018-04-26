@@ -175,7 +175,7 @@ class OMVModuleZFSUtil {
             $filesystem->updateProperty("mountpoint");
             $name = $filesystem->getName();
             $mntpoint = $filesystem->getMountPoint();
-            if (($mntpoint != "none") && ($mntpoint !== "legacy") && strpos($name, '/')) {
+            if (($mntpoint != "none") && ($mntpoint !== "legacy") && ($mntpoint !== "/")) {
                 $cmd = "mountpoint -q " . $mntpoint;
                 try
                 {

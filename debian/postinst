@@ -6,6 +6,12 @@ set -e
 . /usr/share/openmediavault/scripts/helper-functions
 
 
+get_dataset_status ()
+{
+    zfs list "$1" &>/dev/null
+}
+
+
 case "$1" in
     configure)
         SERVICE_XPATH_NAME="zfs"
@@ -23,6 +29,31 @@ case "$1" in
 
         dpkg-trigger update-fixperms
         dpkg-trigger update-locale
+
+        if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs \
+            2>/dev/null; then
+            zfsMntent_entries=$(omv-confdbadm read conf.system.filesystem.mountpoint \
+                | jq -r '.[]|select(.type=="zfs")')
+            zfsMntent_uuid=( $(echo "$zfsMntent_entries" | jq -r '.uuid') )
+            zfsMntent_fsname=( $(echo "$zfsMntent_entries" | jq -r '.fsname') )
+            i=$(( `echo ${#zfsMntent_fsname[@]}` - 1 ))
+
+            # echo $i
+            j=0
+            for fsname in ${zfsMntent_fsname[@]};do
+                echo $fsname ${zfsMntent_uuid[$j]}
+                if get_dataset_status ${fsname};then
+                    # echo ${zfsMntent_uuid[$j]}
+                    echo "Adding omvzfsplugin:uuid property to ${fsname} dataset"
+                    echo "zfs set "omvzfsplugin:uuid="${zfsMntent_uuid[$j]} ${fsname}"
+                else 
+                    echo "Dataset ${fsname} is not available, skipping...."
+                fi
+                let j++
+            done
+        else 
+            echo "ZFS module not loaded"
+        fi
 
         ;;
 

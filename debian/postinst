@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -27,33 +27,30 @@ case "$1" in
 
         /sbin/modprobe zfs
 
-        dpkg-trigger update-fixperms
-        dpkg-trigger update-locale
-
-        if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs \
-            2>/dev/null; then
+        if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs 2>/dev/null; then
             zfsMntent_entries=$(omv-confdbadm read conf.system.filesystem.mountpoint \
                 | jq -r '.[]|select(.type=="zfs")')
             zfsMntent_uuid=( $(echo "$zfsMntent_entries" | jq -r '.uuid') )
             zfsMntent_fsname=( $(echo "$zfsMntent_entries" | jq -r '.fsname') )
-            i=$(( `echo ${#zfsMntent_fsname[@]}` - 1 ))
-
-            # echo $i
             j=0
+            echo ${zfsMntent_uuid[0]}
             for fsname in ${zfsMntent_fsname[@]};do
-                echo $fsname ${zfsMntent_uuid[$j]}
-                if get_dataset_status ${fsname};then
-                    # echo ${zfsMntent_uuid[$j]}
+                if (get_dataset_status "${fsname}");then
                     echo "Adding omvzfsplugin:uuid property to ${fsname} dataset"
-                    echo "zfs set "omvzfsplugin:uuid="${zfsMntent_uuid[$j]} ${fsname}"
+                    zfs set 'omvzfsplugin:uuid='"${zfsMntent_uuid[$j]}" "${fsname}"
                 else 
                     echo "Dataset ${fsname} is not available, skipping...."
                 fi
-                let j++
+                let "++j"
             done
-        else 
+        else
             echo "ZFS module not loaded"
         fi
+
+        dpkg-trigger update-fixperms
+        dpkg-trigger update-locale
+
+
 
         ;;
 

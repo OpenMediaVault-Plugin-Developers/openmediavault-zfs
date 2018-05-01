@@ -550,7 +550,7 @@ class OMVModuleZFSUtil {
 
 
         /**
-         * Create pool config from parsed input
+         * Check if the pool is imported
          *
          * @param string $name Pool name
          * @return boolean

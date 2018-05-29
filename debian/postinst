@@ -51,10 +51,10 @@ case "$1" in
             echo "New plugin install, not inserting uuid property into existing datasets"
         fi
 
+        echo "zfs" > /etc/modules-load.d/zfs.conf
+
         dpkg-trigger update-fixperms
         dpkg-trigger update-locale
-
-
 
         ;;
 

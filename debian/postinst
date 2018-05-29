@@ -1,9 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-set -e
+set -x
 
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions
+
+
+get_dataset_status ()
+{
+    zfs list "$1" &>/dev/null
+}
 
 
 case "$1" in
@@ -21,8 +27,34 @@ case "$1" in
 
         /sbin/modprobe zfs
 
+        if dpkg --compare-versions "$2" lt-nl "4.0.3"; then
+            if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs 2>/dev/null; then
+                zfsMntent_entries=$(omv-confdbadm read conf.system.filesystem.mountpoint \
+                    | jq -r '.[]|select(.type=="zfs")')
+                zfsMntent_uuid=( $(echo "$zfsMntent_entries" | jq -r '.uuid') )
+                zfsMntent_fsname=( $(echo "$zfsMntent_entries" | jq -r '.fsname') )
+                j=0
+                echo ${zfsMntent_uuid[0]}
+                for fsname in ${zfsMntent_fsname[@]};do
+                    if (get_dataset_status "${fsname}");then
+                        echo "Adding omvzfsplugin:uuid property to ${fsname} dataset"
+                        zfs set 'omvzfsplugin:uuid='"${zfsMntent_uuid[$j]}" "${fsname}"
+                    else 
+                        echo "Dataset ${fsname} is not available, skipping...."
+                    fi
+                    let "++j"
+                done
+            else
+                echo "ZFS module not loaded"
+            fi
+        else
+            echo "New plugin install, not inserting uuid property into existing datasets"
+        fi
+
         dpkg-trigger update-fixperms
         dpkg-trigger update-locale
+
+
 
         ;;
 

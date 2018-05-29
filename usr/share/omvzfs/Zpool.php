@@ -5,7 +5,7 @@ require_once("Zvol.php");
 require_once("VdevType.php");
 require_once("Utils.php");
 require_once("Exception.php");
-
+require_once("Dataset.php");
 /**
  * Class containing information about the pool
  *
@@ -574,6 +574,8 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         }
         $cmd = "zpool create $opts \"$name\" $cmd 2>&1";
         OMVModuleZFSUtil::exec($cmd,$output,$result);
+        $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
+        // $tmp->setMntentProperty($uuid);
         return new OMVModuleZFSZpool($name);
     }
     /**
@@ -647,5 +649,8 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         }
         return null;
     }
+
+
+
 }
 ?>

@@ -1,3 +1,9 @@
+openmediavault-zfs (4.0.4) UNRELEASED; urgency=medium
+
+  * Add dependencies to work with proxmox kernel
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 30 May 2018 08:25:17 -0500
+
 openmediavault-zfs (4.0.3) stable; urgency=low
 
   * Add mntent uuid into zfs properties

@@ -49,7 +49,7 @@ class OMVModuleZFSUtil {
         $cmd = "ls -la /dev/disk/by-id/" . $id;
         OMVModuleZFSUtil::exec($cmd,$out,$res);
         if (count($out) === 1) {
-            if (preg_match('/^.*\/([a-z0-9]+.*)$/', $out[0], $match)) {
+            if (preg_match('/^.*\/([A-Za-z0-9]+.*)$/', $out[0], $match)) {
                 $disk = $match[1];
                 return($disk);
             }

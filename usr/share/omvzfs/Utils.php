@@ -14,6 +14,11 @@ use OMV\Uuid;
  */
 class OMVModuleZFSUtil {
 
+    /**
+     * @var  REGEX_DEVBYID_DEVNAME
+     * @access public
+     */
+	const REGEX_DEVBYID_DEVNAME = "/^.*\/([A-Za-z0-9]+.*)$/";
 
     /**
      * Sets a GPT label on a disk to prevent the zpool command from generating
@@ -49,7 +54,7 @@ class OMVModuleZFSUtil {
         $cmd = "ls -la /dev/disk/by-id/" . $id;
         OMVModuleZFSUtil::exec($cmd,$out,$res);
         if (count($out) === 1) {
-            if (preg_match('/^.*\/([A-Za-z0-9]+.*)$/', $out[0], $match)) {
+            if (preg_match(OMVModuleZFSUtil::REGEX_DEVBYID_DEVNAME, $out[0], $match)) {
                 $disk = $match[1];
                 return($disk);
             }
@@ -130,7 +135,7 @@ class OMVModuleZFSUtil {
      * @return string Disk identifier
      */
     public static function getDiskId($disk) {
-        preg_match("/^.*\/([A-Za-z0-9]+.*)$/", $disk, $identifier);
+        preg_match(OMVModuleZFSUtil::REGEX_DEVBYID_DEVNAME, $disk, $identifier);
         $cmd = "ls -la /dev/disk/by-id | grep '" . preg_quote($identifier[1]) . "$'";
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         if (is_array($out)) {

@@ -130,7 +130,7 @@ class OMVModuleZFSUtil {
      * @return string Disk identifier
      */
     public static function getDiskId($disk) {
-        preg_match("/^.*\/([A-Za-z0-9]+)$/", $disk, $identifier);
+        preg_match("/^.*\/([A-Za-z0-9]+.*)$/", $disk, $identifier);
         $cmd = "ls -la /dev/disk/by-id | grep '" . preg_quote($identifier[1]) . "$'";
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         if (is_array($out)) {

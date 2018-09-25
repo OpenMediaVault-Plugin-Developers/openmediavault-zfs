@@ -15,6 +15,9 @@ use OMV\Uuid;
 class OMVModuleZFSUtil {
 
     /**
+     * Regex matching the "/dev/DEVICENAME" strings.
+     * DEVICENAME can be retrieved from the first capture group.
+     *
      * @var  REGEX_DEVBYID_DEVNAME
      * @access public
      */

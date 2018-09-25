@@ -50,7 +50,7 @@ class OMVModuleZFSUtil {
     }
 
     /**
-     * Get the /dev/sdX device name from /dev/disk/by-id
+     * Get the /dev/DEVNAME device name from /dev/disk/by-id
      *
      */
     public static function getDevByID($id) {
@@ -133,7 +133,7 @@ class OMVModuleZFSUtil {
     }
 
     /**
-     * Get /dev/disk/by-id from /dev/sdX
+     * Get /dev/disk/by-id from /dev/DEVNAME
      *
      * @return string Disk identifier
      */

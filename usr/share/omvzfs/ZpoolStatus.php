@@ -10,6 +10,18 @@
  */
 class OMVModuleZFSZpoolStatus {
     /**
+     * The parsed status of a zpool
+     *
+     * @var    array $status
+     * @access private
+     */
+    private $status;
+
+    public function __construct($statusCmdOutput) {
+        $this->status = self::parseStatus($statusCmdOutput);
+    }
+
+    /**
      * Parse pool's status entries
      * and return it as a nested object.
      *

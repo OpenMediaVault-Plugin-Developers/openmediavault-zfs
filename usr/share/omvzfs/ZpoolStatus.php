@@ -22,6 +22,34 @@ class OMVModuleZFSZpoolStatus {
     }
 
     /**
+     * Return pool's name.
+     *
+     * @return string
+     */
+    public function getPoolsName() {
+        return $this->status["pool"];
+    }
+
+    /**
+     * Return pool's state.
+     *
+     * @return string
+     */
+    public function getState() {
+        return $this->status["state"];
+    }
+
+    /**
+     * Checks whether the config entry has been properly loaded
+     * (as in - it contains useful data instead of an error message).
+     *
+     * @return boolean
+     */
+    public function hasConfig() {
+        return is_array($this->status["config"]);
+    }
+
+    /**
      * Parse pool's status entries
      * and return it as a nested object.
      *

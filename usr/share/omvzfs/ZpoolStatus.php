@@ -71,6 +71,9 @@ class OMVModuleZFSZpoolStatus {
             $parsedEntryLines = null;
 
             switch ($entryName) {
+                case "config":
+                    $parsedEntryLines = OMVModuleZFSZpoolStatus::parseStatusConfig($entryLines);
+                    break;
                 default:
                     // No dedicated entry parser, concat all lines into a big string
                     // and preserve new line characters

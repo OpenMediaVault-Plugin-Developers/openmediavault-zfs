@@ -53,41 +53,31 @@ class OMVModuleZFSZpoolStatus {
     }
 
     /**
-     * Returns all vdevs of the pool.
+     * Returns all devices (not vdevs!) as absolute paths.
      *
      * @return array
      * @throws OMVModuleZFSException
+     * @todo This method should not return file-based vdevs on its list
      */
-    public function getVDevs() {
+    public function getAllDevices() {
         if (!($this->hasConfig())) {
             throw new OMVModuleZFSException("Config could not be loaded");
         }
 
-        return $this->wrapVDevs(
-            $this->getRawVDevs()
-        );
-    }
+        $devices = [];
 
-    /**
-     * Returns unboxed (raw string data) vdevs information from "config" entry.
-     *
-     * @return array
-     * @throws OMVModuleZFSException
-     */
-    private function getRawVDevs() {
-        if (!($this->hasConfig())) {
-            throw new OMVModuleZFSException("Config could not be loaded");
+        foreach ($this->status["config"] as $rawVDevs) {
+            $vdevs = $this->wrapVDevs($rawVDevs["subentries"]);
+
+            foreach ($vdevs as $vdev) {
+                // TODO: Append only ONLINE vdevs
+                foreach ($vdev->getDisks() as $newDevice) {
+                    $devices[] = $newDevice;
+                }
+            }
         }
 
-        $vdevsEntryIdx = array_search(
-            $this->getPoolsName(),
-            array_column(
-                $this->status["config"],
-                "name"
-            )
-        );
-
-        return $this->status["config"][$vdevsEntryIdx]["subentries"];
+        return $devices;
     }
 
     /**

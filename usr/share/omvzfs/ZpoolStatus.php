@@ -2,6 +2,7 @@
 
 require_once "Vdev.php";
 require_once "VdevType.php";
+require_once "VdevState.php";
 
 /**
  * Class containing parsed status of a zpool.
@@ -85,13 +86,22 @@ class OMVModuleZFSZpoolStatus {
      * Expects to receive an array of "subentries" taken from top-level vdev
      * (root-vdev, logs, cache, spares...)
      *
+     * @param array $options
+     *  Additional options for the wrapper defined as an associative array:
+     *  - "excludeStates" (array)
+     *      Vdev states to be excluded from the list
      * @return array
      * @throws OMVModuleZFSException
      * @todo Once OMVModuleZFSVdevType gets extended with these top-level
      *       vdev types, there should be a more general wrapping method.
      */
-    private function wrapVDevs($rawVDevs) {
+    private function wrapVDevs($rawVDevs, array $options = array()) {
         $vdevs = array();
+
+        // Sanitize options
+        if (!array_key_exists("excludeStates", $options)) {
+            $options["excludeStates"] = [];
+        }
 
         $vdevSpecialTypes = [
             "mirror",
@@ -104,7 +114,13 @@ class OMVModuleZFSZpoolStatus {
 
         foreach ($rawVDevs as $rawVDev) {
             $vdevName = $rawVDev["name"];
+            $vdevState = OMVModuleZFSVdevState::parseState($rawVDev["state"]);
             $vdevType = null;
+
+            // Check if vdev is not in the excluded state
+            if (in_array($vdevState, $options["excludeStates"], true)) {
+                continue;
+            }
 
             $specialTypeDetected = preg_match(
                 "/^(" . (implode("|", $vdevSpecialTypes)) . ")/",
@@ -141,12 +157,22 @@ class OMVModuleZFSZpoolStatus {
                 $vdevDevices = [];
 
                 foreach ($rawVDev["subentries"] as $subVDev) {
+                    $subVDevState = OMVModuleZFSVdevState::parseState($subVDev["state"]);
+
+                    // Check if device is not in the excluded state
+                    if (in_array($subVDevState, $options["excludeStates"], true)) {
+                        continue;
+                    }
+
                     $vdevDevices[] = $subVDev["name"];
                 }
             }
 
-            // TODO: Detect if devices are actually available (ONLINE)
-            // to prevent device GUIDs being treated as /dev paths.
+            // If devices array is empty, do not add this vdev to the list
+            // (it means that all devices have been excluded for some reason)
+            if (count($vdevDevices) === 0) {
+                continue;
+            }
 
             $vdev = new OMVModuleZFSVdev($poolName, $vdevType, $vdevDevices);
 

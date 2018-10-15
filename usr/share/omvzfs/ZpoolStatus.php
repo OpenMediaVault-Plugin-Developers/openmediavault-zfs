@@ -56,11 +56,15 @@ class OMVModuleZFSZpoolStatus {
     /**
      * Returns all devices (not vdevs!) as absolute paths.
      *
+     * @param array $options
+     *  Additional options for the getter defined as an associative array:
+     *  - "excludeStates" (array)
+     *      Vdev states to be excluded from the list
      * @return array
      * @throws OMVModuleZFSException
      * @todo This method should not return file-based vdevs on its list
      */
-    public function getAllDevices() {
+    public function getAllDevices(array $options = array()) {
         if (!($this->hasConfig())) {
             throw new OMVModuleZFSException("Config could not be loaded");
         }
@@ -68,7 +72,7 @@ class OMVModuleZFSZpoolStatus {
         $devices = [];
 
         foreach ($this->status["config"] as $rawVDevs) {
-            $vdevs = $this->wrapVDevs($rawVDevs["subentries"]);
+            $vdevs = $this->wrapVDevs($rawVDevs["subentries"], $options);
 
             foreach ($vdevs as $vdev) {
                 // TODO: Append only ONLINE vdevs

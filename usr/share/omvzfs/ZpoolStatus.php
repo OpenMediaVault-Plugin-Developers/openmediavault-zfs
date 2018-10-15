@@ -82,9 +82,13 @@ class OMVModuleZFSZpoolStatus {
 
     /**
      * Wraps raw vdevs information into OMVModuleZFSVdev instances.
+     * Expects to receive an array of "subentries" taken from top-level vdev
+     * (root-vdev, logs, cache, spares...)
      *
      * @return array
      * @throws OMVModuleZFSException
+     * @todo Once OMVModuleZFSVdevType gets extended with these top-level
+     *       vdev types, there should be a more general wrapping method.
      */
     private function wrapVDevs($rawVDevs) {
         $vdevs = array();

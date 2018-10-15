@@ -354,7 +354,7 @@ class OMVModuleZFSZpoolStatus {
             }
 
             // Read the rest as a whole column
-            // (without loosing the original whitespacing)
+            // (without losing the original whitespacing)
             // (use non-capturing group to go past the already-read columns)
             $matchReturn = preg_match("/^(?:\S+\s+){{$columnsReadCount}}(.*?)$/", $trimmedLine, $restMatch);
 

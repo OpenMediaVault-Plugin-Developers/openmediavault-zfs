@@ -1,5 +1,8 @@
 <?php
 
+require_once "Vdev.php";
+require_once "VdevType.php";
+
 /**
  * Class containing parsed status of a zpool.
  * In most cases, should be constructed as a member of OMVModuleZFSZpool.
@@ -47,6 +50,116 @@ class OMVModuleZFSZpoolStatus {
      */
     public function hasConfig() {
         return is_array($this->status["config"]);
+    }
+
+    /**
+     * Returns all vdevs of the pool.
+     *
+     * @return array
+     * @throws OMVModuleZFSException
+     */
+    public function getVDevs() {
+        if (!($this->hasConfig())) {
+            throw new OMVModuleZFSException("Config could not be loaded");
+        }
+
+        return $this->wrapVDevs(
+            $this->getRawVDevs()
+        );
+    }
+
+    /**
+     * Returns unboxed (raw string data) vdevs information from "config" entry.
+     *
+     * @return array
+     * @throws OMVModuleZFSException
+     */
+    private function getRawVDevs() {
+        if (!($this->hasConfig())) {
+            throw new OMVModuleZFSException("Config could not be loaded");
+        }
+
+        $vdevsEntryIdx = array_search(
+            $this->getPoolsName(),
+            array_column(
+                $this->status["config"],
+                "name"
+            )
+        );
+
+        return $this->status["config"][$vdevsEntryIdx]["subentries"];
+    }
+
+    /**
+     * Wraps raw vdevs information into OMVModuleZFSVdev instances.
+     *
+     * @return array
+     * @throws OMVModuleZFSException
+     */
+    private function wrapVDevs($rawVDevs) {
+        $vdevs = array();
+
+        $vdevSpecialTypes = [
+            "mirror",
+            "raidz1",
+            "raidz2",
+            "raidz3"
+        ];
+
+        $poolName = $this->getPoolsName();
+
+        foreach ($rawVDevs as $rawVDev) {
+            $vdevName = $rawVDev["name"];
+            $vdevType = null;
+
+            $specialTypeDetected = preg_match(
+                "/^(" . (implode("|", $vdevSpecialTypes)) . ")/",
+                $vdevName,
+                $vdevTypeMatch
+            );
+
+            if ($specialTypeDetected === 1) {
+                switch ($vdevTypeMatch[1]) {
+                    case "mirror":
+                        $vdevType = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+                        break;
+                    case "raidz1":
+                        $vdevType = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
+                        break;
+                    case "raidz2":
+                        $vdevType = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
+                        break;
+                    case "raidz3":
+                        $vdevType = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
+                        break;
+                }
+            } else if ($specialTypeDetected === 0) {
+                $vdevType = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
+            } else {
+                throw new OMVModuleZFSException("An error occured while detecting vdev type");
+            }
+
+            if ($vdevType === OMVModuleZFSVdevType::OMVMODULEZFSPLAIN) {
+                $vdevDevices = [ $vdevName ];
+            } else {
+                // "Virtual devices cannot be nested"
+                // ~ZPOOL(8)
+                $vdevDevices = [];
+
+                foreach ($rawVDev["subentries"] as $subVDev) {
+                    $vdevDevices[] = $subVDev["name"];
+                }
+            }
+
+            // TODO: Detect if devices are actually available (ONLINE)
+            // to prevent device GUIDs being treated as /dev paths.
+
+            $vdev = new OMVModuleZFSVdev($poolName, $vdevType, $vdevDevices);
+
+            $vdevs[] = $vdev;
+        }
+
+        return $vdevs;
     }
 
     /**

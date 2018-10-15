@@ -21,29 +21,14 @@ class test_omvzfs_zpoolstatus extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * @dataProvider vdevsGetterDataProvider
+     * @dataProvider allDevicesGetterDataProvider
      */
-    public function testVDevGetter($cmdOutput, $expectedVDevs) {
+    public function testAllDevicesGetter($cmdOutput, $expectedDevices) {
         $zpoolStatus = new OMVModuleZFSZpoolStatus($cmdOutput);
 
-        $vdevs = $zpoolStatus->getVDevs();
+        $resultDevices = $zpoolStatus->getAllDevices();
 
-        $this->assertCount(count($expectedVDevs), $vdevs);
-
-        foreach ($expectedVDevs as $vdevIdx => $expectedVDev) {
-            $this->assertEquals(
-                $expectedVDev["poolName"],
-                $vdevs[$vdevIdx]->getPool()
-            );
-            $this->assertEquals(
-                $expectedVDev["type"],
-                $vdevs[$vdevIdx]->getType()
-            );
-            $this->assertEquals(
-                $expectedVDev["devices"],
-                $vdevs[$vdevIdx]->getDisks()
-            );
-        }
+        $this->assertEquals($expectedDevices, $resultDevices);
     }
 
     public function parseStatusDataProvider() {
@@ -59,41 +44,29 @@ class test_omvzfs_zpoolstatus extends \PHPUnit\Framework\TestCase {
         ];
     }
 
-    public function vdevsGetterDataProvider() {
+    public function allDevicesGetterDataProvider() {
         return [
             "simple, healthy pool's output" => [
                 Test\OMVZFS\ZpoolStatus\Mocks\SimpleMock::getCmdOutput(),
                 [
-                    [
-                        "poolName" => "testpool",
-                        "type" => OMVModuleZFSVdevType::OMVMODULEZFSMIRROR,
-                        "devices" => [
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1"
-                        ]
-                    ]
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1"
                 ]
             ],
             "complex pool's output (vdevs, logs & spares)" => [
                 Test\OMVZFS\ZpoolStatus\Mocks\AdvancedMock::getCmdOutput(),
                 [
-                    [
-                        "poolName" => "testpool",
-                        "type" => OMVModuleZFSVdevType::OMVMODULEZFSMIRROR,
-                        "devices" => [
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1"
-                        ]
-                    ],
-                    [
-                        "poolName" => "testpool",
-                        "type" => OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1,
-                        "devices" => [
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part2",
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part2",
-                            "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-a6c3b929-part2"
-                        ]
-                    ]
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part2",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part2",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-a6c3b929-part2",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                    "12655960456386485198",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1"
                 ]
             ]
         ];

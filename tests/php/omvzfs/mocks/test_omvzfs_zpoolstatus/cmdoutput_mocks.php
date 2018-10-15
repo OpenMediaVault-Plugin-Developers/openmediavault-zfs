@@ -98,9 +98,10 @@ class AdvancedMock implements CmdOutputMockInterface {
             "	  mirror-0                                                       ONLINE       0     0     0",
             "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1  ONLINE       0     0     0",
             "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1  ONLINE       0     0     0",
-            "	  mirror-1                                                       ONLINE       0     0     0",
-            "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1  ONLINE       0     0     0",
-            "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1  ONLINE       0     0     0",
+            "	  raidz1-0                                                       ONLINE       0     0     0",
+            "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part2  ONLINE       0     0     0",
+            "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part2  ONLINE       0     0     0",
+            "	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-a6c3b929-part2  ONLINE       0     0     0",
             "	spares                                                           ONLINE",
             "	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1    INUSE  in use by pool 'otherpool'",
             "	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1    AVAIL",
@@ -170,7 +171,7 @@ class AdvancedMock implements CmdOutputMockInterface {
                             ]
                         ],
                         [
-                            "name" => "mirror-1",
+                            "name" => "raidz1-0",
                             "state" => "ONLINE",
                             "read" => "0",
                             "write" => "0",
@@ -179,7 +180,7 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "isSpare" => false,
                             "subentries" => [
                                 [
-                                    "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
+                                    "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part2",
                                     "state" => "ONLINE",
                                     "read" => "0",
                                     "write" => "0",
@@ -189,7 +190,17 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "subentries" => []
                                 ],
                                 [
-                                    "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1",
+                                    "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part2",
+                                    "state" => "ONLINE",
+                                    "read" => "0",
+                                    "write" => "0",
+                                    "cksum" => "0",
+                                    "notes" => null,
+                                    "isSpare" => false,
+                                    "subentries" => []
+                                ],
+                                [
+                                    "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-a6c3b929-part2",
                                     "state" => "ONLINE",
                                     "read" => "0",
                                     "write" => "0",

@@ -267,10 +267,10 @@ class OMVModuleZFSZpoolStatus {
         // only the top of the stack is a regular object to make it easier to store some flags
         $nestingStack = array();
         $nestingStack[] = array(
-            "isSpare" => false,
             "subentries" => &$config
         );
         $nestingIndentation = 0;
+        $isParsingSpares = false;
         $currentNestingEntry = &$nestingStack[count($nestingStack) - 1];
 
         foreach ($outputLines as $outputLine) {
@@ -325,21 +325,27 @@ class OMVModuleZFSZpoolStatus {
 
                 "notes" => null,
 
-                "isSpare" => null,
                 "subentries" => array()
             );
 
             $columnsReadCount += 2;
 
             // "read", "write" & "cksum" are not shown for "spares",
-            // so determine if we're parsing a spare entry
-            $newEntry["isSpare"] = (
-                $currentNestingEntry["isSpare"] ||
-                $newEntry["name"] === "spares"
+            // so we have to determine if we're parsing a "spare" entry upfront.
+            // "spare" type is determined by the top-level entry called "spares",
+            // which means that we can "enter" spares parsing only when reached
+            // descendants of "spares" entry, and we can "leave" spares parsing
+            // when the parsing stack has cleared (to the top-level stack frame entry).
+            $isParsingSpares = (
+                ($newEntry["name"] === "spares") ||
+                (
+                    $isParsingSpares &&
+                    count($nestingStack) > 1
+                )
             );
 
             // "not" spares will have three additional columns
-            if ($newEntry["isSpare"] === false) {
+            if (!$isParsingSpares) {
                 $newEntry["read"] = $lineDetails[2];
                 $newEntry["write"] = $lineDetails[3];
                 $newEntry["cksum"] = $lineDetails[4];

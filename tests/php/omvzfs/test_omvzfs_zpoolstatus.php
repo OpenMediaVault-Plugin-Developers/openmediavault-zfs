@@ -14,11 +14,10 @@ class test_omvzfs_zpoolstatus extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider parseStatusDataProvider
      */
-
     public function testParseStatus($cmdOutput, $expectedStructure) {
         $result = OMVModuleZFSZpoolStatus::parseStatus($cmdOutput);
 
-        $this->assertEquals($result, $expectedStructure);
+        $this->assertEquals($expectedStructure, $result);
     }
 
     public function parseStatusDataProvider() {

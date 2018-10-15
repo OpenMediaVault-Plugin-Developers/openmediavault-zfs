@@ -39,7 +39,6 @@ class SimpleMock implements CmdOutputMockInterface {
                     "write" => "0",
                     "cksum" => "0",
                     "notes" => null,
-                    "isSpare" => false,
                     "subentries" => [
                         [
                             "name" => "mirror-0",
@@ -48,7 +47,6 @@ class SimpleMock implements CmdOutputMockInterface {
                             "write" => "0",
                             "cksum" => "0",
                             "notes" => null,
-                            "isSpare" => false,
                             "subentries" => [
                                 [
                                     "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
@@ -57,7 +55,6 @@ class SimpleMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -67,7 +64,6 @@ class SimpleMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ]
                             ]
@@ -137,7 +133,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                     "write" => "0",
                     "cksum" => "0",
                     "notes" => null,
-                    "isSpare" => false,
                     "subentries" => [
                         [
                             "name" => "mirror-0",
@@ -146,7 +141,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => "0",
                             "cksum" => "0",
                             "notes" => null,
-                            "isSpare" => false,
                             "subentries" => [
                                 [
                                     "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
@@ -155,7 +149,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -165,7 +158,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ]
                             ]
@@ -177,7 +169,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => "0",
                             "cksum" => "0",
                             "notes" => null,
-                            "isSpare" => false,
                             "subentries" => [
                                 [
                                     "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part2",
@@ -186,7 +177,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -196,7 +186,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -206,7 +195,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ]
                             ]
@@ -220,7 +208,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                     "write" => null,
                     "cksum" => null,
                     "notes" => null,
-                    "isSpare" => true,
                     "subentries" => [
                         [
                             "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
@@ -229,7 +216,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => null,
                             "cksum" => null,
                             "notes" => "in use by pool 'otherpool'",
-                            "isSpare" => true,
                             "subentries" => []
                         ],
                         [
@@ -239,7 +225,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => null,
                             "cksum" => null,
                             "notes" => null,
-                            "isSpare" => true,
                             "subentries" => []
                         ]
                     ]
@@ -251,7 +236,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                     "write" => "0",
                     "cksum" => "0",
                     "notes" => null,
-                    "isSpare" => false,
                     "subentries" => [
                         [
                             "name" => "mirror-0",
@@ -260,7 +244,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => "0",
                             "cksum" => "0",
                             "notes" => null,
-                            "isSpare" => false,
                             "subentries" => [
                                 [
                                     "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
@@ -269,7 +252,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -279,7 +261,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => "was /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-71d3f044-part1",
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ]
                             ]
@@ -291,7 +272,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                             "write" => "0",
                             "cksum" => "0",
                             "notes" => null,
-                            "isSpare" => false,
                             "subentries" => [
                                 [
                                     "name" => "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-93542ba0-part1",
@@ -300,7 +280,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ],
                                 [
@@ -310,7 +289,6 @@ class AdvancedMock implements CmdOutputMockInterface {
                                     "write" => "0",
                                     "cksum" => "0",
                                     "notes" => null,
-                                    "isSpare" => false,
                                     "subentries" => []
                                 ]
                             ]

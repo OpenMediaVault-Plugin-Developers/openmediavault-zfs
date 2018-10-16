@@ -72,13 +72,10 @@ class OMVModuleZFSZpoolStatus {
         $devices = [];
 
         foreach ($this->status["config"] as $rawVDevs) {
-            $vdevs = $this->wrapVDevs($rawVDevs["subentries"], $options);
+            $vdevDevices = $this->extractDevicesFromVDevs($rawVDevs["subentries"], $options);
 
-            foreach ($vdevs as $vdev) {
-                // TODO: Append only ONLINE vdevs
-                foreach ($vdev->getDisks() as $newDevice) {
-                    $devices[] = $newDevice;
-                }
+            foreach ($vdevDevices as $vdevDevice) {
+                $devices[] = $vdevDevice;
             }
         }
 
@@ -86,9 +83,7 @@ class OMVModuleZFSZpoolStatus {
     }
 
     /**
-     * Wraps raw vdevs information into OMVModuleZFSVdev instances.
-     * Expects to receive an array of "subentries" taken from top-level vdev
-     * (root-vdev, logs, cache, spares...)
+     * Extracts real devices from top-level vdev's subentries.
      *
      * @param array $options
      *  Additional options for the wrapper defined as an associative array:
@@ -96,11 +91,11 @@ class OMVModuleZFSZpoolStatus {
      *      Vdev states to be excluded from the list
      * @return array
      * @throws OMVModuleZFSException
-     * @todo Once OMVModuleZFSVdevType gets extended with these top-level
-     *       vdev types, there should be a more general wrapping method.
+     * @todo Once OMVModuleZFSVdevType gets extended with top-level vdev types,
+     *       there should be a more general wrapping method.
      */
-    private function wrapVDevs($rawVDevs, array $options = array()) {
-        $vdevs = array();
+    private function extractDevicesFromVDevs($rawVDevs, array $options = array()) {
+        $allDevices = array();
 
         // Sanitize options
         if (!array_key_exists("excludeStates", $options)) {
@@ -178,12 +173,12 @@ class OMVModuleZFSZpoolStatus {
                 continue;
             }
 
-            $vdev = new OMVModuleZFSVdev($poolName, $vdevType, $vdevDevices);
-
-            $vdevs[] = $vdev;
+            foreach ($vdevDevices as $device) {
+                $allDevices[] = $device;
+            }
         }
 
-        return $vdevs;
+        return $allDevices;
     }
 
     /**

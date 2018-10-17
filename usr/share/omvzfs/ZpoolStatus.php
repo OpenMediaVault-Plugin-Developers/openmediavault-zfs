@@ -389,6 +389,7 @@ class OMVModuleZFSZpoolStatus {
                 $isParsingVDev &&
                 !$isParsingSpares
             );
+            $canHaveNotesColumn = (!$isParsingSpecialVDevsGroupHeader);
 
             if ($hasStateColumn) {
                 $newEntry["state"] = $lineDetails[1];
@@ -404,13 +405,15 @@ class OMVModuleZFSZpoolStatus {
                 $columnsReadCount += 3;
             }
 
-            // Read the rest as a whole column
-            // (without losing the original whitespacing)
-            // (use non-capturing group to go past the already-read columns)
-            $matchReturn = preg_match("/^(?:\S+\s+){{$columnsReadCount}}(.*?)$/", $trimmedLine, $restMatch);
+            if ($canHaveNotesColumn) {
+                // Read the rest as a whole column
+                // (without losing the original whitespacing)
+                // (use non-capturing group to go past the already-read columns)
+                $matchReturn = preg_match("/^(?:\S+\s+){{$columnsReadCount}}(.*?)$/", $trimmedLine, $restMatch);
 
-            if ($matchReturn === 1) {
-                $newEntry["notes"] = $restMatch[1];
+                if ($matchReturn === 1) {
+                    $newEntry["notes"] = $restMatch[1];
+                }
             }
 
             $currentNestingEntry["subentries"][] = $newEntry;

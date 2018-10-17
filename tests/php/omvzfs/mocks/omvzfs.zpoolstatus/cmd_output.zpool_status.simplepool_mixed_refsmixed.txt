@@ -7,6 +7,7 @@ config:
 	simplepool_mixed_refsmixed                                                   ONLINE       0     0     0
 	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdg-part1                     ONLINE       0     0     0
 	  /dev/sdh1                                                                  ONLINE       0     0     0
+	  /dev/disk/by-id/dm-name-sdb-crypt                                          ONLINE       0     0     0
 	  /dev/disk/by-id/nvme-eui.33a4d1b00c48b843a6adacfeffe59c2c-nvme0n1p1-part1  ONLINE       0     0     0
 	  /dev/nvme0n2p1                                                             ONLINE       0     0     0
 

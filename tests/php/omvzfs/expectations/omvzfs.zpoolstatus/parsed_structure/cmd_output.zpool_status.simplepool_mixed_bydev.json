@@ -30,6 +30,15 @@
                     "subentries": []
                 },
                 {
+                    "name": "/dev/dm-0",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                },
+                {
                     "name": "/dev/nvme0n1p1",
                     "state": "ONLINE",
                     "read": "0",

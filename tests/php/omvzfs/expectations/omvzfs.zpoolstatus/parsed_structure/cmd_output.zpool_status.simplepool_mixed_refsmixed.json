@@ -30,6 +30,15 @@
                     "subentries": []
                 },
                 {
+                    "name": "/dev/disk/by-id/dm-name-sdb-crypt",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                },
+                {
                     "name": "/dev/disk/by-id/nvme-eui.33a4d1b00c48b843a6adacfeffe59c2c-nvme0n1p1-part1",
                     "state": "ONLINE",
                     "read": "0",

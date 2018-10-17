@@ -22,14 +22,23 @@
 PHP_FILES=$(wildcard ./**/*.php)
 
 test:
+	@echo ">>> Running PHPUnit tests ..."
+	@echo "Test files:"
+
 	@for file in $(PHP_FILES); do \
-		echo ">>> Processing $$file ..."; \
-		phpunit $$file; \
-		echo; \
+		echo "\t$$file"; \
 	done
 
+	@echo "-----------------------------"
+	@echo ""
+
+	phpunit ./
+
 setup:
-	echo "Installing required packages ..."
+	@echo "Installing required packages ..."
+	@echo "--------------------------------"
+	@echo ""
+
 	sudo apt-get install phpunit
 
 .PHONY: test setup

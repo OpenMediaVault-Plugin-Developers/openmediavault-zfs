@@ -279,6 +279,11 @@ class OMVModuleZFSZpoolStatus {
         }
 
         $CMD_ZPOOLSTATUS_INDENTSIZE = 2;
+        $CMD_ZPOOLSTATUS_SPECIALVDEVS_HEADERS = [
+            "spares",
+            "logs",
+            "cache"
+        ];
 
         $config = array();
 
@@ -330,13 +335,26 @@ class OMVModuleZFSZpoolStatus {
             $trimmedLine = trim($outputLine);
             $lineDetails = preg_split("/\s+/", $trimmedLine);
 
-            // Create the new entry with basic info
-            // "name" & "state" columns are always present
+            // Create the new entry with basic info:
+            // - "name"
+            //      Column is always present.
+            // - "state"
+            //      Column is present when parsing vdevs (including root vdev).
+            //      Alternatively, it is NOT present when parsing special vdevs
+            //      group headers.
+            // - "read", "write", "cksum"
+            //      Columns are present when parsing vdevs (including root vdev),
+            //      except for spare vdevs.
+            //      Alternatively, it is NOT present when parsing special vdevs
+            //      group headers and spare vdevs.
+            // - "notes" [virtual, no top-level column]
+            //      Column is present mostly when something bad happens
+            //      with the vdev's entry.
             $columnsReadCount = 0;
 
             $newEntry = array(
                 "name" => $lineDetails[0],
-                "state" => $lineDetails[1],
+                "state" => null,
 
                 "read" => null,
                 "write" => null,
@@ -347,11 +365,14 @@ class OMVModuleZFSZpoolStatus {
                 "subentries" => array()
             );
 
-            $columnsReadCount += 2;
+            $columnsReadCount += 1;
 
-            // "read", "write" & "cksum" are not shown for "spares",
-            // so we have to determine if we're parsing a "spare" entry upfront.
-            // "spare" type is determined by the top-level entry called "spares",
+            $isParsingSpecialVDevsGroupHeader = in_array(
+                $newEntry["name"],
+                $CMD_ZPOOLSTATUS_SPECIALVDEVS_HEADERS
+            );
+            $isParsingVDev = (!$isParsingSpecialVDevsGroupHeader);
+            // "spare" vdev type is determined by the top-level entry called "spares",
             // which means that we can "enter" spares parsing only when reached
             // descendants of "spares" entry, and we can "leave" spares parsing
             // when the parsing stack has cleared (to the top-level stack frame entry).
@@ -363,8 +384,19 @@ class OMVModuleZFSZpoolStatus {
                 )
             );
 
-            // "not" spares will have three additional columns
-            if (!$isParsingSpares) {
+            $hasStateColumn = ($isParsingVDev);
+            $hasStatsColumns = (
+                $isParsingVDev &&
+                !$isParsingSpares
+            );
+
+            if ($hasStateColumn) {
+                $newEntry["state"] = $lineDetails[1];
+
+                $columnsReadCount += 1;
+            }
+
+            if ($hasStatsColumns) {
                 $newEntry["read"] = $lineDetails[2];
                 $newEntry["write"] = $lineDetails[3];
                 $newEntry["cksum"] = $lineDetails[4];

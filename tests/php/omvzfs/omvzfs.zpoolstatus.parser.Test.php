@@ -61,13 +61,13 @@ class test_omvzfs_zpoolstatus_parser extends \PHPUnit\Framework\TestCase {
                 explode(
                     "\n",
                     file_get_contents(
-                        $basepath . "/mocks/test_omvzfs_zpoolstatus_parser/" . $mockName . ".txt"
+                        $basepath . "/mocks/omvzfs.zpoolstatus/" . $mockName . ".txt"
                     )
                 ),
                 // mock expected structure
                 json_decode(
                     file_get_contents(
-                        $basepath . "/expectations/test_omvzfs_zpoolstatus_parser/parsed_structure/" . $mockName . ".json"
+                        $basepath . "/expectations/omvzfs.zpoolstatus/parsed_structure/" . $mockName . ".json"
                     ),
                     true
                 )

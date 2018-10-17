@@ -7,7 +7,7 @@ $filePath = dirname(__FILE__);
 
 require_once $filePath . "/../../../usr/share/omvzfs/ZpoolStatus.php";
 
-class test_omvzfs_zpoolstatus_parser extends \PHPUnit\Framework\TestCase {
+class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider parseStatusDataProvider
      */

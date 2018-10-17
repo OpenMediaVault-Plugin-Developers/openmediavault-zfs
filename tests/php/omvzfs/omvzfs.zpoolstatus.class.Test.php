@@ -10,7 +10,7 @@ require_once $filePath . "/../../../usr/share/omvzfs/VdevState.php";
 
 require_once $filePath . "/mocks/test_omvzfs_zpoolstatus/cmdoutput_mocks.php";
 
-class test_omvzfs_zpoolstatus extends \PHPUnit\Framework\TestCase {
+class OMVZFSZpoolStatusClassTest extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider allDevicesGetterDataProvider
      */

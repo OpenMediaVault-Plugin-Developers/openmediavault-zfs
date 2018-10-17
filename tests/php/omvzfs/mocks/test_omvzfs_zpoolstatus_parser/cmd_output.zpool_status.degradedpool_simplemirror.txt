@@ -1,0 +1,18 @@
+  pool: degradedpool_simplemirror
+ state: DEGRADED
+status: One or more devices could not be used because the label is missing or
+	invalid.  Sufficient replicas exist for the pool to continue
+	functioning in a degraded state.
+action: Replace the device using 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-4J
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                        STATE     READ WRITE CKSUM
+	degradedpool_simplemirror                                   DEGRADED     0     0     0
+	  mirror-0                                                  DEGRADED     0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1  ONLINE       0     0     0
+	    7289430804289271706                                     UNAVAIL      0     0     0  was /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1
+	    351480577971836490                                      UNAVAIL      0     0     0  was /dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1
+
+errors: No known data errors

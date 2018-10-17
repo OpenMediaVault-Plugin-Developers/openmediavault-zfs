@@ -1,0 +1,14 @@
+  pool: poolwithspares_singlespare
+ state: ONLINE
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                        STATE     READ WRITE CKSUM
+	poolwithspares_singlespare                                  ONLINE       0     0     0
+	  mirror-0                                                  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1  ONLINE       0     0     0
+	spares
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1    AVAIL
+
+errors: No known data errors

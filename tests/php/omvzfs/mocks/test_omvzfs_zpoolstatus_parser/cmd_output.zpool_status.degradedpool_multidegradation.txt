@@ -1,0 +1,26 @@
+  pool: degradedpool_multidegradation
+ state: DEGRADED
+status: One or more devices could not be used because the label is missing or
+	invalid.  Sufficient replicas exist for the pool to continue
+	functioning in a degraded state.
+action: Replace the device using 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-4J
+  scan: resilvered 4.50K in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                        STATE     READ WRITE CKSUM
+	degradedpool_multidegradation                               DEGRADED     0     0     0
+	  mirror-0                                                  DEGRADED     0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1  ONLINE       0     0     0
+	    7289430804289271706                                     UNAVAIL      0     0     0  was /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1  ONLINE       0     0     0
+	logs
+	  mirror-1                                                  DEGRADED     0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1  ONLINE       0     0     0
+	    5643719822593634226                                     UNAVAIL      0     0     0  was /dev/disk/by-id/ata-VBOX_HARDDISK_VB075dfa27-sdf-part1
+	spares
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB86483a44-sdg-part1    AVAIL
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBaea157d4-sdh-part1    UNAVAIL
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd1234-sdi-part1    AVAIL
+
+errors: No known data errors

@@ -248,8 +248,8 @@ class OMVModuleZFSZpoolStatus {
                     break;
                 default:
                     // No dedicated entry parser, concat all lines into a big string
-                    // and preserve new line characters
-                    $parsedEntryLines = implode("\n", $entryLines);
+                    // and replace new line character with a space.
+                    $parsedEntryLines = implode(" ", $entryLines);
                     break;
             }
 

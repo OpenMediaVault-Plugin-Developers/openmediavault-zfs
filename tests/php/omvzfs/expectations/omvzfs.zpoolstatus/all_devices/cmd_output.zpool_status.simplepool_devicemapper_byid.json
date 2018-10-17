@@ -1,0 +1,4 @@
+[
+    "/dev/disk/by-id/dm-name-sdb-crypt",
+    "/dev/disk/by-id/dm-name-nvme0n1-crypt"
+]

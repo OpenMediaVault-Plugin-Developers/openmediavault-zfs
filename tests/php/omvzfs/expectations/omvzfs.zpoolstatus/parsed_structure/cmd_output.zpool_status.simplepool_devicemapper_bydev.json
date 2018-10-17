@@ -1,0 +1,36 @@
+{
+    "pool": "simplepool_devicemapper_bydev",
+    "state": "ONLINE",
+    "scan": "scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "simplepool_devicemapper_bydev",
+            "state": "ONLINE",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "/dev/dm-0",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                },
+                {
+                    "name": "/dev/dm-1",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

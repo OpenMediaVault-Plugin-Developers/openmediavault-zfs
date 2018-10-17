@@ -24,6 +24,8 @@ class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
             "cmd_output.zpool_status.simplepool_sata_byid",
             "cmd_output.zpool_status.simplepool_nvme_bydev",
             "cmd_output.zpool_status.simplepool_nvme_byid",
+            "cmd_output.zpool_status.simplepool_devicemapper_bydev",
+            "cmd_output.zpool_status.simplepool_devicemapper_byid",
             "cmd_output.zpool_status.simplepool_mixed_bydev",
             "cmd_output.zpool_status.simplepool_mixed_byid",
             "cmd_output.zpool_status.simplepool_mixed_refsmixed",

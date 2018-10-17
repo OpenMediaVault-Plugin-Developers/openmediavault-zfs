@@ -5,6 +5,7 @@ require_once 'PHPUnit/Autoload.php';
 // Relative "base" path used
 $filePath = dirname(__FILE__);
 
+require_once $filePath . "/utils.php";
 require_once $filePath . "/../../../usr/share/omvzfs/ZpoolStatus.php";
 
 class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
@@ -18,8 +19,6 @@ class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function parseStatusDataProvider() {
-        $basepath = dirname(__FILE__);
-
         $mocks = [
             "cmd_output.zpool_status.simplepool_sata_bydev",
             "cmd_output.zpool_status.simplepool_sata_byid",
@@ -58,18 +57,12 @@ class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
         foreach ($mocks as $mockName) {
             $datasets[$mockName] = [
                 // mock file content
-                explode(
-                    "\n",
-                    file_get_contents(
-                        $basepath . "/mocks/omvzfs.zpoolstatus/" . $mockName . ".txt"
-                    )
+                OMVZFSTestUtils::loadCmdOutputFile(
+                    "/mocks/omvzfs.zpoolstatus/" . $mockName . ".txt"
                 ),
                 // mock expected structure
-                json_decode(
-                    file_get_contents(
-                        $basepath . "/expectations/omvzfs.zpoolstatus/parsed_structure/" . $mockName . ".json"
-                    ),
-                    true
+                OMVZFSTestUtils::loadJSONFile(
+                    "/expectations/omvzfs.zpoolstatus/parsed_structure/" . $mockName . ".json"
                 )
             ];
         }

@@ -46,6 +46,7 @@ class OMVZFSZpoolStatusClassTest extends \PHPUnit\Framework\TestCase {
             "cmd_output.zpool_status.simplepool_nvme_byid",
             "cmd_output.zpool_status.simplepool_mixed_bydev",
             "cmd_output.zpool_status.simplepool_mixed_byid",
+            "cmd_output.zpool_status.simplepool_mixed_refsmixed",
             // A bit longer list with more than one nested groups
             "cmd_output.zpool_status.redundantpool_raidz3_double",
             "cmd_output.zpool_status.redundantpool_mixed",

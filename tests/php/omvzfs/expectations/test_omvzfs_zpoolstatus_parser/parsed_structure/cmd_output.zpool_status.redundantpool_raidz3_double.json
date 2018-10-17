@@ -1,0 +1,128 @@
+{
+    "pool": "redundantpool_raidz3_double",
+    "state": "ONLINE",
+    "scan": "scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "redundantpool_raidz3_double",
+            "state": "ONLINE",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "raidz3-0",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB075dfa27-sdf-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        }
+                    ]
+                },
+                {
+                    "name": "raidz3-1",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB86483a44-sdg-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBaea157d4-sdh-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd1234-sdi-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd2345-sdj-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd3456-sdk-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

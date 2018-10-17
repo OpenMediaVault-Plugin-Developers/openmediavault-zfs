@@ -1,4 +1,3 @@
-#!/usr/bin/phpunit -c/etc/openmediavault
 <?php
 
 require_once 'PHPUnit/Autoload.php';

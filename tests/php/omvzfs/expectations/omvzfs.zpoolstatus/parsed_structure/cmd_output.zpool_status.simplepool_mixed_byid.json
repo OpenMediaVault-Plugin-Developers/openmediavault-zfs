@@ -12,7 +12,7 @@
             "notes": null,
             "subentries": [
                 {
-                    "name": "/dev/sdg1",
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdg-part1",
                     "state": "ONLINE",
                     "read": "0",
                     "write": "0",
@@ -21,7 +21,7 @@
                     "subentries": []
                 },
                 {
-                    "name": "/dev/sdh1",
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdh-part1",
                     "state": "ONLINE",
                     "read": "0",
                     "write": "0",

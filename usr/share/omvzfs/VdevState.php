@@ -33,6 +33,10 @@ abstract class OMVModuleZFSVdevState {
     const STATE_SPLIT = 0x10;
 
     // Vdev cannot be opened for another reason
+    // Usually, "used" devices' names (data vdevs, caches, logs) will have
+    // their name changed to GUID and will have a "was /previous/path" note.
+    // However, "spares" that disappeared won't be changed
+    // (they will still be identified by their "/previous/path").
     const STATE_UNAVAIL = 0x20;
 
     // Vdev contains unhealthy descendants

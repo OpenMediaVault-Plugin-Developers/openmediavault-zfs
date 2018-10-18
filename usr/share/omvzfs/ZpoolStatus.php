@@ -71,8 +71,8 @@ class OMVModuleZFSZpoolStatus {
 
         $devices = [];
 
-        foreach ($this->status["config"] as $rawVDevs) {
-            $vdevDevices = $this->extractDevicesFromVDevs($rawVDevs["subentries"], $options);
+        foreach ($this->status["config"] as $rawVdevs) {
+            $vdevDevices = $this->extractDevicesFromVdevs($rawVdevs["subentries"], $options);
 
             foreach ($vdevDevices as $vdevDevice) {
                 $devices[] = $vdevDevice;
@@ -94,7 +94,7 @@ class OMVModuleZFSZpoolStatus {
      * @todo Once OMVModuleZFSVdevType gets extended with top-level vdev types,
      *       there should be a more general wrapping method.
      */
-    private function extractDevicesFromVDevs($rawVDevs, array $options = array()) {
+    private function extractDevicesFromVdevs($rawVdevs, array $options = array()) {
         $allDevices = array();
 
         // Sanitize options
@@ -111,9 +111,9 @@ class OMVModuleZFSZpoolStatus {
 
         $poolName = $this->getPoolsName();
 
-        foreach ($rawVDevs as $rawVDev) {
-            $vdevName = $rawVDev["name"];
-            $vdevState = OMVModuleZFSVdevState::parseState($rawVDev["state"]);
+        foreach ($rawVdevs as $rawVdev) {
+            $vdevName = $rawVdev["name"];
+            $vdevState = OMVModuleZFSVdevState::parseState($rawVdev["state"]);
             $vdevType = null;
 
             // Check if vdev is not in the excluded state
@@ -155,15 +155,15 @@ class OMVModuleZFSZpoolStatus {
                 // ~ZPOOL(8)
                 $vdevDevices = [];
 
-                foreach ($rawVDev["subentries"] as $subVDev) {
-                    $subVDevState = OMVModuleZFSVdevState::parseState($subVDev["state"]);
+                foreach ($rawVdev["subentries"] as $subVdev) {
+                    $subVdevState = OMVModuleZFSVdevState::parseState($subVdev["state"]);
 
                     // Check if device is not in the excluded state
-                    if (in_array($subVDevState, $options["excludeStates"], true)) {
+                    if (in_array($subVdevState, $options["excludeStates"], true)) {
                         continue;
                     }
 
-                    $vdevDevices[] = $subVDev["name"];
+                    $vdevDevices[] = $subVdev["name"];
                 }
             }
 
@@ -371,11 +371,11 @@ class OMVModuleZFSZpoolStatus {
 
             $columnsReadCount += 1;
 
-            $isParsingSpecialVDevsGroupHeader = in_array(
+            $isParsingSpecialVdevsGroupHeader = in_array(
                 $newEntry["name"],
                 $CMD_ZPOOLSTATUS_SPECIALVDEVS_HEADERS
             );
-            $isParsingVDev = (!$isParsingSpecialVDevsGroupHeader);
+            $isParsingVdev = (!$isParsingSpecialVdevsGroupHeader);
             // "spare" vdev type is determined by the top-level entry called "spares",
             // which means that we can "enter" spares parsing only when reached
             // descendants of "spares" entry, and we can "leave" spares parsing
@@ -388,12 +388,12 @@ class OMVModuleZFSZpoolStatus {
                 )
             );
 
-            $hasStateColumn = ($isParsingVDev);
+            $hasStateColumn = ($isParsingVdev);
             $hasStatsColumns = (
-                $isParsingVDev &&
+                $isParsingVdev &&
                 !$isParsingSpares
             );
-            $canHaveNotesColumn = (!$isParsingSpecialVDevsGroupHeader);
+            $canHaveNotesColumn = (!$isParsingSpecialVdevsGroupHeader);
 
             if ($hasStateColumn) {
                 $newEntry["state"] = $lineDetails[1];

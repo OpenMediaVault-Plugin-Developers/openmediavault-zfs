@@ -490,7 +490,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
             throw new OMVMODULEZFSException("Could not read pool's status ({$poolName})");
         }
 
-        return new OMVModuleZFSZPoolStatus($cmdOutput);
+        return new OMVModuleZFSZpoolStatus($cmdOutput);
     }
 
     /**

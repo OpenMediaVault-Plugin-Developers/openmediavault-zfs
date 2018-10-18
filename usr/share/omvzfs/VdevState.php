@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class containing all known VDev States.
+ * Class containing all known Vdev States.
  *
  * For more info, refer to ZOL's:
  * - zpool_state_to_name()

@@ -270,7 +270,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                     throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
                 OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
 
-                $devices = $tmp->getAllDevices();
+                $devices = $tmp->getAllDevices([
+                    "excludeStates" => [
+                        OMVModuleZFSVdevState::STATE_SPARE_INUSE,
+                        OMVModuleZFSVdevState::STATE_UNAVAIL,
+                        OMVModuleZFSVdevState::STATE_SPLIT,
+                    ]
+                ]);
 
                 OMVModuleZFSZpool::clearZFSLabel($devices);
                 break;

@@ -135,7 +135,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      *  Additional options for the getter defined as an associative array:
      *  - "excludeStates" (array)
      *      Vdev states to be excluded from the list
-     * @return  void
+     * @return  array
      * @throws  OMVModuleZFSException
      * @access  public
      */

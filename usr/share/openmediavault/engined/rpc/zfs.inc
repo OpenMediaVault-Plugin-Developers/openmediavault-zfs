@@ -112,9 +112,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
 
         $disks = preg_split("/[,;]/", $params['devices']);
-        foreach ($disks as $disk) {
-            OMVModuleZFSUtil::setGPTLabel($disk);
-        }
+
         switch ($params['devalias']) {
         case "path":
             try {
@@ -467,9 +465,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $opts .= "-f ";
         }
         $disks = preg_split("/[,;]/", $params['devices']);
-        foreach ($disks as $disk) {
-            OMVModuleZFSUtil::setGPTLabel($disk);
-        }
+
         switch ($params['devalias']) {
             case "path":
                 try {

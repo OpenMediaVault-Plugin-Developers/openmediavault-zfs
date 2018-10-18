@@ -24,16 +24,6 @@ class OMVModuleZFSUtil {
 	const REGEX_DEVBYID_DEVNAME = "/^.*\/([A-Za-z0-9]+.*)$/";
 
     /**
-     * Sets a GPT label on a disk to prevent the zpool command from generating
-     * errors.
-     *
-     */
-    public static function setGPTLabel($disk) {
-        $cmd = "parted -s " . $disk . " mklabel gpt 2>&1";
-        OMVModuleZFSUtil::exec($cmd, $out, $res);
-    }
-
-    /**
      * Get the /dev/sdX device name from /dev/disk/by-uuid
      *
      */

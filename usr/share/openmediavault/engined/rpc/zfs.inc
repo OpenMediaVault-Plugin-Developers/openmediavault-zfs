@@ -27,6 +27,7 @@ require_once("/usr/share/omvzfs/Snapshot.php");
 require_once("/usr/share/omvzfs/Zvol.php");
 require_once("/usr/share/omvzfs/Zpool.php");
 require_once("/usr/share/omvzfs/Filesystem.php");
+require_once("/usr/share/omvzfs/VdevState");
 
 class OMVRpcServiceZFS extends ServiceAbstract {
     private $dataModelPath = "conf.service.zfs";
@@ -268,8 +269,10 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 if (OMVModuleZFSUtil::checkOMVShares($context,$tmp))
                     throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
                 OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
-                $disks = $tmp->getDevDisks();
-                OMVModuleZFSZpool::clearZFSLabel($disks);
+
+                $devices = $tmp->getAllDevices();
+
+                OMVModuleZFSZpool::clearZFSLabel($devices);
                 break;
             default:
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);

@@ -6,6 +6,7 @@ require_once("VdevType.php");
 require_once("Utils.php");
 require_once("Exception.php");
 require_once("Dataset.php");
+require_once("ZpoolStatus.php");
 /**
  * Class containing information about the pool
  *
@@ -16,6 +17,14 @@ require_once("Dataset.php");
 class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
 
     // Attributes
+
+    /**
+     * Pool's status instance
+     *
+     * @var     OMVModuleZFSZpoolStatus $status
+     * @access  private
+     */
+    private $status;
 
     /**
      * List of Vdev
@@ -76,6 +85,8 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         $this->log = null;
         $this->cache = null;
         $this->assemblePool($name);
+
+        $this->status = $this->readStatus($name);
     }
 
     /**
@@ -469,6 +480,29 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         }
 
         return $new_disks;
+    }
+
+    /**
+     * Read pool's status
+     * and return it as a nested object
+     *
+     * @param string $poolName
+     * @return array
+     * @throws OMVModuleZFSException
+     */
+    private function readStatus($poolName) {
+        // Get the pool's status,
+        // and use -P flag to make sure that we have full paths to used vdevs.
+        // We also ensure that the output does not contain translation.
+        $cmd = "LC_ALL=C zpool status -P \"{$poolName}\" 2>&1";
+
+        OMVModuleZFSUtil::exec($cmd, $cmdOutput, $exitCode);
+
+        if ($exitCode !== 0) {
+            throw new OMVMODULEZFSException("Could not read pool's status ({$poolName})");
+        }
+
+        return new OMVModuleZFSZPoolStatus($cmdOutput);
     }
 
     /**

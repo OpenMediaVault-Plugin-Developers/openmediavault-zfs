@@ -127,40 +127,6 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     }
 
     /**
-     * Return all disks in /dev/sdXX used by the pool
-     *
-     * @return array An array with all the disks
-     */
-    public function getDevDisks() {
-        $disks = [];
-        $vdevs = $this->getVdevs();
-        foreach ($vdevs as $vdev) {
-            $vdisks = $vdev->getDisks();
-            foreach ($vdisks as $vdisk) {
-                if (preg_match('/^(sd[a-z]{1})|(fio[a-z]{1})$/', $vdisk)) {
-                    $disks[] = "/dev/" . $vdisk . "1";
-                    continue;
-                } else if (preg_match('/^c[0-9]+d[0-9]+$/', $vdisk)) {
-                    $disks[] = "/dev/cciss/" . $vdisk . "p1";
-                    continue;
-                } else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
-                    $disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
-                    continue;
-                } else if (!(OMVModuleZFSUtil::getDevByID($vdisk) === null)) {
-                    $disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
-                    continue;
-                } else if (preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $vdisk)) {
-                    $disks[] = OMVModuleZFSUtil::getDevByUuid($vdisk);
-                    continue;
-                } else {
-                    throw new OMVModuleZFSException("Unknown disk identifier " . $vdisk);
-                }
-            }
-        }
-        return($disks);
-    }
-
-    /**
      * Returns all "real" devices used by the pool for storage and other purposes
      * (eg. cache). Returns "absolute paths" (/dev/...) to the devices or GUID
      * if a device is unavailable for some reason.

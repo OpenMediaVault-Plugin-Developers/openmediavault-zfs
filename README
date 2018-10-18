@@ -3,6 +3,7 @@ openmediavault-zfs
 
 To build: fakeroot debian/rules clean binary
 
+To run tests: make -C tests/php/
 
 
 Objects:

@@ -311,7 +311,8 @@ class OMVModuleZFSZpoolStatus {
                 // Nesting has deepened,
                 // create new nested structure and append reference to the stack
 
-                $nestingStack[] = &$currentNestingEntry["subentries"][count($currentNestingEntry["subentries"]) - 1];
+                $lastSubentryIdx = count($currentNestingEntry["subentries"]) - 1;
+                $nestingStack[] = &$currentNestingEntry["subentries"][$lastSubentryIdx];
                 $currentNestingEntry = &$nestingStack[count($nestingStack) - 1];
                 $nestingIndentation = $currentIndentation;
             } else if ($currentIndentation < $nestingIndentation) {
@@ -319,7 +320,10 @@ class OMVModuleZFSZpoolStatus {
                 // pop the last reference from the stack and update local vars
 
                 // Detect the indentation difference
-                $levelsUp = ($nestingIndentation - $currentIndentation) / $CMD_ZPOOLSTATUS_INDENTSIZE;
+                $levelsUp = (
+                    ($nestingIndentation - $currentIndentation) /
+                    $CMD_ZPOOLSTATUS_INDENTSIZE
+                );
 
                 while ($levelsUp > 0) {
                     array_pop($nestingStack);
@@ -409,7 +413,11 @@ class OMVModuleZFSZpoolStatus {
                 // Read the rest as a whole column
                 // (without losing the original whitespacing)
                 // (use non-capturing group to go past the already-read columns)
-                $matchReturn = preg_match("/^(?:\S+\s+){{$columnsReadCount}}(.*?)$/", $trimmedLine, $restMatch);
+                $matchReturn = preg_match(
+                    "/^(?:\S+\s+){{$columnsReadCount}}(.*?)$/",
+                    $trimmedLine,
+                    $restMatch
+                );
 
                 if ($matchReturn === 1) {
                     $newEntry["notes"] = $restMatch[1];

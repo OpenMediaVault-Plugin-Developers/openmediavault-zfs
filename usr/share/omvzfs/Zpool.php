@@ -161,6 +161,28 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     }
 
     /**
+     * Returns all "real" devices used by the pool for storage and other purposes
+     * (eg. cache). Returns "absolute paths" (/dev/...) to the devices or GUID
+     * if a device is unavailable for some reason.
+     *
+     * @param   array $options
+     *  Additional options for the getter defined as an associative array:
+     *  - "excludeStates" (array)
+     *      Vdev states to be excluded from the list
+     * @return  void
+     * @throws  OMVModuleZFSException
+     * @access  public
+     */
+    public function getAllDevices($options = []) {
+        // Sanitize options
+        if (!array_key_exists("excludeStates", $options)) {
+            $options["excludeStates"] = [];
+        }
+
+        return $this->status->getAllDevices($options);
+    }
+
+    /**
      * XXX
      *
      * @param  OMVModuleZFSVdev $cache

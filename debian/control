@@ -17,7 +17,7 @@ Depends: libnvpair1linux,
          openmediavault (>= 4.1.0),
          openmediavault-omvextrasorg (>= 4.0.3),
          zfs-dkms | pve-headers,
-         zfsutils-linux,
+         zfsutils-linux (>= 0.7.0),
          zfs-zed
          ${misc:Depends}
 Description: OpenMediaVault plugin for ZFS

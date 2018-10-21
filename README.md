@@ -1,17 +1,21 @@
 openmediavault-zfs
-=================
+==================
 
-Commands:
-- build .deb package: fakeroot debian/rules clean binary
-- install PHP dependencies: composer install
-- run PHP tests: composer run-script test
+### Commands:
 
+- build .deb package:  
+  ``fakeroot debian/rules clean binary``
+- install PHP dependencies:  
+  ``composer install``
+- run PHP tests:  
+  ``composer run-script test``
 
+### Objects:
 
-Objects:
+```
 - zpool
-	- vdev
-	- disk
+    - vdev
+    - disk
 - zvol
 - dataset
 - snapshot
@@ -26,4 +30,4 @@ Objects:
 <cache>		::=	"internal" | <diskset>;
 <spare>		::= "" | <diskset>;
 <diskset>	::= "disk" | "disk" <diskset>;
-
+```

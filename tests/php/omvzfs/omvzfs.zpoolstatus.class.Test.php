@@ -1,7 +1,5 @@
 <?php
 
-require_once 'PHPUnit/Autoload.php';
-
 // Relative "base" path used
 $filePath = dirname(__FILE__);
 

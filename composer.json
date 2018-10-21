@@ -19,6 +19,6 @@
         "phpunit/phpunit": "^6.5"
     },
     "scripts": {
-        "test": "phpunit --bootstrap vendor/autoload.php tests/php/"
+        "test": "phpunit --bootstrap vendor/autoload.php --colors=always tests/php/"
     }
 }

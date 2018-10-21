@@ -32,6 +32,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $vdevs
      * @access private
      * @association OMVModuleZFSVdev to vdevs
+     * @todo Get rid of this and use $status instead
      */
     private $vdevs;
 
@@ -41,6 +42,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $spare
      * @access private
      * @association OMVModuleZFSVdev to spare
+     * @todo Get rid of this and use $status instead
      */
     private $spare;
 
@@ -50,6 +52,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $log
      * @access private
      * @association OMVModuleZFSVdev to log
+     * @todo Get rid of this and use $status instead
      */
     private $log;
 
@@ -59,6 +62,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $cache
      * @access private
      * @association OMVModuleZFSVdev to cache
+     * @todo Get rid of this and use $status instead
      */
     private $cache;
 
@@ -498,6 +502,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @param string $name
      * @return void
      * @throws OMVModuleZFSException
+     * @todo Get rid of this and use OMVModuleZFSZpoolStatus instead
      */
     private function assemblePool($name) {
         $cmd = "zpool status -v \"$name\"";
@@ -607,6 +612,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @param string $dev
      * @return void
      * @throws OMVModuleZFSException
+     * @todo Get rid of this and use OMVModuleZFSZpoolStatus instead
      */
     private function output($part, $type, $dev) {
         $disks = explode(" ", $dev);

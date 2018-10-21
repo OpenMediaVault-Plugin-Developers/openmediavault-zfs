@@ -481,8 +481,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     private function readStatus($poolName) {
         // Get the pool's status,
         // and use -P flag to make sure that we have full paths to used vdevs.
-        // We also ensure that the output does not contain translation.
-        $cmd = "LC_ALL=C zpool status -P \"{$poolName}\" 2>&1";
+        $cmd = "zpool status -P \"{$poolName}\" 2>&1";
 
         OMVModuleZFSUtil::exec($cmd, $cmdOutput, $exitCode);
 

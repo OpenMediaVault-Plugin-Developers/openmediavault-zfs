@@ -185,6 +185,14 @@ class OMVModuleZFSZpoolStatus {
      * Parse pool's status entries
      * and return it as a nested object.
      *
+     * Returns an array of "key => value" pairs, where "key" is the name of an entry
+     * (eg. "status" or "scan"), and "value" is it's value. In most cases, "value"
+     * is a String containing the whole content of an entry, with all lines merged
+     * into a single string (joined with "a space" instead of "new line" character).
+     * Some entries may have special parsers for easier data management.
+     * Entries known to have dedicated "value" parsers:
+     * - "config" (see OMVModuleZFSZpoolStatus::parseStatusConfig)
+     *
      * @param array $cmdOutput
      * @return array
      */
@@ -264,6 +272,27 @@ class OMVModuleZFSZpoolStatus {
      * and return it as a nested object.
      * In case of a known error returns "false",
      * in case of an unrecognized error returns "null".
+     *
+     * Returns an array of objects matching ConfigEntry pseudo-type.
+     * Each ConfigEntry object contains these properties:
+     * - "name"
+     *      The name (identifier) of the entry. Can be the pool's name,
+     *      special vdev group's name (eg. logs, spares),
+     *      vdev group's name (eg. mirror-0, raidz2-1) or a device identifier
+     *      (either absolute path or its GUID).
+     * - "state"
+     *      Vdev's state. See "omvzfs/VdevState.php" for well-known states.
+     * - "read"
+     *      Read errors number.
+     * - "write"
+     *      Write errors number.
+     * - "cksum"
+     *      Checksum errors number.
+     * - "notes"
+     *      Optional strings provided by the "status" command.
+     *      An example would be "was /previous/path/to/dev" on moved (unavailable) device.
+     * - "subentries"
+     *      An array of all "children" entries (ConfigEntry pseudo-type objects).
      *
      * @param array $outputLines
      * @return array

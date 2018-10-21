@@ -1,0 +1,39 @@
+{
+    "pool": "poolerror_zfs_8000_9P",
+    "state": "ONLINE",
+    "status": "One or more devices has experienced an unrecoverable error.  An attempt was made to correct the error.  Applications are unaffected.",
+    "action": "Determine if the device needs to be replaced, and clear the errors using 'zpool clear' or replace the device with 'zpool replace'.",
+    "see": "http://zfsonlinux.org/msg/ZFS-8000-9P",
+    "scan": "scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "poolerror_zfs_8000_9P",
+            "state": "ONLINE",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "1.13M",
+                    "notes": null,
+                    "subentries": []
+                },
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+                    "state": "ONLINE",
+                    "read": "5.2K",
+                    "write": "2",
+                    "cksum": "12K",
+                    "notes": null,
+                    "subentries": []
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

@@ -51,6 +51,7 @@ class OMVZFSZpoolStatusParserTest extends \PHPUnit\Framework\TestCase {
             "cmd_output.zpool_status.complexpool_outoforder",
             "cmd_output.zpool_status.degradedpool_simplemirror",
             "cmd_output.zpool_status.degradedpool_multidegradation",
+            "cmd_output.zpool_status.poolerror_zfs_8000_9P",
         ];
 
         $datasets = [];

@@ -1,0 +1,15 @@
+# see http://about.travis-ci.org/docs/user/languages/php/ for more hints
+language: php
+
+# list any PHP version you want to test against
+php:
+    # main version should be kept as close as possible to supported OMV's PHP version
+    # and dependencies should be updated with --prefer-lowest to prevent being ahead
+    - 7.0
+
+# install project dependencies
+install:
+    - composer install
+
+script:
+    - composer run-script test

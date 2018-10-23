@@ -27,6 +27,7 @@ require_once("/usr/share/omvzfs/Snapshot.php");
 require_once("/usr/share/omvzfs/Zvol.php");
 require_once("/usr/share/omvzfs/Zpool.php");
 require_once("/usr/share/omvzfs/Filesystem.php");
+require_once("/usr/share/omvzfs/VdevState.php");
 
 class OMVRpcServiceZFS extends ServiceAbstract {
     private $dataModelPath = "conf.service.zfs";
@@ -111,9 +112,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
 
         $disks = preg_split("/[,;]/", $params['devices']);
-        foreach ($disks as $disk) {
-            OMVModuleZFSUtil::setGPTLabel($disk);
-        }
+
         switch ($params['devalias']) {
         case "path":
             try {
@@ -268,8 +267,16 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 if (OMVModuleZFSUtil::checkOMVShares($context,$tmp))
                     throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
                 OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
-                $disks = $tmp->getDevDisks();
-                OMVModuleZFSZpool::clearZFSLabel($disks);
+
+                $devices = $tmp->getAllDevices([
+                    "excludeStates" => [
+                        OMVModuleZFSVdevState::STATE_SPARE_INUSE,
+                        OMVModuleZFSVdevState::STATE_UNAVAIL,
+                        OMVModuleZFSVdevState::STATE_SPLIT,
+                    ]
+                ]);
+
+                OMVModuleZFSZpool::clearZFSLabel($devices);
                 break;
             default:
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
@@ -458,9 +465,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $opts .= "-f ";
         }
         $disks = preg_split("/[,;]/", $params['devices']);
-        foreach ($disks as $disk) {
-            OMVModuleZFSUtil::setGPTLabel($disk);
-        }
+
         switch ($params['devalias']) {
             case "path":
                 try {

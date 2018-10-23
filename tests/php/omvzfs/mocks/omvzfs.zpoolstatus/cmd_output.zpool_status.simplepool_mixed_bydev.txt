@@ -1,0 +1,14 @@
+  pool: simplepool_mixed_bydev
+ state: ONLINE
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                    STATE     READ WRITE CKSUM
+	simplepool_mixed_bydev  ONLINE       0     0     0
+	  /dev/sdg1             ONLINE       0     0     0
+	  /dev/sdh1             ONLINE       0     0     0
+	  /dev/dm-0             ONLINE       0     0     0
+	  /dev/nvme0n1p1        ONLINE       0     0     0
+	  /dev/nvme0n2p1        ONLINE       0     0     0
+
+errors: No known data errors

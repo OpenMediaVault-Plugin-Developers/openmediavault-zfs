@@ -1,0 +1,31 @@
+  pool: complexpool_createdupfront
+ state: ONLINE
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                        STATE     READ WRITE CKSUM
+	complexpool_createdupfront                                  ONLINE       0     0     0
+	  mirror-0                                                  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1  ONLINE       0     0     0
+	  raidz2-1                                                  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB075dfa27-sdf-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VB86483a44-sdg-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBaea157d4-sdh-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd1234-sdi-part1  ONLINE       0     0     0
+	logs
+	  mirror-2                                                  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd2345-sdj-part1  ONLINE       0     0     0
+	    /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd3456-sdk-part1  ONLINE       0     0     0
+	cache
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd4567-sdl-part1    ONLINE       0     0     0
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd5678-sdm-part1    ONLINE       0     0     0
+	spares
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBbcde1234-sdn-part1    AVAIL
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBbcde2345-sdo-part1    AVAIL
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBbcde3456-sdp-part1    AVAIL
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBbcde4567-sdr-part1    AVAIL
+
+errors: No known data errors

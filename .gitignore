@@ -62,3 +62,7 @@ debian/files
 debian/*.debhelper.log
 debian/*.debhelper
 debian/*substvars
+
+### Composer ###
+composer.phar
+/vendor/

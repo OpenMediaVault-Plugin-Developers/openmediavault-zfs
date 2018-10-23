@@ -1,0 +1,74 @@
+{
+    "pool": "poolwithlogs_doublelog",
+    "state": "ONLINE",
+    "scan": "scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "poolwithlogs_doublelog",
+            "state": "ONLINE",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "mirror-0",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "logs",
+            "state": null,
+            "read": null,
+            "write": null,
+            "cksum": null,
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                },
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1",
+                    "state": "ONLINE",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": []
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

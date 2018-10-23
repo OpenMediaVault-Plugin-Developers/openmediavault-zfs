@@ -1,0 +1,16 @@
+  pool: poolerror_zfs_8000_9P
+ state: ONLINE
+status: One or more devices has experienced an unrecoverable error.  An
+	attempt was made to correct the error.  Applications are unaffected.
+action: Determine if the device needs to be replaced, and clear the errors
+	using 'zpool clear' or replace the device with 'zpool replace'.
+   see: http://zfsonlinux.org/msg/ZFS-8000-9P
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                      STATE     READ WRITE CKSUM
+	poolerror_zfs_8000_9P                                     ONLINE       0     0     0
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1  ONLINE       0     0 1.13M
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1  ONLINE    5.2K     2   12K
+
+errors: No known data errors

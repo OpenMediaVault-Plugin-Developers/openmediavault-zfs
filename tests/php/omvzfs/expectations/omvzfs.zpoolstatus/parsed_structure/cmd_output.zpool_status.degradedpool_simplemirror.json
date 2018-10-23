@@ -1,0 +1,58 @@
+{
+    "pool": "degradedpool_simplemirror",
+    "state": "DEGRADED",
+    "status": "One or more devices could not be used because the label is missing or invalid.  Sufficient replicas exist for the pool to continue functioning in a degraded state.",
+    "action": "Replace the device using 'zpool replace'.",
+    "see": "http://zfsonlinux.org/msg/ZFS-8000-4J",
+    "scan": "scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "degradedpool_simplemirror",
+            "state": "DEGRADED",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "mirror-0",
+                    "state": "DEGRADED",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "7289430804289271706",
+                            "state": "UNAVAIL",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": "was /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+                            "subentries": []
+                        },
+                        {
+                            "name": "351480577971836490",
+                            "state": "UNAVAIL",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": "was /dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1",
+                            "subentries": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

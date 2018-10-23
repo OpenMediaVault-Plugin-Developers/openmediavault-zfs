@@ -1,0 +1,24 @@
+{
+    "name": "OpenMediaVault-Plugin-Developers/openmediavault-zfs",
+    "type": "library",
+    "description": "OpenMediaVault plugin for ZFS",
+    "keywords": ["openmediavault","openmediavault-plugin","omv-extras","zfs"],
+    "homepage": "https://github.com/OpenMediaVault-Plugin-Developers/openmediavault-zfs",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "OpenMediaVault Plugin Developers",
+            "email": "plugins@omv-extras.org",
+            "homepage": "http://omv-extras.org"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    },
+    "scripts": {
+        "test": "phpunit --bootstrap vendor/autoload.php --colors=always tests/php/"
+    }
+}

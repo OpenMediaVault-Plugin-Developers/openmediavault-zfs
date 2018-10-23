@@ -6,6 +6,7 @@ require_once("VdevType.php");
 require_once("Utils.php");
 require_once("Exception.php");
 require_once("Dataset.php");
+require_once("ZpoolStatus.php");
 /**
  * Class containing information about the pool
  *
@@ -18,11 +19,20 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     // Attributes
 
     /**
+     * Pool's status instance
+     *
+     * @var     OMVModuleZFSZpoolStatus $status
+     * @access  private
+     */
+    private $status;
+
+    /**
      * List of Vdev
      *
      * @var    array $vdevs
      * @access private
      * @association OMVModuleZFSVdev to vdevs
+     * @todo Get rid of this and use $status instead
      */
     private $vdevs;
 
@@ -32,6 +42,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $spare
      * @access private
      * @association OMVModuleZFSVdev to spare
+     * @todo Get rid of this and use $status instead
      */
     private $spare;
 
@@ -41,6 +52,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $log
      * @access private
      * @association OMVModuleZFSVdev to log
+     * @todo Get rid of this and use $status instead
      */
     private $log;
 
@@ -50,6 +62,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @var    array $cache
      * @access private
      * @association OMVModuleZFSVdev to cache
+     * @todo Get rid of this and use $status instead
      */
     private $cache;
 
@@ -76,6 +89,8 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         $this->log = null;
         $this->cache = null;
         $this->assemblePool($name);
+
+        $this->status = $this->readStatus($name);
     }
 
     /**
@@ -116,37 +131,25 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     }
 
     /**
-     * Return all disks in /dev/sdXX used by the pool
+     * Returns all "real" devices used by the pool for storage and other purposes
+     * (eg. cache). Returns "absolute paths" (/dev/...) to the devices or GUID
+     * if a device is unavailable for some reason.
      *
-     * @return array An array with all the disks
+     * @param   array $options
+     *  Additional options for the getter defined as an associative array:
+     *  - "excludeStates" (array)
+     *      Vdev states to be excluded from the list
+     * @return  array
+     * @throws  OMVModuleZFSException
+     * @access  public
      */
-    public function getDevDisks() {
-        $disks = [];
-        $vdevs = $this->getVdevs();
-        foreach ($vdevs as $vdev) {
-            $vdisks = $vdev->getDisks();
-            foreach ($vdisks as $vdisk) {
-                if (preg_match('/^(sd[a-z]{1})|(fio[a-z]{1})$/', $vdisk)) {
-                    $disks[] = "/dev/" . $vdisk . "1";
-                    continue;
-                } else if (preg_match('/^c[0-9]+d[0-9]+$/', $vdisk)) {
-                    $disks[] = "/dev/cciss/" . $vdisk . "p1";
-                    continue;
-                } else if (preg_match('/^pci[a-z0-9-:.]+$/', $vdisk)) {
-                    $disks[] = "/dev/" . OMVModuleZFSUtil::getDevByPath($vdisk) . "1";
-                    continue;
-                } else if (!(OMVModuleZFSUtil::getDevByID($vdisk) === null)) {
-                    $disks[] = "/dev/" . OMVModuleZFSUtil::getDevByID($vdisk) . "1";
-                    continue;
-                } else if (preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/', $vdisk)) {
-                    $disks[] = OMVModuleZFSUtil::getDevByUuid($vdisk);
-                    continue;
-                } else {
-                    throw new OMVModuleZFSException("Unknown disk identifier " . $vdisk);
-                }
-            }
+    public function getAllDevices($options = []) {
+        // Sanitize options
+        if (!array_key_exists("excludeStates", $options)) {
+            $options["excludeStates"] = [];
         }
-        return($disks);
+
+        return $this->status->getAllDevices($options);
     }
 
     /**
@@ -472,11 +475,34 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
     }
 
     /**
+     * Read pool's status
+     * and return it as a nested object
+     *
+     * @param string $poolName
+     * @return array
+     * @throws OMVModuleZFSException
+     */
+    private function readStatus($poolName) {
+        // Get the pool's status,
+        // and use -P flag to make sure that we have full paths to used vdevs.
+        $cmd = "zpool status -P \"{$poolName}\" 2>&1";
+
+        OMVModuleZFSUtil::exec($cmd, $cmdOutput, $exitCode);
+
+        if ($exitCode !== 0) {
+            throw new OMVMODULEZFSException("Could not read pool's status ({$poolName})");
+        }
+
+        return new OMVModuleZFSZpoolStatus($cmdOutput);
+    }
+
+    /**
      * Construct existing pool
      *
      * @param string $name
      * @return void
      * @throws OMVModuleZFSException
+     * @todo Get rid of this and use OMVModuleZFSZpoolStatus instead
      */
     private function assemblePool($name) {
         $cmd = "zpool status -v \"$name\"";
@@ -586,6 +612,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
      * @param string $dev
      * @return void
      * @throws OMVModuleZFSException
+     * @todo Get rid of this and use OMVModuleZFSZpoolStatus instead
      */
     private function output($part, $type, $dev) {
         $disks = explode(" ", $dev);

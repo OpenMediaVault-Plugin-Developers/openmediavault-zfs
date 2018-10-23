@@ -1,0 +1,133 @@
+{
+    "pool": "degradedpool_multidegradation",
+    "state": "DEGRADED",
+    "status": "One or more devices could not be used because the label is missing or invalid.  Sufficient replicas exist for the pool to continue functioning in a degraded state.",
+    "action": "Replace the device using 'zpool replace'.",
+    "see": "http://zfsonlinux.org/msg/ZFS-8000-4J",
+    "scan": "resilvered 4.50K in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018",
+    "config": [
+        {
+            "name": "degradedpool_multidegradation",
+            "state": "DEGRADED",
+            "read": "0",
+            "write": "0",
+            "cksum": "0",
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "mirror-0",
+                    "state": "DEGRADED",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "7289430804289271706",
+                            "state": "UNAVAIL",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": "was /dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+                            "subentries": []
+                        },
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "logs",
+            "state": null,
+            "read": null,
+            "write": null,
+            "cksum": null,
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "mirror-1",
+                    "state": "DEGRADED",
+                    "read": "0",
+                    "write": "0",
+                    "cksum": "0",
+                    "notes": null,
+                    "subentries": [
+                        {
+                            "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1",
+                            "state": "ONLINE",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": null,
+                            "subentries": []
+                        },
+                        {
+                            "name": "5643719822593634226",
+                            "state": "UNAVAIL",
+                            "read": "0",
+                            "write": "0",
+                            "cksum": "0",
+                            "notes": "was /dev/disk/by-id/ata-VBOX_HARDDISK_VB075dfa27-sdf-part1",
+                            "subentries": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "spares",
+            "state": null,
+            "read": null,
+            "write": null,
+            "cksum": null,
+            "notes": null,
+            "subentries": [
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VB86483a44-sdg-part1",
+                    "state": "AVAIL",
+                    "read": null,
+                    "write": null,
+                    "cksum": null,
+                    "notes": null,
+                    "subentries": []
+                },
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBaea157d4-sdh-part1",
+                    "state": "UNAVAIL",
+                    "read": null,
+                    "write": null,
+                    "cksum": null,
+                    "notes": null,
+                    "subentries": []
+                },
+                {
+                    "name": "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd1234-sdi-part1",
+                    "state": "AVAIL",
+                    "read": null,
+                    "write": null,
+                    "cksum": null,
+                    "notes": null,
+                    "subentries": []
+                }
+            ]
+        }
+    ],
+    "errors": "No known data errors"
+}

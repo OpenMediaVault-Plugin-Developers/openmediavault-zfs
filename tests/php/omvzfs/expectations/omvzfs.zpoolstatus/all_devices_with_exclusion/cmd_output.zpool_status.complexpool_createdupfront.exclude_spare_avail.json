@@ -1,0 +1,14 @@
+[
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdb-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBefaa040c-sdc-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBe26698ba-sdd-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB17d69a13-sde-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB075dfa27-sdf-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VB86483a44-sdg-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBaea157d4-sdh-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd1234-sdi-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd2345-sdj-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd3456-sdk-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd4567-sdl-part1",
+    "/dev/disk/by-id/ata-VBOX_HARDDISK_VBabcd5678-sdm-part1"
+]

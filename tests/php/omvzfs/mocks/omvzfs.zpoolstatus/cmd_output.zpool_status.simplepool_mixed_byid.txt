@@ -1,0 +1,14 @@
+  pool: simplepool_mixed_byid
+ state: ONLINE
+  scan: scrub repaired 0B in 0h0m with 0 errors on Sun Oct 14 00:00:30 2018
+config:
+
+	NAME                                                                         STATE     READ WRITE CKSUM
+	simplepool_mixed_byid                                                        ONLINE       0     0     0
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdg-part1                     ONLINE       0     0     0
+	  /dev/disk/by-id/ata-VBOX_HARDDISK_VB84ca63f0-sdh-part1                     ONLINE       0     0     0
+	  /dev/disk/by-id/dm-name-sdb-crypt                                          ONLINE       0     0     0
+	  /dev/disk/by-id/nvme-eui.33a4d1b00c48b843a6adacfeffe59c2c-nvme0n1p1-part1  ONLINE       0     0     0
+	  /dev/disk/by-id/nvme-eui.185908b61679a14e8091246837f8ac6b-nvme0n2p1-part1  ONLINE       0     0     0
+
+errors: No known data errors

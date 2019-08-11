@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2018-06-03 12:29+0000\n"
+"PO-Revision-Date: 2018-11-11 11:25+0000\n"
 "Last-Translator: Jonatan Nyberg\n"
 "Language-Team: Swedish (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -91,7 +91,7 @@ msgid ""
 "Do you really want to create the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Vill du verkligen skapa ZFS-poolen?<br/><br/>Processen tar lite tid och ingen ändring kommer att visas tills den är klar.<br/>Uppdatera sidan för att uppdatera eventuella ändringar."
 
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "Vill du verkligen ta bort de(t) vald(a) objekte(t/n)?"
@@ -100,13 +100,13 @@ msgid ""
 "Do you really want to expand the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Vill du verkligen utöka ZFS-poolen?<br/><br/>Processen tar lite tid och ingen ändring kommer att visas tills den är klar.<br/>Uppdatera sidan för att uppdatera eventuella ändringar."
 
 msgid "Do you really want to export the pool?"
-msgstr ""
+msgstr "Vill du verkligen exportera poolen?"
 
 msgid "Do you really want to rollback the selected item?"
-msgstr ""
+msgstr "Vill du verkligen rulla tillbaka det valda objektet?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr "Vill du verkligen skrubba poolen?<br/><br/>Senaste skrubbning:"
@@ -127,7 +127,7 @@ msgid "Expand Pool"
 msgstr "Expandera pool"
 
 msgid "Export Pool"
-msgstr ""
+msgstr "Exportera pool"
 
 msgid "Filesystem/Volume"
 msgstr "Filsystem/Volym"
@@ -139,7 +139,7 @@ msgid "Force creation"
 msgstr "Force skapande"
 
 msgid "Forces import, even if the pool appears to be potentially active."
-msgstr ""
+msgstr "Krafter importeras, även om poolen verkar vara potentiellt aktiv."
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -152,16 +152,16 @@ msgid ""
 msgstr "Krafter skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
 
 msgid "Import Pool"
-msgstr ""
+msgstr "Importera pool"
 
 msgid "Import ZFS Pool(s)"
-msgstr ""
+msgstr "Importera ZFS-pool(er)"
 
 msgid "Import all"
 msgstr "Importera alla"
 
 msgid "Import all missing pools. Overrides pool specification above."
-msgstr ""
+msgstr "Importera alla saknade pooler. Åsidosätt poolspecifikation ovan."
 
 msgid "Mirror"
 msgstr "Spegel"
@@ -219,7 +219,7 @@ msgid "Overview"
 msgstr "Översikt"
 
 msgid "Pool Name"
-msgstr ""
+msgstr "Poolnamn"
 
 msgid "Pool type"
 msgstr "Pool typ"
@@ -240,7 +240,7 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refer"
-msgstr ""
+msgstr "Hänvisa"
 
 msgid "Refresh"
 msgstr "Uppdatera"
@@ -252,7 +252,7 @@ msgid "Rename ZFS Object"
 msgstr "Byt namn på ZFS-objekt"
 
 msgid "Rollback"
-msgstr ""
+msgstr "Rulla tillbaka"
 
 msgid "Save"
 msgstr "Spara"
@@ -292,13 +292,13 @@ msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "Ange ashift värde. Använd bara om du är säker på att du behöver det."
 
 msgid "State"
-msgstr ""
+msgstr "Status"
 
 msgid "Status"
 msgstr "Status"
 
 msgid "Successfully rollbacked!"
-msgstr ""
+msgstr "Tillbaka rullad!"
 
 msgid "Thin provisioning"
 msgstr ""
@@ -328,7 +328,7 @@ msgid "ZFS"
 msgstr "ZFS"
 
 msgid "ZFS ZED"
-msgstr ""
+msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"

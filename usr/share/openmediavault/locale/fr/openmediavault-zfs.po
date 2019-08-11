@@ -3,14 +3,17 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
+# Axel Cantenys, 2018
+# Lucien Gregoire <lgreg197@gmail.com>, 2018
 # niko2 <nicolas@zosk.fr>, 2017
+# Seboss666 <sebastien_verdet@seboss666.info>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2018-04-06 12:45+0000\n"
-"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
+"PO-Revision-Date: 2018-11-01 13:10+0000\n"
+"Last-Translator: Lucien Gregoire <lgreg197@gmail.com>\n"
 "Language-Team: French (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -54,7 +57,7 @@ msgid "Capacity"
 msgstr "Capacité"
 
 msgid "Clone"
-msgstr ""
+msgstr "Cloner"
 
 msgid "Clone name"
 msgstr "Nom du clone"
@@ -90,7 +93,7 @@ msgid ""
 "Do you really want to create the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Voulez-vous vraiment créer le pool ZFS? <br/><br/> Le processus prendra un certain temps et aucune modification ne sera affichée jusqu'à ce qu'il soit terminé. <br/>Veuillez recharger la page pour mettre à jour les modifications."
 
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "Confirmez-vous la suppression des éléments sélectionné(s) ?"
@@ -99,13 +102,13 @@ msgid ""
 "Do you really want to expand the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Voulez-vous vraiment étendre le pool ZFS?<br/><br/> Le processus prendra un certain temps et aucune modification ne sera affichée jusqu'à ce qu'il soit terminé. <br/>Veuillez recharger la page pour mettre à jour les modifications."
 
 msgid "Do you really want to export the pool?"
-msgstr ""
+msgstr "Voulez-vous vraiment exporter le pool?"
 
 msgid "Do you really want to rollback the selected item?"
-msgstr ""
+msgstr "Voulez-vous vraiment restaurer l'élément sélectionné?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr "Confirmez-vous la réparation du \"pool\" ?<br/><br/>Dernière vérification : "
@@ -126,19 +129,19 @@ msgid "Expand Pool"
 msgstr "Etendre le \"pool\""
 
 msgid "Export Pool"
-msgstr ""
+msgstr "Exporter le pool"
 
 msgid "Filesystem/Volume"
-msgstr ""
+msgstr "Système de fichiers/Volume"
 
 msgid "Force"
-msgstr ""
+msgstr "Forcer"
 
 msgid "Force creation"
 msgstr "Forcer la création"
 
 msgid "Forces import, even if the pool appears to be potentially active."
-msgstr ""
+msgstr "Force l'importation, même si le pool semble potentiellement actif."
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -151,16 +154,16 @@ msgid ""
 msgstr "Force la création du \"pool\" même si des erreurs sont rencontrées. A utiliser avec précaution !"
 
 msgid "Import Pool"
-msgstr ""
+msgstr "Importer le pool"
 
 msgid "Import ZFS Pool(s)"
-msgstr ""
+msgstr "Importer un(des) pool(s) ZFS"
 
 msgid "Import all"
-msgstr ""
+msgstr "Tout importer"
 
 msgid "Import all missing pools. Overrides pool specification above."
-msgstr ""
+msgstr "Importer tous les pools manquants. Écrase les spécifications du pool au dessus."
 
 msgid "Mirror"
 msgstr "Mirroir"
@@ -186,7 +189,7 @@ msgid "New"
 msgstr "Nouveau"
 
 msgid "New Name"
-msgstr ""
+msgstr "Nouveau Nom"
 
 msgid "No items to display"
 msgstr "Aucun élément à afficher"
@@ -204,7 +207,7 @@ msgid "Ok"
 msgstr "Ok"
 
 msgid "Old Name"
-msgstr ""
+msgstr "Ancien Nom"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "Point de montage optionnel du \"pool\". Le nom du \"pool\" est utilisé par défaut."
@@ -218,7 +221,7 @@ msgid "Overview"
 msgstr "Vue d'ensemble"
 
 msgid "Pool Name"
-msgstr ""
+msgstr "Nom du Pool"
 
 msgid "Pool type"
 msgstr "Type de \"pool\""
@@ -239,19 +242,19 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refer"
-msgstr ""
+msgstr "Référer"
 
 msgid "Refresh"
 msgstr "Rafraîchir"
 
 msgid "Rename"
-msgstr ""
+msgstr "Renommer"
 
 msgid "Rename ZFS Object"
-msgstr ""
+msgstr "Renommer l'objet ZFS"
 
 msgid "Rollback"
-msgstr ""
+msgstr "Retour en arrière"
 
 msgid "Save"
 msgstr "Enregistrer"
@@ -266,7 +269,7 @@ msgid "Set ashift"
 msgstr "Configurer la valeur du décalage d'alignement \"Ashift\""
 
 msgid "Settings"
-msgstr ""
+msgstr "Paramètres"
 
 msgid "Size"
 msgstr "Taille"
@@ -278,7 +281,7 @@ msgid "Snapshot to clone"
 msgstr "Cliché instantané à cloner"
 
 msgid "Snapshots"
-msgstr ""
+msgstr "Instantanés"
 
 msgid "Source"
 msgstr "Source"
@@ -291,16 +294,16 @@ msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "Valeur du décalage d'alignement \"Ashift\". A ne changer qu'en cas d’extrême nécessité."
 
 msgid "State"
-msgstr ""
+msgstr "État"
 
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 msgid "Successfully rollbacked!"
-msgstr ""
+msgstr "Retour en arrière réussi!"
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "Allocation granulaire"
 
 msgid "Type"
 msgstr "Type"
@@ -327,7 +330,7 @@ msgid "ZFS"
 msgstr "ZFS"
 
 msgid "ZFS ZED"
-msgstr ""
+msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"

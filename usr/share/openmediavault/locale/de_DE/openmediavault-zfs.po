@@ -5,7 +5,7 @@
 # Translators:
 # David Hönel <davidh1990@gmx.de>, 2015
 # Ettore Atalan <atalanttore@googlemail.com>, 2014,2016,2018
-# Niklas Wagner, 2017
+# 10a15b38c3121a70dc67d288ab76de5d, 2017
 # WastlJ, 2016
 msgid ""
 msgstr ""

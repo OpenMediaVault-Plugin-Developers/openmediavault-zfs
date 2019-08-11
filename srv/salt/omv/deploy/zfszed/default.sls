@@ -1,10 +1,6 @@
-#!/bin/bash
-#
 # @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
-# @author    Volker Theile <volker.theile@openmediavault.org>
 # @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
-# @copyright Copyright (c) 2009-2013 Volker Theile
-# @copyright Copyright (c) 2013-2015 OpenMediaVault Plugin Developers
+# @copyright Copyright (c) 2019 OpenMediaVault Plugin Developers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,17 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-set -e
+{% set notification_config = salt['omv_conf.get_by_filter'](
+  'conf.system.notification.notification',
+  {'operator': 'stringEquals', 'arg0': 'id', 'arg1': 'zfs'})[0] %}
+{% set email_config = salt['omv_conf.get']('conf.system.notification.email') %}
 
-. /etc/default/openmediavault
-. /usr/share/openmediavault/scripts/helper-functions
-
-OMV_ZED_CONFIG=${OMV_ZED_CONFIG:-"/etc/zfs/zed.d/zed.rc"}
-OMV_ZED_NOTIFY_INTERVAL_SECS=3600
-
-xmlstarlet sel -t -m "//system/email" \
-  -i "enable[. = '1'] and //system/notification/notifications/notification[id='zfs'][enable = '1']" \
-	-v "concat('ZED_EMAIL_ADDR=',primaryemail)" -n \
-	-o "ZED_NOTIFY_INTERVAL_SECS=${OMV_ZED_NOTIFY_INTERVAL_SECS}" \
-  -b \
-  ${OMV_CONFIG_FILE} | xmlstarlet unesc > ${OMV_ZED_CONFIG}
+create_zed-rc_config:
+  file.managed:
+    - name: "/etc/zfs/zed.d/zed.rc"
+    - source:
+      - salt://{{ slspath }}/files/etc_zfs_zed-d_zed-rc.j2
+    - template: jinja
+    - context:
+        email_config: {{ email_config | json }}
+        notification_config: {{ notification_config | json }}
+    - user: root
+    - group: root
+    - mode: 644

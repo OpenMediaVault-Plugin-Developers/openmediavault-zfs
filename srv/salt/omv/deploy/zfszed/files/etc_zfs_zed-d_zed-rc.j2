@@ -1,0 +1,8 @@
+{{ pillar['headers']['multiline'] }}
+{% if not email_config.enable or not notification_config.enable -%}
+#ZED_EMAIL_ADDR=
+#ZED_NOTIFY_INTERNAL_SECS=3600
+{%- else -%}
+ZED_EMAIL_ADDR={{ email_config.primaryemail }}
+ZED_NOTIFY_INTERNAL_SECS=3600
+{%- endif %}

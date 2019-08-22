@@ -1,3 +1,9 @@
+openmediavault-zfs (5.0.1) stable; urgency=low
+
+  * Include salt files
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 22 Aug 2019 11:16:57 -0500
+
 openmediavault-zfs (5.0) stable; urgency=low
 
   * Update for OMV 5.x

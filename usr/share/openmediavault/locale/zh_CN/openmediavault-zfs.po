@@ -4,12 +4,13 @@
 # 
 # Translators:
 # songming <by@songming.me>, 2014,2018
+# alphaarea <awpak78@hotmail.com> 2019
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2018-04-09 12:58+0000\n"
+"PO-Revision-Date: 2019-08-23 20:49+0800\n"
 "Last-Translator: songming <by@songming.me>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -108,7 +109,7 @@ msgid "Do you really want to rollback the selected item?"
 msgstr "确认要回滚至选中项吗？"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "确认要侦测 (scrub) 存储池吗，<br/><br/>上次侦测 (scrub):"
+msgstr "确认要清理 (scrub) 存储池吗，<br/><br/>上次清理 (scrub): "
 
 msgid "Down"
 msgstr "向下"
@@ -117,7 +118,7 @@ msgid "Edit"
 msgstr "编辑"
 
 msgid "Edit properties"
-msgstr "编辑特性"
+msgstr "编辑属性"
 
 msgid "Expand"
 msgstr "扩展"
@@ -227,7 +228,7 @@ msgid "Prefix"
 msgstr "前缀"
 
 msgid "Property"
-msgstr "特性"
+msgstr "属性"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -239,7 +240,7 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refer"
-msgstr ""
+msgstr "参考"
 
 msgid "Refresh"
 msgstr "刷新"
@@ -248,7 +249,7 @@ msgid "Rename"
 msgstr "重命名"
 
 msgid "Rename ZFS Object"
-msgstr "重命名 ZFS 目标"
+msgstr "重命名 ZFS 对象"
 
 msgid "Rollback"
 msgstr "回滚"
@@ -257,7 +258,7 @@ msgid "Save"
 msgstr "保存"
 
 msgid "Scrub"
-msgstr "侦测 (Scrub)"
+msgstr "清理 (Scrub)"
 
 msgid "Serial Number"
 msgstr "序列号"
@@ -300,7 +301,7 @@ msgid "Successfully rollbacked!"
 msgstr "回滚成功！"
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "稀疏卷"
 
 msgid "Type"
 msgstr "类型"

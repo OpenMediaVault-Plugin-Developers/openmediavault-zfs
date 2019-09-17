@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -e
 
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions

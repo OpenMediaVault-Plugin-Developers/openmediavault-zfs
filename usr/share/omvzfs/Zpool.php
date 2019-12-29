@@ -546,7 +546,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
                                     $dev = null;
                                 }
                                 $type = $match[1];
-                            } else if (preg_match("/^\s*([\w\d-a-z0-9\:\.\-]+)\s+/", $line, $match)) {
+                            } else if (preg_match("/^\s*([\w\da-z0-9\:\.\-]+)\s+/", $line, $match)) {
                                 if ($dev)
                                     $dev .= " $match[1]";
                                 else
@@ -554,7 +554,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
                             }
                             break;
                         case 'logs':
-                            if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
+                            if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
                                 if ($dev)
                                     $dev .= " $match[1]";
                                 else
@@ -563,7 +563,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
                             break;
                         case 'cache':
                         case 'spares':
-                            if (preg_match("/^\s*([\w\d-]+)\s+/", $line, $match)) {
+                            if (preg_match("/^\s*([\w\d]+)\s+/", $line, $match)) {
                                 if ($dev)
                                     $dev .= " $match[1]";
                                 else

@@ -8,12 +8,12 @@ Standards-Version: 3.9.3
 Homepage: http://omv-extras.org/
 
 Package: openmediavault-zfs
-Architecture: amd64
+Architecture: all
 Depends: libnvpair1linux,
          libuutil1linux,
          libzfs2linux,
          libzpool2linux,
-         linux-headers-amd64 | pve-headers,
+         linux-headers-amd64 | pve-headers | linux-headers-586 | linux-headers-686 | linux-headers-686-pae,
          openmediavault (>= 5),
          openmediavault-omvextrasorg (>= 5),
          zfs-dkms | pve-headers,

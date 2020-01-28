@@ -1,3 +1,9 @@
+openmediavault-zfs (5.0.3) stable; urgency=low
+
+  * Add other architectures
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 28 Jan 2020 16:43:18 -0600
+
 openmediavault-zfs (5.0.2) stable; urgency=low
 
   * Fix parsing the pool when multiple vdevs types are present

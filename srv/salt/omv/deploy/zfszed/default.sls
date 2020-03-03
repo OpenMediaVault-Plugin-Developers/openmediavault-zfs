@@ -1,6 +1,6 @@
 # @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
 # @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
-# @copyright Copyright (c) 2019 OpenMediaVault Plugin Developers
+# @copyright Copyright (c) 2019-2020 OpenMediaVault Plugin Developers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ create_zed-rc_config:
   file.managed:
     - name: "/etc/zfs/zed.d/zed.rc"
     - source:
-      - salt://{{ slspath }}/files/etc_zfs_zed-d_zed-rc.j2
+      - salt://{{ tpldir }}/files/etc_zfs_zed-d_zed-rc.j2
     - template: jinja
     - context:
         email_config: {{ email_config | json }}

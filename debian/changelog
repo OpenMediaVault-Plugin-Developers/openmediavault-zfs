@@ -1,3 +1,9 @@
+openmediavault-zfs (5.0.6) stable; urgency=low
+
+  * Change dependencies for zfs 2.0.x.
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 24 Feb 2021 07:45:11 -0600
+
 openmediavault-zfs (5.0.5) stable; urgency=low
 
   * Replace 'slspath' with 'tpldir' for saltstack 3000

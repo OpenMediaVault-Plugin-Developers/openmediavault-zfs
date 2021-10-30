@@ -2,4 +2,3 @@ srv/* srv
 usr/share/openmediavault/*  usr/share/openmediavault
 usr/share/php/*  usr/share/php
 usr/share/omvzfs/*          usr/share/omvzfs
-var/www/openmediavault/*    var/www/openmediavault

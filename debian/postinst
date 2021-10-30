@@ -53,9 +53,7 @@ case "$1" in
 
         echo "zfs" > /etc/modules-load.d/zfs.conf
 
-        dpkg-trigger update-fixperms
-        dpkg-trigger update-locale
-
+        dpkg-trigger update-workbench
         ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

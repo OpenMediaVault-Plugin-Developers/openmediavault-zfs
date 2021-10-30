@@ -5,29 +5,20 @@ set -e
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions
 
-CONFIG="/config/services/zfs"
 
 case "$1" in
-    purge)
+  purge)
+    echo "Deleting Configuration"
+    omv_config_delete "/config/services/zfs"
+    ;;
 
-        if omv_config_exists $CONFIG; then
-            echo "Deleting Configuration"
-            omv_config_delete $CONFIG;
-        fi
+  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
 
-        if ! omv_config_exists $CONFIG; then
-            echo "Configuration Deleted"
-        fi
-
-        ;;
-
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-        ;;
-
-    *)
-        echo "postrm called with unknown argument \`$1'" >&2
-        exit 1
-        ;;
+  *)
+    echo "postrm called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
 esac
 
 #DEBHELPER#

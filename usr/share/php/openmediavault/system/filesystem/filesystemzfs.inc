@@ -106,6 +106,11 @@ class FilesystemZfs implements FilesystemInterface,
         return $this->deviceFile;
     }
 
+    public function getDeviceName()
+    {
+        return $this->deviceFile;
+    }
+
     /**
      * Get the canonical device file, e.g. /dev/root -> /dev/sde1
      */
@@ -390,7 +395,7 @@ class FilesystemZfs implements FilesystemInterface,
      * @param lazy Set to TRUE to lazy unmount. Defaults to FALSE.
      * @return TRUE if successful, otherwise FALSE.
      */
-    public function umount($force = FALSE, $lazy = FALSE)
+    public function umount($force = FALSE, $lazy = FALSE, $directory = FALSE)
     {
         try{
             $this->filesystem->unmount();

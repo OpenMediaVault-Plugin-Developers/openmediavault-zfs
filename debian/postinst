@@ -53,6 +53,9 @@ case "$1" in
 
         echo "zfs" > /etc/modules-load.d/zfs.conf
 
+        # creates mntent entries for pools that don't exist in the mntent section
+        omv-rpc -u admin "zfs" "getObjectTree" '{}'
+
         dpkg-trigger update-workbench
         ;;
 

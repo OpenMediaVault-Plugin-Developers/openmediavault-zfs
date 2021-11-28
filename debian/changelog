@@ -1,3 +1,10 @@
+openmediavault-zfs (6.0.1) stable; urgency=low
+
+  * Update backend for OMV 6.x
+  * Import existing pools into database
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 27 Nov 2021 19:12:32 -0600
+
 openmediavault-zfs (6.0) stable; urgency=low
 
   * Start update for OMV 6.x - will not include web interface portion

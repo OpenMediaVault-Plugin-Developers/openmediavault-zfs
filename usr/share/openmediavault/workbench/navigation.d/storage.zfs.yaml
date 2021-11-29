@@ -1,0 +1,7 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs"
+  text: _("zfs")
+  icon: "mdi:vector-bezier"
+  url: "/storage/zfs"

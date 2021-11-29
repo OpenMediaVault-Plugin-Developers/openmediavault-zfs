@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs"
+  title: _("zfs")
+  component: omv-storage-zfs-datatable-page

@@ -1,0 +1,30 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-datatable-page
+  type: datatablePage
+  config:
+    autoReload: 10000
+    hasSearchField: true
+    stateId: fc0545e0-50b2-11ec-bf5c-37dde54fc31c
+    store:
+      proxy:
+        service: Zfs
+        get:
+          method: listPools
+    columns:
+      - name: _("Pools")
+        prop: pools
+        flexGrow: 1
+        sortable: true
+    actions:
+      - type: iconButton
+        tooltip: _("Import")
+        icon: mdi:database-import-outline
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: getObjectTree
+            task: false
+            successUrl: /storage/zfs

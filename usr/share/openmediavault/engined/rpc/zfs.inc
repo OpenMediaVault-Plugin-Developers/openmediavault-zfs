@@ -48,6 +48,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("importPool");
         $this->registerMethod("exportPool");
         $this->registerMethod("getObjectTree");
+        $this->registerMethod("listPools");
         $this->registerMethod("getAllSnapshots");
         $this->registerMethod("addObject");
         $this->registerMethod("deleteObject");
@@ -185,6 +186,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
         OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
         return $tree;
+    }
+
+    public function listPools($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $objects = OMVModuleZFSUtil::getZFSFlatArray();
+        return $this->applyFilter($objects, $params['start'],
+          $params['limit'], $params['sortfield'], $params['sortdir']);
     }
 
     public function getAllSnapshots($params, $context)

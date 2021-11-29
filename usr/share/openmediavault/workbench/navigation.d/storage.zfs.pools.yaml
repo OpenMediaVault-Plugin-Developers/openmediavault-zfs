@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.pools"
+  text: _("Pools")
+  position: 10
+  icon: mdi:format-list-group
+  url: "/storage/zfs/pools"

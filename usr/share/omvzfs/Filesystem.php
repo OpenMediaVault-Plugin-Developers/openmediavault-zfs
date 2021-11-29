@@ -26,7 +26,7 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 	 */
 	public function __construct($name) {
 		$this->name = $name;
-		$cmd = "zfs list -H -t filesystem \"" . $name . "\" 2>&1";
+		$cmd = "zfs list -p -H -t filesystem \"" . $name . "\" 2>&1";
 		try {
 			OMVModuleZFSUtil::exec($cmd, $out, $res);
 		}
@@ -37,7 +37,7 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 
 	public function exists(){
 		try {
-			$cmd = "zfs list -H -t filesystem \"" . $this->name . "\" 2>&1";
+			$cmd = "zfs list -p -H -t filesystem \"" . $this->name . "\" 2>&1";
 			OMVModuleZFSUtil::exec($cmd, $out, $res);
 			return TRUE;
 		}
@@ -47,7 +47,7 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 	}
 
 	public static function getAllFilesystems(){
-		$cmd = "zfs list -H -o name,mountpoint -t filesystem";
+		$cmd = "zfs list -p -H -o name,mountpoint -t filesystem";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		$filesystems=[];
 		foreach($out as $line) {
@@ -113,7 +113,7 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 
 	public function getChildren(){
 		$name = $this->name;
-		$cmd="zfs list -H -r -t filesystem $name 2>&1";
+		$cmd="zfs list -p -H -r -t filesystem $name 2>&1";
 		OMVModuleZFSUtil::exec($cmd,$out,$res);
 		$children=[];
 		foreach ($out as $line) {

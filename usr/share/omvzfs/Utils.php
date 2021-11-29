@@ -248,7 +248,7 @@ class OMVModuleZFSUtil {
     public static function getZFSFlatArray() {
         $prefix = "root/pool-";
         $objects = [];
-        $cmd = "zfs list -H -t all -o name,type 2>&1";
+        $cmd = "zfs list -p -H -t all -o name,type 2>&1";
         $expanded = true;
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         foreach ($out as $line) {
@@ -275,9 +275,10 @@ class OMVModuleZFSUtil {
                     $pool = new OMVModuleZFSZpool($path);
                     $pool->updateAllProperties();
                     $tmp['origin'] = "n/a";
-                    $tmp['size'] = OMVModuleZFSUtil::bytesToSize($pool->getSize());
-                    $tmp['used'] = OMVModuleZFSUtil::bytesToSize($pool->getUsed());
-                    $tmp['available'] = OMVModuleZFSUtil::bytesToSize($pool->getAvailable());
+                    $tmp['size'] = $pool->getSize();
+                    $tmp['used'] = $pool->getUsed();
+                    $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                    $tmp['available'] = $pool->getAvailable();
                     $tmp['mountpoint'] = $pool->getMountPoint();
                     $tmp['lastscrub'] = $pool->getLatestScrub();
                     $tmp['state'] = $pool->getPoolState();
@@ -306,9 +307,10 @@ class OMVModuleZFSUtil {
                         $tmp['origin'] = "n/a";
                     }
                     $tmp['type'] = ucfirst($type);
-                    $tmp['size'] = OMVModuleZFSUtil::bytesToSize($ds->getSize());
-                    $tmp['used'] = OMVModuleZFSUtil::bytesToSize($ds->getUsed());
-                    $tmp['available'] = OMVModuleZFSUtil::bytesToSize($ds->getAvailable());
+                    $tmp['size'] = $ds->getSize();
+                    $tmp['used'] = $ds->getUsed();
+                    $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                    $tmp['available'] = $ds->getAvailable();
                     $tmp['mountpoint'] = $ds->getMountPoint();
                     $tmp['lastscrub'] = "n/a";
                     $tmp['state'] = "n/a";
@@ -337,9 +339,10 @@ class OMVModuleZFSUtil {
                     $tmp['origin'] = "n/a";
                 }
                 $tmp['type'] = ucfirst($type);
-                $tmp['size'] = OMVModuleZFSUtil::bytesToSize($vol->getSize());
-                $tmp['used'] = OMVModuleZFSUtil::bytesToSize($vol->getUsed());
-                $tmp['available'] = OMVModuleZFSUtil::bytesToSize($vol->getAvailable());
+                $tmp['size'] = $vol->getSize();
+                $tmp['used'] = $vol->getUsed();
+                $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                $tmp['available'] = $vol->getAvailable();
                 $tmp['mountpoint'] = "n/a";
                 $tmp['lastscrub'] = "n/a";
                 if (!($vol->isThinVol())) {
@@ -389,7 +392,7 @@ class OMVModuleZFSUtil {
     public static function getAllSnapshots() {
         $prefix = "root/pool-";
         $objects = [];
-        $cmd = "zfs list -H -t snapshot -o name,used,refer 2>&1";
+        $cmd = "zfs list -p -H -t snapshot -o name,used,refer 2>&1";
 
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         foreach ($out as $line) {
@@ -412,8 +415,8 @@ class OMVModuleZFSUtil {
                 'icon' => 'images/zfs_snap.png',
                 'path' => $path
             );
-            $tmp['used'] = OMVModuleZFSUtil::bytesToSize(OMVModuleZFSUtil::SizeTobytes($used));
-            $tmp['refer'] = OMVModuleZFSUtil::bytesToSize(OMVModuleZFSUtil::SizeTobytes($refer));
+            $tmp['used'] = $used;
+            $tmp['refer'] = $refer;
             array_push($objects, $tmp);
         }
         return $objects;

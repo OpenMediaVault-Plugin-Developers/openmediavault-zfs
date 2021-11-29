@@ -30,7 +30,7 @@ class OMVModuleZFSZvol extends OMVModuleZFSDataset {
 	public function __construct($name) {
 		$zvol_exists = true;
 		$this->name = $name;
-		$cmd = "zfs list -H -t volume \"" . $name . "\" 2>&1";
+		$cmd = "zfs list -p -H -t volume \"" . $name . "\" 2>&1";
 		try {
 			OMVModuleZFSUtil::exec($cmd, $out, $res);
 		}

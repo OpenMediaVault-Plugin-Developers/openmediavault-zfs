@@ -216,7 +216,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         switch ($params['type']) {
             case "clone":
                 $tmp = new OMVModuleZFSSnapshot($params['path']);
-                $tmp->clonesnap($params['clonename']);
+                $tmp->clonesnap($params['pool'] . '/'.  $params['clonename']);
                 break;
             case "filesystem":
                 $name = $params['path'] . "/" . $params['name'];

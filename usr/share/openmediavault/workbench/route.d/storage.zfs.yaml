@@ -3,4 +3,4 @@ type: route
 data:
   url: "/storage/zfs"
   title: _("zfs")
-  component: omv-storage-zfs-datatable-page
+  component: omv-storage-zfs-navigation-page

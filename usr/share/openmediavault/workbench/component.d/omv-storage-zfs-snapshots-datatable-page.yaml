@@ -1,0 +1,132 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-snapshots-datatable-page
+  type: datatablePage
+  config:
+    autoReload: 10000
+    hasSearchField: true
+    rowId: id
+    stateId: af51b038-513b-11ec-b91a-1bce262337ed
+    store:
+      proxy:
+        service: Zfs
+        get:
+          method: getAllSnapshots
+    columns:
+      - name: _("Name")
+        prop: name
+        flexGrow: 1
+        sortable: true
+      - name: _("Parent")
+        prop: parent
+        flexGrow: 1
+        sortable: true
+      - name: _("Used")
+        prop: used
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+      - name: _("Refer")
+        prop: refer
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+      - name: _("Path")
+        prop: path
+        flexGrow: 2
+        sortable: true
+      - name: _("Type")
+        prop: type
+        flexGrow: 1
+        sortable: true
+    actions:
+      - type: iconButton
+        tooltip: _("Delete")
+        icon: mdi:delete
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to delete to this snapshot?")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: deleteObject
+            params:
+              name: "{{ _selected[0].path }}"
+              type: "{{ _selected[0].type }}"
+            task: false
+            successUrl: /storage/zfs/snapshots
+      - type: iconButton
+        tooltip: _("Clone")
+        icon: mdi:content-copy
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: formDialog
+          formDialog:
+            title: _('Clone snapshot')
+            fields:
+              - type: textInput
+                name: pool
+                label: _("Source pool")
+                value: "{{ _selected[0].parent | split('/') | first }}"
+                readonly: true
+              - type: textInput
+                name: name
+                label: _("Source name")
+                value: "{{ _selected[0].name }}"
+                readonly: true
+              - type: textInput
+                name: path
+                label: _("Source path")
+                value: "{{ _selected[0].path }}"
+                readonly: true
+              - type: textInput
+                name: clonename
+                label: _("Snap clone name")
+                value: ""
+                validators:
+                  required: true
+                  patternType: shareName
+                  custom:
+                    - constraint:
+                        operator: ne
+                        arg0:
+                          prop: name
+                        arg1:
+                          prop: clonename
+                        errorData: _('A different name must be specified.')
+              - type: hidden
+                name: type
+                value: "clone"
+            buttons:
+              submit:
+                text: _('Clone')
+                execute:
+                  type: request
+                  request:
+                    service: Zfs
+                    method: addObject
+      - type: iconButton
+        tooltip: _("Rollback")
+        icon: mdi:arrow-u-left-top
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to rollback to this snapshot?")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: rollbackSnapshot
+            params:
+              name: "{{ _selected[0].path }}"
+            task: false
+            successUrl: /storage/zfs/snapshots

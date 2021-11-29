@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.2) stable; urgency=low
+
+  * Add simple web interface
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 29 Nov 2021 17:56:59 -0600
+
 openmediavault-zfs (6.0.1) stable; urgency=low
 
   * Update backend for OMV 6.x

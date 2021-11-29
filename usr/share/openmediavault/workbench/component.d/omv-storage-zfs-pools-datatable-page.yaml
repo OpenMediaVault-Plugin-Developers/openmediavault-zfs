@@ -1,0 +1,63 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-datatable-page
+  type: datatablePage
+  config:
+    autoReload: 10000
+    hasSearchField: true
+    stateId: fc0545e0-50b2-11ec-bf5c-37dde54fc31c
+    store:
+      proxy:
+        service: Zfs
+        get:
+          method: listPools
+    columns:
+      - name: _("Name")
+        prop: name
+        flexGrow: 1
+        sortable: true
+      - name: _("Type")
+        prop: type
+        flexGrow: 1
+        sortable: true
+      - name: _("Size")
+        prop: size
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+      - name: _("Used")
+        prop: usedpercent
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: progressBar
+        cellTemplateConfig:
+          text: '{{ used | tobytes | binaryunit | notavailable("-") }}'
+      - name: _("Available")
+        prop: available
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+      - name: _("Mountpoint")
+        prop: mountpoint
+        flexGrow: 2
+        sortable: true
+      - name: _("State")
+        prop: state
+        flexGrow: 1
+        sortable: true
+      - name: _("Status")
+        prop: status
+        flexGrow: 1
+        sortable: true
+    actions:
+      - type: iconButton
+        tooltip: _("Import")
+        icon: mdi:database-import-outline
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: getObjectTree
+            task: false
+            successUrl: /storage/zfs

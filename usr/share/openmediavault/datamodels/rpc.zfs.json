@@ -22,7 +22,11 @@
 				"required": true
 			},
 			"devices": {
-				"type": "string",
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "devicefile"
+				},
 				"required": true
 			},
 			"devalias": {
@@ -34,7 +38,7 @@
 				"required": true
 			},
 			"ashiftval": {
-				"type": "string",
+				"type": "integer",
 				"required": true
 			}
 		}

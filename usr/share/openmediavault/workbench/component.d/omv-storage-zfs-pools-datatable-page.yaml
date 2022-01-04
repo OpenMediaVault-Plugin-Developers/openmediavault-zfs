@@ -42,6 +42,11 @@ data:
         prop: mountpoint
         flexGrow: 2
         sortable: true
+      - name: _("Path")
+        prop: path
+        flexGrow: 2
+        sortable: true
+        hidden: true
       - name: _("State")
         prop: state
         flexGrow: 1
@@ -51,6 +56,10 @@ data:
         flexGrow: 1
         sortable: true
     actions:
+      - template: create
+        execute:
+          type: url
+          url: "/storage/zfs/pools/create"
       - type: iconButton
         tooltip: _("Import")
         icon: mdi:database-import-outline
@@ -60,4 +69,23 @@ data:
             service: Zfs
             method: getObjectTree
             task: false
-            successUrl: /storage/zfs
+            successUrl: /storage/zfs/pools
+      - type: iconButton
+        tooltip: _("Delete")
+        icon: mdi:delete
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to delete?")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: deleteObject
+            params:
+              name: "{{ _selected[0].path }}"
+              type: "{{ _selected[0].type }}"
+            task: false
+            successUrl: /storage/zfs/pools

@@ -112,7 +112,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $opts .= "-m \"" . $params['mountpoint'] . "\" ";
         }
 
-        $disks = preg_split("/[,;]/", $params['devices']);
+        //$disks = preg_split("/[,;]/", $params['devices']);
+        $disks = $params['devices'];
 
         switch ($params['devalias']) {
         case "path":

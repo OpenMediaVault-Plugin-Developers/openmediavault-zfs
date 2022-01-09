@@ -106,10 +106,10 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $opts .= "-f ";
         }
         if ($params['ashift']) {
-            $opts .= "-o ashift=" . $params['ashiftval'] . " ";
+            $opts .= sprintf("-o ashift=%s ", $params['ashiftval']);
         }
         if (strlen($params['mountpoint']) > 0) {
-            $opts .= "-m \"" . $params['mountpoint'] . "\" ";
+            $opts .= sprintf('-m "%s" ', $params['mountpoint']);
         }
 
         //$disks = preg_split("/[,;]/", $params['devices']);
@@ -148,6 +148,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
 
         $vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
         $pool = OMVModuleZFSZpool::create($vdev, $opts);
+        //$tmp = new OMVModuleZFSZpool($params['name']);
+
+        if ($params['compress']) {
+            $objects = [];
+            $objects["compression"] = $params['compresstype'];
+            $pool->setProperties($objects);
+        }
+        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
     }
 
     public function importPool($params, $context)
@@ -237,16 +245,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 break;
             case "volume":
                 $name = $params['path'] . "/" . $params['name'];
-                if ($params['thinvol']) {
-                    OMVModuleZFSZvol::create($name,$params['size'], null, true);
-                } else {
-                    OMVModuleZFSZvol::create($name,$params['size'], null, false);
-                }
+                $volsize = str_replace([' ','i'], '', $params['size']);
+                OMVModuleZFSZvol::create($name, $volsize, null, boolval($params['thinvol']));
                 break;
             default:
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
+        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
     }
 
     public function deleteObject($params, $context)

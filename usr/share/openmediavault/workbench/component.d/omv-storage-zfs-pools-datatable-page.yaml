@@ -6,6 +6,7 @@ data:
   config:
     autoReload: 10000
     hasSearchField: true
+    rowId: id
     stateId: fc0545e0-50b2-11ec-bf5c-37dde54fc31c
     store:
       proxy:
@@ -56,10 +57,97 @@ data:
         flexGrow: 1
         sortable: true
     actions:
-      - template: create
-        execute:
-          type: url
-          url: "/storage/zfs/pools/create"
+      - type: menu
+        icon: mdi:plus
+        tooltip: _("Add")
+        actions:
+          - text: _("Add pool")
+            icon: mdi:plus
+            execute:
+              type: url
+              url: "/storage/zfs/pools/create"
+          - text: _("Add filesystem|snap|volume")
+            icon: mdi:plus
+            execute:
+              type: formDialog
+              formDialog:
+                title: _('Add filesystem, snapshot, or volume ...')
+                fields:
+                  - type: select
+                    name: type
+                    label: _("Type")
+                    value: "filesystem"
+                    store:
+                      data:
+                        - ["filesystem", _("Filesystem")]
+                        - ["snapshot", _("Snapshot")]
+                        - ["volume", _("Volume")]
+                  - type: textInput
+                    name: path
+                    label: _("Prefix")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: textInput
+                    name: name
+                    label: _("Name")
+                    value: ""
+                    validators:
+                      required: true
+                      patternType: shareName
+                  - type: textInput
+                    name: mountpoint
+                    label: _("Mountpoint")
+                    value: ""
+                    hint: _("Optional mountpoint. Default is to use the name.")
+                    modifiers:
+                      - type: hidden
+                        constraint:
+                          operator: ne
+                          arg0:
+                            prop: type
+                          arg1: "filesystem"
+                  - type: binaryUnitInput
+                    name: size
+                    label: _('Size')
+                    value: 1024
+                    modifiers:
+                      - type: hidden
+                        constraint:
+                          operator: ne
+                          arg0:
+                            prop: type
+                          arg1: "volume"
+                    validators:
+                      min: 1024
+                      required: true
+                  - type: checkbox
+                    name: thinvol
+                    label: _("Thin provisioning")
+                    value: false
+                    modifiers:
+                      - type: hidden
+                        constraint:
+                          operator: ne
+                          arg0:
+                            prop: type
+                          arg1: "filesystem"
+                buttons:
+                  submit:
+                    text: _('Add')
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: addObject
+                    successUrl: /services/zfs/pools
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: type
+                  arg1: "Pool"
       - type: iconButton
         tooltip: _("Import")
         icon: mdi:database-import-outline

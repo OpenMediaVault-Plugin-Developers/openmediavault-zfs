@@ -1,0 +1,191 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: addPool
+    fields:
+      - type: hidden
+        name: uuid
+        value: "{{ newconfobjuuid }}"
+      - type: textInput
+        name: name
+        label: _("Name")
+        value: ""
+        validators:
+          required: true
+          patternType: 'shareName'
+      - type: select
+        name: pooltype
+        label: _("Pool type")
+        value: "raidz1"
+        store:
+          data:
+            - ["basic", _("Basic")]
+            - ["mirror", _("Mirror")]
+            - ["raidz1", _("RAID-Z1")]
+            - ["raidz2", _("RAID-Z2")]
+            - ["raidz3", _("RAID-Z3")]
+      - type: select
+        name: devices
+        label: _("Devices")
+        multiple: true
+        valueField: devicefile
+        textField: devicefile
+        store:
+          proxy:
+            service: RaidMgmt
+            get:
+              method: getCandidates
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+          custom:
+            - constraint:
+                operator: if
+                arg0:
+                  operator: eq
+                  arg0:
+                    prop: pooltype
+                  arg1: 'mirror'
+                arg1:
+                  operator: '>='
+                  arg0:
+                    operator: length
+                    arg0:
+                      prop: devices
+                  arg1: 2
+              errorData: _('At least two devices are required.')
+            - constraint:
+                operator: if
+                arg0:
+                  operator: eq
+                  arg0:
+                    prop: pooltype
+                  arg1: 'raidz1'
+                arg1:
+                  operator: '>='
+                  arg0:
+                    operator: length
+                    arg0:
+                      prop: devices
+                  arg1: 3
+              errorData: _('At least three devices are required.')
+            - constraint:
+                operator: if
+                arg0:
+                  operator: eq
+                  arg0:
+                    prop: pooltype
+                  arg1: 'raidz2'
+                arg1:
+                  operator: '>='
+                  arg0:
+                    operator: length
+                    arg0:
+                      prop: devices
+                  arg1: 4
+              errorData: _('At least four devices are required.')
+            - constraint:
+                operator: if
+                arg0:
+                  operator: eq
+                  arg0:
+                    prop: pooltype
+                  arg1: 'raidz3'
+                arg1:
+                  operator: '>='
+                  arg0:
+                    operator: length
+                    arg0:
+                      prop: devices
+                  arg1: 5
+              errorData: _('At least five devices are required.')
+      - type: textInput
+        name: mountpoint
+        label: _("Mountpoint")
+        value: ""
+        hint: _("Optional mountpoint for the pool. Default is to use the pool name.")
+      - type: select
+        name: devalias
+        label: _("Device alias")
+        value: "id"
+        store:
+          data:
+            - ["id", _("By ID")]
+            - ["path", _("By Path")]
+            - ["dev", _("None")]
+        hint: _("Specifies which device alias should be used. Don't change unless needed.")
+      - type: checkbox
+        name: force
+        label: _("Force creation")
+        value: false
+        hint: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
+      - type: container
+        fields:
+          - type: checkbox
+            name: ashift
+            label: _("Set ashift")
+            value: false
+            hint: _("Specify ashift value. Only use if you are sure you need it.")
+          - type: numberInput
+            name: ashiftval
+            label: _("Ashift value")
+            value: 0
+            validators:
+              min: 0
+              max: 16
+              patternType: integer
+              required: true
+            modifiers:
+              - type: visible
+                constraint:
+                  operator: truthy
+                  arg0:
+                    prop: ashift
+      - type: container
+        fields:
+          - type: checkbox
+            name: compress
+            label: _("Compression")
+            value: false
+          - type: select
+            name: compresstype
+            label: _("Compression type")
+            value: "lz4"
+            store:
+              data:
+                - ["gzip", _("gzip")]
+                - ["gzip-1", _("gzip-1")]
+                - ["gzip-2", _("gzip-2")]
+                - ["gzip-3", _("gzip-3")]
+                - ["gzip-4", _("gzip-4")]
+                - ["gzip-5", _("gzip-5")]
+                - ["gzip-6", _("gzip-6")]
+                - ["gzip-7", _("gzip-7")]
+                - ["gzip-8", _("gzip-8")]
+                - ["gzip-9", _("gzip-9")]
+                - ["lz4", _("lz4")]
+                - ["lzjb", _("lzjb")]
+                - ["zle", _("zle")]
+            modifiers:
+              - type: visible
+                constraint:
+                  operator: truthy
+                  arg0:
+                    prop: compress
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

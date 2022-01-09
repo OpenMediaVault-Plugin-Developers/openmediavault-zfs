@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/create"
+  title: _("Create")
+  notificationTitle: _("Created pool.")
+  component: omv-storage-zfs-pools-create-form-page

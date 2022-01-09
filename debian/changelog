@@ -1,3 +1,12 @@
+openmediavault-zfs (6.0.3) stable; urgency=low
+
+  * Add interface to create filesystems, snapshots, and volumes
+  * Fix bug in used column calculation
+  * Add compression option for pool creation
+  * Only install notification database entry if it does not exist
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 09 Jan 2022 12:54:26 -0600
+
 openmediavault-zfs (6.0.2) stable; urgency=low
 
   * Add simple web interface

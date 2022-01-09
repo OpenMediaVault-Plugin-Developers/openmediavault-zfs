@@ -17,12 +17,14 @@ case "$1" in
         SERVICE_XPATH_NAME="zfs"
         SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
 
-        object="<uuid>$(omv_uuid)</uuid>"
-        object="${object}<id>zfs</id>"
-        object="${object}<enable>0</enable>"
-        omv_config_add_node_data "/config/system/notification/notifications" "notification" "${object}"
+        if ! omv_config_exists "/config/system/notification/notifications/notification[id='zfs']"; then
+            object="<uuid>$(omv_uuid)</uuid>"
+            object="${object}<id>zfs</id>"
+            object="${object}<enable>0</enable>"
+            omv_config_add_node_data "/config/system/notification/notifications" "notification" "${object}"
+        fi
 
-        #Remove deprectaed stuff to ensure clean installation
+        # Remove deprectaed stuff to ensure clean installation
         rm -f /etc/insserv/overrides/zfs-mount
 
         /sbin/modprobe zfs

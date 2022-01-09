@@ -277,7 +277,7 @@ class OMVModuleZFSUtil {
                     $tmp['origin'] = "n/a";
                     $tmp['size'] = $pool->getSize();
                     $tmp['used'] = $pool->getUsed();
-                    $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                    $tmp['usedpercent'] = $tmp['used'] / $tmp['size'] * 100;
                     $tmp['available'] = $pool->getAvailable();
                     $tmp['mountpoint'] = $pool->getMountPoint();
                     $tmp['lastscrub'] = $pool->getLatestScrub();
@@ -309,7 +309,7 @@ class OMVModuleZFSUtil {
                     $tmp['type'] = ucfirst($type);
                     $tmp['size'] = $ds->getSize();
                     $tmp['used'] = $ds->getUsed();
-                    $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                    $tmp['usedpercent'] = $tmp['used'] / $tmp['size'] * 100;
                     $tmp['available'] = $ds->getAvailable();
                     $tmp['mountpoint'] = $ds->getMountPoint();
                     $tmp['lastscrub'] = "n/a";
@@ -341,7 +341,7 @@ class OMVModuleZFSUtil {
                 $tmp['type'] = ucfirst($type);
                 $tmp['size'] = $vol->getSize();
                 $tmp['used'] = $vol->getUsed();
-                $tmp['usedpercent'] = $pool->getUsed() / $pool->getAvailable() * 100;
+                $tmp['usedpercent'] = $tmp['used'] / $tmp['size'] * 100;
                 $tmp['available'] = $vol->getAvailable();
                 $tmp['mountpoint'] = "n/a";
                 $tmp['lastscrub'] = "n/a";

@@ -116,7 +116,7 @@ class FilesystemZfs implements FilesystemInterface,
      */
     public function getCanonicalDeviceFile()
     {
-        return realpath($this->deviceFile);
+        return $this->deviceFile;
     }
 
     /**

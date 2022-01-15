@@ -149,6 +149,15 @@ data:
                     prop: type
                   arg1: "Pool"
       - type: iconButton
+        icon: mdi:desktop-classic
+        tooltip: _("Properties")
+        execute:
+          type: url
+          url: "/storage/zfs/pools/properties/{{ _selected[0].name }}/{{ _selected[0].type }}"
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+      - type: iconButton
         tooltip: _("Import")
         icon: mdi:database-import-outline
         execute:

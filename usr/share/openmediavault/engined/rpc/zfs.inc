@@ -303,7 +303,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
     public function getProperties($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.getproperties');
+        //$this->validateMethodParams($params, 'rpc.zfs.getproperties');
 
         $objects = [];
         $name = $params['name'];
@@ -335,7 +335,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                     'modified' => "false");
             }
         }
-        return $objects;
+        return [ "properties" => $objects ];
     }
 
     public function setProperties($params, $context)

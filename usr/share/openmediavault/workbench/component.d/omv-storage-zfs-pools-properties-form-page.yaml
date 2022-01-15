@@ -1,0 +1,66 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-properties-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      get:
+        method: getProperties
+        params:
+          name: "{{ _routeParams.name }}"
+          type: "{{ _routeParams.type }}"
+      post:
+        method: setProperties
+    fields:
+      - type: hidden
+        name: uuid
+        value: "{{ newconfobjuuid }}"
+      - type: datatable
+        name: properties
+        label: _("Properties")
+        hasHeader: true
+        hasFooter: true
+        columns:
+          - name: _("Property")
+            prop: property
+            flexGrow: 1
+          - name: _("Value")
+            prop: value
+            flexGrow: 1
+          - name: _("Source")
+            prop: source
+            flexGrow: 1
+          - name: _("Modified")
+            prop: modified
+            flexGrow: 1
+          - name: _("New Property")
+            prop: newproperty
+            flexGrow: 1
+            hidden: true
+        actions:
+          - template: add
+            dialogConfig:
+              title: _("New property")
+              fields:
+                - type: textInput
+                  name: property
+                  label: _("Name")
+                  value: ""
+                - type: textInput
+                  name: property
+                  label: _("Value")
+                  value: ""
+          - template: delete
+        valueType: object
+        value: []
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

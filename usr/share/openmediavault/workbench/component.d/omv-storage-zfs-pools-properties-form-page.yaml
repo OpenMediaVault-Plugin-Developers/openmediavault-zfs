@@ -35,6 +35,7 @@ data:
           - name: _("Modified")
             prop: modified
             flexGrow: 1
+            hidden: true
           - name: _("New Property")
             prop: newproperty
             flexGrow: 1
@@ -52,6 +53,37 @@ data:
                   name: property
                   label: _("Value")
                   value: ""
+                - type: hidden
+                  name: source
+                  value: "local"
+                - type: hidden
+                  name: modified
+                  value: "true"
+                - type: hidden
+                  name: newproperty
+                  value: "true"
+          - template: edit
+            dialogConfig:
+              title: _("Edit property")
+              fields:
+                - type: textInput
+                  name: property
+                  label: _("Property")
+                  value: "{{ _selected[0].property }}"
+                  readonly: true
+                - type: textInput
+                  name: property
+                  label: _("Value")
+                  value: "{{ _selected[0].value }}"
+                - type: hidden
+                  name: source
+                  value: "local"
+                - type: hidden
+                  name: modified
+                  value: "true"
+                - type: hidden
+                  name: newproperty
+                  value: "false"
           - template: delete
         valueType: object
         value: []

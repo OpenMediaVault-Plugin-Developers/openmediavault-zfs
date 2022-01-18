@@ -50,7 +50,7 @@ data:
                   label: _("Name")
                   value: ""
                 - type: textInput
-                  name: property
+                  name: value
                   label: _("Value")
                   value: ""
                 - type: hidden
@@ -69,12 +69,10 @@ data:
                 - type: textInput
                   name: property
                   label: _("Property")
-                  value: "{{ _selected[0].property }}"
                   readonly: true
                 - type: textInput
-                  name: property
+                  name: value
                   label: _("Value")
-                  value: "{{ _selected[0].value }}"
                 - type: hidden
                   name: source
                   value: "local"

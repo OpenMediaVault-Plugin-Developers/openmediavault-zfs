@@ -12,7 +12,7 @@ Architecture: any
 Depends: libzfs4linux,
          pve-headers [amd64] | linux-headers-amd64 [amd64],
          linux-headers-586 [i386] | linux-headers-686 [i386] | linux-headers-686-pae [i386],
-         openmediavault (>= 6.0.7),
+         openmediavault (>= 6.0.10),
          pve-headers [amd64] | zfs-dkms [amd64],
          zfs-dkms [i386],
          zfsutils-linux [i386 amd64],

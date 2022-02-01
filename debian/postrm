@@ -10,6 +10,7 @@ case "$1" in
   purge)
     echo "Deleting Configuration"
     omv_config_delete "/config/services/zfs"
+    rm -f /etc/modules-load.d/zfs.conf
     ;;
 
   remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

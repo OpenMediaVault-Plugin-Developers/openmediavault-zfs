@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# songming <by@songming.me>, 2014,2018
+# haai so <s1097854603@gmail.com>, 2021
+# songming <by@songming.me>, 2014,2018,2021
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2018-04-09 12:58+0000\n"
+"PO-Revision-Date: 2021-11-17 07:31+0000\n"
 "Last-Translator: songming <by@songming.me>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -33,10 +34,10 @@ msgid "Add Pool"
 msgstr "添加池"
 
 msgid "Ashift value"
-msgstr "Ashift值"
+msgstr "Ashift 值"
 
 msgid "Ashift value to use."
-msgstr "使用的Ashift值。"
+msgstr "使用的 Ashift 值。"
 
 msgid "Available"
 msgstr "可用"
@@ -45,10 +46,10 @@ msgid "Basic"
 msgstr "基础"
 
 msgid "By Id"
-msgstr ""
+msgstr "以 id"
 
 msgid "By Path"
-msgstr ""
+msgstr "以路径"
 
 msgid "Capacity"
 msgstr "容量"
@@ -63,7 +64,7 @@ msgid "Confirmation"
 msgstr "确认"
 
 msgid "Create ZFS Pool"
-msgstr "创建ZFS池"
+msgstr "创建 ZFS 池"
 
 msgid "Delete"
 msgstr "删除"
@@ -105,7 +106,7 @@ msgid "Do you really want to export the pool?"
 msgstr "确认要导出存储池吗？"
 
 msgid "Do you really want to rollback the selected item?"
-msgstr "确认要回滚至选中项吗？"
+msgstr "确认要回滚选中项吗？"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
 msgstr "确认要侦测 (scrub) 存储池吗，<br/><br/>上次侦测 (scrub):"
@@ -143,7 +144,7 @@ msgstr "强制导入，即使可能出现池错误。"
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
-msgstr "即使报错也强制创建Vdev，请谨慎使用该设置！"
+msgstr "即使报错也强制创建 Vdev，请谨慎使用该设置！"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
@@ -239,7 +240,7 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refer"
-msgstr ""
+msgstr "Refer"
 
 msgid "Refresh"
 msgstr "刷新"
@@ -300,7 +301,7 @@ msgid "Successfully rollbacked!"
 msgstr "回滚成功！"
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "精简配置"
 
 msgid "Type"
 msgstr "类型"

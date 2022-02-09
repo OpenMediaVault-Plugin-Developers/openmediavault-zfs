@@ -4,13 +4,14 @@
 # 
 # Translators:
 # okpail <okpail@gmail.com>, 2014
+# Varkentjes, 2020
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2018-04-06 12:45+0000\n"
-"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
+"PO-Revision-Date: 2020-11-15 15:47+0000\n"
+"Last-Translator: Varkentjes\n"
 "Language-Team: Dutch (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,11 +21,11 @@ msgstr ""
 
 #, javascript-format
 msgid "% completed ..."
-msgstr "% afgewerkt..."
+msgstr "% voltooid ..."
 
 #, javascript-format
 msgid "100% completed ..."
-msgstr "100% verwerkt ..."
+msgstr "100% voltooid ..."
 
 msgid "Add Object"
 msgstr "Voeg een Object toe"
@@ -36,7 +37,7 @@ msgid "Ashift value"
 msgstr "Ashift waarde"
 
 msgid "Ashift value to use."
-msgstr "Te gebruiken Ashift waarde"
+msgstr "Te gebruiken ashift waarde"
 
 msgid "Available"
 msgstr "Beschikbaar"
@@ -54,7 +55,7 @@ msgid "Capacity"
 msgstr "Capaciteit"
 
 msgid "Clone"
-msgstr ""
+msgstr "Kloon"
 
 msgid "Clone name"
 msgstr "Kloon naam"
@@ -90,7 +91,7 @@ msgid ""
 "Do you really want to create the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Wil je werkelijk de ZFS-pool maken?<br/><br/>Het proces zal enige tijd duren en er wordt geen wijziging weergegeven totdat deze is voltooid.<br/>Laad de pagina opnieuw om eventuele wijzigingen bij te werken."
 
 msgid "Do you really want to delete the selected item(s)?"
 msgstr "Wil je werkelijk de geselecteerd item(s) verwijderen?"
@@ -99,25 +100,25 @@ msgid ""
 "Do you really want to expand the ZFS pool?<br/><br/>The process will take "
 "some time and no change will be displayed until it is completed.<br/>Please "
 "reload the page to update any changes."
-msgstr ""
+msgstr "Wilt u de ZFS-pool echt uitbreiden?<br/><br/>Het proces zal enige tijd duren en er wordt geen wijziging weergegeven totdat deze is voltooid.<br/>Laad de pagina opnieuw om eventuele wijzigingen bij te werken."
 
 msgid "Do you really want to export the pool?"
-msgstr ""
+msgstr "Wilt u de pool echt exporteren?"
 
 msgid "Do you really want to rollback the selected item?"
-msgstr ""
+msgstr "Wilt u het geselecteerde item echt terugdraaien?"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "Will je de pool werkelijk 'scrubben'?<br/><br/>Laatste scrub vond plaats op:"
+msgstr "Wil je de pool werkelijk 'scrubben'?<br/><br/>Laatste scrub vond plaats op:"
 
 msgid "Down"
 msgstr "Buiten werking"
 
 msgid "Edit"
-msgstr "Edit"
+msgstr "Bewerk"
 
 msgid "Edit properties"
-msgstr "Edit de eigenschappen"
+msgstr "Bewerk de eigenschappen"
 
 msgid "Expand"
 msgstr "Expandeer"
@@ -126,19 +127,19 @@ msgid "Expand Pool"
 msgstr "Expandeer de Pool"
 
 msgid "Export Pool"
-msgstr ""
+msgstr "Exporteer de Pool"
 
 msgid "Filesystem/Volume"
-msgstr ""
+msgstr "Bestandssysteem/Volume"
 
 msgid "Force"
-msgstr ""
+msgstr "Forceer"
 
 msgid "Force creation"
-msgstr "Kracht creatie"
+msgstr "Forceer creatie"
 
 msgid "Forces import, even if the pool appears to be potentially active."
-msgstr ""
+msgstr "Forceert import, zelfs als de pool potentieel actief lijkt te zijn."
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -151,16 +152,16 @@ msgid ""
 msgstr "Forceer de creatie van de pool, zelfs als fouten worden gerapporteerd. Wees extreem voorzichtig!"
 
 msgid "Import Pool"
-msgstr ""
+msgstr "Pool importeren"
 
 msgid "Import ZFS Pool(s)"
-msgstr ""
+msgstr "ZFS-pool(s) importeren"
 
 msgid "Import all"
-msgstr ""
+msgstr "Alles importeren"
 
 msgid "Import all missing pools. Overrides pool specification above."
-msgstr ""
+msgstr "Importeer alle ontbrekende pools. Negeert de bovenstaande poolspecificatie."
 
 msgid "Mirror"
 msgstr "Spiegel"
@@ -176,7 +177,7 @@ msgstr "Naam"
 
 msgid ""
 "Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "De naam van de nieuwe kloon. Deze kan overal in de ZFS hierarchy worden gehangen. "
+msgstr "Naam van de nieuwe kloon. Het kan overal in de ZFS-hiërarchie worden geplaatst."
 
 msgid ""
 "Name of the new object. Prefix will prepend the name. Please omit leading /"
@@ -186,7 +187,7 @@ msgid "New"
 msgstr "Nieuw"
 
 msgid "New Name"
-msgstr ""
+msgstr "Nieuwe naam"
 
 msgid "No items to display"
 msgstr "Geen items die kunnen worden weergegeven"
@@ -204,27 +205,27 @@ msgid "Ok"
 msgstr "Ok"
 
 msgid "Old Name"
-msgstr ""
+msgstr "Oude naam"
 
 msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "Optioneel mount point voor de pool. Gebruikelijk wordt de pool naam gebruikt."
+msgstr "Optioneel koppelpunt voor de pool. Gebruikelijk wordt de naam van de pool gebruikt."
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
-msgstr "Optioneel mount point van het filesystem. Als er niets wordt ingevuld zal het 'ouder' mount point automatisch vooraan aan de naam van het filesysteem worden toegevoegd. "
+msgstr "Optioneel koppelpunt van het bestandssysteem. Indien leeg gelaten, wordt het bovenliggende koppelpunt toegevoegd aan de naam van het bestandssysteem."
 
 msgid "Overview"
 msgstr "Overzicht"
 
 msgid "Pool Name"
-msgstr ""
+msgstr "Pool naam"
 
 msgid "Pool type"
 msgstr "Pool type"
 
 msgid "Prefix"
-msgstr "Prefix"
+msgstr "Voorvoegsel"
 
 msgid "Property"
 msgstr "Eigenschap"
@@ -239,19 +240,19 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "Refer"
-msgstr ""
+msgstr "Verwijzen"
 
 msgid "Refresh"
-msgstr "Informatie Vernieuwen"
+msgstr "Vernieuwen"
 
 msgid "Rename"
-msgstr ""
+msgstr "Hernoemen"
 
 msgid "Rename ZFS Object"
-msgstr ""
+msgstr "Hernoem ZFS-object"
 
 msgid "Rollback"
-msgstr ""
+msgstr "Terugdraaien"
 
 msgid "Save"
 msgstr "Opslaan"
@@ -260,47 +261,47 @@ msgid "Scrub"
 msgstr "Scrub"
 
 msgid "Serial Number"
-msgstr "Serie Nummer"
+msgstr "Serienummer"
 
 msgid "Set ashift"
 msgstr "Stel ashift in"
 
 msgid "Settings"
-msgstr ""
+msgstr "Instellingen"
 
 msgid "Size"
 msgstr "Grootte"
 
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "Grootte van het volume bijv. 5mb,100gb,1tb etc"
+msgstr "Grootte van het volume bijv. 5 MB, 100 GB, 1 TB, enz."
 
 msgid "Snapshot to clone"
 msgstr "Het Snapshot wat gekloond moet worden"
 
 msgid "Snapshots"
-msgstr ""
+msgstr "Snapshots"
 
 msgid "Source"
 msgstr "Bron"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "Geeft aan welke device alias gebruikt moet worden. Verander niets tenzij nodig."
+msgstr "Specificeert welke apparaatalias moet worden gebruikt. Verander niets tenzij dat nodig is."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Specificeer de shift waarde. Gebruik het alleen als je zeker weet dat je het nodig hebt."
+msgstr "Specificeer de ashift-waarde. Gebruik het alleen als je zeker weet dat je het nodig hebt."
 
 msgid "State"
-msgstr ""
+msgstr "Toestand"
 
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 msgid "Successfully rollbacked!"
-msgstr ""
+msgstr "Succesvol teruggedraaid!"
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "Thin provisioning"
 
 msgid "Type"
 msgstr "Type"
@@ -309,7 +310,7 @@ msgid "Up"
 msgstr "Aan"
 
 msgid "Updating property..."
-msgstr "Eigenschap vernieuwen..."
+msgstr "Eigenschap bijwerken ..."
 
 msgid "Used"
 msgstr "Gebruikt"
@@ -321,13 +322,13 @@ msgid "Vdev type"
 msgstr "Vdev type"
 
 msgid "Vendor"
-msgstr "Verkoper"
+msgstr "Leverancier"
 
 msgid "ZFS"
 msgstr "ZFS"
 
 msgid "ZFS ZED"
-msgstr ""
+msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"

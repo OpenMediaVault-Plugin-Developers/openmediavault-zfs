@@ -153,7 +153,7 @@ data:
         tooltip: _("Properties")
         execute:
           type: url
-          url: "/storage/zfs/pools/properties/{{ _selected[0].name }}/{{ _selected[0].type }}"
+          url: "/storage/zfs/pools/properties/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
         enabledConstraints:
           minSelected: 1
           maxSelected: 1

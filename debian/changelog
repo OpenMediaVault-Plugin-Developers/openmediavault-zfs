@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.5) stable; urgency=low
+
+  * Fix property editor for filesystem
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 09 Feb 2022 06:11:21 -0600
+
 openmediavault-zfs (6.0.4) stable; urgency=low
 
   * Add property editor

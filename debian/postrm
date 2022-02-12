@@ -5,15 +5,23 @@ set -e
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions
 
+remove_action() {
+    dpkg-trigger update-workbench
+}
 
 case "$1" in
   purge)
+    remove_action
     echo "Deleting Configuration"
     omv_config_delete "/config/services/zfs"
     rm -f /etc/modules-load.d/zfs.conf
     ;;
 
-  remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+  remove)
+    remove_action
+    ;;
+
+  upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
     ;;
 
   *)

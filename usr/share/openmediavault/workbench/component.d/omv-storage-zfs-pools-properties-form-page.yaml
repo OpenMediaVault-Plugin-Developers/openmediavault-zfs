@@ -17,6 +17,12 @@ data:
       - type: hidden
         name: uuid
         value: "{{ newconfobjuuid }}"
+      - type: hidden
+        name: name
+        value: "{{ _routeParams.name }}"
+      - type: hidden
+        name: type
+        value: "{{ _routeParams.type }}"
       - type: datatable
         name: properties
         label: _("Properties")
@@ -42,7 +48,7 @@ data:
             hidden: true
         actions:
           - template: add
-            dialogConfig:
+            formDialogConfig:
               title: _("New property")
               fields:
                 - type: textInput
@@ -58,12 +64,12 @@ data:
                   value: "local"
                 - type: hidden
                   name: modified
-                  value: "true"
+                  value: true
                 - type: hidden
                   name: newproperty
-                  value: "true"
+                  value: true
           - template: edit
-            dialogConfig:
+            formDialogConfig:
               title: _("Edit property")
               fields:
                 - type: textInput
@@ -73,15 +79,10 @@ data:
                 - type: textInput
                   name: value
                   label: _("Value")
-                - type: hidden
-                  name: source
-                  value: "local"
-                - type: hidden
-                  name: modified
-                  value: "true"
-                - type: hidden
-                  name: newproperty
-                  value: "false"
+              transform:
+                source: "local"
+                modified: true
+                newproperty: false
           - template: delete
         valueType: object
         value: []

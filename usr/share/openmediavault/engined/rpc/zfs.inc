@@ -361,6 +361,9 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 break;
         }
         foreach ($params['properties'] as $property) {
+            if ($property['modified'] !== true) {
+                continue;
+            }
             unset($objects);
             $objects = [];
             $objects[$property['property']] = $property['value'];

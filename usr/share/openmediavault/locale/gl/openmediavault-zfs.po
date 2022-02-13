@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2020-09-28 17:49+0000\n"
-"Last-Translator: Miguel Anxo Bouzada <mbouzada@gmail.com>\n"
+"POT-Creation-Date: 2022-02-13 12:47-0600\n"
+"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Galician (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/gl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,11 +26,29 @@ msgstr "% completado…"
 msgid "100% completed ..."
 msgstr "100% completado…"
 
+msgid "Add"
+msgstr ""
+
 msgid "Add Object"
 msgstr "Engadir obxecto"
 
 msgid "Add Pool"
 msgstr "Engadir a agrupación"
+
+msgid "Add filesystem|snap|volume"
+msgstr ""
+
+msgid "Add pool"
+msgstr ""
+
+msgid "Are you sure you want to delete to this snapshot?"
+msgstr ""
+
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+msgid "Are you sure you want to rollback to this snapshot?"
+msgstr ""
 
 msgid "Ashift value"
 msgstr "Valor de desviación do aliñamento «ashift»"
@@ -43,6 +61,9 @@ msgstr "Dispoñíbel"
 
 msgid "Basic"
 msgstr "Básico"
+
+msgid "By ID"
+msgstr ""
 
 msgid "By Id"
 msgstr "Polo ID"
@@ -59,11 +80,23 @@ msgstr "Clonar"
 msgid "Clone name"
 msgstr "Nome do clon"
 
+msgid "Compression"
+msgstr ""
+
+msgid "Compression type"
+msgstr ""
+
 msgid "Confirmation"
 msgstr "Confirmación"
 
+msgid "Create"
+msgstr ""
+
 msgid "Create ZFS Pool"
 msgstr "Crear unha agrupación ZFS"
+
+msgid "Created pool."
+msgstr ""
 
 msgid "Delete"
 msgstr "Eliminar"
@@ -119,6 +152,9 @@ msgstr "Editar"
 msgid "Edit properties"
 msgstr "Editar as propiedades"
 
+msgid "Edit property"
+msgstr ""
+
 msgid "Expand"
 msgstr "Ampliar"
 
@@ -127,6 +163,9 @@ msgstr "Ampliar a agrupación"
 
 msgid "Export Pool"
 msgstr "Exportar a agrupación"
+
+msgid "Filesystem"
+msgstr ""
 
 msgid "Filesystem/Volume"
 msgstr "Sistema de ficheiros/Volume"
@@ -149,6 +188,9 @@ msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "Forzar a creación da agrupación aínda que se informe de erros. Useo con extrema precaución."
+
+msgid "Import"
+msgstr ""
 
 msgid "Import Pool"
 msgstr "Importar a agrupación"
@@ -188,6 +230,12 @@ msgstr "Novo"
 msgid "New Name"
 msgstr "Novo nome"
 
+msgid "New Property"
+msgstr ""
+
+msgid "New property"
+msgstr ""
+
 msgid "No items to display"
 msgstr "Non hai elementos para amosar"
 
@@ -209,13 +257,25 @@ msgstr "Nome antigo"
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "Punto de montaxe opcional para a agrupación. O valor predeterminado é usar o nome da agrupación."
 
+msgid "Optional mountpoint for the pool. Default is to use the pool name."
+msgstr ""
+
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
 msgstr "Punto de montaxe opcional do sistema de ficheiros. Se o deixa en branco, o punto de montaxe pai anteporase ao nome do sistema de ficheiros."
 
+msgid "Optional mountpoint. Default is to use the name."
+msgstr ""
+
 msgid "Overview"
 msgstr "Vista xeral"
+
+msgid "Parent"
+msgstr ""
+
+msgid "Path"
+msgstr ""
 
 msgid "Pool Name"
 msgstr "Nome da agrupación"
@@ -223,8 +283,17 @@ msgstr "Nome da agrupación"
 msgid "Pool type"
 msgstr "Tipo de agrupación"
 
+msgid "Pools"
+msgstr ""
+
 msgid "Prefix"
 msgstr "Prefixo"
+
+msgid "Properties"
+msgstr ""
+
+msgid "Properties saved."
+msgstr ""
 
 msgid "Property"
 msgstr "Propiedade"
@@ -274,6 +343,12 @@ msgstr "Tamaño"
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "Tamaño do volume, p. ex. 5mb, 100gb, 1tb etc."
 
+msgid "Snap clone name"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Snapshot to clone"
 msgstr "Instantánea para clonar"
 
@@ -282,6 +357,15 @@ msgstr "Instantáneas"
 
 msgid "Source"
 msgstr "Orixe"
+
+msgid "Source name"
+msgstr ""
+
+msgid "Source path"
+msgstr ""
+
+msgid "Source pool"
+msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -323,6 +407,9 @@ msgstr "Tipo de dispositivo virtual «Vdev»"
 msgid "Vendor"
 msgstr "Fabricante"
 
+msgid "Volume"
+msgstr ""
+
 msgid "ZFS"
 msgstr "ZFS"
 
@@ -331,3 +418,45 @@ msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
+
+msgid "gzip"
+msgstr ""
+
+msgid "gzip-1"
+msgstr ""
+
+msgid "gzip-2"
+msgstr ""
+
+msgid "gzip-3"
+msgstr ""
+
+msgid "gzip-4"
+msgstr ""
+
+msgid "gzip-5"
+msgstr ""
+
+msgid "gzip-6"
+msgstr ""
+
+msgid "gzip-7"
+msgstr ""
+
+msgid "gzip-8"
+msgstr ""
+
+msgid "gzip-9"
+msgstr ""
+
+msgid "lz4"
+msgstr ""
+
+msgid "lzjb"
+msgstr ""
+
+msgid "zfs"
+msgstr ""
+
+msgid "zle"
+msgstr ""

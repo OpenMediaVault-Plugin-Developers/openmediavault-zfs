@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2021-12-04 20:17+0000\n"
-"Last-Translator: Daniel\n"
+"POT-Creation-Date: 2022-02-13 12:47-0600\n"
+"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Polish (Poland) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/pl_PL/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,10 +27,28 @@ msgstr "% ukończonych ..."
 msgid "100% completed ..."
 msgstr "100% ukończonych ..."
 
+msgid "Add"
+msgstr ""
+
 msgid "Add Object"
 msgstr "Dodaj obiekt"
 
 msgid "Add Pool"
+msgstr ""
+
+msgid "Add filesystem|snap|volume"
+msgstr ""
+
+msgid "Add pool"
+msgstr ""
+
+msgid "Are you sure you want to delete to this snapshot?"
+msgstr ""
+
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+msgid "Are you sure you want to rollback to this snapshot?"
 msgstr ""
 
 msgid "Ashift value"
@@ -43,6 +61,9 @@ msgid "Available"
 msgstr "Dostępne"
 
 msgid "Basic"
+msgstr ""
+
+msgid "By ID"
 msgstr ""
 
 msgid "By Id"
@@ -60,11 +81,23 @@ msgstr "Klonuj"
 msgid "Clone name"
 msgstr "Klonuj nazwę"
 
+msgid "Compression"
+msgstr ""
+
+msgid "Compression type"
+msgstr ""
+
 msgid "Confirmation"
 msgstr "Potwierdzenie"
 
+msgid "Create"
+msgstr ""
+
 msgid "Create ZFS Pool"
 msgstr "Stwórz ZFS Pool"
+
+msgid "Created pool."
+msgstr ""
 
 msgid "Delete"
 msgstr "Usuń"
@@ -120,6 +153,9 @@ msgstr "Edytuj"
 msgid "Edit properties"
 msgstr ""
 
+msgid "Edit property"
+msgstr ""
+
 msgid "Expand"
 msgstr ""
 
@@ -127,6 +163,9 @@ msgid "Expand Pool"
 msgstr ""
 
 msgid "Export Pool"
+msgstr ""
+
+msgid "Filesystem"
 msgstr ""
 
 msgid "Filesystem/Volume"
@@ -149,6 +188,9 @@ msgstr ""
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
+msgstr ""
+
+msgid "Import"
 msgstr ""
 
 msgid "Import Pool"
@@ -189,6 +231,12 @@ msgstr "Nowy"
 msgid "New Name"
 msgstr ""
 
+msgid "New Property"
+msgstr ""
+
+msgid "New property"
+msgstr ""
+
 msgid "No items to display"
 msgstr ""
 
@@ -210,12 +258,24 @@ msgstr ""
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr ""
 
+msgid "Optional mountpoint for the pool. Default is to use the pool name."
+msgstr ""
+
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
 msgstr ""
 
+msgid "Optional mountpoint. Default is to use the name."
+msgstr ""
+
 msgid "Overview"
+msgstr ""
+
+msgid "Parent"
+msgstr ""
+
+msgid "Path"
 msgstr ""
 
 msgid "Pool Name"
@@ -224,8 +284,17 @@ msgstr ""
 msgid "Pool type"
 msgstr ""
 
+msgid "Pools"
+msgstr ""
+
 msgid "Prefix"
 msgstr "Prefiks"
+
+msgid "Properties"
+msgstr ""
+
+msgid "Properties saved."
+msgstr ""
 
 msgid "Property"
 msgstr ""
@@ -275,6 +344,12 @@ msgstr "Rozmiar"
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr ""
 
+msgid "Snap clone name"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Snapshot to clone"
 msgstr ""
 
@@ -283,6 +358,15 @@ msgstr ""
 
 msgid "Source"
 msgstr "Źródło"
+
+msgid "Source name"
+msgstr ""
+
+msgid "Source path"
+msgstr ""
+
+msgid "Source pool"
+msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -324,6 +408,9 @@ msgstr ""
 msgid "Vendor"
 msgstr ""
 
+msgid "Volume"
+msgstr ""
+
 msgid "ZFS"
 msgstr "ZFS"
 
@@ -332,3 +419,45 @@ msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
+
+msgid "gzip"
+msgstr ""
+
+msgid "gzip-1"
+msgstr ""
+
+msgid "gzip-2"
+msgstr ""
+
+msgid "gzip-3"
+msgstr ""
+
+msgid "gzip-4"
+msgstr ""
+
+msgid "gzip-5"
+msgstr ""
+
+msgid "gzip-6"
+msgstr ""
+
+msgid "gzip-7"
+msgstr ""
+
+msgid "gzip-8"
+msgstr ""
+
+msgid "gzip-9"
+msgstr ""
+
+msgid "lz4"
+msgstr ""
+
+msgid "lzjb"
+msgstr ""
+
+msgid "zfs"
+msgstr ""
+
+msgid "zle"
+msgstr ""

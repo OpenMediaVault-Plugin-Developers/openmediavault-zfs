@@ -12,9 +12,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2021-07-26 16:39+0000\n"
-"Last-Translator: Dampflok_HD\n"
+"POT-Creation-Date: 2022-02-13 12:47-0600\n"
+"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,11 +30,29 @@ msgstr "% fertiggestellt ..."
 msgid "100% completed ..."
 msgstr "100% fertiggestellt ..."
 
+msgid "Add"
+msgstr ""
+
 msgid "Add Object"
 msgstr "Objekt hinzufügen"
 
 msgid "Add Pool"
 msgstr "Pool hinzufügen"
+
+msgid "Add filesystem|snap|volume"
+msgstr ""
+
+msgid "Add pool"
+msgstr ""
+
+msgid "Are you sure you want to delete to this snapshot?"
+msgstr ""
+
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+msgid "Are you sure you want to rollback to this snapshot?"
+msgstr ""
 
 msgid "Ashift value"
 msgstr "Ashift Wert"
@@ -47,6 +65,9 @@ msgstr "Verfügbar"
 
 msgid "Basic"
 msgstr "Basis"
+
+msgid "By ID"
+msgstr ""
 
 msgid "By Id"
 msgstr "Nach Kennung"
@@ -63,11 +84,23 @@ msgstr "Klonen"
 msgid "Clone name"
 msgstr "Klonname"
 
+msgid "Compression"
+msgstr ""
+
+msgid "Compression type"
+msgstr ""
+
 msgid "Confirmation"
 msgstr "Bestätigung"
 
+msgid "Create"
+msgstr ""
+
 msgid "Create ZFS Pool"
 msgstr "Erstelle ZFS Pool"
+
+msgid "Created pool."
+msgstr ""
 
 msgid "Delete"
 msgstr "Löschen"
@@ -123,6 +156,9 @@ msgstr "Bearbeiten"
 msgid "Edit properties"
 msgstr "Eigenschaften bearbeiten"
 
+msgid "Edit property"
+msgstr ""
+
 msgid "Expand"
 msgstr "Erweitern"
 
@@ -131,6 +167,9 @@ msgstr "Pool Erweitern"
 
 msgid "Export Pool"
 msgstr "Pool exportieren"
+
+msgid "Filesystem"
+msgstr ""
 
 msgid "Filesystem/Volume"
 msgstr "Dateisystem/Volume"
@@ -153,6 +192,9 @@ msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "Forciert die Erstellung eines Pools, auch wenn Fehler auftreten. Mit extremer Vorsicht verwenden!"
+
+msgid "Import"
+msgstr ""
 
 msgid "Import Pool"
 msgstr "Pool importieren"
@@ -192,6 +234,12 @@ msgstr "Neu"
 msgid "New Name"
 msgstr "Neuer Name"
 
+msgid "New Property"
+msgstr ""
+
+msgid "New property"
+msgstr ""
+
 msgid "No items to display"
 msgstr "Keine anzuzeigenden Elemente"
 
@@ -213,13 +261,25 @@ msgstr "Alter Name"
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "Optionaler Einhängepunkt für den Poll. Standard ist die Verwendung des Poolnamens."
 
+msgid "Optional mountpoint for the pool. Default is to use the pool name."
+msgstr ""
+
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
 msgstr ""
 
+msgid "Optional mountpoint. Default is to use the name."
+msgstr ""
+
 msgid "Overview"
 msgstr "Übersicht"
+
+msgid "Parent"
+msgstr ""
+
+msgid "Path"
+msgstr ""
 
 msgid "Pool Name"
 msgstr "Pool Name"
@@ -227,8 +287,17 @@ msgstr "Pool Name"
 msgid "Pool type"
 msgstr "Pool Typ"
 
+msgid "Pools"
+msgstr ""
+
 msgid "Prefix"
 msgstr "Präfix"
+
+msgid "Properties"
+msgstr ""
+
+msgid "Properties saved."
+msgstr ""
 
 msgid "Property"
 msgstr "Eigenschaft"
@@ -278,6 +347,12 @@ msgstr "Größe"
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "Größe des Volumens, z.B. 5mb,100gb,1tb, usw."
 
+msgid "Snap clone name"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Snapshot to clone"
 msgstr "Zu klonender Schnappschuss"
 
@@ -286,6 +361,15 @@ msgstr "Schnappschüsse"
 
 msgid "Source"
 msgstr "Quelle"
+
+msgid "Source name"
+msgstr ""
+
+msgid "Source path"
+msgstr ""
+
+msgid "Source pool"
+msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -327,6 +411,9 @@ msgstr "Vdev-Typ"
 msgid "Vendor"
 msgstr "Anbieter"
 
+msgid "Volume"
+msgstr ""
+
 msgid "ZFS"
 msgstr "ZFS"
 
@@ -335,3 +422,45 @@ msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
+
+msgid "gzip"
+msgstr ""
+
+msgid "gzip-1"
+msgstr ""
+
+msgid "gzip-2"
+msgstr ""
+
+msgid "gzip-3"
+msgstr ""
+
+msgid "gzip-4"
+msgstr ""
+
+msgid "gzip-5"
+msgstr ""
+
+msgid "gzip-6"
+msgstr ""
+
+msgid "gzip-7"
+msgstr ""
+
+msgid "gzip-8"
+msgstr ""
+
+msgid "gzip-9"
+msgstr ""
+
+msgid "lz4"
+msgstr ""
+
+msgid "lzjb"
+msgstr ""
+
+msgid "zfs"
+msgstr ""
+
+msgid "zle"
+msgstr ""

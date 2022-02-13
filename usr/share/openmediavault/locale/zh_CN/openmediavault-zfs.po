@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-29 07:35-0500\n"
-"PO-Revision-Date: 2021-11-17 07:31+0000\n"
-"Last-Translator: songming <by@songming.me>\n"
+"POT-Creation-Date: 2022-02-13 12:47-0600\n"
+"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,11 +27,29 @@ msgstr "完成 % ..."
 msgid "100% completed ..."
 msgstr "完成100% ..."
 
+msgid "Add"
+msgstr ""
+
 msgid "Add Object"
 msgstr "添加对象"
 
 msgid "Add Pool"
 msgstr "添加池"
+
+msgid "Add filesystem|snap|volume"
+msgstr ""
+
+msgid "Add pool"
+msgstr ""
+
+msgid "Are you sure you want to delete to this snapshot?"
+msgstr ""
+
+msgid "Are you sure you want to delete?"
+msgstr ""
+
+msgid "Are you sure you want to rollback to this snapshot?"
+msgstr ""
 
 msgid "Ashift value"
 msgstr "Ashift 值"
@@ -44,6 +62,9 @@ msgstr "可用"
 
 msgid "Basic"
 msgstr "基础"
+
+msgid "By ID"
+msgstr ""
 
 msgid "By Id"
 msgstr "以 id"
@@ -60,11 +81,23 @@ msgstr "克隆"
 msgid "Clone name"
 msgstr "克隆名称"
 
+msgid "Compression"
+msgstr ""
+
+msgid "Compression type"
+msgstr ""
+
 msgid "Confirmation"
 msgstr "确认"
 
+msgid "Create"
+msgstr ""
+
 msgid "Create ZFS Pool"
 msgstr "创建 ZFS 池"
+
+msgid "Created pool."
+msgstr ""
 
 msgid "Delete"
 msgstr "删除"
@@ -120,6 +153,9 @@ msgstr "编辑"
 msgid "Edit properties"
 msgstr "编辑特性"
 
+msgid "Edit property"
+msgstr ""
+
 msgid "Expand"
 msgstr "扩展"
 
@@ -128,6 +164,9 @@ msgstr "扩展池"
 
 msgid "Export Pool"
 msgstr "导出池"
+
+msgid "Filesystem"
+msgstr ""
 
 msgid "Filesystem/Volume"
 msgstr "文件系统/卷"
@@ -150,6 +189,9 @@ msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "即使报错也强制创建池，请谨慎使用该设置！"
+
+msgid "Import"
+msgstr ""
 
 msgid "Import Pool"
 msgstr "导入池"
@@ -189,6 +231,12 @@ msgstr "新增"
 msgid "New Name"
 msgstr "新名称"
 
+msgid "New Property"
+msgstr ""
+
+msgid "New property"
+msgstr ""
+
 msgid "No items to display"
 msgstr "没有项目显示"
 
@@ -210,13 +258,25 @@ msgstr "旧名称"
 msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "可选池的挂载点，默认使用池名称挂载。"
 
+msgid "Optional mountpoint for the pool. Default is to use the pool name."
+msgstr ""
+
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
 "be prepended to name of the filesystem."
 msgstr "可选文件系统的挂载点，如果留空则父挂载点将作为文件系统名称的前缀。"
 
+msgid "Optional mountpoint. Default is to use the name."
+msgstr ""
+
 msgid "Overview"
 msgstr "概览"
+
+msgid "Parent"
+msgstr ""
+
+msgid "Path"
+msgstr ""
 
 msgid "Pool Name"
 msgstr "池名称"
@@ -224,8 +284,17 @@ msgstr "池名称"
 msgid "Pool type"
 msgstr "池类型"
 
+msgid "Pools"
+msgstr ""
+
 msgid "Prefix"
 msgstr "前缀"
+
+msgid "Properties"
+msgstr ""
+
+msgid "Properties saved."
+msgstr ""
 
 msgid "Property"
 msgstr "特性"
@@ -275,6 +344,12 @@ msgstr "大小"
 msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "卷的大小，如5mb、100gb、1tb等"
 
+msgid "Snap clone name"
+msgstr ""
+
+msgid "Snapshot"
+msgstr ""
+
 msgid "Snapshot to clone"
 msgstr "快照克隆"
 
@@ -283,6 +358,15 @@ msgstr "快照"
 
 msgid "Source"
 msgstr "源"
+
+msgid "Source name"
+msgstr ""
+
+msgid "Source path"
+msgstr ""
+
+msgid "Source pool"
+msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -324,6 +408,9 @@ msgstr "Vdev类型"
 msgid "Vendor"
 msgstr "供应商"
 
+msgid "Volume"
+msgstr ""
+
 msgid "ZFS"
 msgstr "ZFS"
 
@@ -332,3 +419,45 @@ msgstr "ZFS ZED"
 
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
+
+msgid "gzip"
+msgstr ""
+
+msgid "gzip-1"
+msgstr ""
+
+msgid "gzip-2"
+msgstr ""
+
+msgid "gzip-3"
+msgstr ""
+
+msgid "gzip-4"
+msgstr ""
+
+msgid "gzip-5"
+msgstr ""
+
+msgid "gzip-6"
+msgstr ""
+
+msgid "gzip-7"
+msgstr ""
+
+msgid "gzip-8"
+msgstr ""
+
+msgid "gzip-9"
+msgstr ""
+
+msgid "lz4"
+msgstr ""
+
+msgid "lzjb"
+msgstr ""
+
+msgid "zfs"
+msgstr ""
+
+msgid "zle"
+msgstr ""

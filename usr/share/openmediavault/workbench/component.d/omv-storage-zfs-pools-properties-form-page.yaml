@@ -83,7 +83,6 @@ data:
                 source: "local"
                 modified: true
                 newproperty: false
-          - template: delete
         valueType: object
         value: []
     buttons:

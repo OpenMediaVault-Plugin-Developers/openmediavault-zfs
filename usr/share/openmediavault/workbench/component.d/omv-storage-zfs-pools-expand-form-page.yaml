@@ -1,27 +1,25 @@
 version: "1.0"
 type: component
 data:
-  name: omv-storage-zfs-pools-form-page
+  name: omv-storage-zfs-pools-expand-form-page
   type: formPage
   config:
     request:
       service: Zfs
       post:
-        method: addPool
+        method: expandPool
+        confirmationDialogConfig:
+          template: confirmation
+          message: _('Do you really want to expand the ZFS pool?')
     fields:
-      - type: hidden
-        name: uuid
-        value: "{{ newconfobjuuid }}"
       - type: textInput
         name: name
-        label: _("Name")
-        value: ""
-        validators:
-          required: true
-          patternType: 'shareName'
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
       - type: select
-        name: pooltype
-        label: _("Pool type")
+        name: vdevtype
+        label: _("Vdev type")
         value: "raidz1"
         store:
           data:
@@ -107,11 +105,6 @@ data:
                       prop: devices
                   arg1: 5
               errorData: _('At least five devices are required.')
-      - type: textInput
-        name: mountpoint
-        label: _("Mountpoint")
-        value: ""
-        hint: _("Optional mountpoint for the pool. Default is to use the pool name.")
       - type: select
         name: devalias
         label: _("Device alias")
@@ -126,60 +119,7 @@ data:
         name: force
         label: _("Force creation")
         value: false
-        hint: _("Forces the creation of the pool even if errors are reported. Use with extreme caution!")
-      - type: container
-        fields:
-          - type: checkbox
-            name: ashift
-            label: _("Set ashift")
-            value: false
-            hint: _("Specify ashift value. Only use if you are sure you need it.")
-          - type: numberInput
-            name: ashiftval
-            label: _("Ashift value")
-            value: 0
-            validators:
-              min: 0
-              max: 16
-              patternType: integer
-              required: true
-            modifiers:
-              - type: visible
-                constraint:
-                  operator: truthy
-                  arg0:
-                    prop: ashift
-      - type: container
-        fields:
-          - type: checkbox
-            name: compress
-            label: _("Compression")
-            value: false
-          - type: select
-            name: compresstype
-            label: _("Compression type")
-            value: "lz4"
-            store:
-              data:
-                - ["gzip", _("gzip")]
-                - ["gzip-1", _("gzip-1")]
-                - ["gzip-2", _("gzip-2")]
-                - ["gzip-3", _("gzip-3")]
-                - ["gzip-4", _("gzip-4")]
-                - ["gzip-5", _("gzip-5")]
-                - ["gzip-6", _("gzip-6")]
-                - ["gzip-7", _("gzip-7")]
-                - ["gzip-8", _("gzip-8")]
-                - ["gzip-9", _("gzip-9")]
-                - ["lz4", _("lz4")]
-                - ["lzjb", _("lzjb")]
-                - ["zle", _("zle")]
-            modifiers:
-              - type: visible
-                constraint:
-                  operator: truthy
-                  arg0:
-                    prop: compress
+        hint: _("Forces the creation of the Vded even if errors are reported. Use with extreme caution!")
     buttons:
       - template: submit
         execute:

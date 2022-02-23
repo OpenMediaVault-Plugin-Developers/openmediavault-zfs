@@ -131,7 +131,11 @@
 				"required": true
 			},
 			"devices": {
-				"type": "string",
+				"type": "array",
+				"items": {
+					"type": "string",
+					"format": "devicefile"
+				},
 				"required": true
 			},
 			"force": {

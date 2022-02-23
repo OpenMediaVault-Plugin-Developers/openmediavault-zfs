@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/expand/:pool"
+  title: _("Expand")
+  notificationTitle: _("Expanded pool.")
+  component: omv-storage-zfs-pools-expand-form-page

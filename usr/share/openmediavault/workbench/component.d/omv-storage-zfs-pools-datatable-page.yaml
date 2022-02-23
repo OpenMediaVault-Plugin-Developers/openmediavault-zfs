@@ -66,6 +66,19 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/create"
+          - text: _("Expand pool")
+            icon: mdi:expand-all-outline
+            execute:
+              type: url
+              url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: type
+                  arg1: "Pool"
           - text: _("Add filesystem|snap|volume")
             icon: mdi:plus
             execute:
@@ -174,7 +187,7 @@ data:
           minSelected: 1
           maxSelected: 1
         confirmationDialogConfig:
-          template: confirmation
+          template: confirmation-critical
           message: _("Are you sure you want to delete?")
         execute:
           type: request

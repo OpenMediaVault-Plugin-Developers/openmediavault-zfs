@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2019 OpenMediaVault Plugin Developers
+ * Copyright (C) 2014-2022 OpenMediaVault Plugin Developers
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -298,6 +298,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
+        OMVModuleZFSUtil::fixOMVMntEnt($context);
     }
 
     public function getProperties($params, $context)
@@ -451,7 +452,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
         OMVModuleZFSUtil::exec($cmd,$out,$res);
         $output .= implode("\n\r", $out);
-        return ["details" => $output];
+        return ($output);
     }
 
     public function expandPool($params, $context)

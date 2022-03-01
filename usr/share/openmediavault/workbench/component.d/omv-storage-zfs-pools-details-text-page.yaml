@@ -1,0 +1,14 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-details-text-page
+  type: textPage
+  config:
+    hasReloadButton: true
+    request:
+      service: Zfs
+      get:
+        method: getObjectDetails
+        params:
+          name: "{{ _routeParams.name }}"
+          type: "{{ _routeParams.type }}"

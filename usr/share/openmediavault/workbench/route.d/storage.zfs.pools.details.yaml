@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/details/:name/:type"
+  title: _("Details")
+  editing: true
+  component: omv-storage-zfs-pools-details-text-page

@@ -1,6 +1,6 @@
 # @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
 # @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
-# @copyright Copyright (c) 2019-2020 OpenMediaVault Plugin Developers
+# @copyright Copyright (c) 2019-2022 OpenMediaVault Plugin Developers
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

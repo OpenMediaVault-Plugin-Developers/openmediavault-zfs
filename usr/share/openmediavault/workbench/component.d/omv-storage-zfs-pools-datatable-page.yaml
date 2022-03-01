@@ -180,6 +180,37 @@ data:
             method: getObjectTree
             task: false
             successUrl: /storage/zfs/pools
+      - type: menu
+        icon: mdi:hammer-wrench
+        tooltip: _("Tools")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Details")
+            icon: mdi:information-outline
+            execute:
+              type: url
+              url: "/storage/zfs/pools/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+          - text: _("Scrub")
+            icon: mdi:progress-wrench
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: type
+                  arg1: "Pool"
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: scrubPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                successUrl: /storage/zfs/pools
       - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete

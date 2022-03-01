@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# kochin <kochinc@outlook.com>, 2014,2018
+# kochin <kochinc@outlook.com>, 2014,2018,2022
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-13 12:47-0600\n"
-"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"POT-Creation-Date: 2022-02-28 18:42-0600\n"
+"PO-Revision-Date: 2022-03-01 00:42+0000\n"
 "Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgid "100% completed ..."
 msgstr "100% 完成 ..."
 
 msgid "Add"
-msgstr ""
+msgstr "新增"
 
 msgid "Add Object"
 msgstr "新增物件"
@@ -36,19 +36,19 @@ msgid "Add Pool"
 msgstr "新增集用場"
 
 msgid "Add filesystem|snap|volume"
-msgstr ""
+msgstr "新增 檔案系統|快照|儲存卷"
 
 msgid "Add pool"
-msgstr ""
+msgstr "新增集用場"
 
 msgid "Are you sure you want to delete to this snapshot?"
-msgstr ""
+msgstr "您確定要删除此快照？"
 
 msgid "Are you sure you want to delete?"
-msgstr ""
+msgstr "您確定要删除？"
 
 msgid "Are you sure you want to rollback to this snapshot?"
-msgstr ""
+msgstr "您確定要回轉到此快照？"
 
 msgid "Ashift value"
 msgstr "Ashift 數值"
@@ -63,7 +63,7 @@ msgid "Basic"
 msgstr "基本"
 
 msgid "By ID"
-msgstr ""
+msgstr "以 ID"
 
 msgid "By Id"
 msgstr "以 Id"
@@ -81,22 +81,22 @@ msgid "Clone name"
 msgstr "複件名稱"
 
 msgid "Compression"
-msgstr ""
+msgstr "壓縮"
 
 msgid "Compression type"
-msgstr ""
+msgstr "壓縮型式"
 
 msgid "Confirmation"
 msgstr "確認"
 
 msgid "Create"
-msgstr ""
+msgstr "建立"
 
 msgid "Create ZFS Pool"
 msgstr "建立 ZFS 集用場"
 
 msgid "Created pool."
-msgstr ""
+msgstr "建立集用場。"
 
 msgid "Delete"
 msgstr "刪除"
@@ -153,7 +153,7 @@ msgid "Edit properties"
 msgstr "編輯特性"
 
 msgid "Edit property"
-msgstr ""
+msgstr "編輯特性"
 
 msgid "Expand"
 msgstr "擴展"
@@ -161,11 +161,17 @@ msgstr "擴展"
 msgid "Expand Pool"
 msgstr "擴展集用場"
 
+msgid "Expand pool"
+msgstr ""
+
+msgid "Expanded pool."
+msgstr ""
+
 msgid "Export Pool"
 msgstr "匯出集用場"
 
 msgid "Filesystem"
-msgstr ""
+msgstr "檔案系統"
 
 msgid "Filesystem/Volume"
 msgstr "檔案系統/磁卷"
@@ -180,6 +186,11 @@ msgid "Forces import, even if the pool appears to be potentially active."
 msgstr "強制匯入，即使該集用場似乎有正在作用中的可能，"
 
 msgid ""
+"Forces the creation of the Vded even if errors are reported. Use with "
+"extreme caution!"
+msgstr ""
+
+msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
 msgstr "即使有錯誤報告，也強迫建立 Vdev。請務必謹慎使用！"
@@ -190,7 +201,7 @@ msgid ""
 msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用！"
 
 msgid "Import"
-msgstr ""
+msgstr "匯入"
 
 msgid "Import Pool"
 msgstr "匯入集用場"
@@ -231,10 +242,10 @@ msgid "New Name"
 msgstr "新名稱"
 
 msgid "New Property"
-msgstr ""
+msgstr "新特性"
 
 msgid "New property"
-msgstr ""
+msgstr "新特性"
 
 msgid "No items to display"
 msgstr "無項目可顯示"
@@ -258,7 +269,7 @@ msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
-msgstr ""
+msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
@@ -266,15 +277,18 @@ msgid ""
 msgstr "給檔案系統的選用性掛載點。如果留空白，上層掛載點將被加在檔案系統名稱之前。"
 
 msgid "Optional mountpoint. Default is to use the name."
-msgstr ""
+msgstr "選用性掛載點。預設為使用名稱。"
 
 msgid "Overview"
 msgstr "概觀"
 
 msgid "Parent"
-msgstr ""
+msgstr "上層"
 
 msgid "Path"
+msgstr "路徑"
+
+msgid "Pool"
 msgstr ""
 
 msgid "Pool Name"
@@ -284,16 +298,16 @@ msgid "Pool type"
 msgstr "集用場型式"
 
 msgid "Pools"
-msgstr ""
+msgstr "集用場"
 
 msgid "Prefix"
 msgstr "前綴詞"
 
 msgid "Properties"
-msgstr ""
+msgstr "特性"
 
 msgid "Properties saved."
-msgstr ""
+msgstr "特性已被儲存。"
 
 msgid "Property"
 msgstr "特性"
@@ -344,10 +358,10 @@ msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "磁碟大小，例如 5mb、100gb、1tb 等等"
 
 msgid "Snap clone name"
-msgstr ""
+msgstr "快照複件名稱"
 
 msgid "Snapshot"
-msgstr ""
+msgstr "快照"
 
 msgid "Snapshot to clone"
 msgstr "攝取快照到複件"
@@ -359,13 +373,13 @@ msgid "Source"
 msgstr "來源"
 
 msgid "Source name"
-msgstr ""
+msgstr "來源名稱"
 
 msgid "Source path"
-msgstr ""
+msgstr "來源路徑"
 
 msgid "Source pool"
-msgstr ""
+msgstr "來源集用場"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -385,6 +399,9 @@ msgstr "成功地轉返！"
 
 msgid "Thin provisioning"
 msgstr "精簡配置"
+
+msgid "Tools"
+msgstr ""
 
 msgid "Type"
 msgstr "型式"
@@ -408,7 +425,7 @@ msgid "Vendor"
 msgstr "供應商"
 
 msgid "Volume"
-msgstr ""
+msgstr "儲存卷"
 
 msgid "ZFS"
 msgstr "ZFS"
@@ -420,43 +437,43 @@ msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
 msgid "gzip"
-msgstr ""
+msgstr "gzip"
 
 msgid "gzip-1"
-msgstr ""
+msgstr "gzip-1"
 
 msgid "gzip-2"
-msgstr ""
+msgstr "gzip-2"
 
 msgid "gzip-3"
-msgstr ""
+msgstr "gzip-3"
 
 msgid "gzip-4"
-msgstr ""
+msgstr "gzip-4"
 
 msgid "gzip-5"
-msgstr ""
+msgstr "gzip-5"
 
 msgid "gzip-6"
-msgstr ""
+msgstr "gzip-6"
 
 msgid "gzip-7"
-msgstr ""
+msgstr "gzip-7"
 
 msgid "gzip-8"
-msgstr ""
+msgstr "gzip-8"
 
 msgid "gzip-9"
-msgstr ""
+msgstr "gzip-9"
 
 msgid "lz4"
-msgstr ""
+msgstr "lz4"
 
 msgid "lzjb"
-msgstr ""
+msgstr "lzjb"
 
 msgid "zfs"
-msgstr ""
+msgstr "zfs"
 
 msgid "zle"
-msgstr ""
+msgstr "zle"

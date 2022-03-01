@@ -1,3 +1,11 @@
+openmediavault-zfs (6.0.7) stable; urgency=low
+
+  * Add pool expand
+  * Add details
+  * Add scrub
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 28 Feb 2022 18:42:11 -0600
+
 openmediavault-zfs (6.0.6) stable; urgency=low
 
   * Fix properties

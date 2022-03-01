@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-13 12:47-0600\n"
-"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"POT-Creation-Date: 2022-02-28 18:42-0600\n"
+"PO-Revision-Date: 2022-03-01 00:42+0000\n"
 "Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -162,6 +162,12 @@ msgstr "Расширить"
 msgid "Expand Pool"
 msgstr "Расширить пул"
 
+msgid "Expand pool"
+msgstr ""
+
+msgid "Expanded pool."
+msgstr ""
+
 msgid "Export Pool"
 msgstr "Экспортировать пул"
 
@@ -179,6 +185,11 @@ msgstr "Создать принудительно"
 
 msgid "Forces import, even if the pool appears to be potentially active."
 msgstr "Принудительный импорт, даже если пул потенциально активен"
+
+msgid ""
+"Forces the creation of the Vded even if errors are reported. Use with "
+"extreme caution!"
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -276,6 +287,9 @@ msgid "Parent"
 msgstr ""
 
 msgid "Path"
+msgstr ""
+
+msgid "Pool"
 msgstr ""
 
 msgid "Pool Name"
@@ -386,6 +400,9 @@ msgstr "Откат произведен успешно!"
 
 msgid "Thin provisioning"
 msgstr "Тонкая настройка"
+
+msgid "Tools"
+msgstr ""
 
 msgid "Type"
 msgstr "Тип"

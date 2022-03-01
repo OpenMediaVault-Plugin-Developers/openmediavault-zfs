@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-13 12:47-0600\n"
-"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"POT-Creation-Date: 2022-02-28 18:42-0600\n"
+"PO-Revision-Date: 2022-03-01 00:42+0000\n"
 "Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: Italian (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/it/)\n"
 "MIME-Version: 1.0\n"
@@ -162,6 +162,12 @@ msgstr "Espandi"
 msgid "Expand Pool"
 msgstr "Espandi Pool"
 
+msgid "Expand pool"
+msgstr ""
+
+msgid "Expanded pool."
+msgstr ""
+
 msgid "Export Pool"
 msgstr ""
 
@@ -178,6 +184,11 @@ msgid "Force creation"
 msgstr "Forza creazione"
 
 msgid "Forces import, even if the pool appears to be potentially active."
+msgstr ""
+
+msgid ""
+"Forces the creation of the Vded even if errors are reported. Use with "
+"extreme caution!"
 msgstr ""
 
 msgid ""
@@ -276,6 +287,9 @@ msgid "Parent"
 msgstr ""
 
 msgid "Path"
+msgstr ""
+
+msgid "Pool"
 msgstr ""
 
 msgid "Pool Name"
@@ -385,6 +399,9 @@ msgid "Successfully rollbacked!"
 msgstr ""
 
 msgid "Thin provisioning"
+msgstr ""
+
+msgid "Tools"
 msgstr ""
 
 msgid "Type"

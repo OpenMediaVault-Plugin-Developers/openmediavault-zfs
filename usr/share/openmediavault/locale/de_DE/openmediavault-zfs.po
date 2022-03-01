@@ -5,15 +5,15 @@
 # Translators:
 # Dampflok_HD, 2021
 # David Hönel <davidh1990@gmx.de>, 2015
-# Ettore Atalan <atalanttore@googlemail.com>, 2014,2016,2018,2020
+# Ettore Atalan <atalanttore@googlemail.com>, 2014,2016,2018,2020,2022
 # 10a15b38c3121a70dc67d288ab76de5d, 2017
 # WastlJ, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-13 12:47-0600\n"
-"PO-Revision-Date: 2022-02-13 18:47+0000\n"
+"POT-Creation-Date: 2022-02-28 18:42-0600\n"
+"PO-Revision-Date: 2022-03-01 00:42+0000\n"
 "Last-Translator: Aaron Murray <aaronmurray27@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgid "100% completed ..."
 msgstr "100% fertiggestellt ..."
 
 msgid "Add"
-msgstr ""
+msgstr "Hinzufügen"
 
 msgid "Add Object"
 msgstr "Objekt hinzufügen"
@@ -43,7 +43,7 @@ msgid "Add filesystem|snap|volume"
 msgstr ""
 
 msgid "Add pool"
-msgstr ""
+msgstr "Pool hinzufügen"
 
 msgid "Are you sure you want to delete to this snapshot?"
 msgstr ""
@@ -67,7 +67,7 @@ msgid "Basic"
 msgstr "Basis"
 
 msgid "By ID"
-msgstr ""
+msgstr "Nach Kennung"
 
 msgid "By Id"
 msgstr "Nach Kennung"
@@ -85,22 +85,22 @@ msgid "Clone name"
 msgstr "Klonname"
 
 msgid "Compression"
-msgstr ""
+msgstr "Komprimierung"
 
 msgid "Compression type"
-msgstr ""
+msgstr "Komprimierungsart"
 
 msgid "Confirmation"
 msgstr "Bestätigung"
 
 msgid "Create"
-msgstr ""
+msgstr "Erstellen"
 
 msgid "Create ZFS Pool"
-msgstr "Erstelle ZFS Pool"
+msgstr "ZFS-Pool erstellen"
 
 msgid "Created pool."
-msgstr ""
+msgstr "Pool erstellt."
 
 msgid "Delete"
 msgstr "Löschen"
@@ -157,19 +157,25 @@ msgid "Edit properties"
 msgstr "Eigenschaften bearbeiten"
 
 msgid "Edit property"
-msgstr ""
+msgstr "Eigenschaft bearbeiten"
 
 msgid "Expand"
 msgstr "Erweitern"
 
 msgid "Expand Pool"
-msgstr "Pool Erweitern"
+msgstr "Pool erweitern"
+
+msgid "Expand pool"
+msgstr ""
+
+msgid "Expanded pool."
+msgstr ""
 
 msgid "Export Pool"
 msgstr "Pool exportieren"
 
 msgid "Filesystem"
-msgstr ""
+msgstr "Dateisystem"
 
 msgid "Filesystem/Volume"
 msgstr "Dateisystem/Volume"
@@ -184,6 +190,11 @@ msgid "Forces import, even if the pool appears to be potentially active."
 msgstr "Erzwingt den Import, auch wenn der Pool potenziell aktiv zu sein scheint."
 
 msgid ""
+"Forces the creation of the Vded even if errors are reported. Use with "
+"extreme caution!"
+msgstr ""
+
+msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
 "extreme caution!"
 msgstr "Forciert die Erstellung von Vdev, auch wenn Fehler auftreten. Mit extremer Vorsicht zu verwenden!"
@@ -194,7 +205,7 @@ msgid ""
 msgstr "Forciert die Erstellung eines Pools, auch wenn Fehler auftreten. Mit extremer Vorsicht verwenden!"
 
 msgid "Import"
-msgstr ""
+msgstr "Importieren"
 
 msgid "Import Pool"
 msgstr "Pool importieren"
@@ -235,10 +246,10 @@ msgid "New Name"
 msgstr "Neuer Name"
 
 msgid "New Property"
-msgstr ""
+msgstr "Neue Eigenschaft"
 
 msgid "New property"
-msgstr ""
+msgstr "Neue Eigenschaft"
 
 msgid "No items to display"
 msgstr "Keine anzuzeigenden Elemente"
@@ -276,9 +287,12 @@ msgid "Overview"
 msgstr "Übersicht"
 
 msgid "Parent"
-msgstr ""
+msgstr "Übergeordnet"
 
 msgid "Path"
+msgstr "Pfad"
+
+msgid "Pool"
 msgstr ""
 
 msgid "Pool Name"
@@ -294,10 +308,10 @@ msgid "Prefix"
 msgstr "Präfix"
 
 msgid "Properties"
-msgstr ""
+msgstr "Eigenschaften"
 
 msgid "Properties saved."
-msgstr ""
+msgstr "Eigenschaften gespeichert."
 
 msgid "Property"
 msgstr "Eigenschaft"
@@ -351,7 +365,7 @@ msgid "Snap clone name"
 msgstr ""
 
 msgid "Snapshot"
-msgstr ""
+msgstr "Schnappschuss"
 
 msgid "Snapshot to clone"
 msgstr "Zu klonender Schnappschuss"
@@ -363,10 +377,10 @@ msgid "Source"
 msgstr "Quelle"
 
 msgid "Source name"
-msgstr ""
+msgstr "Quellenname"
 
 msgid "Source path"
-msgstr ""
+msgstr "Quellenpfad"
 
 msgid "Source pool"
 msgstr ""
@@ -388,6 +402,9 @@ msgid "Successfully rollbacked!"
 msgstr "Erfolgreich zurückgerollt!"
 
 msgid "Thin provisioning"
+msgstr ""
+
+msgid "Tools"
 msgstr ""
 
 msgid "Type"
@@ -424,43 +441,43 @@ msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
 msgid "gzip"
-msgstr ""
+msgstr "gzip"
 
 msgid "gzip-1"
-msgstr ""
+msgstr "gzip-1"
 
 msgid "gzip-2"
-msgstr ""
+msgstr "gzip-2"
 
 msgid "gzip-3"
-msgstr ""
+msgstr "gzip-3"
 
 msgid "gzip-4"
-msgstr ""
+msgstr "gzip-4"
 
 msgid "gzip-5"
-msgstr ""
+msgstr "gzip-5"
 
 msgid "gzip-6"
-msgstr ""
+msgstr "gzip-6"
 
 msgid "gzip-7"
-msgstr ""
+msgstr "gzip-7"
 
 msgid "gzip-8"
-msgstr ""
+msgstr "gzip-8"
 
 msgid "gzip-9"
-msgstr ""
+msgstr "gzip-9"
 
 msgid "lz4"
-msgstr ""
+msgstr "lz4"
 
 msgid "lzjb"
-msgstr ""
+msgstr "lzjb"
 
 msgid "zfs"
-msgstr ""
+msgstr "zfs"
 
 msgid "zle"
-msgstr ""
+msgstr "zle"

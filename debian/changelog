@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.8) stable; urgency=low
+
+  * Allow child datasets
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 10 Mar 2022 16:22:41 -0600
+
 openmediavault-zfs (6.0.7) stable; urgency=low
 
   * Add pool expand

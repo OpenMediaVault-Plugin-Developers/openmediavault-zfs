@@ -156,11 +156,6 @@ data:
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
-              constraint:
-                - operator: eq
-                  arg0:
-                    prop: type
-                  arg1: "Pool"
       - type: iconButton
         icon: mdi:desktop-classic
         tooltip: _("Properties")

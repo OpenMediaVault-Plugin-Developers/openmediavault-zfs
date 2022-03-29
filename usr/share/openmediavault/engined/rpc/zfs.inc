@@ -201,6 +201,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $objects = OMVModuleZFSUtil::getZFSFlatArray();
+        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
         return $this->applyFilter($objects, $params['start'],
           $params['limit'], $params['sortfield'], $params['sortdir']);
     }

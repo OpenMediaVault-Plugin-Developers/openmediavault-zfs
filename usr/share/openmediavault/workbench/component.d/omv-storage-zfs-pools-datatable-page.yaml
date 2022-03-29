@@ -165,22 +165,9 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
-      - type: iconButton
-        tooltip: _("Import")
-        icon: mdi:database-import-outline
-        execute:
-          type: request
-          request:
-            service: Zfs
-            method: getObjectTree
-            task: false
-            successUrl: /storage/zfs/pools
       - type: menu
         icon: mdi:hammer-wrench
         tooltip: _("Tools")
-        enabledConstraints:
-          minSelected: 1
-          maxSelected: 1
         actions:
           - text: _("Details")
             icon: mdi:information-outline
@@ -206,6 +193,64 @@ data:
                   name: "{{ _selected[0].path }}"
                 task: false
                 successUrl: /storage/zfs/pools
+          - text: _("zpool import")
+            icon: mdi:import
+            execute:
+              type: formDialog
+              formDialog:
+                title: _('Import pool(s)')
+                fields:
+                  - type: container
+                    fields:
+                      - type: checkbox
+                        name: all
+                        label: _("Import all")
+                        value: false
+                        hint: _("Import all missing pools.")
+                      - type: textInput
+                        name: poolname
+                        label: _("Pool name")
+                        value: ""
+                        modifiers:
+                          - type: visible
+                            constraint:
+                              operator: falsy
+                              arg0:
+                                prop: all
+                  - type: checkbox
+                    name: force
+                    label: _("Force")
+                    value: false
+                    hint: _("Forces import, even if the pool appears to be potentially active.")
+                buttons:
+                  submit:
+                    text: _('Import')
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: importPool
+          - text: _("zpool export")
+            icon: mdi:export
+            confirmationDialogConfig:
+              template: confirmation-critical
+              message: _("Are you sure you want to export?")
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: type
+                  arg1: "Pool"
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: exportPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
       - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete

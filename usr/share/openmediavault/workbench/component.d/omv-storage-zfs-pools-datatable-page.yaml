@@ -166,7 +166,7 @@ data:
           minSelected: 1
           maxSelected: 1
       - type: iconButton
-        tooltip: _("Import")
+        tooltip: _("Update OMV filesystem list")
         icon: mdi:database-import-outline
         execute:
           type: request

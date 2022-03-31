@@ -107,6 +107,21 @@ data:
                     validators:
                       required: true
                       patternType: shareName
+                    modifiers:
+                      - type: value
+                        typeConfig: '{{ moment("YYYY-MM-DD_HH-mm-ss") }}'
+                        constraint:
+                          operator: eq
+                          arg0:
+                            prop: type
+                          arg1: "snapshot"
+                      - type: value
+                        typeConfig: ''
+                        constraint:
+                          operator: ne
+                          arg0:
+                            prop: type
+                          arg1: "snapshot"
                   - type: textInput
                     name: mountpoint
                     label: _("Mountpoint")

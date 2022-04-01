@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-10 16:21-0600\n"
-"PO-Revision-Date: 2022-03-05 10:28+0000\n"
-"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>\n"
+"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"PO-Revision-Date: 2014-10-16 11:20+0000\n"
+"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022\n"
 "Language-Team: Spanish (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,6 +46,9 @@ msgstr "¿Está seguro de que desea borrar este snapshot?"
 
 msgid "Are you sure you want to delete?"
 msgstr "¿Está seguro de que desea borrar?"
+
+msgid "Are you sure you want to export?"
+msgstr ""
 
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "¿Está seguro de que desea deshacer este snapshot?"
@@ -212,6 +215,9 @@ msgstr "Importar Pool(s) ZFS"
 msgid "Import all"
 msgstr "Importar todo"
 
+msgid "Import all missing pools."
+msgstr ""
+
 msgid "Import all missing pools. Overrides pool specification above."
 msgstr "Importar pool perdidos. Se salta todas las restricciones."
 
@@ -293,6 +299,9 @@ msgstr "Pool"
 
 msgid "Pool Name"
 msgstr "Nombre del Pool"
+
+msgid "Pool name"
+msgstr ""
 
 msgid "Pool type"
 msgstr "Tipo de Pool"
@@ -477,3 +486,9 @@ msgstr "zfs"
 
 msgid "zle"
 msgstr "zle"
+
+msgid "zpool export"
+msgstr ""
+
+msgid "zpool import"
+msgstr ""

@@ -3,6 +3,7 @@ openmediavault-zfs (6.0.9) stable; urgency=low
   * Remove import button.  Imports will automatically be done when
     loading pool list.  This was the behavior in the 5.x plugin.
   * Add zpool import and export menu items
+  * Default snapshot name to datetime stamp
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 29 Mar 2022 06:54:41 -0500
 

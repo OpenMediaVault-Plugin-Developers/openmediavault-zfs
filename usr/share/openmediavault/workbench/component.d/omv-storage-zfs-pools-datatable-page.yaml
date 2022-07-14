@@ -186,6 +186,9 @@ data:
         actions:
           - text: _("Details")
             icon: mdi:information-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
             execute:
               type: url
               url: "/storage/zfs/pools/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"

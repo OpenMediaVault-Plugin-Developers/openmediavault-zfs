@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.10) UNRELEASED; urgency=medium
+
+  * Add arc hits/misses dashboard widget
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Wed, 27 Jul 2022 18:24:40 -0500
+
 openmediavault-zfs (6.0.9) stable; urgency=low
 
   * Remove import button.  Imports will automatically be done when

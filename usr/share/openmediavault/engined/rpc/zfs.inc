@@ -64,12 +64,52 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("setSettings");
         $this->registerMethod("rollbackSnapshot");
         $this->registerMethod("set");
+        $this->registerMethod("getStats");
     }
 
     public function set($params, $context)
     {
         // empty function for details window
         // TODO:  change window type for details
+    }
+
+    public function getStats($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+
+        $arcstats = file("/proc/spl/kstat/zfs/arcstats");
+
+        foreach($arcstats as $line) {
+          if (strpos($line,"hits") === 0) {
+            $parts = preg_split('/\s+/', $line);
+            $hits = $parts[2];
+          }
+          if (strpos($line,"misses") === 0) {
+            $parts = preg_split('/\s+/', $line);
+            $misses = $parts[2];
+          }
+          if (strpos($line,"size") === 0) {
+            $parts = preg_split('/\s+/', $line);
+            $size = $parts[2];
+          }
+        }
+        if ($hits > 0 || $misses > 0) {
+            $stats = [
+              "hits" => $hits,
+              "misses" => $misses,
+              "ratio" => ($hits / ($hits + $misses)) * 100,
+              "size" => $size
+            ];
+        } else {
+            $stats = [
+              "hits" => 0,
+              "misses" => 0,
+              "ratio" => 0,
+              "size" => 0
+            ];
+        }
+print_r($stats);
+        return ($stats);
     }
 
     public function addPool($params, $context)

@@ -20,7 +20,7 @@ data:
     dataConfig:
     - label: _("Hits")
       prop: hits
-      backgroundColor: "#ff9d00"
+      backgroundColor: "#4cd964"
     - label: _("Misses")
       prop: misses
-      backgroundColor: "#bc5090"
+      backgroundColor: "#ff3b30"

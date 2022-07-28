@@ -1,0 +1,29 @@
+version: "1.0"
+type: dashboard-widget
+data:
+  id: de727ef2-0e77-11ed-a00a-e36b026b4dfc
+  title: _("ZFS Misses/Hits")
+  type: chart
+  permissions:
+    role:
+    - admin
+  chart:
+    type: advanced-doughnut
+    maxHeight: "150px"
+    maxWidth: "150px"
+    request:
+      service: Zfs
+      method: getStats
+      transform:
+        hits2: '{{ hitsMisses - misses }}'
+    label:
+      display: true
+      formatter: template
+      formatterConfig: "{{ value }}"
+    dataConfig:
+    - label: _("Hits")
+      prop: hits2
+      backgroundColor: "#4cd964"
+    - label: _("Misses")
+      prop: misses
+      backgroundColor: "#ff3b30"

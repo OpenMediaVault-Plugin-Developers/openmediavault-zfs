@@ -97,6 +97,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $stats = [
               "hits" => $hits,
               "misses" => $misses,
+              "hitsMisses" => $hits + $misses,
               "ratio" => ($hits / ($hits + $misses)) * 100,
               "size" => $size
             ];
@@ -104,6 +105,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $stats = [
               "hits" => 0,
               "misses" => 0,
+              "hitsMisses" => 0,
               "ratio" => 0,
               "size" => 0
             ];

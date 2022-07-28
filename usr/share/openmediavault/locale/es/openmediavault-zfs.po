@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022\n"
 "Language-Team: Spanish (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es/)\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #, javascript-format
 msgid "% completed ..."
@@ -48,7 +48,7 @@ msgid "Are you sure you want to delete?"
 msgstr "¿Está seguro de que desea borrar?"
 
 msgid "Are you sure you want to export?"
-msgstr ""
+msgstr "¿Está seguro de que desea exportar el pool?"
 
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "¿Está seguro de que desea deshacer este snapshot?"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "Fuerza la creacción de un Pool incluso si hay errores. !Usar con precaución!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr "Importar"
 
@@ -216,13 +219,16 @@ msgid "Import all"
 msgstr "Importar todo"
 
 msgid "Import all missing pools."
-msgstr ""
+msgstr "Importar TODOS los pools posibles."
 
 msgid "Import all missing pools. Overrides pool specification above."
 msgstr "Importar pool perdidos. Se salta todas las restricciones."
 
 msgid "Mirror"
 msgstr "Espejo"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Modificado"
@@ -301,7 +307,7 @@ msgid "Pool Name"
 msgstr "Nombre del Pool"
 
 msgid "Pool name"
-msgstr ""
+msgstr "Nombre del pool"
 
 msgid "Pool type"
 msgstr "Tipo de Pool"
@@ -439,6 +445,9 @@ msgstr "Volumen"
 msgid "ZFS"
 msgstr "ZFS"
 
+msgid "ZFS Hits/Misses"
+msgstr ""
+
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
@@ -488,7 +497,7 @@ msgid "zle"
 msgstr "zle"
 
 msgid "zpool export"
-msgstr ""
+msgstr "zpool export"
 
 msgid "zpool import"
-msgstr ""
+msgstr "zpool import"

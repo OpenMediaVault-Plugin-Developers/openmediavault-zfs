@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Hyeonkyu Chu <hyeonkyu@gmail.com>, 2014\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ko_KR/)\n"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "생성 중 오류를 무시하고 Pool 생성을 강제합니다. 아주 조심해서 사용해야 합니다!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -223,6 +226,9 @@ msgstr ""
 
 msgid "Mirror"
 msgstr "Mirror"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "수정됨"
@@ -438,6 +444,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr ""

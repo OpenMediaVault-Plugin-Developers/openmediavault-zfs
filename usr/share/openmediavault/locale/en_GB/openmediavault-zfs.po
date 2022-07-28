@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>, 2015,2019\n"
 "Language-Team: English (United Kingdom) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/en_GB/)\n"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "Forces the creation of the pool even if errors are reported. Use with extreme caution!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -223,6 +226,9 @@ msgstr "Import all missing pools. Overrides pool specification above."
 
 msgid "Mirror"
 msgstr "Mirror"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Modified"
@@ -438,6 +444,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

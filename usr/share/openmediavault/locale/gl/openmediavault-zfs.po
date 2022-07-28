@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Miguel Anxo Bouzada <mbouzada@gmail.com>, 2020\n"
 "Language-Team: Galician (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/gl/)\n"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "Forzar a creación da agrupación aínda que se informe de erros. Useo con extrema precaución."
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -223,6 +226,9 @@ msgstr "Importar todos as agrupacións que faltan. Anula a especificación da ag
 
 msgid "Mirror"
 msgstr "Espello"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Modificado"
@@ -438,6 +444,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

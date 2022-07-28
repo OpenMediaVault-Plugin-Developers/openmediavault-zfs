@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Jonatan Nyberg <jonatan@autistici.org>, 2018,2021\n"
 "Language-Team: Swedish (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/sv/)\n"
@@ -204,6 +204,9 @@ msgid ""
 "extreme caution!"
 msgstr "Krafter skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -224,6 +227,9 @@ msgstr "Importera alla saknade pooler. Åsidosätt poolspecifikation ovan."
 
 msgid "Mirror"
 msgstr "Spegel"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Modifiera"
@@ -439,6 +445,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

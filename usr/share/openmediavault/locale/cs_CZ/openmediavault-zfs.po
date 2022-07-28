@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Pavel Borecki <pavel.borecki@gmail.com>, 2015-2016,2018\n"
 "Language-Team: Czech (Czech Republic) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/cs_CZ/)\n"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "Vynutí vytvoření fondu i když jsou hlášeny chyby. Použijte jen s nejvyšší obezřetností!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -223,6 +226,9 @@ msgstr "Importovat všechny chybějící fondy. Přepíše výše uvedené urče
 
 msgid "Mirror"
 msgstr "RAID 1 (zrcadlení)"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Změněno"
@@ -438,6 +444,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

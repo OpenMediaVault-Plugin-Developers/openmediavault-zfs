@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
@@ -203,6 +203,9 @@ msgid ""
 "extreme caution!"
 msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用！"
 
+msgid "Hits"
+msgstr "命中"
+
 msgid "Import"
 msgstr "匯入"
 
@@ -223,6 +226,9 @@ msgstr "匯入所有漏失的集用場。蓋換以上的集用場規格。"
 
 msgid "Mirror"
 msgstr "鏡像"
+
+msgid "Misses"
+msgstr "未中"
 
 msgid "Modified"
 msgstr "已修改"
@@ -438,6 +444,9 @@ msgstr "儲存卷"
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr "ZFS 命中/未中"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

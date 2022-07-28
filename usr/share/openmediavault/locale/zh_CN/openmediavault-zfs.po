@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: songming <by@songming.me>, 2014,2018,2021-2022\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
@@ -204,6 +204,9 @@ msgid ""
 "extreme caution!"
 msgstr "即使报错也强制创建池，请谨慎使用该设置！"
 
+msgid "Hits"
+msgstr "Hits"
+
 msgid "Import"
 msgstr "导入"
 
@@ -224,6 +227,9 @@ msgstr "导入全部丢失池，覆盖以前的池参数。"
 
 msgid "Mirror"
 msgstr "镜像"
+
+msgid "Misses"
+msgstr "Misses"
 
 msgid "Modified"
 msgstr "修改"
@@ -439,6 +445,9 @@ msgstr "卷"
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr "ZFS Hits/Misses"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

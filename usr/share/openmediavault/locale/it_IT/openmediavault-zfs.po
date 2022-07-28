@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 07:10-0500\n"
+"POT-Creation-Date: 2022-07-27 18:24-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Paolo Velati <paolo.velati@gmail.com>, 2015-2016\n"
 "Language-Team: Italian (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/it/)\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #, javascript-format
 msgid "% completed ..."
@@ -204,6 +204,9 @@ msgid ""
 "extreme caution!"
 msgstr "Forza la creazione del pool anche se vengono riportati errori. Usare con estrema cautela!"
 
+msgid "Hits"
+msgstr ""
+
 msgid "Import"
 msgstr ""
 
@@ -224,6 +227,9 @@ msgstr ""
 
 msgid "Mirror"
 msgstr "Mirror"
+
+msgid "Misses"
+msgstr ""
 
 msgid "Modified"
 msgstr "Modificato"
@@ -439,6 +445,9 @@ msgstr ""
 
 msgid "ZFS"
 msgstr "ZFS"
+
+msgid "ZFS Hits/Misses"
+msgstr ""
 
 msgid "ZFS ZED"
 msgstr ""

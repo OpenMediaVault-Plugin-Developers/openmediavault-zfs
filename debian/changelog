@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.11) stable; urgency=low
+
+  * Move widget to one arc instead of two
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 31 Jul 2022 07:54:59 -0500
+
 openmediavault-zfs (6.0.10) stable; urgency=low
 
   * Add arc hits/misses dashboard widget

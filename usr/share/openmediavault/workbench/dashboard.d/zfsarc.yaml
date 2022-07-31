@@ -2,7 +2,7 @@ version: "1.0"
 type: dashboard-widget
 data:
   id: de727ef2-0e77-11ed-a00a-e36b026b4dfc
-  title: _("ZFS Misses/Hits")
+  title: _("ZFS Hits/Misses")
   type: chart
   permissions:
     role:

@@ -204,7 +204,7 @@ msgid ""
 msgstr "Fuerza la creacción de un Pool incluso si hay errores. !Usar con precaución!"
 
 msgid "Hits"
-msgstr ""
+msgstr "Aciertos"
 
 msgid "Import"
 msgstr "Importar"
@@ -228,7 +228,7 @@ msgid "Mirror"
 msgstr "Espejo"
 
 msgid "Misses"
-msgstr ""
+msgstr "Errores"
 
 msgid "Modified"
 msgstr "Modificado"
@@ -446,7 +446,7 @@ msgid "ZFS"
 msgstr "ZFS"
 
 msgid "ZFS Hits/Misses"
-msgstr ""
+msgstr "Aciertos/errores de ZFS"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"

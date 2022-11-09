@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.12) stable; urgency=low
+
+  * Fix typos on expand form
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 08 Nov 2022 18:48:16 -0600
+
 openmediavault-zfs (6.0.11) stable; urgency=low
 
   * Move widget to one arc instead of two

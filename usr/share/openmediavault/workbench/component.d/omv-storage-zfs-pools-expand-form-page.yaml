@@ -50,7 +50,7 @@ data:
                 arg0:
                   operator: eq
                   arg0:
-                    prop: pooltype
+                    prop: vdevtype
                   arg1: 'mirror'
                 arg1:
                   operator: '>='
@@ -65,7 +65,7 @@ data:
                 arg0:
                   operator: eq
                   arg0:
-                    prop: pooltype
+                    prop: vdevtype
                   arg1: 'raidz1'
                 arg1:
                   operator: '>='
@@ -80,7 +80,7 @@ data:
                 arg0:
                   operator: eq
                   arg0:
-                    prop: pooltype
+                    prop: vdevtype
                   arg1: 'raidz2'
                 arg1:
                   operator: '>='
@@ -95,7 +95,7 @@ data:
                 arg0:
                   operator: eq
                   arg0:
-                    prop: pooltype
+                    prop: vdevtype
                   arg1: 'raidz3'
                 arg1:
                   operator: '>='

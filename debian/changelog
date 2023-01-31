@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.13) stable; urgency=low
+
+  * Change order in navigation menu.
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 31 Jan 2023 12:41:41 +0100
+
 openmediavault-zfs (6.0.12) stable; urgency=low
 
   * Fix typos on expand form

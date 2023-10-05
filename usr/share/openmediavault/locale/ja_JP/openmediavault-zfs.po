@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018
+# Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-07-31 07:56-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018\n"
-"Language-Team: Japanese (Japan) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ja_JP/)\n"
+"Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023\n"
+"Language-Team: Japanese (Japan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ja_JP/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -27,7 +27,7 @@ msgid "100% completed ..."
 msgstr "100% 完了 ..."
 
 msgid "Add"
-msgstr ""
+msgstr "追加"
 
 msgid "Add Object"
 msgstr "オブジェクトの追加"
@@ -36,22 +36,22 @@ msgid "Add Pool"
 msgstr "プールの追加"
 
 msgid "Add filesystem|snap|volume"
-msgstr ""
+msgstr "ファイルシステム|スナップ|ボリュームの追加"
 
 msgid "Add pool"
-msgstr ""
+msgstr "プールの追加"
 
 msgid "Are you sure you want to delete to this snapshot?"
-msgstr ""
+msgstr "このスナップショットを削除してよろしいですか？"
 
 msgid "Are you sure you want to delete?"
-msgstr ""
+msgstr "削除してよろしいですか？"
 
 msgid "Are you sure you want to export?"
-msgstr ""
+msgstr "エクスポートしてよろしいですか？"
 
 msgid "Are you sure you want to rollback to this snapshot?"
-msgstr ""
+msgstr "このスナップショットにロールバックしますか？"
 
 msgid "Ashift value"
 msgstr "ashift値"
@@ -66,7 +66,7 @@ msgid "Basic"
 msgstr "ベーシック"
 
 msgid "By ID"
-msgstr ""
+msgstr "By ID"
 
 msgid "By Id"
 msgstr "By Id"
@@ -84,22 +84,22 @@ msgid "Clone name"
 msgstr "クローン名"
 
 msgid "Compression"
-msgstr ""
+msgstr "圧縮"
 
 msgid "Compression type"
-msgstr ""
+msgstr "圧縮タイプ"
 
 msgid "Confirmation"
 msgstr "確認"
 
 msgid "Create"
-msgstr ""
+msgstr "作成"
 
 msgid "Create ZFS Pool"
 msgstr "ZFSプールの作成"
 
 msgid "Created pool."
-msgstr ""
+msgstr "プールを作成。"
 
 msgid "Delete"
 msgstr "削除"
@@ -156,7 +156,7 @@ msgid "Edit properties"
 msgstr "プロパティの編集"
 
 msgid "Edit property"
-msgstr ""
+msgstr "プロパティの編集"
 
 msgid "Expand"
 msgstr "拡張"
@@ -165,16 +165,16 @@ msgid "Expand Pool"
 msgstr "プールの拡張"
 
 msgid "Expand pool"
-msgstr ""
+msgstr "プールの拡張"
 
 msgid "Expanded pool."
-msgstr ""
+msgstr "プールを拡張。"
 
 msgid "Export Pool"
 msgstr "プールのエクスポート"
 
 msgid "Filesystem"
-msgstr ""
+msgstr "ファイルシステム"
 
 msgid "Filesystem/Volume"
 msgstr "ファイルシステム/ボリューム"
@@ -191,7 +191,7 @@ msgstr "プールが潜在的にアクティブであるように見えても、
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "エラーが報告された場合でも、Vded の作成を強制します。細心の注意を払って使用してください。"
 
 msgid ""
 "Forces the creation of the Vdev even if errors are reported. Use with "
@@ -204,10 +204,10 @@ msgid ""
 msgstr "エラーが報告されている場合でもプールを強制的に作成します。細心の注意を払って使用してください！"
 
 msgid "Hits"
-msgstr ""
+msgstr "Hits"
 
 msgid "Import"
-msgstr ""
+msgstr "インポート"
 
 msgid "Import Pool"
 msgstr "プールのインポート"
@@ -219,7 +219,7 @@ msgid "Import all"
 msgstr "すべてをインポート"
 
 msgid "Import all missing pools."
-msgstr ""
+msgstr "不足しているプールをすべてインポートします。"
 
 msgid "Import all missing pools. Overrides pool specification above."
 msgstr "不足しているプールをすべてインポートします。 既存のプール指定を上書きします。"
@@ -228,7 +228,7 @@ msgid "Mirror"
 msgstr "ミラー"
 
 msgid "Misses"
-msgstr ""
+msgstr "Misses"
 
 msgid "Modified"
 msgstr "変更済み"
@@ -254,10 +254,10 @@ msgid "New Name"
 msgstr "新しい名前"
 
 msgid "New Property"
-msgstr ""
+msgstr "新しいプロパティ"
 
 msgid "New property"
-msgstr ""
+msgstr "新しいプロパティ"
 
 msgid "No items to display"
 msgstr "表示するアイテムはありません"
@@ -281,7 +281,7 @@ msgid "Optional mountpoint for the pool. Default is to use pool name."
 msgstr "プールのオプションマウントポイント。デフォルトではプール名を使用します。"
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
-msgstr ""
+msgstr "プール用のオプションのマウントポイント。デフォルトはプール名を使用します。"
 
 msgid ""
 "Optional mountpoint of the filesystem. If left blank parent mountpoint will "
@@ -289,40 +289,40 @@ msgid ""
 msgstr "ファイルシステムのオプションマウントポイント。"
 
 msgid "Optional mountpoint. Default is to use the name."
-msgstr ""
+msgstr "オプションのマウントポイント。デフォルトでは名前を使用します。"
 
 msgid "Overview"
 msgstr "概要"
 
 msgid "Parent"
-msgstr ""
+msgstr "親"
 
 msgid "Path"
-msgstr ""
+msgstr "パス"
 
 msgid "Pool"
-msgstr ""
+msgstr "プール"
 
 msgid "Pool Name"
 msgstr "プールの名前"
 
 msgid "Pool name"
-msgstr ""
+msgstr "プール名"
 
 msgid "Pool type"
 msgstr "プールタイプ"
 
 msgid "Pools"
-msgstr ""
+msgstr "プール"
 
 msgid "Prefix"
 msgstr "プレフィックス"
 
 msgid "Properties"
-msgstr ""
+msgstr "プロパティ"
 
 msgid "Properties saved."
-msgstr ""
+msgstr "プロパティを保存しました。"
 
 msgid "Property"
 msgstr "プロパティ"
@@ -373,10 +373,10 @@ msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
 msgstr "ボリュームのサイズ　例)5mb,100gb,1tb など"
 
 msgid "Snap clone name"
-msgstr ""
+msgstr "スナップクローン名"
 
 msgid "Snapshot"
-msgstr ""
+msgstr "スナップショット"
 
 msgid "Snapshot to clone"
 msgstr "クローンのスナップショット"
@@ -388,13 +388,13 @@ msgid "Source"
 msgstr "ソース"
 
 msgid "Source name"
-msgstr ""
+msgstr "ソース名"
 
 msgid "Source path"
-msgstr ""
+msgstr "ソースパス"
 
 msgid "Source pool"
-msgstr ""
+msgstr "ソースプール"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -416,7 +416,7 @@ msgid "Thin provisioning"
 msgstr "シンプロビジョニング"
 
 msgid "Tools"
-msgstr ""
+msgstr "ツール"
 
 msgid "Type"
 msgstr "タイプ"
@@ -440,13 +440,13 @@ msgid "Vendor"
 msgstr "ベンダ"
 
 msgid "Volume"
-msgstr ""
+msgstr "ボリューム"
 
 msgid "ZFS"
 msgstr "ZFS"
 
 msgid "ZFS Hits/Misses"
-msgstr ""
+msgstr "ZFS Hits/Misses"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
@@ -455,49 +455,49 @@ msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
 msgid "gzip"
-msgstr ""
+msgstr "gzip"
 
 msgid "gzip-1"
-msgstr ""
+msgstr "gzip-1"
 
 msgid "gzip-2"
-msgstr ""
+msgstr "gzip-2"
 
 msgid "gzip-3"
-msgstr ""
+msgstr "gzip-3"
 
 msgid "gzip-4"
-msgstr ""
+msgstr "gzip-4"
 
 msgid "gzip-5"
-msgstr ""
+msgstr "gzip-5"
 
 msgid "gzip-6"
-msgstr ""
+msgstr "gzip-6"
 
 msgid "gzip-7"
-msgstr ""
+msgstr "gzip-7"
 
 msgid "gzip-8"
-msgstr ""
+msgstr "gzip-8"
 
 msgid "gzip-9"
-msgstr ""
+msgstr "gzip-9"
 
 msgid "lz4"
-msgstr ""
+msgstr "lz4"
 
 msgid "lzjb"
-msgstr ""
+msgstr "lzjb"
 
 msgid "zfs"
-msgstr ""
+msgstr "zfs"
 
 msgid "zle"
-msgstr ""
+msgstr "zle"
 
 msgid "zpool export"
-msgstr ""
+msgstr "zpool export"
 
 msgid "zpool import"
-msgstr ""
+msgstr "zpool import"

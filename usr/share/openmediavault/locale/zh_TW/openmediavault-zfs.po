@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# kochin <kochinc@outlook.com>, 2014,2018,2022
+# kochin <kochinc@outlook.com>, 2014,2018,2022-2023
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-07-31 07:56-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022\n"
-"Language-Team: Chinese (Taiwan) (http://www.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
+"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2023\n"
+"Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -144,7 +144,7 @@ msgid "Do you really want to rollback the selected item?"
 msgstr "您真的要轉返所選項目嗎？"
 
 msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "您真的要擦除該集用場嗎？<br/><br/>最近擦除："
+msgstr "您真的要清理該集用場嗎？<br/><br/>最近清理於："
 
 msgid "Down"
 msgstr "停止"
@@ -355,7 +355,7 @@ msgid "Save"
 msgstr "儲存"
 
 msgid "Scrub"
-msgstr "擦除"
+msgstr "清理"
 
 msgid "Serial Number"
 msgstr "序號"

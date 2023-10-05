@@ -158,7 +158,7 @@ data:
                           operator: ne
                           arg0:
                             prop: type
-                          arg1: "filesystem"
+                          arg1: "volume"
                 buttons:
                   submit:
                     text: _('Add')

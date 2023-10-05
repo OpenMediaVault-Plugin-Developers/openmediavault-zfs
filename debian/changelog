@@ -1,3 +1,9 @@
+openmediavault-zfs (6.0.14) stable; urgency=low
+
+  * Only show Thin checkbox for volume
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 05 Oct 2023 16:55:05 -0500
+
 openmediavault-zfs (6.0.13) stable; urgency=low
 
   * Change order in navigation menu.

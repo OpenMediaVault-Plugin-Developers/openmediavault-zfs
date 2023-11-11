@@ -1,3 +1,9 @@
+openmediavault-zfs (7.0.1) stable; urgency=low
+
+  * Update for OMV 7.x
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 11 Nov 2023 14:57:47 -0600
+
 openmediavault-zfs (7.0) stable; urgency=low
 
   * Update for OMV 7.x

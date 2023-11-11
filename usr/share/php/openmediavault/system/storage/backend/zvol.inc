@@ -36,7 +36,7 @@ class ZVol extends BackendAbstract
         return preg_replace("/(p\d+)$/", "", $deviceFile);
     }
 
-    function fsDeviceFile($deviceFile)
+    function fsDeviceFile($deviceFile, $partition = 1)
     {
         // E.g. /dev/zd0p1
         return sprintf("%sp1", $deviceFile);

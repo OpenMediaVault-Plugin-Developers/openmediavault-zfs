@@ -430,7 +430,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         foreach ($vdevs as $vdev) {
             if (is_object($vdev) == false)
                 throw new OMVMODULEZFSException("Not object of class OMVModuleZFSVdev");
-            if (is_a($vdev, OMVModuleZFSVdev) == false)
+            if (!($vdev instanceof OMVModuleZFSVdev))
                 throw new OMVMODULEZFSException("Object is not of class OMVModuleZFSVdev");
             $type = $vdev->getType();
             $command = "";

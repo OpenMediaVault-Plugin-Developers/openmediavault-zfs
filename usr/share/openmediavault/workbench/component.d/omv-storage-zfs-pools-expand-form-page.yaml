@@ -36,9 +36,9 @@ data:
         textField: devicefile
         store:
           proxy:
-            service: RaidMgmt
+            service: Zfs
             get:
-              method: getCandidates
+              method: getEmptyCandidates
           sorters:
             dir: asc
             prop: devicefile

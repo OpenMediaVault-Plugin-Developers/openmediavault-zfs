@@ -59,6 +59,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("expandPool");
         $this->registerMethod("scrubPool");
         $this->registerMethod("getCandidates");
+        $this->registerMethod("getEmptyCandidates");
         $this->registerMethod("rename");
         $this->registerMethod("getSettings");
         $this->registerMethod("setSettings");
@@ -584,6 +585,50 @@ print_r($stats);
             }
         }
         return $devs;
+    }
+
+    public function getEmptyCandidates($params, $context) {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, [ "role" => OMV_ROLE_ADMINISTRATOR ]);
+        // Get a list of all potential usable devices.
+        if (FALSE === ($devs = \OMV\System\Storage\StorageDevice::enumerateUnused()))
+            throw new \OMV\Exception("Failed to get list of unused devices.");
+        // Prepare the result list.
+        $result = [];
+        foreach ($devs as $devk => $devv) {
+            // Get the object that implements the given storage device.
+            $sd = \OMV\System\Storage\StorageDevice::getStorageDevice($devv);
+            if (is_null($sd) || !$sd->exists())
+                continue;
+            // Skip read-only devices like CDROM.
+            if (TRUE === $sd->isReadOnly())
+                continue;
+            // Skip devices that are connected via USB.
+            if (TRUE === $sd->isUsb())
+                continue;
+            // Check if the device is referenced/used by a plugin.
+            $db = \OMV\Config\Database::getInstance();
+            if (TRUE === $db->exists("conf.service", [
+              "operator" => "stringContains",
+              "arg0" => "devicefile",
+              "arg1" => $sd->getDeviceFile()
+              ]))
+                continue;
+            // Does this device already contain a filesystem?
+            if (FALSE !== \OMV\System\Filesystem\Filesystem::hasFileSystem(
+              $sd->getDeviceFile()))
+                continue;
+            // The device is a potential candidate to be a member of a
+            // zfs RAID.
+            $result[] = [
+                "devicefile" => $sd->getDeviceFile(),
+                "size" => $sd->getSize(),
+                "vendor" => $sd->getVendor(),
+                "serialnumber" => $sd->getSerialNumber(),
+                "description" => $sd->getDescription()
+            ];
+        }
+        return $result;
     }
 
     public function rename($params, $context)

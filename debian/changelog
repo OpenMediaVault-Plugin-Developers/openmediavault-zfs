@@ -1,3 +1,10 @@
+openmediavault-zfs (7.0.2) stable; urgency=low
+
+  * Replace RaidMgmt getCandidates function
+  * Update for OMV 7.x
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 23 Dec 2023 07:58:21 -0600
+
 openmediavault-zfs (7.0.1) stable; urgency=low
 
   * Update for OMV 7.x

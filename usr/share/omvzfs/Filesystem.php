@@ -47,7 +47,7 @@ class OMVModuleZFSFilesystem extends OMVModuleZFSDataset {
 	}
 
 	public static function getAllFilesystems(){
-		$cmd = "zfs list -p -H -o name,mountpoint -t filesystem";
+		$cmd = "zfs list -p -H -o name,mountpoint -t filesystem | awk '$2 != \"/\" && $2 != \"/boot\" { print $0 }'";
 		OMVModuleZFSUtil::exec($cmd, $out, $res);
 		$filesystems=[];
 		foreach($out as $line) {

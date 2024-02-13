@@ -137,7 +137,7 @@ data:
           - type: numberInput
             name: ashiftval
             label: _("Ashift value")
-            value: 0
+            value: 12
             validators:
               min: 0
               max: 16

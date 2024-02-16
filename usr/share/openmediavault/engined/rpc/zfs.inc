@@ -48,6 +48,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("importPool");
         $this->registerMethod("exportPool");
         $this->registerMethod("getObjectTree");
+        $this->registerMethod("listCompressionTypes");
         $this->registerMethod("listPools");
         $this->registerMethod("getAllSnapshots");
         $this->registerMethod("addObject");
@@ -238,6 +239,33 @@ print_r($stats);
         $tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
         OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
         return $tree;
+    }
+
+    public function listCompressionTypes($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $objects = [];
+        $objects[] = 'gzip';
+        for ($i = 0; $i < 10; $i++) {
+            $objects[] = sprintf('gzip-%d', $i);
+        }
+        $objects[] = 'lz4';
+        $objects[] = 'lzjb';
+        $objects[] = 'zle';
+        $objects[] = 'zstd';
+        for ($i = 0; $i < 10; $i++) {
+            $objects[] = sprintf('zstd-%d', $i);
+        }
+        $objects[] = 'zstd-fast';
+        for ($i = 0; $i < 10; $i++) {
+            $objects[] = sprintf('zstd-fast-%d', $i);
+        }
+        for ($i = 10; $i <= 100; $i += 10) {
+            $objects[] = sprintf('zstd-fast-%d', $i);
+        }
+        $objects[] = 'zstd-fast-500';
+        $objects[] = 'zstd-fast-1000';
+        return ($objects);
     }
 
     public function listPools($params, $context)

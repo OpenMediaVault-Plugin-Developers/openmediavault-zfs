@@ -158,22 +158,14 @@ data:
           - type: select
             name: compresstype
             label: _("Compression type")
-            value: "lz4"
+            textField: path
+            valueField: path
+            value: 'lz4'
             store:
-              data:
-                - ["gzip", _("gzip")]
-                - ["gzip-1", _("gzip-1")]
-                - ["gzip-2", _("gzip-2")]
-                - ["gzip-3", _("gzip-3")]
-                - ["gzip-4", _("gzip-4")]
-                - ["gzip-5", _("gzip-5")]
-                - ["gzip-6", _("gzip-6")]
-                - ["gzip-7", _("gzip-7")]
-                - ["gzip-8", _("gzip-8")]
-                - ["gzip-9", _("gzip-9")]
-                - ["lz4", _("lz4")]
-                - ["lzjb", _("lzjb")]
-                - ["zle", _("zle")]
+              proxy:
+                service: Zfs
+                get:
+                  method: listCompressionTypes
             modifiers:
               - type: visible
                 constraint:

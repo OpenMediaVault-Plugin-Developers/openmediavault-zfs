@@ -28,16 +28,20 @@ data:
         label: _("Properties")
         hasHeader: true
         hasFooter: true
+        hasSearchField: true
         columns:
           - name: _("Property")
             prop: property
             flexGrow: 1
+            sortable: true
           - name: _("Value")
             prop: value
             flexGrow: 1
+            sortable: true
           - name: _("Source")
             prop: source
             flexGrow: 1
+            sortable: true
           - name: _("Modified")
             prop: modified
             flexGrow: 1

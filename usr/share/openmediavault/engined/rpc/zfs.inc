@@ -152,6 +152,8 @@ print_r($stats);
         if ($params['ashift']) {
             $opts .= sprintf("-o ashift=%s ", $params['ashiftval']);
         }
+        $opts .= "-o failmode=continue ";
+        $opts .= "-o autoexpand=on ";
         if (strlen($params['mountpoint']) > 0) {
             $opts .= sprintf('-m "%s" ', $params['mountpoint']);
         }
@@ -303,7 +305,12 @@ print_r($stats);
                 $name = $params['path'] . "/" . $params['name'];
                 $tmp = OMVModuleZFSFilesystem::create($name);
                 if (strlen($params['mountpoint']) > 0) {
-                    $properties = array("mountpoint"=>$params['mountpoint']);
+                    $properties = [
+                        'mountpoint' => $params['mountpoint'],
+                        'atime' => 'off',
+                        'acltype' => 'posix',
+                        'xattr' => 'sa'
+                    ];
                     $tmp->setProperties($properties);
                 }
                 // $mntent_uuid = \OMV\Uuid::uuid4();

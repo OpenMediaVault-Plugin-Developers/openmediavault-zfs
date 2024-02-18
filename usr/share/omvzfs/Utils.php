@@ -205,12 +205,20 @@ class OMVModuleZFSUtil {
         // print_r($add);
         foreach ($add as $object) {
             $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
+            $cmd = sprintf('awk \'$2 == "%s" { print $4 }\' /proc/mounts', $object["dir"]);
+            $opts = "";
+            try {
+                OMVModuleZFSUtil::exec($cmd, $out, $res);
+                $opts = trim(implode("", $out));
+            } catch(Exception $e) {
+                $opts = "";
+            }
             $object = array(
                 "uuid" => $uuid,
                 "fsname" => $object["fsname"],
                 "dir" => $object["dir"],
                 "type" => "zfs",
-                "opts" => "rw,relatime,xattr,noacl",
+                "opts" => $opts,
                 "freq" => 0,
                 "passno" => 0
             );

@@ -1,3 +1,14 @@
+openmediavault-zfs (7.0.3) stable; urgency=low
+
+  * Exclude root and boot filesystems if they are zfs
+  * Set default ashift to 12
+  * Add zstd compression types and populate compression types with a function
+  * Add search field and make columns sortable on properties form
+  * Sort properties by name by default
+  * Update pool and filesystem creation defaults
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 18 Feb 2024 09:43:14 -0600
+
 openmediavault-zfs (7.0.2) stable; urgency=low
 
   * Replace RaidMgmt getCandidates function

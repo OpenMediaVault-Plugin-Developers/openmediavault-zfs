@@ -154,6 +154,9 @@ print_r($stats);
         }
         $opts .= "-o failmode=continue ";
         $opts .= "-o autoexpand=on ";
+        $opts .= "-O atime=off ";
+        $opts .= "-O acltype=posix ";
+        $opts .= "-O xattr=sa ";
         if (strlen($params['mountpoint']) > 0) {
             $opts .= sprintf('-m "%s" ', $params['mountpoint']);
         }

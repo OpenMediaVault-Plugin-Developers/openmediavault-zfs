@@ -1,3 +1,9 @@
+openmediavault-zfs (7.0.4) stable; urgency=low
+
+  * Add options to pool creation
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 18 Feb 2024 11:50:22 -0600
+
 openmediavault-zfs (7.0.3) stable; urgency=low
 
   * Exclude root and boot filesystems if they are zfs

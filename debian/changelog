@@ -1,6 +1,7 @@
 openmediavault-zfs (7.0.4) stable; urgency=low
 
   * Add options to pool creation
+  * Add actual mount options when importing pool
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 18 Feb 2024 11:50:22 -0600
 

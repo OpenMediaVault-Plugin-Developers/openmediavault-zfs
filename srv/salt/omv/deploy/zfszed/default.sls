@@ -32,3 +32,11 @@ create_zed-rc_config:
     - user: root
     - group: root
     - mode: 644
+
+restart_zed_service:
+  service.running:
+    - name: zfs-zed
+    - enable: True
+    - watch:
+      - file: create_zed-rc_config
+

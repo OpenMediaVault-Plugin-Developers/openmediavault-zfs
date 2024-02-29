@@ -56,6 +56,8 @@ case "$1" in
         echo "zfs" > /etc/modules-load.d/zfs.conf
 
         dpkg-trigger update-workbench
+
+        omv-salt deploy run --no-color --quiet zfs || :
         ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

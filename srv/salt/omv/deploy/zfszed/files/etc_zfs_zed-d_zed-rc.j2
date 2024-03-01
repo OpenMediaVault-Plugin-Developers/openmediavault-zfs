@@ -3,7 +3,7 @@
 #ZED_EMAIL_ADDR=
 #ZED_NOTIFY_INTERNAL_SECS=3600
 {%- else -%}
-ZED_EMAIL_ADDR={{ email_config.primaryemail }}
+ZED_EMAIL_ADDR="{{ email_config.primaryemail }}"
 ZED_NOTIFY_INTERNAL_SECS=3600
 ZED_NOTIFY_VERBOSE=1
 ZED_SYSLOG_SUBCLASS_EXCLUDE="history_event"

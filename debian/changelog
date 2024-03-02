@@ -1,3 +1,11 @@
+openmediavault-zfs (7.0.5) stable; urgency=low
+
+  * Improve zfs zed notifications
+  * Restart zfs-zed service when rewriting zed.rc
+  * Add double quotes around zed email address
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 02 Mar 2024 08:08:59 -0600
+
 openmediavault-zfs (7.0.4) stable; urgency=low
 
   * Add options to pool creation

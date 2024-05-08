@@ -111,6 +111,11 @@ class FilesystemZfs implements FilesystemInterface,
         return $this->deviceFile;
     }
 
+    public function getDetails()
+    {
+        return '';
+    }
+
     /**
      * Get the canonical device file, e.g. /dev/root -> /dev/sde1
      */

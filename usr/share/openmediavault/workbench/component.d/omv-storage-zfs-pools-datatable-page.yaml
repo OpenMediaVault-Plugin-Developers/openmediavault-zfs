@@ -4,7 +4,7 @@ data:
   name: omv-storage-zfs-pools-datatable-page
   type: datatablePage
   config:
-    autoReload: 10000
+    autoReload: false
     hasSearchField: true
     rowId: id
     stateId: fc0545e0-50b2-11ec-bf5c-37dde54fc31c
@@ -12,7 +12,8 @@ data:
       proxy:
         service: Zfs
         get:
-          method: listPools
+          method: listPoolsBg
+          task: true
     columns:
       - name: _("Name")
         prop: name
@@ -288,3 +289,15 @@ data:
               type: "{{ _selected[0].type }}"
             task: false
             successUrl: /storage/zfs/pools
+      - type: iconButton
+        tooltip: _("Discover")
+        icon: mdi:magnify-plus-outline
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: doDiscoverBg
+            task: true
+            progressMessage: _("Discovering new pools ...")
+            successNotification: _("Discover complete.")
+

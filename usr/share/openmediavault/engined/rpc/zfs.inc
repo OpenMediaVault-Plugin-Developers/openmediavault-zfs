@@ -44,12 +44,15 @@ class OMVRpcServiceZFS extends ServiceAbstract {
     /* Initialize the RPC service. Different methods of the RPC service are declared here*/
     public function initialize()
     {
+        $this->registerMethod("doDiscover");
+        $this->registerMethod("doDiscoverBg");
         $this->registerMethod("addPool");
         $this->registerMethod("importPool");
         $this->registerMethod("exportPool");
         $this->registerMethod("getObjectTree");
         $this->registerMethod("listCompressionTypes");
         $this->registerMethod("listPools");
+        $this->registerMethod("listPoolsBg");
         $this->registerMethod("getAllSnapshots");
         $this->registerMethod("addObject");
         $this->registerMethod("deleteObject");
@@ -73,6 +76,19 @@ class OMVRpcServiceZFS extends ServiceAbstract {
     {
         // empty function for details window
         // TODO:  change window type for details
+    }
+
+    public function doDiscover($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ["role" => OMV_ROLE_ADMINISTRATOR]);
+        // Adds missing ZFS filesystems to the OMV core
+        OMVModuleZFSUtil::fixOMVMntEnt($context);
+    }
+
+    public function doDiscoverBg($params, $context)
+    {
+        return $this->callMethodBg("doDiscover", $params, $context);
     }
 
     public function getStats($params, $context)
@@ -112,7 +128,6 @@ class OMVRpcServiceZFS extends ServiceAbstract {
               "size" => 0
             ];
         }
-print_r($stats);
         return ($stats);
     }
 
@@ -204,7 +219,6 @@ print_r($stats);
             $objects["compression"] = $params['compresstype'];
             $pool->setProperties($objects);
         }
-        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
     }
 
     public function importPool($params, $context)
@@ -242,7 +256,6 @@ print_r($stats);
             $new[$a['parentid']][] = $a;
         }
         $tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
-        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
         return $tree;
     }
 
@@ -277,9 +290,13 @@ print_r($stats);
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $objects = OMVModuleZFSUtil::getZFSFlatArray();
-        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
         return $this->applyFilter($objects, $params['start'],
           $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function listPoolsBg($params, $context)
+    {
+        return $this->callMethodBg("listPools", $params, $context);
     }
 
     public function getAllSnapshots($params, $context)
@@ -334,7 +351,6 @@ print_r($stats);
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
-        OMVModuleZFSUtil::fixOMVMntEnt($context); //Adds missing ZFS filesystems to the OMV core
     }
 
     public function deleteObject($params, $context)
@@ -380,7 +396,6 @@ print_r($stats);
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
-        OMVModuleZFSUtil::fixOMVMntEnt($context);
     }
 
     public function getProperties($params, $context)

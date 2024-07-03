@@ -207,6 +207,7 @@ class OMVModuleZFSUtil {
             $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
             $cmd = sprintf('awk \'$2 == "%s" { print $4 }\' /proc/mounts', $object["dir"]);
             $opts = "";
+            $out = [];
             try {
                 OMVModuleZFSUtil::exec($cmd, $out, $res);
                 $opts = trim(implode("", $out));

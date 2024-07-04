@@ -4,7 +4,6 @@ data:
   name: omv-storage-zfs-snapshots-datatable-page
   type: datatablePage
   config:
-    autoReload: 10000
     hasSearchField: true
     rowId: id
     stateId: af51b038-513b-11ec-b91a-1bce262337ed
@@ -12,7 +11,8 @@ data:
       proxy:
         service: Zfs
         get:
-          method: getAllSnapshots
+          method: getAllSnapshotsBg
+          task: true
     columns:
       - name: _("Name")
         prop: name
@@ -54,12 +54,13 @@ data:
           type: request
           request:
             service: Zfs
-            method: deleteObject
+            method: deleteObjectBg
             params:
               name: "{{ _selected[0].path }}"
               type: "{{ _selected[0].type }}"
-            task: false
-            successUrl: /storage/zfs/snapshots
+            task: true
+            progressMessage: _("Deleting snapshot ...")
+            successNotification: _("Snapshot deleted.")
       - type: iconButton
         tooltip: _("Clone")
         icon: mdi:content-copy

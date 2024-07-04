@@ -283,12 +283,13 @@ data:
           type: request
           request:
             service: Zfs
-            method: deleteObject
+            method: deleteObjectBg
             params:
               name: "{{ _selected[0].path }}"
               type: "{{ _selected[0].type }}"
-            task: false
-            successUrl: /storage/zfs/pools
+            task: true
+            progressMessage: _("Deleting object ...")
+            successNotification: _("Object deleted.")
       - type: iconButton
         tooltip: _("Discover")
         icon: mdi:magnify-plus-outline
@@ -300,4 +301,3 @@ data:
             task: true
             progressMessage: _("Discovering new pools ...")
             successNotification: _("Discover complete.")
-

@@ -54,8 +54,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("listPools");
         $this->registerMethod("listPoolsBg");
         $this->registerMethod("getAllSnapshots");
+        $this->registerMethod("getAllSnapshotsBg");
         $this->registerMethod("addObject");
+        $this->registerMethod("addObjectBg");
         $this->registerMethod("deleteObject");
+        $this->registerMethod("deleteObjectBg");
         $this->registerMethod("getProperties");
         $this->registerMethod("setProperties");
         $this->registerMethod("inherit");
@@ -219,6 +222,8 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $objects["compression"] = $params['compresstype'];
             $pool->setProperties($objects);
         }
+        // Adds missing ZFS filesystems to the OMV core
+        OMVModuleZFSUtil::fixOMVMntEnt($context);
     }
 
     public function importPool($params, $context)
@@ -308,6 +313,12 @@ class OMVRpcServiceZFS extends ServiceAbstract {
           $params['limit'], $params['sortfield'], $params['sortdir']);
     }
 
+    public function getAllSnapshotsBg($params, $context)
+    {
+        return $this->callMethodBg("getAllSnapshots", $params, $context);
+    }
+
+
     public function addObject($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
@@ -351,6 +362,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
+        // Adds missing ZFS filesystems to the OMV core
+        OMVModuleZFSUtil::fixOMVMntEnt($context);
+    }
+
+    public function addObjectBg($params, $context)
+    {
+        return $this->callMethodBg("addObject", $params, $context);
     }
 
     public function deleteObject($params, $context)
@@ -396,6 +414,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
                 break;
         }
+        // Adds missing ZFS filesystems to the OMV core
+        OMVModuleZFSUtil::fixOMVMntEnt($context);
+    }
+
+    public function deleteObjectBg($params, $context)
+    {
+        return $this->callMethodBg("deleteObject", $params, $context);
     }
 
     public function getProperties($params, $context)

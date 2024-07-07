@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-31 07:56-0500\n"
+"POT-Creation-Date: 2024-07-07 07:55-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023\n"
 "Language-Team: Japanese (Japan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ja_JP/)\n"
@@ -18,22 +18,8 @@ msgstr ""
 "Language: ja_JP\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#, javascript-format
-msgid "% completed ..."
-msgstr "% 完了 ..."
-
-#, javascript-format
-msgid "100% completed ..."
-msgstr "100% 完了 ..."
-
 msgid "Add"
 msgstr "追加"
-
-msgid "Add Object"
-msgstr "オブジェクトの追加"
-
-msgid "Add Pool"
-msgstr "プールの追加"
 
 msgid "Add filesystem|snap|volume"
 msgstr "ファイルシステム|スナップ|ボリュームの追加"
@@ -56,9 +42,6 @@ msgstr "このスナップショットにロールバックしますか？"
 msgid "Ashift value"
 msgstr "ashift値"
 
-msgid "Ashift value to use."
-msgstr "ashift値に使用。"
-
 msgid "Available"
 msgstr "利用可能"
 
@@ -68,20 +51,11 @@ msgstr "ベーシック"
 msgid "By ID"
 msgstr "By ID"
 
-msgid "By Id"
-msgstr "By Id"
-
 msgid "By Path"
 msgstr "By Path"
 
-msgid "Capacity"
-msgstr "容量"
-
 msgid "Clone"
 msgstr "クローン"
-
-msgid "Clone name"
-msgstr "クローン名"
 
 msgid "Compression"
 msgstr "圧縮"
@@ -89,14 +63,8 @@ msgstr "圧縮"
 msgid "Compression type"
 msgstr "圧縮タイプ"
 
-msgid "Confirmation"
-msgstr "確認"
-
 msgid "Create"
 msgstr "作成"
-
-msgid "Create ZFS Pool"
-msgstr "ZFSプールの作成"
 
 msgid "Created pool."
 msgstr "プールを作成。"
@@ -104,14 +72,14 @@ msgstr "プールを作成。"
 msgid "Delete"
 msgstr "削除"
 
-msgid "Deleting selected item(s)"
-msgstr "選択したアイテムを削除"
+msgid "Deleting object ..."
+msgstr ""
+
+msgid "Deleting snapshot ..."
+msgstr ""
 
 msgid "Details"
 msgstr "詳細"
-
-msgid "Device"
-msgstr "デバイス"
 
 msgid "Device alias"
 msgstr "デバイスエイリアス"
@@ -119,41 +87,14 @@ msgstr "デバイスエイリアス"
 msgid "Devices"
 msgstr "デバイス"
 
-msgid "Displaying items {0} - {1} of {2}"
-msgstr "表示中のアイテム {2} 件中 {0} - {1}"
+msgid "Discover"
+msgstr ""
 
-msgid ""
-"Do you really want to create the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
-msgstr "本当にZFSプールを作成しますか？<br/><br/>このプロセスには時間がかかり、完了するまで変更内容は表示されません。<br/> 表示を更新するには、ページをリロードしてください。"
+msgid "Discover complete."
+msgstr ""
 
-msgid "Do you really want to delete the selected item(s)?"
-msgstr "選択したアイテムを削除してもよろしいですか？"
-
-msgid ""
-"Do you really want to expand the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
-msgstr "本当にZFSプールを作成しますか？<br/><br/>このプロセスには時間がかかり、完了するまで変更内容は表示されません。<br/> 表示を更新するには、ページをリロードしてください。"
-
-msgid "Do you really want to export the pool?"
-msgstr "本当にプールをエクスポートしますか？"
-
-msgid "Do you really want to rollback the selected item?"
-msgstr "本当に選択したアイテムをロールバックしますか？"
-
-msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "ZFSプールを作成してもよろしいですか？<br/><br/>最新のスクラブ:"
-
-msgid "Down"
-msgstr "下げる"
-
-msgid "Edit"
-msgstr "編集"
-
-msgid "Edit properties"
-msgstr "プロパティの編集"
+msgid "Discovering new pools ..."
+msgstr ""
 
 msgid "Edit property"
 msgstr "プロパティの編集"
@@ -161,23 +102,14 @@ msgstr "プロパティの編集"
 msgid "Expand"
 msgstr "拡張"
 
-msgid "Expand Pool"
-msgstr "プールの拡張"
-
 msgid "Expand pool"
 msgstr "プールの拡張"
 
 msgid "Expanded pool."
 msgstr "プールを拡張。"
 
-msgid "Export Pool"
-msgstr "プールのエクスポート"
-
 msgid "Filesystem"
 msgstr "ファイルシステム"
-
-msgid "Filesystem/Volume"
-msgstr "ファイルシステム/ボリューム"
 
 msgid "Force"
 msgstr "強制"
@@ -194,11 +126,6 @@ msgid ""
 msgstr "エラーが報告された場合でも、Vded の作成を強制します。細心の注意を払って使用してください。"
 
 msgid ""
-"Forces the creation of the Vdev even if errors are reported. Use with "
-"extreme caution!"
-msgstr "エラーが報告されている場合でもVdevを強制的に作成します。細心の注意を払って使用してください！"
-
-msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "エラーが報告されている場合でもプールを強制的に作成します。細心の注意を払って使用してください！"
@@ -206,23 +133,11 @@ msgstr "エラーが報告されている場合でもプールを強制的に作
 msgid "Hits"
 msgstr "Hits"
 
-msgid "Import"
-msgstr "インポート"
-
-msgid "Import Pool"
-msgstr "プールのインポート"
-
-msgid "Import ZFS Pool(s)"
-msgstr "ZFSプールのインポート"
-
 msgid "Import all"
 msgstr "すべてをインポート"
 
 msgid "Import all missing pools."
 msgstr "不足しているプールをすべてインポートします。"
-
-msgid "Import all missing pools. Overrides pool specification above."
-msgstr "不足しているプールをすべてインポートします。 既存のプール指定を上書きします。"
 
 msgid "Mirror"
 msgstr "ミラー"
@@ -239,60 +154,23 @@ msgstr "マウントポイント"
 msgid "Name"
 msgstr "名前"
 
-msgid ""
-"Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "新しいクローンの名前。これは、ZFS階層内のどこにでも配置することができます。"
-
-msgid ""
-"Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "新しいオブジェクトの名前。プレフィックスとして名前を付加します。先頭の / は省略してください。"
-
-msgid "New"
-msgstr "新規"
-
-msgid "New Name"
-msgstr "新しい名前"
-
 msgid "New Property"
 msgstr "新しいプロパティ"
 
 msgid "New property"
 msgstr "新しいプロパティ"
 
-msgid "No items to display"
-msgstr "表示するアイテムはありません"
-
 msgid "None"
 msgstr "None"
 
-msgid "Object Type"
-msgstr "オブジェクトタイプ"
-
-msgid "Object details"
-msgstr "オブジェクト詳細"
-
-msgid "Ok"
-msgstr "了解"
-
-msgid "Old Name"
-msgstr "古い名前"
-
-msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "プールのオプションマウントポイント。デフォルトではプール名を使用します。"
+msgid "Object deleted."
+msgstr ""
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "プール用のオプションのマウントポイント。デフォルトはプール名を使用します。"
 
-msgid ""
-"Optional mountpoint of the filesystem. If left blank parent mountpoint will "
-"be prepended to name of the filesystem."
-msgstr "ファイルシステムのオプションマウントポイント。"
-
 msgid "Optional mountpoint. Default is to use the name."
 msgstr "オプションのマウントポイント。デフォルトでは名前を使用します。"
-
-msgid "Overview"
-msgstr "概要"
 
 msgid "Parent"
 msgstr "親"
@@ -302,9 +180,6 @@ msgstr "パス"
 
 msgid "Pool"
 msgstr "プール"
-
-msgid "Pool Name"
-msgstr "プールの名前"
 
 msgid "Pool name"
 msgstr "プール名"
@@ -339,38 +214,17 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "参照"
 
-msgid "Refresh"
-msgstr "リフレッシュ"
-
-msgid "Rename"
-msgstr "名前の変更"
-
-msgid "Rename ZFS Object"
-msgstr "ZFSオブジェクトの名前の変更"
-
 msgid "Rollback"
 msgstr "ロールバック"
-
-msgid "Save"
-msgstr "保存"
 
 msgid "Scrub"
 msgstr "スクラブ"
 
-msgid "Serial Number"
-msgstr "シリアルナンバー"
-
 msgid "Set ashift"
 msgstr "ashiftの設定"
 
-msgid "Settings"
-msgstr "設定"
-
 msgid "Size"
 msgstr "サイズ"
-
-msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "ボリュームのサイズ　例)5mb,100gb,1tb など"
 
 msgid "Snap clone name"
 msgstr "スナップクローン名"
@@ -378,8 +232,8 @@ msgstr "スナップクローン名"
 msgid "Snapshot"
 msgstr "スナップショット"
 
-msgid "Snapshot to clone"
-msgstr "クローンのスナップショット"
+msgid "Snapshot deleted."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "スナップショット"
@@ -409,9 +263,6 @@ msgstr "状態"
 msgid "Status"
 msgstr "ステータス"
 
-msgid "Successfully rollbacked!"
-msgstr "ロールバックが成功しました!"
-
 msgid "Thin provisioning"
 msgstr "シンプロビジョニング"
 
@@ -420,12 +271,6 @@ msgstr "ツール"
 
 msgid "Type"
 msgstr "タイプ"
-
-msgid "Up"
-msgstr "上げる"
-
-msgid "Updating property..."
-msgstr "プロパティを更新しています..."
 
 msgid "Used"
 msgstr "使用済"
@@ -436,14 +281,8 @@ msgstr "値"
 msgid "Vdev type"
 msgstr "Vdev タイプ"
 
-msgid "Vendor"
-msgstr "ベンダ"
-
 msgid "Volume"
 msgstr "ボリューム"
-
-msgid "ZFS"
-msgstr "ZFS"
 
 msgid "ZFS Hits/Misses"
 msgstr "ZFS Hits/Misses"
@@ -454,47 +293,8 @@ msgstr "ZFS ZED"
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
-msgid "gzip"
-msgstr "gzip"
-
-msgid "gzip-1"
-msgstr "gzip-1"
-
-msgid "gzip-2"
-msgstr "gzip-2"
-
-msgid "gzip-3"
-msgstr "gzip-3"
-
-msgid "gzip-4"
-msgstr "gzip-4"
-
-msgid "gzip-5"
-msgstr "gzip-5"
-
-msgid "gzip-6"
-msgstr "gzip-6"
-
-msgid "gzip-7"
-msgstr "gzip-7"
-
-msgid "gzip-8"
-msgstr "gzip-8"
-
-msgid "gzip-9"
-msgstr "gzip-9"
-
-msgid "lz4"
-msgstr "lz4"
-
-msgid "lzjb"
-msgstr "lzjb"
-
 msgid "zfs"
 msgstr "zfs"
-
-msgid "zle"
-msgstr "zle"
 
 msgid "zpool export"
 msgstr "zpool export"

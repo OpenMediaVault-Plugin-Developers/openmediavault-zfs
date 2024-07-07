@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-31 07:56-0500\n"
+"POT-Creation-Date: 2024-07-07 07:55-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2023\n"
 "Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
@@ -18,22 +18,8 @@ msgstr ""
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#, javascript-format
-msgid "% completed ..."
-msgstr "% 完成 ..."
-
-#, javascript-format
-msgid "100% completed ..."
-msgstr "100% 完成 ..."
-
 msgid "Add"
 msgstr "新增"
-
-msgid "Add Object"
-msgstr "新增物件"
-
-msgid "Add Pool"
-msgstr "新增集用場"
 
 msgid "Add filesystem|snap|volume"
 msgstr "新增 檔案系統|快照|儲存卷"
@@ -56,9 +42,6 @@ msgstr "您確定要回轉到此快照？"
 msgid "Ashift value"
 msgstr "Ashift 數值"
 
-msgid "Ashift value to use."
-msgstr "所要使用的 Ashift 數值。"
-
 msgid "Available"
 msgstr "可用"
 
@@ -68,20 +51,11 @@ msgstr "基本"
 msgid "By ID"
 msgstr "以 ID"
 
-msgid "By Id"
-msgstr "以 Id"
-
 msgid "By Path"
 msgstr "以路徑"
 
-msgid "Capacity"
-msgstr "容量"
-
 msgid "Clone"
 msgstr "複件"
-
-msgid "Clone name"
-msgstr "複件名稱"
 
 msgid "Compression"
 msgstr "壓縮"
@@ -89,14 +63,8 @@ msgstr "壓縮"
 msgid "Compression type"
 msgstr "壓縮型式"
 
-msgid "Confirmation"
-msgstr "確認"
-
 msgid "Create"
 msgstr "建立"
-
-msgid "Create ZFS Pool"
-msgstr "建立 ZFS 集用場"
 
 msgid "Created pool."
 msgstr "建立集用場。"
@@ -104,14 +72,14 @@ msgstr "建立集用場。"
 msgid "Delete"
 msgstr "刪除"
 
-msgid "Deleting selected item(s)"
-msgstr "刪除所選項目"
+msgid "Deleting object ..."
+msgstr ""
+
+msgid "Deleting snapshot ..."
+msgstr ""
 
 msgid "Details"
 msgstr "詳細資料"
-
-msgid "Device"
-msgstr "裝置"
 
 msgid "Device alias"
 msgstr "裝置別名"
@@ -119,41 +87,14 @@ msgstr "裝置別名"
 msgid "Devices"
 msgstr "裝置"
 
-msgid "Displaying items {0} - {1} of {2}"
-msgstr "顯示項目 {0} - {1} 全部 {2}"
+msgid "Discover"
+msgstr ""
 
-msgid ""
-"Do you really want to create the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
-msgstr "您真的要建立此 ZFS 集用場嗎？<br/><br/>這過程將花費些時間，直到它完成後才會顯示出變更。<br/>請重新載入網頁來更新顯示變更。"
+msgid "Discover complete."
+msgstr ""
 
-msgid "Do you really want to delete the selected item(s)?"
-msgstr "您真的要刪除所選項目嗎？"
-
-msgid ""
-"Do you really want to expand the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
-msgstr "您真的要擴展此 ZFS 集用場嗎？<br/><br/>這過程將花費些時間，直到它完成後才會顯示出變更。<br/>請重新載入網頁來更新顯示變更。"
-
-msgid "Do you really want to export the pool?"
-msgstr "您真的要匯出集用場嗎？"
-
-msgid "Do you really want to rollback the selected item?"
-msgstr "您真的要轉返所選項目嗎？"
-
-msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "您真的要清理該集用場嗎？<br/><br/>最近清理於："
-
-msgid "Down"
-msgstr "停止"
-
-msgid "Edit"
-msgstr "編輯"
-
-msgid "Edit properties"
-msgstr "編輯特性"
+msgid "Discovering new pools ..."
+msgstr ""
 
 msgid "Edit property"
 msgstr "編輯特性"
@@ -161,23 +102,14 @@ msgstr "編輯特性"
 msgid "Expand"
 msgstr "擴展"
 
-msgid "Expand Pool"
-msgstr "擴展集用場"
-
 msgid "Expand pool"
 msgstr "擴展集用場"
 
 msgid "Expanded pool."
 msgstr "擴展集用場。"
 
-msgid "Export Pool"
-msgstr "匯出集用場"
-
 msgid "Filesystem"
 msgstr "檔案系統"
-
-msgid "Filesystem/Volume"
-msgstr "檔案系統/磁卷"
 
 msgid "Force"
 msgstr "強制"
@@ -194,11 +126,6 @@ msgid ""
 msgstr "即使有錯誤報告，也強迫建立 Vded。請務必謹慎使用！"
 
 msgid ""
-"Forces the creation of the Vdev even if errors are reported. Use with "
-"extreme caution!"
-msgstr "即使有錯誤報告，也強迫建立 Vdev。請務必謹慎使用！"
-
-msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用！"
@@ -206,23 +133,11 @@ msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用
 msgid "Hits"
 msgstr "命中"
 
-msgid "Import"
-msgstr "匯入"
-
-msgid "Import Pool"
-msgstr "匯入集用場"
-
-msgid "Import ZFS Pool(s)"
-msgstr "匯入 ZFS 集用場"
-
 msgid "Import all"
 msgstr "匯入全部"
 
 msgid "Import all missing pools."
 msgstr "匯入所有漏失的集用場。"
-
-msgid "Import all missing pools. Overrides pool specification above."
-msgstr "匯入所有漏失的集用場。蓋換以上的集用場規格。"
 
 msgid "Mirror"
 msgstr "鏡像"
@@ -239,60 +154,23 @@ msgstr "掛載點"
 msgid "Name"
 msgstr "名稱"
 
-msgid ""
-"Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "新複件的名稱。它可以被放在 ZFS 層次結構中的任何地方。"
-
-msgid ""
-"Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "新物件的名稱。前綴詞會被加在名稱支前。請省去前導的 /"
-
-msgid "New"
-msgstr "新增"
-
-msgid "New Name"
-msgstr "新名稱"
-
 msgid "New Property"
 msgstr "新特性"
 
 msgid "New property"
 msgstr "新特性"
 
-msgid "No items to display"
-msgstr "無項目可顯示"
-
 msgid "None"
 msgstr "無"
 
-msgid "Object Type"
-msgstr "物件型式"
-
-msgid "Object details"
-msgstr "物件詳細資料"
-
-msgid "Ok"
-msgstr "Ok"
-
-msgid "Old Name"
-msgstr "舊名稱"
-
-msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
+msgid "Object deleted."
+msgstr ""
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
 
-msgid ""
-"Optional mountpoint of the filesystem. If left blank parent mountpoint will "
-"be prepended to name of the filesystem."
-msgstr "給檔案系統的選用性掛載點。如果留空白，上層掛載點將被加在檔案系統名稱之前。"
-
 msgid "Optional mountpoint. Default is to use the name."
 msgstr "選用性掛載點。預設為使用名稱。"
-
-msgid "Overview"
-msgstr "概觀"
 
 msgid "Parent"
 msgstr "上層"
@@ -302,9 +180,6 @@ msgstr "路徑"
 
 msgid "Pool"
 msgstr "集用場"
-
-msgid "Pool Name"
-msgstr "集用場名稱"
 
 msgid "Pool name"
 msgstr "集用場名稱"
@@ -339,38 +214,17 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "參用"
 
-msgid "Refresh"
-msgstr "更新"
-
-msgid "Rename"
-msgstr "重新命名"
-
-msgid "Rename ZFS Object"
-msgstr "重新命名 ZFS 物件"
-
 msgid "Rollback"
 msgstr "轉返"
-
-msgid "Save"
-msgstr "儲存"
 
 msgid "Scrub"
 msgstr "清理"
 
-msgid "Serial Number"
-msgstr "序號"
-
 msgid "Set ashift"
 msgstr "設定 ashift"
 
-msgid "Settings"
-msgstr "設定"
-
 msgid "Size"
 msgstr "大小"
-
-msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "磁碟大小，例如 5mb、100gb、1tb 等等"
 
 msgid "Snap clone name"
 msgstr "快照複件名稱"
@@ -378,8 +232,8 @@ msgstr "快照複件名稱"
 msgid "Snapshot"
 msgstr "快照"
 
-msgid "Snapshot to clone"
-msgstr "攝取快照到複件"
+msgid "Snapshot deleted."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "快照"
@@ -409,9 +263,6 @@ msgstr "狀態"
 msgid "Status"
 msgstr "狀況"
 
-msgid "Successfully rollbacked!"
-msgstr "成功地轉返！"
-
 msgid "Thin provisioning"
 msgstr "精簡配置"
 
@@ -420,12 +271,6 @@ msgstr "工具"
 
 msgid "Type"
 msgstr "型式"
-
-msgid "Up"
-msgstr "啟動"
-
-msgid "Updating property..."
-msgstr "更新特性 ..."
 
 msgid "Used"
 msgstr "已使用"
@@ -436,14 +281,8 @@ msgstr "數值"
 msgid "Vdev type"
 msgstr "Vdev 型式"
 
-msgid "Vendor"
-msgstr "供應商"
-
 msgid "Volume"
 msgstr "儲存卷"
-
-msgid "ZFS"
-msgstr "ZFS"
 
 msgid "ZFS Hits/Misses"
 msgstr "ZFS 命中/未中"
@@ -454,47 +293,8 @@ msgstr "ZFS ZED"
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
-msgid "gzip"
-msgstr "gzip"
-
-msgid "gzip-1"
-msgstr "gzip-1"
-
-msgid "gzip-2"
-msgstr "gzip-2"
-
-msgid "gzip-3"
-msgstr "gzip-3"
-
-msgid "gzip-4"
-msgstr "gzip-4"
-
-msgid "gzip-5"
-msgstr "gzip-5"
-
-msgid "gzip-6"
-msgstr "gzip-6"
-
-msgid "gzip-7"
-msgstr "gzip-7"
-
-msgid "gzip-8"
-msgstr "gzip-8"
-
-msgid "gzip-9"
-msgstr "gzip-9"
-
-msgid "lz4"
-msgstr "lz4"
-
-msgid "lzjb"
-msgstr "lzjb"
-
 msgid "zfs"
 msgstr "zfs"
-
-msgid "zle"
-msgstr "zle"
 
 msgid "zpool export"
 msgstr "zpool export"

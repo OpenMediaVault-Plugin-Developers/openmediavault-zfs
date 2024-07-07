@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-31 07:56-0500\n"
+"POT-Creation-Date: 2024-07-07 07:55-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Hyeonkyu Chu <hyeonkyu@gmail.com>, 2014\n"
 "Language-Team: Korean (Korea) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ko_KR/)\n"
@@ -18,22 +18,8 @@ msgstr ""
 "Language: ko_KR\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#, javascript-format
-msgid "% completed ..."
-msgstr "% 완료됨 ..."
-
-#, javascript-format
-msgid "100% completed ..."
-msgstr "100% 완료됨 ..."
-
 msgid "Add"
 msgstr ""
-
-msgid "Add Object"
-msgstr "Object 추가"
-
-msgid "Add Pool"
-msgstr "Pool 추가"
 
 msgid "Add filesystem|snap|volume"
 msgstr ""
@@ -56,9 +42,6 @@ msgstr ""
 msgid "Ashift value"
 msgstr "ashift 값"
 
-msgid "Ashift value to use."
-msgstr "ashift 값 사용."
-
 msgid "Available"
 msgstr "가용"
 
@@ -68,20 +51,11 @@ msgstr "기본"
 msgid "By ID"
 msgstr ""
 
-msgid "By Id"
-msgstr "By Id"
-
 msgid "By Path"
 msgstr "By Path"
 
-msgid "Capacity"
-msgstr "용량"
-
 msgid "Clone"
 msgstr ""
-
-msgid "Clone name"
-msgstr "복제 이름"
 
 msgid "Compression"
 msgstr ""
@@ -89,14 +63,8 @@ msgstr ""
 msgid "Compression type"
 msgstr ""
 
-msgid "Confirmation"
-msgstr "확인"
-
 msgid "Create"
 msgstr ""
-
-msgid "Create ZFS Pool"
-msgstr "ZFS Pool 생성"
 
 msgid "Created pool."
 msgstr ""
@@ -104,14 +72,14 @@ msgstr ""
 msgid "Delete"
 msgstr "삭제"
 
-msgid "Deleting selected item(s)"
-msgstr "선택된 항목(들) 삭제 "
+msgid "Deleting object ..."
+msgstr ""
+
+msgid "Deleting snapshot ..."
+msgstr ""
 
 msgid "Details"
 msgstr "상세"
-
-msgid "Device"
-msgstr "장치"
 
 msgid "Device alias"
 msgstr "장치 별칭"
@@ -119,41 +87,14 @@ msgstr "장치 별칭"
 msgid "Devices"
 msgstr "장치"
 
-msgid "Displaying items {0} - {1} of {2}"
-msgstr "항목 표시 중 {0} - {1} of {2}"
-
-msgid ""
-"Do you really want to create the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
+msgid "Discover"
 msgstr ""
 
-msgid "Do you really want to delete the selected item(s)?"
-msgstr "정말로 선택된 항목(들)을 삭제하기겠습니까?"
-
-msgid ""
-"Do you really want to expand the ZFS pool?<br/><br/>The process will take "
-"some time and no change will be displayed until it is completed.<br/>Please "
-"reload the page to update any changes."
+msgid "Discover complete."
 msgstr ""
 
-msgid "Do you really want to export the pool?"
+msgid "Discovering new pools ..."
 msgstr ""
-
-msgid "Do you really want to rollback the selected item?"
-msgstr ""
-
-msgid "Do you really want to scrub the pool?<br/><br/>Latest scrub: "
-msgstr "정말로 Pool을 검증하시겠습니까?<br/><br/>마지막 검증: "
-
-msgid "Down"
-msgstr "내림"
-
-msgid "Edit"
-msgstr "편집"
-
-msgid "Edit properties"
-msgstr "속성 편집"
 
 msgid "Edit property"
 msgstr ""
@@ -161,22 +102,13 @@ msgstr ""
 msgid "Expand"
 msgstr "확장"
 
-msgid "Expand Pool"
-msgstr "Pool 확장"
-
 msgid "Expand pool"
 msgstr ""
 
 msgid "Expanded pool."
 msgstr ""
 
-msgid "Export Pool"
-msgstr ""
-
 msgid "Filesystem"
-msgstr ""
-
-msgid "Filesystem/Volume"
 msgstr ""
 
 msgid "Force"
@@ -194,11 +126,6 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Forces the creation of the Vdev even if errors are reported. Use with "
-"extreme caution!"
-msgstr "생성 중 오류를 무시하고 Vdev 생성을 강제합니다. 아주 조심해서 사용해야 합니다!"
-
-msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
 msgstr "생성 중 오류를 무시하고 Pool 생성을 강제합니다. 아주 조심해서 사용해야 합니다!"
@@ -206,22 +133,10 @@ msgstr "생성 중 오류를 무시하고 Pool 생성을 강제합니다. 아주
 msgid "Hits"
 msgstr ""
 
-msgid "Import"
-msgstr ""
-
-msgid "Import Pool"
-msgstr ""
-
-msgid "Import ZFS Pool(s)"
-msgstr ""
-
 msgid "Import all"
 msgstr ""
 
 msgid "Import all missing pools."
-msgstr ""
-
-msgid "Import all missing pools. Overrides pool specification above."
 msgstr ""
 
 msgid "Mirror"
@@ -239,60 +154,23 @@ msgstr "마운트지점"
 msgid "Name"
 msgstr "이름"
 
-msgid ""
-"Name of the new Clone. It can be placed anywhere within the ZFS hierarchy."
-msgstr "새로운 복제의 이름. 이것은 ZFS 계층-구조에 무작위로 배치됩니다."
-
-msgid ""
-"Name of the new object. Prefix will prepend the name. Please omit leading /"
-msgstr "새 Object 이름. 접두사는 이름 앞에 추가됩니다. 맨 앞의 '/'는 생략하세요."
-
-msgid "New"
-msgstr "신규"
-
-msgid "New Name"
-msgstr ""
-
 msgid "New Property"
 msgstr ""
 
 msgid "New property"
 msgstr ""
 
-msgid "No items to display"
-msgstr "표시할 항목이 없습니다"
-
 msgid "None"
 msgstr "None"
 
-msgid "Object Type"
-msgstr "Object 유형"
-
-msgid "Object details"
-msgstr "Object 상세"
-
-msgid "Ok"
-msgstr "Ok"
-
-msgid "Old Name"
+msgid "Object deleted."
 msgstr ""
-
-msgid "Optional mountpoint for the pool. Default is to use pool name."
-msgstr "Pool에 대한 선택적 마운트지점. 기본적으로 Pool 이름을 사용합니다."
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr ""
 
-msgid ""
-"Optional mountpoint of the filesystem. If left blank parent mountpoint will "
-"be prepended to name of the filesystem."
-msgstr "파일 시스템의 선택적 마운트지점. If left blank parent mountpoint will be prepended to name of the filesystem."
-
 msgid "Optional mountpoint. Default is to use the name."
 msgstr ""
-
-msgid "Overview"
-msgstr "개요"
 
 msgid "Parent"
 msgstr ""
@@ -301,9 +179,6 @@ msgid "Path"
 msgstr ""
 
 msgid "Pool"
-msgstr ""
-
-msgid "Pool Name"
 msgstr ""
 
 msgid "Pool name"
@@ -339,38 +214,17 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr ""
 
-msgid "Refresh"
-msgstr "새로 고침"
-
-msgid "Rename"
-msgstr ""
-
-msgid "Rename ZFS Object"
-msgstr ""
-
 msgid "Rollback"
 msgstr ""
-
-msgid "Save"
-msgstr "저장"
 
 msgid "Scrub"
 msgstr "검증"
 
-msgid "Serial Number"
-msgstr "일련번호"
-
 msgid "Set ashift"
 msgstr "ashift 설정"
 
-msgid "Settings"
-msgstr ""
-
 msgid "Size"
 msgstr "크기"
-
-msgid "Size of the volume e.g. 5mb,100gb,1tb etc"
-msgstr "볼륨의 크기. 예: 5mb,100gb,1tb 기타"
 
 msgid "Snap clone name"
 msgstr ""
@@ -378,8 +232,8 @@ msgstr ""
 msgid "Snapshot"
 msgstr ""
 
-msgid "Snapshot to clone"
-msgstr "복제로 스냅샷"
+msgid "Snapshot deleted."
+msgstr ""
 
 msgid "Snapshots"
 msgstr ""
@@ -409,9 +263,6 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-msgid "Successfully rollbacked!"
-msgstr ""
-
 msgid "Thin provisioning"
 msgstr ""
 
@@ -420,12 +271,6 @@ msgstr ""
 
 msgid "Type"
 msgstr "유형"
-
-msgid "Up"
-msgstr "올림"
-
-msgid "Updating property..."
-msgstr "속성 갱신 중..."
 
 msgid "Used"
 msgstr "사용"
@@ -436,14 +281,8 @@ msgstr "값"
 msgid "Vdev type"
 msgstr "Vdev 유형"
 
-msgid "Vendor"
-msgstr "공급업체"
-
 msgid "Volume"
 msgstr ""
-
-msgid "ZFS"
-msgstr "ZFS"
 
 msgid "ZFS Hits/Misses"
 msgstr ""
@@ -454,46 +293,7 @@ msgstr ""
 msgid "Zvol %s [%s, %s]"
 msgstr "Zvol %s [%s, %s]"
 
-msgid "gzip"
-msgstr ""
-
-msgid "gzip-1"
-msgstr ""
-
-msgid "gzip-2"
-msgstr ""
-
-msgid "gzip-3"
-msgstr ""
-
-msgid "gzip-4"
-msgstr ""
-
-msgid "gzip-5"
-msgstr ""
-
-msgid "gzip-6"
-msgstr ""
-
-msgid "gzip-7"
-msgstr ""
-
-msgid "gzip-8"
-msgstr ""
-
-msgid "gzip-9"
-msgstr ""
-
-msgid "lz4"
-msgstr ""
-
-msgid "lzjb"
-msgstr ""
-
 msgid "zfs"
-msgstr ""
-
-msgid "zle"
 msgstr ""
 
 msgid "zpool export"

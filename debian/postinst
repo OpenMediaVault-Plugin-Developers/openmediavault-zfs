@@ -27,7 +27,7 @@ case "$1" in
         # Remove deprectaed stuff to ensure clean installation
         rm -f /etc/insserv/overrides/zfs-mount
 
-        /sbin/modprobe zfs || :
+        modprobe --quiet zfs || :
 
         if dpkg --compare-versions "$2" lt-nl "4.0.3"; then
             if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs 2>/dev/null; then

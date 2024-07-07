@@ -1,11 +1,11 @@
-openmediavault-zfs (7.1) UNRELEASED; urgency=medium
+openmediavault-zfs (7.1) stable; urgency=low
 
   * Fix opts not clearing when importing more than one pool
   * Remove autoreload from Pools tab
-  * Remove auto-discover of new pools
+  * Remove auto-discover of new pools on datatable load
   * Add Discover button to discover new pools
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 02 Jul 2024 19:35:19 -0500
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 07 Jul 2024 07:53:42 -0500
 
 openmediavault-zfs (7.0.6) stable; urgency=low
 

@@ -1,3 +1,9 @@
+openmediavault-zfs (7.1.1) stable; urgency=low
+
+  * Improve plugin installation
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 22 Jul 2024 08:33:04 -0500
+
 openmediavault-zfs (7.1) stable; urgency=low
 
   * Fix opts not clearing when importing more than one pool

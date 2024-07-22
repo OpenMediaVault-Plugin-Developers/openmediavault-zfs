@@ -5,68 +5,33 @@ set -e
 . /etc/default/openmediavault
 . /usr/share/openmediavault/scripts/helper-functions
 
-
-get_dataset_status ()
-{
-    zfs list "$1" &>/dev/null
-}
-
-
 case "$1" in
     configure)
-        SERVICE_XPATH_NAME="zfs"
-        SERVICE_XPATH="/config/services/${SERVICE_XPATH_NAME}"
+        # Activate package triggers
+        dpkg-trigger update-workbench
 
-        if ! omv_config_exists "/config/system/notification/notifications/notification[id='zfs']"; then
+        # add zfs-zed notfication
+        xpath="/config/system/notification/notifications"
+        if ! omv_config_exists "${xpath}/notification[id='zfs']"; then
             object="<uuid>$(omv_uuid)</uuid>"
             object="${object}<id>zfs</id>"
             object="${object}<enable>0</enable>"
-            omv_config_add_node_data "/config/system/notification/notifications" "notification" "${object}"
+            omv_config_add_node_data "${xpath}" "notification" "${object}"
         fi
+        omv-salt deploy run --no-color --quiet zfszed || :
 
-        # Remove deprectaed stuff to ensure clean installation
-        rm -f /etc/insserv/overrides/zfs-mount
-
+        # load zfs kernel module
         modprobe --quiet zfs || :
-
-        if dpkg --compare-versions "$2" lt-nl "4.0.3"; then
-            if modinfo zfs >/dev/null 2>/dev/null && ! modprobe -n --first-time zfs 2>/dev/null; then
-                zfsMntent_entries=$(omv-confdbadm read conf.system.filesystem.mountpoint \
-                    | jq -r '.[]|select(.type=="zfs")')
-                zfsMntent_uuid=( $(echo "$zfsMntent_entries" | jq -r '.uuid') )
-                zfsMntent_fsname=( $(echo "$zfsMntent_entries" | jq -r '.fsname') )
-                j=0
-                echo ${zfsMntent_uuid[0]}
-                for fsname in ${zfsMntent_fsname[@]};do
-                    if (get_dataset_status "${fsname}");then
-                        echo "Adding omvzfsplugin:uuid property to ${fsname} dataset"
-                        zfs set 'omvzfsplugin:uuid='"${zfsMntent_uuid[$j]}" "${fsname}"
-                    else 
-                        echo "Dataset ${fsname} is not available, skipping...."
-                    fi
-                    let "++j"
-                done
-            else
-                echo "ZFS module not loaded"
-            fi
-        else
-            echo "New plugin install, not inserting uuid property into existing datasets"
-        fi
-
         echo "zfs" > /etc/modules-load.d/zfs.conf
-
-        dpkg-trigger update-workbench
-
-        omv-salt deploy run --no-color --quiet zfs || :
-        ;;
+    ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-        ;;
+    ;;
 
     *)
         echo "postinst called with unknown argument \`$1'" >&2
         exit 1
-        ;;
+    ;;
 esac
 
 #DEBHELPER#

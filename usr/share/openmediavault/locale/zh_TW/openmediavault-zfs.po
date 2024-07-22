@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# kochin <kochinc@outlook.com>, 2014,2018,2022-2023
+# kochin <kochinc@outlook.com>, 2014,2018,2022-2024
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-07 07:55-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2023\n"
+"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2024\n"
 "Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,10 +73,10 @@ msgid "Delete"
 msgstr "刪除"
 
 msgid "Deleting object ..."
-msgstr ""
+msgstr "刪除物件中 ..."
 
 msgid "Deleting snapshot ..."
-msgstr ""
+msgstr "刪除快照中 ..."
 
 msgid "Details"
 msgstr "詳細資料"
@@ -88,13 +88,13 @@ msgid "Devices"
 msgstr "裝置"
 
 msgid "Discover"
-msgstr ""
+msgstr "發現"
 
 msgid "Discover complete."
-msgstr ""
+msgstr "完成發現。"
 
 msgid "Discovering new pools ..."
-msgstr ""
+msgstr "發現新的集用場中 ..."
 
 msgid "Edit property"
 msgstr "編輯特性"
@@ -164,7 +164,7 @@ msgid "None"
 msgstr "無"
 
 msgid "Object deleted."
-msgstr ""
+msgstr "物件已刪除。"
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
@@ -233,7 +233,7 @@ msgid "Snapshot"
 msgstr "快照"
 
 msgid "Snapshot deleted."
-msgstr ""
+msgstr "快照已刪除。"
 
 msgid "Snapshots"
 msgstr "快照"

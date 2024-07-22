@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022
+# Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022,2024
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-07-07 07:55-0500\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022\n"
+"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022,2024\n"
 "Language-Team: Spanish (Spain) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -73,10 +73,10 @@ msgid "Delete"
 msgstr "Borrar"
 
 msgid "Deleting object ..."
-msgstr ""
+msgstr "Borrando objeto ..."
 
 msgid "Deleting snapshot ..."
-msgstr ""
+msgstr "Borrando instantánea ..."
 
 msgid "Details"
 msgstr "Detalles"
@@ -88,13 +88,13 @@ msgid "Devices"
 msgstr "Dispositivos"
 
 msgid "Discover"
-msgstr ""
+msgstr "Descubrir"
 
 msgid "Discover complete."
-msgstr ""
+msgstr "Descubrimiento completo"
 
 msgid "Discovering new pools ..."
-msgstr ""
+msgstr "Descubriendo nuevos Pools ..."
 
 msgid "Edit property"
 msgstr "Editar propiedades"
@@ -164,7 +164,7 @@ msgid "None"
 msgstr "Ninguno"
 
 msgid "Object deleted."
-msgstr ""
+msgstr "Objeto borrado."
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "Punto de montaje opcional para el pool. Por defecto es el nombre del pool."
@@ -233,7 +233,7 @@ msgid "Snapshot"
 msgstr "Snapshot (instantánea)"
 
 msgid "Snapshot deleted."
-msgstr ""
+msgstr "Instantánea borrada."
 
 msgid "Snapshots"
 msgstr "Snapshots"

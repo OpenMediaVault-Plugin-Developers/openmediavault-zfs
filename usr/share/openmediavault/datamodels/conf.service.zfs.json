@@ -1,17 +1,17 @@
 {
-    "type": "config",
-    "title": "zfs",
-    "id": "conf.service.zfs",
-    "queryinfo": {
-        "xpath": "/config/services/zfs",
-        "iterable": false
+  "type": "config",
+  "title": "zfs",
+  "id": "conf.service.zfs",
+  "queryinfo": {
+    "xpath": "/config/services/zfs",
+    "iterable": false
+  },
+  "properties": {
+    "autoShareNestedEnabled": {
+      "type": "boolean"
     },
-    "properties": {
-        "autoShareNestedEnabled": {
-            "type": "boolean"
-        },
-        "autoShareNestedProperty": {
-            "type": "string"
-        }
+    "autoShareNestedProperty": {
+      "type": "string"
     }
+  }
 }

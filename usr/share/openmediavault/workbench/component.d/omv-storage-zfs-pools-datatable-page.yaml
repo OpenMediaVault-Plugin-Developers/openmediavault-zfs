@@ -286,6 +286,7 @@ data:
             method: deleteObjectBg
             params:
               name: "{{ _selected[0].path }}"
+              mp: "{{ _selected[0].mountpoint }}"
               type: "{{ _selected[0].type }}"
             task: true
             progressMessage: _("Deleting object ...")

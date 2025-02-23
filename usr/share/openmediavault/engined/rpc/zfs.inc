@@ -377,12 +377,13 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->validateMethodParams($params, 'rpc.zfs.deleteobject');
 
         $name = $params['name'];
+        $mp = $params['mp'];
         switch ($params['type']) {
             case "Filesystem":
                 $tmp = new OMVModuleZFSFilesystem($name);
-                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp))
+                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp,$mp))
                     throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
-                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
+                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp,$mp);
                 $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
                   "org.openmediavault.storage.zfs.filesystem", $context);
                 break;
@@ -396,9 +397,10 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 break;
             case "Pool":
                 $tmp = new OMVModuleZFSZpool($name);
-                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp))
+                var_dump($tmp);
+                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp,$mp))
                     throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
-                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp);
+                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp,$mp);
 
                 $devices = $tmp->getAllDevices([
                     "excludeStates" => [

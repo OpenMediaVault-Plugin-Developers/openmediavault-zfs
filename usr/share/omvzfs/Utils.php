@@ -71,10 +71,10 @@ class OMVModuleZFSUtil {
         throw new OMVModuleZFSException("Unable to find /dev/disk/by-path/" . $path);
     }
 
-    public static function deleteOMVMntEnt($context, $filesystem) {
-        $object = Rpc::call("FsTab", "getByFsName", ["fsname" => $filesystem->getName()], $context);
+    public static function deleteOMVMntEnt($context, $filesystem, $mp) {
+        $object = Rpc::call("FsTab", "getByDir", ["dir" => $mp], $context);
         $filesystem->updateProperty("mountpoint");
-        if ($object and $object['type'] == 'zfs' and $object['dir'] == $filesystem->getMountPoint()) {
+        if ($object and $object['type'] == 'zfs' and $object['dir'] == $mp) {
             Rpc::call("FsTab", "delete", ["uuid" => $object['uuid']], $context);
             Rpc::call("Config", "applyChanges", ["modules" => [ "fstab" ], "force" => TRUE], $context);
             if ($filesystem->exists()) {
@@ -90,8 +90,9 @@ class OMVModuleZFSUtil {
      * Deletes all shared folders pointing to the specifc path
      *
      */
-    public static function checkOMVShares($context, $filesystem) {
-        $object = Rpc::call("FsTab", "getByFsName", ["fsname" => $filesystem->getName()], $context);
+    public static function checkOMVShares($context, $filesystem, $mp) {
+        var_dump($mp);
+        $object = Rpc::call("FsTab", "getByDir", ["dir" => $mp], $context);
         $uuid = $object['uuid'];
         $shares = Rpc::call("ShareMgmt", "enumerateSharedFolders", [], $context);
         $objects = [];

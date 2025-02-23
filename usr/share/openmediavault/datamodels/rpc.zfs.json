@@ -255,6 +255,9 @@
 			},
 			"name": {
 				"type":"string"
+			},
+			"mp": {
+				"type":"string"
 			}
 		}
 	}

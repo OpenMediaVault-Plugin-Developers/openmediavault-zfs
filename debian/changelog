@@ -1,8 +1,9 @@
-openmediavault-zfs (7.1.2) UNRELEASED; urgency=medium
+openmediavault-zfs (7.1.2) stable; urgency=low
 
   * Fix pool and filesystem delete
+  * Update dependencies for new backports packages
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 23 Feb 2025 15:29:01 -0600
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 22 Mar 2025 08:11:17 -0500
 
 openmediavault-zfs (7.1.1) stable; urgency=low
 

@@ -327,8 +327,7 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         parent::updateAllProperties();
         $attrs = [];
         foreach ($this->properties as $attr => $val) {
-            if (in_array($attr, $featureSet))
-                $attrs[$attr] = $val;
+            $attrs[$attr] = $val;
         }
         $this->properties=$attrs;
     }

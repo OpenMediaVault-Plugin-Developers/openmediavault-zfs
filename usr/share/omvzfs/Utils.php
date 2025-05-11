@@ -241,8 +241,15 @@ class OMVModuleZFSUtil {
                 $tmp->updateAllProperties();
                 $old_uuid = $tmp->getProperty("omvzfsplugin:uuid")['value'];
                 $new_uuid = $dataset['uuid'];
+                // Only update shared folders whose path matches this dataset's mountpoint exactly
+                $mountpoint = $tmp->getMountPoint();
                 if ($old_uuid != $new_uuid) {
-                    OMVModuleZFSUtil::fixOMVSharedFolders($old_uuid, $new_uuid, $sf_objects, $context);
+                    $matching_sfs = array_filter($sf_objects, function ($sf) use ($mountpoint) {
+                        return isset($sf['reldirpath']) && rtrim($sf['mntent']['dir'].'/'.$sf['reldirpath'],'/') === $mountpoint;
+                    });
+                    if (!empty($matching_sfs)) {
+                        OMVModuleZFSUtil::fixOMVSharedFolders($old_uuid, $new_uuid, $matching_sfs, $context);
+                    }
                 }
                 OMVModuleZFSUtil::setMntentProperty($dataset['uuid'], $dataset['fsname']);
             }

@@ -175,7 +175,7 @@ class OMVModuleZFSUtil {
             $name = $filesystem->getName();
             $mntpoint = $filesystem->getMountPoint();
             if (($mntpoint != "none") && ($mntpoint !== "legacy") && ($mntpoint !== "/")) {
-                $cmd = "mountpoint -q " . $mntpoint;
+                $cmd = "mountpoint -q " . escapeshellarg($mntpoint);
                 try
                 {
                     OMVModuleZFSUtil::exec($cmd, $out, $res);
@@ -189,10 +189,7 @@ class OMVModuleZFSUtil {
         }
         $prev = Rpc::call("FsTab", "enumerateEntries", [], $context);
         $prev = array_filter($prev, function ($element) {
-            if ($element["type"] == "zfs")
-                return true;
-            else
-                return false;
+            return $element["type"] == "zfs";
         });
         $compare = function ($a, $b) {
             return strcmp($a["fsname"], $b["fsname"]) ?: strcmp($a["dir"], $b["dir"]);
@@ -203,19 +200,23 @@ class OMVModuleZFSUtil {
             $config = $db->get("conf.system.filesystem.mountpoint", $object['uuid']);
             $db->delete($config, TRUE);
         }
-        // print_r($add);
         foreach ($add as $object) {
-            $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
-            $cmd = sprintf('awk \'$2 == "%s" { print $4 }\' /proc/mounts', $object["dir"]);
+            // Reuse stored UUID when possible so Shared Folders keep working
+            $storedUuid = OMVModuleZFSUtil::getStoredMntentUuid($object["fsname"]);
+            $uuid = $storedUuid ?: \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
+            // safer options fetch
             $opts = "";
             $out = [];
             try {
+                $cmd = sprintf('findmnt -no OPTIONS --target %s 2>/dev/null', escapeshellarg($object["dir"]));
                 OMVModuleZFSUtil::exec($cmd, $out, $res);
-                $opts = trim(implode("", $out));
+                if ($res === 0) {
+                    $opts = trim(implode("", $out));
+                }
             } catch(Exception $e) {
                 $opts = "";
             }
-            $object = array(
+            $entry = array(
                 "uuid" => $uuid,
                 "fsname" => $object["fsname"],
                 "dir" => $object["dir"],
@@ -224,20 +225,21 @@ class OMVModuleZFSUtil {
                 "freq" => 0,
                 "passno" => 0
             );
-            \OMV\Rpc\Rpc::call("FsTab", "set", $object, $context);
+            \OMV\Rpc\Rpc::call("FsTab", "set", $entry, $context);
+            // Persist UUID to dataset for future reuse (no-op if pool not imported)
+            OMVModuleZFSUtil::setMntentProperty($uuid, $object["fsname"]);
         }
         $zfs_mntent = \OMV\Rpc\Rpc::call("FsTab", "enumerateEntries", [], $context);
         $zfs_mntent = array_filter($zfs_mntent, function ($element) {
-            if ($element["type"] == "zfs")
-                return true;
-            else
-                return false;
+            return $element["type"] == "zfs";
         });
         $sf_objects = Rpc::Call("ShareMgmt", "enumerateSharedFolders", [], $context);
         foreach ($zfs_mntent as $dataset) {
-            // Check if pool is available, otherwise errors are thrown
-            if (OMVModuleZFSUtil::isPoolImported(strstr($dataset['fsname'], "/", TRUE))) {
-                $tmp =  new OMVModuleZFSFilesystem($dataset['fsname']);
+            // Check if pool is available, otherwise skip to avoid errors
+            $fsname = $dataset['fsname'];
+            $pool = OMVModuleZFSUtil::getPoolFromFsname($fsname);
+            if (OMVModuleZFSUtil::isPoolImported($pool)) {
+                $tmp = new OMVModuleZFSFilesystem($fsname);
                 $tmp->updateAllProperties();
                 $old_uuid = $tmp->getProperty("omvzfsplugin:uuid")['value'];
                 $new_uuid = $dataset['uuid'];
@@ -251,11 +253,11 @@ class OMVModuleZFSUtil {
                         OMVModuleZFSUtil::fixOMVSharedFolders($old_uuid, $new_uuid, $matching_sfs, $context);
                     }
                 }
-                OMVModuleZFSUtil::setMntentProperty($dataset['uuid'], $dataset['fsname']);
+                OMVModuleZFSUtil::setMntentProperty($dataset['uuid'], $fsname);
             }
-
         }
     }
+
 
     /**
      * Get an array with all ZFS objects
@@ -551,10 +553,35 @@ class OMVModuleZFSUtil {
      * @return void
      * @access public
      */
-    public static function setMntentProperty($mntent_uuid, $name) {
-        $cmd = "zfs set " . "omvzfsplugin:uuid" . "=\"" . $mntent_uuid . "\" \"" . $name . "\" 2>&1";
-        OMVModuleZFSUtil::exec($cmd, $out, $res);
+    public static function setMntentProperty(string $mntent_uuid, string $fsname): void {
+        $pool = self::getPoolFromFsname($fsname);
+        if (!OMVModuleZFSUtil::isPoolImported($pool)) {
+            return;
+        }
+        $prop = 'omvzfsplugin:uuid';
+        $cmd  = sprintf(
+            'zfs set %s=%s %s 2>&1',
+            escapeshellarg($prop),
+            escapeshellarg($mntent_uuid),
+            escapeshellarg($fsname)
+        );
+        try {
+            OMVModuleZFSUtil::exec($cmd, $out, $res);
+            // Optional verification
+            if ($res === 0) {
+                $verifyCmd = sprintf(
+                    'zfs get -H -o value %s %s 2>&1',
+                    escapeshellarg($prop),
+                    escapeshellarg($fsname)
+                );
+                $vout = []; $vres = 0;
+                OMVModuleZFSUtil::exec($verifyCmd, $vout, $vres);
+            }
+        } catch (\Throwable $t) {
+            // Non-fatal
+        }
     }
+
 
     /**
      * Fix all shared folders that have a reference to the old uuid stored in the dataset property
@@ -591,6 +618,35 @@ class OMVModuleZFSUtil {
         }
     }
 
+
+    public static function getPoolFromFsname(string $fsname): string {
+        $pos = strpos($fsname, '/');
+        return ($pos === false) ? $fsname : substr($fsname, 0, $pos);
+    }
+
+    public static function getStoredMntentUuid(string $fsname): ?string {
+        $pool = self::getPoolFromFsname($fsname);
+        if (!OMVModuleZFSUtil::isPoolImported($pool)) {
+            return null;
+        }
+        $prop = 'omvzfsplugin:uuid';
+        $cmd  = sprintf(
+            'zfs get -H -o value %s %s 2>&1',
+            escapeshellarg($prop),
+            escapeshellarg($fsname)
+        );
+        try {
+            $out = []; $res = 0;
+            OMVModuleZFSUtil::exec($cmd, $out, $res);
+            if ($res === 0) {
+                $val = trim(implode("", $out));
+                return ($val !== '-' && $val !== '') ? $val : null;
+            }
+        } catch (\Throwable $t) {
+            // ignore
+        }
+        return null;
+    }
 }
 
 ?>

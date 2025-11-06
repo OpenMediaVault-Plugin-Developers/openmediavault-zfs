@@ -1,3 +1,9 @@
+openmediavault-zfs (8.0) stable; urgency=low
+
+  * Update for omv 8.x
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 06 Nov 2025 22:25:07 +0000
+
 openmediavault-zfs (7.1.4) stable; urgency=low
 
   * Show all pool properties in Property datatable

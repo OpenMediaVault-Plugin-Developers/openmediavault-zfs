@@ -224,6 +224,12 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
         // Adds missing ZFS filesystems to the OMV core
         OMVModuleZFSUtil::fixOMVMntEnt($context);
+
+        // Apply changes immmediately
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+            'modules' => [ 'collectd', 'fstab', 'monit', 'quota' ],
+            'force' => TRUE
+        ], $context);
     }
 
     public function importPool($params, $context)
@@ -364,6 +370,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
         // Adds missing ZFS filesystems to the OMV core
         OMVModuleZFSUtil::fixOMVMntEnt($context);
+        // Apply changes immmediately
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+            'modules' => [ 'collectd', 'fstab', 'monit', 'quota' ],
+            'force' => TRUE
+        ], $context);
     }
 
     public function addObjectBg($params, $context)
@@ -418,6 +429,12 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
         // Adds missing ZFS filesystems to the OMV core
         OMVModuleZFSUtil::fixOMVMntEnt($context);
+
+        // Apply changes immmediately
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+            'modules' => [ 'collectd', 'monit', 'quota' ],
+            'force' => TRUE
+        ], $context);
     }
 
     public function deleteObjectBg($params, $context)
@@ -504,6 +521,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         if ($tmp instanceof OMVModuleZFSFilesystem) {
             $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
               "org.openmediavault.storage.zfs.filesystem", $context);
+            // Apply changes immmediately
+            \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+                'modules' => [ 'collectd', 'monit', 'quota' ],
+                'force' => TRUE
+            ], $context);
         }
     }
 
@@ -744,6 +766,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                 $snap->rename($newpath);
                 break;
         }
+        // Apply changes immmediately
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+            'modules' => [ 'collectd', 'monit', 'quota' ],
+            'force' => TRUE
+        ], $context);
     }
 
     /**

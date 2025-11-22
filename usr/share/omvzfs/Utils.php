@@ -166,98 +166,207 @@ class OMVModuleZFSUtil {
      *
      */
     public static function fixOMVMntEnt($context) {
-        $filesystems=OMVModuleZFSFilesystem::getAllFilesystems();
-        $current = [];
-        $db = \OMV\Config\Database::getInstance();
+        $src = '/etc/openmediavault/config.xml';
+        $dir = '/etc/openmediavault/';
+        $timestamp = date('Ymd-His');
+        $dst = "$dir/config-zfs-$timestamp.xml";
 
-        foreach ($filesystems as $filesystem) {
-            $filesystem->updateProperty("mountpoint");
-            $name = $filesystem->getName();
-            $mntpoint = $filesystem->getMountPoint();
-            if (($mntpoint != "none") && ($mntpoint !== "legacy") && ($mntpoint !== "/")) {
-                $cmd = "mountpoint -q " . escapeshellarg($mntpoint);
-                try
-                {
-                    OMVModuleZFSUtil::exec($cmd, $out, $res);
-                }
-                catch(Exception $e)
-                {
-                    continue;
-                }
-                $current[] = ["fsname" => $name, "dir" => $mntpoint];
-            }
+        if (!@copy($src, $dst)) {
+            throw new \OMV\Exception("Failed to copy $src to $dst");
         }
-        $prev = Rpc::call("FsTab", "enumerateEntries", [], $context);
-        $prev = array_filter($prev, function ($element) {
-            return $element["type"] == "zfs";
+
+        /* Keep only the 20 newest backup files */
+        $files = glob("$dir/config-*.xml", GLOB_NOSORT);
+        if ($files === false) {
+            throw new \OMV\Exception("Failed to list backup files in $dir");
+        }
+
+        /* Sort newest → oldest using filemtime */
+        usort($files, function($a, $b) {
+            return filemtime($b) <=> filemtime($a);  // descending
         });
-        $compare = function ($a, $b) {
-            return strcmp($a["fsname"], $b["fsname"]) ?: strcmp($a["dir"], $b["dir"]);
-        };
-        $remove = array_udiff($prev, $current, $compare);
-        $add = array_udiff($current, $prev, $compare);
-        foreach ($remove as $object) {
-            $config = $db->get("conf.system.filesystem.mountpoint", $object['uuid']);
-            $db->delete($config, TRUE);
+
+        /* Remove any beyond the first 20 */
+        $keep = 20;
+        $toDelete = array_slice($files, $keep);
+
+        foreach ($toDelete as $file) {
+            @unlink($file);
         }
-        foreach ($add as $object) {
-            // Reuse stored UUID when possible so Shared Folders keep working
-            $storedUuid = OMVModuleZFSUtil::getStoredMntentUuid($object["fsname"]);
-            $uuid = $storedUuid ?: \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
-            // safer options fetch
-            $opts = "";
+
+        // 1. Build list of current ZFS datasets from `zfs list`
+        $current = [];
+        try {
             $out = [];
+            $res = 0;
+            OMVModuleZFSUtil::exec('zfs list -H -o name,mountpoint', $out, $res);
+            if ($res === 0) {
+                foreach ($out as $line) {
+                    $line = trim($line);
+                    if ($line === "") {
+                        continue;
+                    }
+                    $parts = preg_split('/\s+/', $line, 2);
+                    if (count($parts) !== 2) {
+                        continue;
+                    }
+                    list($name, $mntpoint) = $parts;
+                    // Skip non-mountable datasets
+                    if ($mntpoint === "-" || $mntpoint === "none" || $mntpoint === "legacy") {
+                        continue;
+                    }
+                    // Match original behavior: skip root "/"
+                    if ($mntpoint === "/") {
+                        continue;
+                    }
+                    $current[] = [
+                        "fsname" => $name,
+                        "dir"    => $mntpoint
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            // If this fails, bail out – we can't safely sync anything
+            return;
+        }
+
+        // 2. Read existing ZFS FsTab entries
+        $prev = \OMV\Rpc\Rpc::call("FsTab", "enumerateEntries", [], $context);
+        $prev = array_filter($prev, function ($element) {
+            return isset($element["type"]) && $element["type"] === "zfs";
+        });
+
+        // 3. Compute which entries are missing (ADD ONLY)
+        $compare = function ($a, $b) {
+            $fsCmp = strcmp($a["fsname"], $b["fsname"]);
+            if ($fsCmp !== 0) {
+                return $fsCmp;
+            }
+            return strcmp($a["dir"], $b["dir"]);
+        };
+
+        // $add = entries present in $current but not in $prev
+        $add = array_udiff($current, $prev, $compare);
+
+        // 4. Add new mntent entries for missing datasets
+        foreach ($add as $object) {
+            $fsname = $object["fsname"];
+            $dir    = $object["dir"];
+
+            // IMPORTANT:
+            // For NEW mountpoints we MUST use OMV_CONFIGOBJECT_NEW_UUID.
+            // Passing any other unknown UUID to FsTab::set will cause a
+            // Database->get() XPath error if that UUID doesn't exist.
+            $uuid = \OMV\Environment::get("OMV_CONFIGOBJECT_NEW_UUID");
+
+            // Fetch mount options via findmnt (best-effort)
+            $opts = "";
             try {
-                $cmd = sprintf('findmnt -no OPTIONS --target %s 2>/dev/null', escapeshellarg($object["dir"]));
+                $out = [];
+                $res = 0;
+                $cmd = sprintf(
+                    "findmnt -no OPTIONS --target %s 2>/dev/null",
+                    escapeshellarg($dir)
+                );
                 OMVModuleZFSUtil::exec($cmd, $out, $res);
                 if ($res === 0) {
                     $opts = trim(implode("", $out));
                 }
-            } catch(Exception $e) {
+            } catch (\Exception $e) {
                 $opts = "";
             }
-            $entry = array(
-                "uuid" => $uuid,
-                "fsname" => $object["fsname"],
-                "dir" => $object["dir"],
-                "type" => "zfs",
-                "opts" => $opts,
-                "freq" => 0,
+
+            $entry = [
+                "uuid"   => $uuid,
+                "fsname" => $fsname,
+                "dir"    => $dir,
+                "type"   => "zfs",
+                "opts"   => $opts,
+                "freq"   => 0,
                 "passno" => 0
-            );
+            ];
+
+            // FsTab::set will:
+            //  - create a new conf.system.filesystem.mountpoint object
+            //  - assign a real UUID, replacing OMV_CONFIGOBJECT_NEW_UUID internally.
             \OMV\Rpc\Rpc::call("FsTab", "set", $entry, $context);
-            // Persist UUID to dataset for future reuse (no-op if pool not imported)
-            OMVModuleZFSUtil::setMntentProperty($uuid, $object["fsname"]);
+
+            // Do NOT update omvzfsplugin:uuid here.
+            // We want the dataset property to still hold the *old* value (if any)
+            // so we can map old_uuid -> new_uuid when fixing SharedFolders below.
         }
+
+        // 5. Refresh ZFS mntents and fix SharedFolders UUID mapping
         $zfs_mntent = \OMV\Rpc\Rpc::call("FsTab", "enumerateEntries", [], $context);
         $zfs_mntent = array_filter($zfs_mntent, function ($element) {
-            return $element["type"] == "zfs";
+            return isset($element["type"]) && $element["type"] === "zfs";
         });
-        $sf_objects = Rpc::Call("ShareMgmt", "enumerateSharedFolders", [], $context);
+
+        $sf_objects = \OMV\Rpc\Rpc::Call("ShareMgmt", "enumerateSharedFolders", [], $context);
+
         foreach ($zfs_mntent as $dataset) {
-            // Check if pool is available, otherwise skip to avoid errors
-            $fsname = $dataset['fsname'];
-            $pool = OMVModuleZFSUtil::getPoolFromFsname($fsname);
-            if (OMVModuleZFSUtil::isPoolImported($pool)) {
-                $tmp = new OMVModuleZFSFilesystem($fsname);
-                $tmp->updateAllProperties();
-                $old_uuid = $tmp->getProperty("omvzfsplugin:uuid")['value'];
-                $new_uuid = $dataset['uuid'];
-                // Only update shared folders whose path matches this dataset's mountpoint exactly
-                $mountpoint = $tmp->getMountPoint();
-                if ($old_uuid != $new_uuid) {
-                    $matching_sfs = array_filter($sf_objects, function ($sf) use ($mountpoint) {
-                        return isset($sf['reldirpath']) && rtrim($sf['mntent']['dir'].'/'.$sf['reldirpath'],'/') === $mountpoint;
-                    });
-                    if (!empty($matching_sfs)) {
-                        OMVModuleZFSUtil::fixOMVSharedFolders($old_uuid, $new_uuid, $matching_sfs, $context);
-                    }
-                }
-                OMVModuleZFSUtil::setMntentProperty($dataset['uuid'], $fsname);
+            $fsname = $dataset["fsname"];
+
+            // STRICT pool name extraction: first component before '/'
+            $pool = strstr($fsname, "/", true);
+            if ($pool === false) {
+                $pool = $fsname;
             }
+
+            // Skip if pool not imported to avoid ZFS errors
+            if (!OMVModuleZFSUtil::isPoolImported($pool)) {
+                continue;
+            }
+
+            // Load ZFS filesystem object and its properties
+            $tmp = new OMVModuleZFSFilesystem($fsname);
+            $tmp->updateAllProperties();
+
+            // old_uuid comes from ZFS dataset property "omvzfsplugin:uuid"
+            // This may be:
+            //  - equal to an existing mntent UUID (normal case)
+            //  - an old UUID whose mntent was manually deleted
+            //  - empty / missing (never imported before)
+            $prop = $tmp->getProperty("omvzfsplugin:uuid");
+            $old_uuid = (is_array($prop) && isset($prop["value"]) && $prop["value"] !== "")
+                ? $prop["value"]
+                : null;
+
+            $new_uuid = $dataset["uuid"];
+            $mountpoint = $tmp->getMountPoint();
+
+            if ($old_uuid && $old_uuid !== $new_uuid) {
+                // Only update shared folders whose path matches this dataset's mountpoint exactly
+                $matching_sfs = array_filter($sf_objects, function ($sf) use ($mountpoint) {
+                    if (!isset($sf["mntent"]["dir"])) {
+                        return false;
+                    }
+                    $base = rtrim($sf["mntent"]["dir"], "/");
+                    if (isset($sf["reldirpath"]) && $sf["reldirpath"] !== "") {
+                        $path = rtrim($base . "/" . $sf["reldirpath"], "/");
+                    } else {
+                        $path = $base;
+                    }
+                    return $path === $mountpoint;
+                });
+
+                if (!empty($matching_sfs)) {
+                    // This should update sharedfolder.mntentref from old_uuid to new_uuid
+                    OMVModuleZFSUtil::fixOMVSharedFolders(
+                        $old_uuid,
+                        $new_uuid,
+                        $matching_sfs,
+                        $context
+                    );
+                }
+            }
+
+            // Finally, sync dataset property to the current mntent UUID so that:
+            //  - Future runs see this as "current"
+            //  - If the mntent is manually deleted, we can still recover state
+            OMVModuleZFSUtil::setMntentProperty($new_uuid, $fsname);
         }
     }
-
 
     /**
      * Get an array with all ZFS objects

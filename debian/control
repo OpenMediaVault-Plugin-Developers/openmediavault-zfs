@@ -11,8 +11,8 @@ Package: openmediavault-zfs
 Architecture: any
 Depends: libzfs6linux,
          openmediavault (>= 8),
-         proxmox-headers-6.14 [amd64] | proxmox-headers-6.17 [amd64] | pve-headers [amd64] | linux-headers-amd64 [amd64],
-         proxmox-headers-6.14 [amd64] | proxmox-headers-6.17 [amd64] | pve-headers [amd64] | zfs-dkms [amd64],
+         proxmox-headers-6.14 [amd64] | proxmox-headers-6.17 [amd64] | linux-headers-amd64 [amd64],
+         proxmox-headers-6.14 [amd64] | proxmox-headers-6.17 [amd64] | zfs-dkms [amd64],
          zfsutils-linux,
          zfs-zed,
          ${misc:Depends}

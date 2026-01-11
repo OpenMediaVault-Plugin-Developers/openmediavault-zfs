@@ -1,6 +1,8 @@
 openmediavault-zfs (8.0.2) stable; urgency=low
 
   * Use omv-zfs-provider dependency
+  * Add saltstack code to switch providers
+  * Add button to fix packages which executes the saltstack
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 11 Jan 2026 17:22:43 +0000
 

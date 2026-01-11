@@ -73,6 +73,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("rollbackSnapshot");
         $this->registerMethod("set");
         $this->registerMethod("getStats");
+        $this->registerMethod("fixPackages");
     }
 
     public function set($params, $context)
@@ -816,5 +817,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $snap->rollback();
 
         return $snap;
+    }
+
+    public function fixPackages($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
+            'modules' => [ 'zfs' ],
+            'force' => TRUE
+        ], $context);
     }
 }

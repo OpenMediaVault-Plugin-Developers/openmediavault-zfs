@@ -19,6 +19,7 @@ case "$1" in
             omv_config_add_node_data "${xpath}" "notification" "${object}"
         fi
         omv-salt deploy run --no-color --quiet zfszed || :
+        omv_module_set_dirty zfs
 
         # load zfs kernel module
         modprobe --quiet zfs || :

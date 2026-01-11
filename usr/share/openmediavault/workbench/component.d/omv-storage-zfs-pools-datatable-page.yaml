@@ -270,6 +270,14 @@ data:
                 params:
                   name: "{{ _selected[0].path }}"
                 task: false
+          - text: _("Fix packages")
+            icon: mdi:folder-wrench-outline
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: fixPackages
+                task: false
       - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete

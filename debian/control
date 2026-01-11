@@ -13,7 +13,7 @@ Depends: openmediavault (>= 8),
          zfsutils-linux,
          zfs-zed,
          libzfs6linux,
-         omv-zfs-provider-pve [amd64] | omv-zfs-provider-dkms,
+         omv-zfs-provider-pve [amd64] | omv-zfs-provider-dkms | zfs-dkms,
          ${misc:Depends}
 Description: OpenMediaVault plugin for ZFS
  ZFS is a combined file system and logical volume manager designed

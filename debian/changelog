@@ -1,3 +1,9 @@
+openmediavault-zfs (8.0.3) stable; urgency=low
+
+  * Remove dependency
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 05 Feb 2026 14:53:04 +0000
+
 openmediavault-zfs (8.0.2) stable; urgency=low
 
   * Use omv-zfs-provider dependency

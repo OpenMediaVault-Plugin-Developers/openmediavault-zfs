@@ -245,7 +245,11 @@ class FilesystemZfs implements FilesystemInterface,
 
     public function getDeviceFiles()
     {
-        return $this->deviceFile;
+        $poolDevices = $this->getPoolDeviceFiles();
+        if (!empty($poolDevices)) {
+            return $poolDevices;
+        }
+        return [$this->deviceFile];
     }
 
     /**
@@ -261,6 +265,23 @@ class FilesystemZfs implements FilesystemInterface,
      */
     public function getParentDeviceFile()
     {
+        $poolDevices = $this->getPoolDeviceFiles();
+        if (empty($poolDevices)) {
+            return NULL;
+        }
+        $mngr = \OMV\System\Storage\Backend\Manager::getInstance();
+        foreach ($poolDevices as $device) {
+            $backend = $mngr->getBackend($device);
+            if (NULL !== $backend) {
+                $parentDeviceFile = $backend->baseDeviceFile($device);
+                if (is_devicefile($parentDeviceFile)) {
+                    return realpath($parentDeviceFile);
+                }
+            }
+            if (is_devicefile($device)) {
+                return realpath($device);
+            }
+        }
         return NULL;
     }
 
@@ -271,7 +292,30 @@ class FilesystemZfs implements FilesystemInterface,
 
     public function hasMultipleDevices()
     {
-        return FALSE;
+        $devs = $this->getDeviceFiles();
+        if (FALSE === is_array($devs))
+            return FALSE;
+        return (1 < count($devs));
+    }
+
+    /**
+     * Get all underlying device files from the ZFS pool.
+     * @return array Array of device file paths, or empty array on failure.
+     */
+    private function getPoolDeviceFiles()
+    {
+        $parts = explode('/', $this->deviceFile);
+        $poolName = $parts[0];
+        try {
+            $pool = new \OMVModuleZFSZpool($poolName);
+            $devices = $pool->getAllDevices();
+            if (empty($devices)) {
+                return [];
+            }
+            return array_values(array_filter($devices, "is_devicefile"));
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**

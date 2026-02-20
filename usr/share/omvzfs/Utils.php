@@ -328,7 +328,8 @@ class OMVModuleZFSUtil {
             //  - an old UUID whose mntent was manually deleted
             //  - empty / missing (never imported before)
             $prop = $tmp->getProperty("omvzfsplugin:uuid");
-            $old_uuid = (is_array($prop) && isset($prop["value"]) && $prop["value"] !== "")
+            $old_uuid = (is_array($prop) && isset($prop["value"]) && $prop["value"] !== ""
+                && isset($prop["source"]) && $prop["source"] === "local")
                 ? $prop["value"]
                 : null;
 
@@ -341,13 +342,7 @@ class OMVModuleZFSUtil {
                     if (!isset($sf["mntent"]["dir"])) {
                         return false;
                     }
-                    $base = rtrim($sf["mntent"]["dir"], "/");
-                    if (isset($sf["reldirpath"]) && $sf["reldirpath"] !== "") {
-                        $path = rtrim($base . "/" . $sf["reldirpath"], "/");
-                    } else {
-                        $path = $base;
-                    }
-                    return $path === $mountpoint;
+                    return rtrim($sf["mntent"]["dir"], "/") === rtrim($mountpoint, "/");
                 });
 
                 if (!empty($matching_sfs)) {
@@ -718,7 +713,7 @@ class OMVModuleZFSUtil {
      * @throws OMVModuleZFSException
      */
     public static function isPoolImported($name) {
-        $cmd = "zpool status " . $name . " &>/dev/null";
+        $cmd = "zpool status \"" . $name . "\" &>/dev/null";
         OMVModuleZFSUtil::exec($cmd, $out, $res);
         if ($res === 0) {
             return TRUE;
@@ -740,7 +735,7 @@ class OMVModuleZFSUtil {
         }
         $prop = 'omvzfsplugin:uuid';
         $cmd  = sprintf(
-            'zfs get -H -o value %s %s 2>&1',
+            'zfs get -H -o value,source %s %s 2>&1',
             escapeshellarg($prop),
             escapeshellarg($fsname)
         );
@@ -748,8 +743,14 @@ class OMVModuleZFSUtil {
             $out = []; $res = 0;
             OMVModuleZFSUtil::exec($cmd, $out, $res);
             if ($res === 0) {
-                $val = trim(implode("", $out));
-                return ($val !== '-' && $val !== '') ? $val : null;
+                $line = trim(implode("", $out));
+                $parts = preg_split('/\s+/', $line, 2);
+                $val = $parts[0] ?? '';
+                $source = $parts[1] ?? '';
+                if ($val !== '-' && $val !== '' && $source === 'local') {
+                    return $val;
+                }
+                return null;
             }
         } catch (\Throwable $t) {
             // ignore

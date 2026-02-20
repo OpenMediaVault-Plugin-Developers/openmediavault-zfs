@@ -74,6 +74,11 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->registerMethod("set");
         $this->registerMethod("getStats");
         $this->registerMethod("fixPackages");
+        $this->registerMethod("enableEncryption");
+        $this->registerMethod("loadEncryptionKey");
+        $this->registerMethod("unloadEncryptionKey");
+        $this->registerMethod("changeEncryptionKey");
+        $this->registerMethod("getEncryptionStatus");
     }
 
     public function set($params, $context)
@@ -223,6 +228,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             $objects["compression"] = $params['compresstype'];
             $pool->setProperties($objects);
         }
+
         // Adds missing ZFS filesystems to the OMV core
         OMVModuleZFSUtil::fixOMVMntEnt($context);
 
@@ -607,30 +613,60 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.zfs.expandpool');
 
+        // Validate pool name
+        if (empty($params['name'])) {
+            throw new OMVModuleZFSException("Pool name cannot be empty");
+        }
+
+        // Validate devices
+        if (!is_array($params['devices']) || empty($params['devices'])) {
+            throw new OMVModuleZFSException("No devices selected for expansion");
+        }
+
         $pool = new OMVModuleZFSZpool($params['name']);
+        $diskCount = count($params['devices']);
+
+        // Validate vdev type and minimum disk requirements
         switch ($params['vdevtype']) {
             case "basic":
                 $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
+                // Basic vdev can have any number of disks
                 break;
             case "mirror":
                 $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
+                if ($diskCount < 2) {
+                    throw new OMVModuleZFSException("Mirror requires at least 2 disks");
+                }
                 break;
             case "raidz1":
                 $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
+                if ($diskCount < 3) {
+                    throw new OMVModuleZFSException("RAID-Z1 requires at least 3 disks");
+                }
                 break;
             case "raidz2":
                 $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
+                if ($diskCount < 4) {
+                    throw new OMVModuleZFSException("RAID-Z2 requires at least 4 disks");
+                }
                 break;
             case "raidz3":
                 $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
+                if ($diskCount < 5) {
+                    throw new OMVModuleZFSException("RAID-Z3 requires at least 5 disks");
+                }
                 break;
             default:
                 throw new OMVModuleZFSException("Incorrect pool type specified");
-                break;
         }
+
+        // Prepare options
+        $opts = "";
         if ($params['force']) {
             $opts .= "-f ";
         }
+
+        // Prepare disk list with device alias resolution
         $disks = $params['devices'];
 
         switch ($params['devalias']) {
@@ -644,7 +680,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                         $disks = $tmp_disks;
                     }
                 } catch (OMVModuleZFSException $e) {
-                    //Do nothing if an excpetion is thrown (fallback on /dev/)
+                    //Do nothing if an exception is thrown (fallback on /dev/)
                 }
                 break;
             case "id":
@@ -657,13 +693,14 @@ class OMVRpcServiceZFS extends ServiceAbstract {
                         $disks = $tmp_disks;
                     }
                 } catch (OMVModuleZFSException $e) {
-                    //Do nothing if an excpetion is thrown (fallback on /dev/)
+                    //Do nothing if an exception is thrown (fallback on /dev/)
                 }
                 break;
             case "dev":
                 break;
         }
 
+        // Create vdev and add to pool
         $vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
         $pool->addVdev($vdev, $opts);
     }
@@ -739,7 +776,7 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.zfs.rename');
 
-        preg_match('/^(.*)' . $params['oldname'] . '$/', $params['oldpath'], $matches);
+        preg_match('/^(.*)' . preg_quote($params['oldname'], '/') . '$/', $params['oldpath'], $matches);
         $pre = "";
         if (isset($matches[1])) {
             $pre = $matches[1];
@@ -827,4 +864,117 @@ class OMVRpcServiceZFS extends ServiceAbstract {
             'force' => TRUE
         ], $context);
     }
+
+    public function enableEncryption($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.enableencryption');
+
+        // Build zfs create command with encryption
+        $encryptionOpt = '-o encryption=' . $params['encryptiontype'];
+
+        // Special handling for key format
+        if ($params['keyformat'] === 'hex') {
+            $encryptionOpt .= ' -o keyformat=hex';
+        } else {
+            $encryptionOpt .= ' -o keyformat=passphrase';
+        }
+
+        // For creating new datasets with encryption
+        if (preg_match('/^[a-zA-Z0-9\-_\.]+\/[a-zA-Z0-9\-_\.]+/', $params['path'])) {
+            // This is a new dataset under existing pool
+            $cmd = "zfs create " . $encryptionOpt . " \"" . $params['path'] . "\"";
+
+            // Execute with key via stdin
+            $descriptors = [
+                0 => ['pipe', 'r'],
+                1 => ['pipe', 'w'],
+                2 => ['pipe', 'w']
+            ];
+            $process = proc_open($cmd, $descriptors, $pipes);
+
+            if (is_resource($process)) {
+                fwrite($pipes[0], $params['key'] . "\n");
+                fclose($pipes[0]);
+                $output = stream_get_contents($pipes[1]);
+                $error = stream_get_contents($pipes[2]);
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                $result = proc_close($process);
+
+                if ($result !== 0) {
+                    throw new \OMV\Exception("Failed to enable encryption: " . trim($error ?: $output));
+                }
+            }
+
+            $dataset = new OMVModuleZFSFilesystem($params['path']);
+            $status = $dataset->getEncryptionStatus();
+            return self::flattenEncryptionStatus($params['path'], $status);
+        } else {
+            throw new \OMV\Exception("Invalid path for encryption");
+        }
+    }
+
+    public function loadEncryptionKey($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.loadencryptionkey');
+
+        // OMVModuleZFSFilesystem works for both pool root datasets and
+        // child filesystems because ZFS encryption operates at the
+        // dataset level via `zfs` commands.
+        $ds = new OMVModuleZFSFilesystem($params['name']);
+        $ds->loadEncryptionKey($params['key'], $params['keyformat']);
+        return ['status' => 'loaded'];
+    }
+
+    public function unloadEncryptionKey($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
+
+        $ds = new OMVModuleZFSFilesystem($params['name']);
+        $ds->unloadEncryptionKey();
+        return ['status' => 'unloaded'];
+    }
+
+    public function changeEncryptionKey($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.changeencryptionkey');
+
+        $ds = new OMVModuleZFSFilesystem($params['name']);
+        $ds->changeEncryptionKey($params['oldkey'], $params['newkey'], $params['keyformat']);
+        return ['status' => 'changed'];
+    }
+
+    public function getEncryptionStatus($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.encryptionstatus');
+
+        $ds = new OMVModuleZFSFilesystem($params['name']);
+        $status = $ds->getEncryptionStatus();
+        return self::flattenEncryptionStatus($params['name'], $status);
+    }
+
+    /**
+     * Flatten the nested encryption status array into a flat object
+     * whose keys match the formPage field names directly.
+     */
+    private static function flattenEncryptionStatus($name, $status)
+    {
+        return [
+            'name' => $name,
+            'encryption' => isset($status['encryption']['value'])
+                ? strtoupper($status['encryption']['value']) : 'OFF',
+            'encryptionroot' => isset($status['encryptionroot']['value'])
+                ? $status['encryptionroot']['value'] : '-',
+            'keystatus' => isset($status['keystatus']['value'])
+                ? $status['keystatus']['value'] : '-',
+            'keyformat' => isset($status['keyformat']['value'])
+                ? $status['keyformat']['value'] : '-',
+        ];
+    }
 }
+

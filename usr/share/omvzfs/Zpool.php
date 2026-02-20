@@ -676,7 +676,120 @@ class OMVModuleZFSZpool extends OMVModuleZFSFilesystem {
         return null;
     }
 
+    /**
+     * Get encryption status of the pool
+     *
+     * @return array encryption status information
+     * @access public
+     */
+    public function getEncryptionStatus() {
+        $properties = [
+            'encryption',
+            'encryptionroot',
+            'keystatus',
+            'keyformat'
+        ];
+        $cmd = "zfs get -H -p " . implode(',', $properties) . " \"" . $this->name . "\" 2>&1";
+        OMVModuleZFSUtil::exec($cmd, $out, $res);
 
+        $status = [];
+        foreach ($out as $line) {
+            if (empty($line)) continue;
+            $parts = preg_split('/\t+/', $line);
+            if (count($parts) >= 3) {
+                $status[$parts[1]] = [
+                    'value' => $parts[2],
+                    'source' => isset($parts[3]) ? $parts[3] : '-'
+                ];
+            }
+        }
+        return $status;
+    }
+
+    /**
+     * Load encryption key for the pool
+     *
+     * @param string $key The encryption key (passphrase or hex)
+     * @param string $keyformat Format of the key (passphrase or hex)
+     * @return void
+     * @throws OMVModuleZFSException
+     * @access public
+     */
+    public function loadEncryptionKey($key, $keyformat = 'passphrase') {
+        $cmd = "zfs load-key \"" . $this->name . "\"";
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w']
+        ];
+        $process = proc_open($cmd, $descriptors, $pipes);
+        if (!is_resource($process)) {
+            throw new OMVModuleZFSException("Failed to start zfs load-key process");
+        }
+        fwrite($pipes[0], $key . "\n");
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $result = proc_close($process);
+        if ($result !== 0) {
+            throw new OMVModuleZFSException("Failed to load encryption key: " . trim($stderr ?: $stdout));
+        }
+    }
+
+    /**
+     * Unload encryption key for the pool
+     *
+     * @return void
+     * @throws OMVModuleZFSException
+     * @access public
+     */
+    public function unloadEncryptionKey() {
+        $cmd = "zfs unload-key \"" . $this->name . "\" 2>&1";
+        OMVModuleZFSUtil::exec($cmd, $out, $res);
+    }
+
+    /**
+     * Change encryption key for the pool
+     *
+     * @param string $oldkey The current encryption key
+     * @param string $newkey The new encryption key
+     * @param string $keyformat Format of the keys (passphrase or hex)
+     * @return void
+     * @throws OMVModuleZFSException
+     * @access public
+     */
+    public function changeEncryptionKey($oldkey, $newkey, $keyformat = 'passphrase') {
+        // First load with old key (in case it's not loaded)
+        try {
+            $this->loadEncryptionKey($oldkey, $keyformat);
+        } catch (\Exception $e) {
+            // Key might already be loaded, continue
+        }
+
+        // Change the key
+        $cmd = "zfs change-key \"" . $this->name . "\"";
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w']
+        ];
+        $process = proc_open($cmd, $descriptors, $pipes);
+        if (!is_resource($process)) {
+            throw new OMVModuleZFSException("Failed to start zfs change-key process");
+        }
+        fwrite($pipes[0], $newkey . "\n");
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $result = proc_close($process);
+        if ($result !== 0) {
+            throw new OMVModuleZFSException("Failed to change encryption key: " . trim($stderr ?: $stdout));
+        }
+    }
 
 }
 ?>

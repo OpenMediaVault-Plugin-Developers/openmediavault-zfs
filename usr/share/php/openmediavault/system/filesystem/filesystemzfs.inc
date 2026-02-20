@@ -1,6 +1,7 @@
 <?php
 namespace OMV\System\Filesystem;
 require_once("/usr/share/omvzfs/Filesystem.php");
+require_once("/usr/share/omvzfs/Zpool.php");
 
 class FilesystemZfs implements FilesystemInterface,
 	SharedFolderCandidateInterface
@@ -313,7 +314,7 @@ class FilesystemZfs implements FilesystemInterface,
                 return [];
             }
             return array_values(array_filter($devices, "is_devicefile"));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return [];
         }
     }

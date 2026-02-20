@@ -156,10 +156,11 @@ data:
                     modifiers:
                       - type: hidden
                         constraint:
-                          operator: ne
+                          opposite: true
+                          operator: in
                           arg0:
                             prop: type
-                          arg1: "volume"
+                          arg1: ["volume","filesystem"]
                 buttons:
                   submit:
                     text: _('Add')

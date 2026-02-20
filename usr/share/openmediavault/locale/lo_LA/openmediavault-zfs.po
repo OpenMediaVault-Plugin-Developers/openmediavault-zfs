@@ -3,23 +3,19 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# Axel Cantenys, 2018
-# Lucien Gregoire <lgreg197@gmail.com>, 2018
-# niko2 <nicolas@zosk.fr>, 2017
-# Seboss666 <sebastien_verdet@seboss666.info>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-07 07:55-0500\n"
+"POT-Creation-Date: 2026-02-19 23:59+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Lucien Gregoire <lgreg197@gmail.com>, 2018\n"
-"Language-Team: French (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/fr/)\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Lao (Laos) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/lo_LA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+"Language: lo_LA\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "Add"
 msgstr ""
@@ -43,22 +39,22 @@ msgid "Are you sure you want to rollback to this snapshot?"
 msgstr ""
 
 msgid "Ashift value"
-msgstr "Valeur du décalage d'alignement \"Ashift\""
+msgstr ""
 
 msgid "Available"
-msgstr "Disponible"
+msgstr ""
 
 msgid "Basic"
-msgstr "Basique"
+msgstr ""
 
 msgid "By ID"
 msgstr ""
 
 msgid "By Path"
-msgstr "Par Chemin d'accès"
+msgstr ""
 
 msgid "Clone"
-msgstr "Cloner"
+msgstr ""
 
 msgid "Compression"
 msgstr ""
@@ -73,7 +69,7 @@ msgid "Created pool."
 msgstr ""
 
 msgid "Delete"
-msgstr "Supprimer"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr ""
@@ -82,13 +78,13 @@ msgid "Deleting snapshot ..."
 msgstr ""
 
 msgid "Details"
-msgstr "Détails"
+msgstr ""
 
 msgid "Device alias"
-msgstr "Alias de périphérique"
+msgstr ""
 
 msgid "Devices"
-msgstr "Périphériques"
+msgstr ""
 
 msgid "Discover"
 msgstr ""
@@ -103,7 +99,7 @@ msgid "Edit property"
 msgstr ""
 
 msgid "Expand"
-msgstr "Etendre"
+msgstr ""
 
 msgid "Expand pool"
 msgstr ""
@@ -114,14 +110,17 @@ msgstr ""
 msgid "Filesystem"
 msgstr ""
 
+msgid "Fix packages"
+msgstr ""
+
 msgid "Force"
-msgstr "Forcer"
+msgstr ""
 
 msgid "Force creation"
-msgstr "Forcer la création"
+msgstr ""
 
 msgid "Forces import, even if the pool appears to be potentially active."
-msgstr "Force l'importation, même si le pool semble potentiellement actif."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -131,31 +130,31 @@ msgstr ""
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Force la création du \"pool\" même si des erreurs sont rencontrées. A utiliser avec précaution !"
+msgstr ""
 
 msgid "Hits"
 msgstr ""
 
 msgid "Import all"
-msgstr "Tout importer"
+msgstr ""
 
 msgid "Import all missing pools."
 msgstr ""
 
 msgid "Mirror"
-msgstr "Mirroir"
+msgstr ""
 
 msgid "Misses"
 msgstr ""
 
 msgid "Modified"
-msgstr "Modifié"
+msgstr ""
 
 msgid "Mountpoint"
-msgstr "Point de montage"
+msgstr ""
 
 msgid "Name"
-msgstr "Nom"
+msgstr ""
 
 msgid "New Property"
 msgstr ""
@@ -164,7 +163,7 @@ msgid "New property"
 msgstr ""
 
 msgid "None"
-msgstr "Aucun"
+msgstr ""
 
 msgid "Object deleted."
 msgstr ""
@@ -188,13 +187,13 @@ msgid "Pool name"
 msgstr ""
 
 msgid "Pool type"
-msgstr "Type de \"pool\""
+msgstr ""
 
 msgid "Pools"
 msgstr ""
 
 msgid "Prefix"
-msgstr "Préfixe"
+msgstr ""
 
 msgid "Properties"
 msgstr ""
@@ -203,31 +202,31 @@ msgid "Properties saved."
 msgstr ""
 
 msgid "Property"
-msgstr "Propriété"
+msgstr ""
 
 msgid "RAID-Z1"
-msgstr "RAID-Z1"
+msgstr ""
 
 msgid "RAID-Z2"
-msgstr "RAID-Z2"
+msgstr ""
 
 msgid "RAID-Z3"
-msgstr "RAID-Z3"
+msgstr ""
 
 msgid "Refer"
-msgstr "Référer"
+msgstr ""
 
 msgid "Rollback"
-msgstr "Retour en arrière"
+msgstr ""
 
 msgid "Scrub"
-msgstr "Vérification"
+msgstr ""
 
 msgid "Set ashift"
-msgstr "Configurer la valeur du décalage d'alignement \"Ashift\""
+msgstr ""
 
 msgid "Size"
-msgstr "Taille"
+msgstr ""
 
 msgid "Snap clone name"
 msgstr ""
@@ -239,10 +238,10 @@ msgid "Snapshot deleted."
 msgstr ""
 
 msgid "Snapshots"
-msgstr "Instantanés"
+msgstr ""
 
 msgid "Source"
-msgstr "Source"
+msgstr ""
 
 msgid "Source name"
 msgstr ""
@@ -255,34 +254,34 @@ msgstr ""
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "Alias de périphérique à utiliser. A ne changer qu'en cas de nécessité."
+msgstr ""
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Valeur du décalage d'alignement \"Ashift\". A ne changer qu'en cas d’extrême nécessité."
+msgstr ""
 
 msgid "State"
-msgstr "État"
+msgstr ""
 
 msgid "Status"
-msgstr "Statut"
+msgstr ""
 
 msgid "Thin provisioning"
-msgstr "Allocation granulaire"
+msgstr ""
 
 msgid "Tools"
 msgstr ""
 
 msgid "Type"
-msgstr "Type"
+msgstr ""
 
 msgid "Used"
-msgstr "Utilisé"
+msgstr ""
 
 msgid "Value"
-msgstr "Valeur"
+msgstr ""
 
 msgid "Vdev type"
-msgstr "Type de périphérique virtuel \"Vdev\""
+msgstr ""
 
 msgid "Volume"
 msgstr ""
@@ -291,10 +290,10 @@ msgid "ZFS Hits/Misses"
 msgstr ""
 
 msgid "ZFS ZED"
-msgstr "ZFS ZED"
+msgstr ""
 
 msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgstr ""
 
 msgid "zfs"
 msgstr ""

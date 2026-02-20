@@ -4,14 +4,14 @@
 # 
 # Translators:
 # Marco, 2015
-# Paolo Velati <paolo.velati@gmail.com>, 2015-2016
+# d5316b6b4d283a9cbe4ea704ae8abe02_b972f24 <bd82b27c045fcb3aa6bd04640e5224c5_36908>, 2015-2016
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-07 07:55-0500\n"
+"POT-Creation-Date: 2026-02-19 23:59+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Paolo Velati <paolo.velati@gmail.com>, 2015-2016\n"
+"Last-Translator: d5316b6b4d283a9cbe4ea704ae8abe02_b972f24 <bd82b27c045fcb3aa6bd04640e5224c5_36908>, 2015-2016\n"
 "Language-Team: Italian (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -110,6 +110,9 @@ msgid "Expanded pool."
 msgstr ""
 
 msgid "Filesystem"
+msgstr ""
+
+msgid "Fix packages"
 msgstr ""
 
 msgid "Force"

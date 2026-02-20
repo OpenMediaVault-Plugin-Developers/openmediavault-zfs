@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-07 07:55-0500\n"
+"POT-Creation-Date: 2026-02-19 23:59+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Dampflok_HD, 2021\n"
 "Language-Team: German (Germany) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/de_DE/)\n"
@@ -109,6 +109,9 @@ msgid "Expanded pool."
 msgstr ""
 
 msgid "Filesystem"
+msgstr ""
+
+msgid "Fix packages"
 msgstr ""
 
 msgid "Force"
@@ -295,6 +298,65 @@ msgstr "Zvol %s [%s, %s]"
 
 msgid "zfs"
 msgstr ""
+
+msgid "zpool export"
+msgstr ""
+
+msgid "zpool import"
+msgstr ""
+ "Quellenname"
+
+msgid "Source path"
+msgstr "Quellenpfad"
+
+msgid "Source pool"
+msgstr ""
+
+msgid ""
+"Specifies which device alias should be used. Don't change unless needed."
+msgstr "Gibt an, welcher Gerätealias verwendet werden soll. Nicht ändern, wenn es nicht nötig ist."
+
+msgid "Specify ashift value. Only use if you are sure you need it."
+msgstr "Eigenen ashift-Wert definieren. Nur verwenden, wenn Sie sicher sind, dass Sie es brauchen."
+
+msgid "State"
+msgstr "Zustand"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Thin provisioning"
+msgstr "Schlanke Bereitstellung"
+
+msgid "Tools"
+msgstr "Werkzeuge"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Used"
+msgstr "Verwendet"
+
+msgid "Value"
+msgstr "Wert"
+
+msgid "Vdev type"
+msgstr "Vdev-Typ"
+
+msgid "Volume"
+msgstr ""
+
+msgid "ZFS Hits/Misses"
+msgstr "ZFS-Treffer/Fehlschläge"
+
+msgid "ZFS ZED"
+msgstr "ZFS ZED"
+
+msgid "Zvol %s [%s, %s]"
+msgstr "Zvol %s [%s, %s]"
+
+msgid "zfs"
+msgstr "zfs"
 
 msgid "zpool export"
 msgstr ""

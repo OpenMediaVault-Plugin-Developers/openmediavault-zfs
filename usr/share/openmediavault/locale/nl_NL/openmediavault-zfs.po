@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-07 07:55-0500\n"
+"POT-Creation-Date: 2026-02-19 23:59+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2025\n"
 "Language-Team: Dutch (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/nl/)\n"
@@ -112,6 +112,9 @@ msgstr "Uitgebreide pool."
 
 msgid "Filesystem"
 msgstr "Bestandssysteem"
+
+msgid "Fix packages"
+msgstr ""
 
 msgid "Force"
 msgstr "Forceren"

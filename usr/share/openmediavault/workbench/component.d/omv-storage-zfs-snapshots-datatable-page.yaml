@@ -70,7 +70,7 @@ data:
         execute:
           type: formDialog
           formDialog:
-            title: _('Clone snapshot')
+            title: _("Clone snapshot")
             fields:
               - type: textInput
                 name: pool
@@ -101,13 +101,13 @@ data:
                           prop: name
                         arg1:
                           prop: clonename
-                        errorData: _('A different name must be specified.')
+                        errorData: _("A different name must be specified.")
               - type: hidden
                 name: type
                 value: "clone"
             buttons:
               submit:
-                text: _('Clone')
+                text: _("Clone")
                 execute:
                   type: request
                   request:

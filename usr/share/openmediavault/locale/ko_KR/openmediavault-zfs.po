@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 23:59+0000\n"
+"POT-Creation-Date: 2026-03-07 17:32+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Hyeonkyu Chu <hyeonkyu@gmail.com>, 2014\n"
 "Language-Team: Korean (Korea) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ko_KR/)\n"
@@ -18,13 +18,40 @@ msgstr ""
 "Language: ko_KR\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "A different name must be specified."
+msgstr ""
+
 msgid "Add"
 msgstr ""
 
-msgid "Add filesystem|snap|volume"
+msgid "Add filesystem"
+msgstr ""
+
+msgid "Add new"
+msgstr ""
+
+msgid "Add new + delete missing"
 msgstr ""
 
 msgid "Add pool"
+msgstr ""
+
+msgid "Add snapshot"
+msgstr ""
+
+msgid "Add volume"
+msgstr ""
+
+msgid "Adding filesystem ..."
+msgstr ""
+
+msgid "Adding missing ZFS mntent entries ..."
+msgstr ""
+
+msgid "Adding snapshot ..."
+msgstr ""
+
+msgid "Adding volume ..."
 msgstr ""
 
 msgid "Are you sure you want to delete to this snapshot?"
@@ -39,8 +66,23 @@ msgstr ""
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr ""
 
+msgid "Are you sure you want to scrub this pool?"
+msgstr ""
+
 msgid "Ashift value"
 msgstr "ashift 값"
+
+msgid "At least five devices are required."
+msgstr ""
+
+msgid "At least four devices are required."
+msgstr ""
+
+msgid "At least three devices are required."
+msgstr ""
+
+msgid "At least two devices are required."
+msgstr ""
 
 msgid "Available"
 msgstr "가용"
@@ -57,6 +99,12 @@ msgstr "By Path"
 msgid "Clone"
 msgstr ""
 
+msgid "Clone snapshot"
+msgstr ""
+
+msgid "Cloning snapshot ..."
+msgstr ""
+
 msgid "Compression"
 msgstr ""
 
@@ -71,6 +119,9 @@ msgstr ""
 
 msgid "Delete"
 msgstr "삭제"
+
+msgid "Delete missing"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr ""
@@ -90,10 +141,7 @@ msgstr "장치"
 msgid "Discover"
 msgstr ""
 
-msgid "Discover complete."
-msgstr ""
-
-msgid "Discovering new pools ..."
+msgid "Do you really want to expand the ZFS pool?"
 msgstr ""
 
 msgid "Edit property"
@@ -108,19 +156,27 @@ msgstr ""
 msgid "Expanded pool."
 msgstr ""
 
-msgid "Filesystem"
+msgid "Exporting pool ..."
+msgstr ""
+
+msgid "Filesystem added."
 msgstr ""
 
 msgid "Fix packages"
 msgstr ""
 
-msgid "Force"
+msgid "Fixing packages ..."
 msgstr ""
 
 msgid "Force creation"
 msgstr "강제 생성"
 
-msgid "Forces import, even if the pool appears to be potentially active."
+msgid "Force import"
+msgstr ""
+
+msgid ""
+"Force import even if the pool appears to be in use or was not cleanly "
+"exported."
 msgstr ""
 
 msgid ""
@@ -136,16 +192,28 @@ msgstr "생성 중 오류를 무시하고 Pool 생성을 강제합니다. 아주
 msgid "Hits"
 msgstr ""
 
-msgid "Import all"
+msgid "Import"
 msgstr ""
 
-msgid "Import all missing pools."
+msgid "Import / Export"
+msgstr ""
+
+msgid "Import all available pools"
+msgstr ""
+
+msgid "Import pool(s)"
+msgstr ""
+
+msgid "Importing pool ..."
 msgstr ""
 
 msgid "Mirror"
 msgstr "Mirror"
 
 msgid "Misses"
+msgstr ""
+
+msgid "Missing ZFS mntent entries added."
 msgstr ""
 
 msgid "Modified"
@@ -156,6 +224,9 @@ msgstr "마운트지점"
 
 msgid "Name"
 msgstr "이름"
+
+msgid "Name of the specific pool to import."
+msgstr ""
 
 msgid "New Property"
 msgstr ""
@@ -172,7 +243,10 @@ msgstr ""
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr ""
 
-msgid "Optional mountpoint. Default is to use the name."
+msgid "Optional mountpoint. Default is to use the dataset path."
+msgstr ""
+
+msgid "Packages fixed."
 msgstr ""
 
 msgid "Parent"
@@ -184,7 +258,16 @@ msgstr ""
 msgid "Pool"
 msgstr ""
 
+msgid "Pool exported."
+msgstr ""
+
+msgid "Pool imported."
+msgstr ""
+
 msgid "Pool name"
+msgstr ""
+
+msgid "Pool scrub started."
 msgstr ""
 
 msgid "Pool type"
@@ -217,11 +300,23 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr ""
 
+msgid "Removing stale ZFS mntent entries ..."
+msgstr ""
+
 msgid "Rollback"
+msgstr ""
+
+msgid "Rolling back snapshot ..."
+msgstr ""
+
+msgid "Scan for and import all pools not currently imported."
 msgstr ""
 
 msgid "Scrub"
 msgstr "검증"
+
+msgid "Scrubbing pool ..."
+msgstr ""
 
 msgid "Set ashift"
 msgstr "ashift 설정"
@@ -232,10 +327,16 @@ msgstr "크기"
 msgid "Snap clone name"
 msgstr ""
 
-msgid "Snapshot"
+msgid "Snapshot added."
+msgstr ""
+
+msgid "Snapshot cloned."
 msgstr ""
 
 msgid "Snapshot deleted."
+msgstr ""
+
+msgid "Snapshot rolled back."
 msgstr ""
 
 msgid "Snapshots"
@@ -260,16 +361,19 @@ msgstr "각 장치의 별칭 사용 여부. 꼭 필요한 경우에만 변경합
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "ashift 값 지정. 꼭 필요한 경우에만 사용합니다."
 
+msgid "Stale ZFS mntent entries removed."
+msgstr ""
+
 msgid "State"
 msgstr ""
 
 msgid "Status"
 msgstr ""
 
-msgid "Thin provisioning"
+msgid "Synchronising ZFS mntent entries ..."
 msgstr ""
 
-msgid "Tools"
+msgid "Thin provisioning"
 msgstr ""
 
 msgid "Type"
@@ -284,7 +388,7 @@ msgstr "값"
 msgid "Vdev type"
 msgstr "Vdev 유형"
 
-msgid "Volume"
+msgid "Volume added."
 msgstr ""
 
 msgid "ZFS Hits/Misses"
@@ -293,8 +397,8 @@ msgstr ""
 msgid "ZFS ZED"
 msgstr ""
 
-msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgid "ZFS mntent entries synchronised."
+msgstr ""
 
 msgid "zfs"
 msgstr ""

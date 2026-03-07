@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# kochin <kochinc@outlook.com>, 2014,2018,2022-2024
+# kochin <kochinc@outlook.com>, 2014,2018,2022-2024,2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 23:59+0000\n"
+"POT-Creation-Date: 2026-03-07 17:32+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2024\n"
+"Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2024,2026\n"
 "Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,14 +18,41 @@ msgstr ""
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "A different name must be specified."
+msgstr ""
+
 msgid "Add"
 msgstr "新增"
 
-msgid "Add filesystem|snap|volume"
-msgstr "新增 檔案系統|快照|儲存卷"
+msgid "Add filesystem"
+msgstr ""
+
+msgid "Add new"
+msgstr ""
+
+msgid "Add new + delete missing"
+msgstr ""
 
 msgid "Add pool"
 msgstr "新增集用場"
+
+msgid "Add snapshot"
+msgstr ""
+
+msgid "Add volume"
+msgstr ""
+
+msgid "Adding filesystem ..."
+msgstr ""
+
+msgid "Adding missing ZFS mntent entries ..."
+msgstr ""
+
+msgid "Adding snapshot ..."
+msgstr ""
+
+msgid "Adding volume ..."
+msgstr ""
 
 msgid "Are you sure you want to delete to this snapshot?"
 msgstr "您確定要删除此快照？"
@@ -39,8 +66,23 @@ msgstr "您確定要匯出？"
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "您確定要回轉到此快照？"
 
+msgid "Are you sure you want to scrub this pool?"
+msgstr ""
+
 msgid "Ashift value"
 msgstr "Ashift 數值"
+
+msgid "At least five devices are required."
+msgstr ""
+
+msgid "At least four devices are required."
+msgstr ""
+
+msgid "At least three devices are required."
+msgstr ""
+
+msgid "At least two devices are required."
+msgstr ""
 
 msgid "Available"
 msgstr "可用"
@@ -57,6 +99,12 @@ msgstr "以路徑"
 msgid "Clone"
 msgstr "複件"
 
+msgid "Clone snapshot"
+msgstr ""
+
+msgid "Cloning snapshot ..."
+msgstr ""
+
 msgid "Compression"
 msgstr "壓縮"
 
@@ -71,6 +119,9 @@ msgstr "建立集用場。"
 
 msgid "Delete"
 msgstr "刪除"
+
+msgid "Delete missing"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr "刪除物件中 ..."
@@ -90,11 +141,8 @@ msgstr "裝置"
 msgid "Discover"
 msgstr "發現"
 
-msgid "Discover complete."
-msgstr "完成發現。"
-
-msgid "Discovering new pools ..."
-msgstr "發現新的集用場中 ..."
+msgid "Do you really want to expand the ZFS pool?"
+msgstr ""
 
 msgid "Edit property"
 msgstr "編輯特性"
@@ -108,20 +156,28 @@ msgstr "擴展集用場"
 msgid "Expanded pool."
 msgstr "擴展集用場。"
 
-msgid "Filesystem"
-msgstr "檔案系統"
-
-msgid "Fix packages"
+msgid "Exporting pool ..."
 msgstr ""
 
-msgid "Force"
-msgstr "強制"
+msgid "Filesystem added."
+msgstr ""
+
+msgid "Fix packages"
+msgstr "修復套件"
+
+msgid "Fixing packages ..."
+msgstr ""
 
 msgid "Force creation"
 msgstr "強制建立"
 
-msgid "Forces import, even if the pool appears to be potentially active."
-msgstr "強制匯入，即使該集用場似乎有正在作用中的可能，"
+msgid "Force import"
+msgstr ""
+
+msgid ""
+"Force import even if the pool appears to be in use or was not cleanly "
+"exported."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -136,17 +192,29 @@ msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用
 msgid "Hits"
 msgstr "命中"
 
-msgid "Import all"
-msgstr "匯入全部"
+msgid "Import"
+msgstr ""
 
-msgid "Import all missing pools."
-msgstr "匯入所有漏失的集用場。"
+msgid "Import / Export"
+msgstr ""
+
+msgid "Import all available pools"
+msgstr ""
+
+msgid "Import pool(s)"
+msgstr ""
+
+msgid "Importing pool ..."
+msgstr ""
 
 msgid "Mirror"
 msgstr "鏡像"
 
 msgid "Misses"
 msgstr "未中"
+
+msgid "Missing ZFS mntent entries added."
+msgstr ""
 
 msgid "Modified"
 msgstr "已修改"
@@ -156,6 +224,9 @@ msgstr "掛載點"
 
 msgid "Name"
 msgstr "名稱"
+
+msgid "Name of the specific pool to import."
+msgstr ""
 
 msgid "New Property"
 msgstr "新特性"
@@ -172,8 +243,11 @@ msgstr "物件已刪除。"
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "給集用場的選用性掛載點。預設為使用集用場的名稱。"
 
-msgid "Optional mountpoint. Default is to use the name."
-msgstr "選用性掛載點。預設為使用名稱。"
+msgid "Optional mountpoint. Default is to use the dataset path."
+msgstr ""
+
+msgid "Packages fixed."
+msgstr ""
 
 msgid "Parent"
 msgstr "上層"
@@ -184,8 +258,17 @@ msgstr "路徑"
 msgid "Pool"
 msgstr "集用場"
 
+msgid "Pool exported."
+msgstr ""
+
+msgid "Pool imported."
+msgstr ""
+
 msgid "Pool name"
 msgstr "集用場名稱"
+
+msgid "Pool scrub started."
+msgstr ""
 
 msgid "Pool type"
 msgstr "集用場型式"
@@ -217,11 +300,23 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "參用"
 
+msgid "Removing stale ZFS mntent entries ..."
+msgstr ""
+
 msgid "Rollback"
 msgstr "轉返"
 
+msgid "Rolling back snapshot ..."
+msgstr ""
+
+msgid "Scan for and import all pools not currently imported."
+msgstr ""
+
 msgid "Scrub"
 msgstr "清理"
+
+msgid "Scrubbing pool ..."
+msgstr ""
 
 msgid "Set ashift"
 msgstr "設定 ashift"
@@ -232,11 +327,17 @@ msgstr "大小"
 msgid "Snap clone name"
 msgstr "快照複件名稱"
 
-msgid "Snapshot"
-msgstr "快照"
+msgid "Snapshot added."
+msgstr ""
+
+msgid "Snapshot cloned."
+msgstr ""
 
 msgid "Snapshot deleted."
 msgstr "快照已刪除。"
+
+msgid "Snapshot rolled back."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "快照"
@@ -260,17 +361,20 @@ msgstr "指定哪一個裝置別名應被使用。除非需要，不要更改。
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "指定 ashift 數值。只有當你確定需要時才使用。"
 
+msgid "Stale ZFS mntent entries removed."
+msgstr ""
+
 msgid "State"
 msgstr "狀態"
 
 msgid "Status"
 msgstr "狀況"
 
+msgid "Synchronising ZFS mntent entries ..."
+msgstr ""
+
 msgid "Thin provisioning"
 msgstr "精簡配置"
-
-msgid "Tools"
-msgstr "工具"
 
 msgid "Type"
 msgstr "型式"
@@ -284,8 +388,8 @@ msgstr "數值"
 msgid "Vdev type"
 msgstr "Vdev 型式"
 
-msgid "Volume"
-msgstr "儲存卷"
+msgid "Volume added."
+msgstr ""
 
 msgid "ZFS Hits/Misses"
 msgstr "ZFS 命中/未中"
@@ -293,8 +397,8 @@ msgstr "ZFS 命中/未中"
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
-msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgid "ZFS mntent entries synchronised."
+msgstr ""
 
 msgid "zfs"
 msgstr "zfs"

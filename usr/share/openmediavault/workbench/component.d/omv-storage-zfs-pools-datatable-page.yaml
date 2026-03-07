@@ -59,19 +59,16 @@ data:
         sortable: true
     actions:
       - type: menu
-        icon: mdi:plus
-        tooltip: _("Add")
+        icon: mdi:database
+        tooltip: _("Pool")
         actions:
           - text: _("Add pool")
-            icon: mdi:plus
+            icon: mdi:database-plus
             execute:
               type: url
               url: "/storage/zfs/pools/create"
           - text: _("Expand pool")
-            icon: mdi:expand-all-outline
-            execute:
-              type: url
-              url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
+            icon: mdi:database-arrow-right
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
@@ -80,22 +77,23 @@ data:
                   arg0:
                     prop: type
                   arg1: "Pool"
-          - text: _("Add filesystem|snap|volume")
-            icon: mdi:plus
+            execute:
+              type: url
+              url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
+      - type: menu
+        icon: mdi:plus
+        tooltip: _("Add")
+        actions:
+          - text: _("Add filesystem")
+            icon: mdi:folder-plus-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
             execute:
               type: formDialog
               formDialog:
-                title: _('Add filesystem, snapshot, or volume ...')
+                title: _("Add filesystem")
                 fields:
-                  - type: select
-                    name: type
-                    label: _("Type")
-                    value: "filesystem"
-                    store:
-                      data:
-                        - ["filesystem", _("Filesystem")]
-                        - ["snapshot", _("Snapshot")]
-                        - ["volume", _("Volume")]
                   - type: textInput
                     name: path
                     label: _("Prefix")
@@ -108,44 +106,50 @@ data:
                     validators:
                       required: true
                       patternType: shareName
-                    modifiers:
-                      - type: value
-                        typeConfig: '{{ moment("YYYY-MM-DD_HH-mm-ss") }}'
-                        constraint:
-                          operator: eq
-                          arg0:
-                            prop: type
-                          arg1: "snapshot"
-                      - type: value
-                        typeConfig: ''
-                        constraint:
-                          operator: ne
-                          arg0:
-                            prop: type
-                          arg1: "snapshot"
                   - type: textInput
                     name: mountpoint
                     label: _("Mountpoint")
                     value: ""
-                    hint: _("Optional mountpoint. Default is to use the name.")
-                    modifiers:
-                      - type: hidden
-                        constraint:
-                          operator: ne
-                          arg0:
-                            prop: type
-                          arg1: "filesystem"
+                    hint: _("Optional mountpoint. Default is to use the dataset path.")
+                  - type: hidden
+                    name: type
+                    value: "filesystem"
+                buttons:
+                  submit:
+                    text: _("Add")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: addObject
+                        progressMessage: _("Adding filesystem ...")
+                        successNotification: _("Filesystem added.")
+          - text: _("Add volume")
+            icon: mdi:harddisk-plus
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Add volume")
+                fields:
+                  - type: textInput
+                    name: path
+                    label: _("Prefix")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: textInput
+                    name: name
+                    label: _("Name")
+                    value: ""
+                    validators:
+                      required: true
+                      patternType: shareName
                   - type: binaryUnitInput
                     name: size
-                    label: _('Size')
-                    value: 1024
-                    modifiers:
-                      - type: hidden
-                        constraint:
-                          operator: ne
-                          arg0:
-                            prop: type
-                          arg1: "volume"
+                    label: _("Size")
+                    value: 2097152
                     validators:
                       min: 1024
                       required: true
@@ -153,100 +157,90 @@ data:
                     name: thinvol
                     label: _("Thin provisioning")
                     value: false
-                    modifiers:
-                      - type: hidden
-                        constraint:
-                          opposite: true
-                          operator: in
-                          arg0:
-                            prop: type
-                          arg1: ["volume","filesystem"]
+                  - type: hidden
+                    name: type
+                    value: "volume"
                 buttons:
                   submit:
-                    text: _('Add')
+                    text: _("Add")
                     execute:
                       type: request
                       request:
                         service: Zfs
                         method: addObject
-                        progressMessage: _("Adding object ...")
-                        successNotification: _("Object added.")
+                        progressMessage: _("Adding volume ...")
+                        successNotification: _("Volume added.")
+          - text: _("Add snapshot")
+            icon: mdi:camera-plus-outline
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
-      - type: iconButton
-        icon: mdi:desktop-classic
-        tooltip: _("Properties")
-        execute:
-          type: url
-          url: "/storage/zfs/pools/properties/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
-        enabledConstraints:
-          minSelected: 1
-          maxSelected: 1
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Add snapshot")
+                fields:
+                  - type: textInput
+                    name: path
+                    label: _("Prefix")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: textInput
+                    name: name
+                    label: _("Name")
+                    value: ""
+                    validators:
+                      required: true
+                      patternType: shareName
+                  - type: hidden
+                    name: type
+                    value: "snapshot"
+                buttons:
+                  submit:
+                    text: _("Add")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: addObject
+                        progressMessage: _("Adding snapshot ...")
+                        successNotification: _("Snapshot added.")
       - type: menu
-        icon: mdi:hammer-wrench
-        tooltip: _("Tools")
+        icon: mdi:swap-horizontal
+        tooltip: _("Import / Export")
         actions:
-          - text: _("Details")
-            icon: mdi:information-outline
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: url
-              url: "/storage/zfs/pools/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
-          - text: _("Scrub")
-            icon: mdi:progress-wrench
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-              constraint:
-                - operator: eq
-                  arg0:
-                    prop: type
-                  arg1: "Pool"
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: scrubPool
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Scrubbing pool ...")
-                successNotification: _("Pool scrub started.")
           - text: _("zpool import")
             icon: mdi:import
             execute:
               type: formDialog
               formDialog:
-                title: _('Import pool(s)')
+                title: _("Import pool(s)")
                 fields:
-                  - type: container
-                    fields:
-                      - type: checkbox
-                        name: all
-                        label: _("Import all")
-                        value: false
-                        hint: _("Import all missing pools.")
-                      - type: textInput
-                        name: poolname
-                        label: _("Pool name")
-                        value: ""
-                        modifiers:
-                          - type: visible
-                            constraint:
-                              operator: falsy
-                              arg0:
-                                prop: all
+                  - type: checkbox
+                    name: all
+                    label: _("Import all available pools")
+                    value: false
+                    hint: _("Scan for and import all pools not currently imported.")
+                  - type: textInput
+                    name: poolname
+                    label: _("Pool name")
+                    value: ""
+                    hint: _("Name of the specific pool to import.")
+                    modifiers:
+                      - type: visible
+                        constraint:
+                          operator: falsy
+                          arg0:
+                            prop: all
+                  - type: divider
                   - type: checkbox
                     name: force
-                    label: _("Force")
+                    label: _("Force import")
                     value: false
-                    hint: _("Forces import, even if the pool appears to be potentially active.")
+                    hint: _("Force import even if the pool appears to be in use or was not cleanly exported.")
                 buttons:
                   submit:
-                    text: _('Import')
+                    text: _("Import")
                     execute:
                       type: request
                       request:
@@ -277,16 +271,102 @@ data:
                 task: false
                 progressMessage: _("Exporting pool ...")
                 successNotification: _("Pool exported.")
-          - text: _("Fix packages")
-            icon: mdi:folder-wrench-outline
+      - type: iconButton
+        icon: mdi:desktop-classic
+        tooltip: _("Properties")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: url
+          url: "/storage/zfs/pools/properties/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+      - type: iconButton
+        icon: mdi:information-outline
+        tooltip: _("Details")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: url
+          url: "/storage/zfs/pools/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+      - type: iconButton
+        icon: mdi:progress-wrench
+        tooltip: _("Scrub")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+          constraint:
+            - operator: eq
+              arg0:
+                prop: type
+              arg1: "Pool"
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to scrub this pool?")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: scrubPool
+            params:
+              name: "{{ _selected[0].path }}"
+            task: false
+            progressMessage: _("Scrubbing pool ...")
+            successNotification: _("Pool scrub started.")
+      - type: menu
+        icon: mdi:magnify-plus-outline
+        tooltip: _("Discover")
+        actions:
+          - text: _("Add new")
+            icon: mdi:magnify-plus-outline
             execute:
               type: request
               request:
                 service: Zfs
-                method: fixPackages
-                task: false
-                progressMessage: _("Fixing packages ...")
-                successNotification: _("Packages fixed.")
+                method: doDiscoverBg
+                params:
+                  addMissing: true
+                  deleteStale: false
+                task: true
+                progressMessage: _("Adding missing ZFS mntent entries ...")
+                successNotification: _("Missing ZFS mntent entries added.")
+          - text: _("Add new + delete missing")
+            icon: mdi:magnify-scan
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: doDiscoverBg
+                params:
+                  addMissing: true
+                  deleteStale: true
+                task: true
+                progressMessage: _("Synchronising ZFS mntent entries ...")
+                successNotification: _("ZFS mntent entries synchronised.")
+          - text: _("Delete missing")
+            icon: mdi:magnify-minus-outline
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: doDiscoverBg
+                params:
+                  addMissing: false
+                  deleteStale: true
+                task: true
+                progressMessage: _("Removing stale ZFS mntent entries ...")
+                successNotification: _("Stale ZFS mntent entries removed.")
+      - type: iconButton
+        icon: mdi:folder-wrench-outline
+        tooltip: _("Fix packages")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: fixPackages
+            task: false
+            progressMessage: _("Fixing packages ...")
+            successNotification: _("Packages fixed.")
       - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete
@@ -308,14 +388,3 @@ data:
             task: true
             progressMessage: _("Deleting object ...")
             successNotification: _("Object deleted.")
-      - type: iconButton
-        tooltip: _("Discover")
-        icon: mdi:magnify-plus-outline
-        execute:
-          type: request
-          request:
-            service: Zfs
-            method: doDiscoverBg
-            task: true
-            progressMessage: _("Discovering new pools ...")
-            successNotification: _("Discover complete.")

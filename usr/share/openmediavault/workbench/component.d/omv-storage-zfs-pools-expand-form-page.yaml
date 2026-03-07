@@ -10,7 +10,7 @@ data:
         method: expandPool
         confirmationDialogConfig:
           template: confirmation
-          message: _('Do you really want to expand the ZFS pool?')
+          message: _("Do you really want to expand the ZFS pool?")
     fields:
       - type: textInput
         name: name
@@ -51,7 +51,7 @@ data:
                   operator: eq
                   arg0:
                     prop: vdevtype
-                  arg1: 'mirror'
+                  arg1: "mirror"
                 arg1:
                   operator: '>='
                   arg0:
@@ -59,14 +59,14 @@ data:
                     arg0:
                       prop: devices
                   arg1: 2
-              errorData: _('At least two devices are required.')
+              errorData: _("At least two devices are required.")
             - constraint:
                 operator: if
                 arg0:
                   operator: eq
                   arg0:
                     prop: vdevtype
-                  arg1: 'raidz1'
+                  arg1: "raidz1"
                 arg1:
                   operator: '>='
                   arg0:
@@ -74,14 +74,14 @@ data:
                     arg0:
                       prop: devices
                   arg1: 3
-              errorData: _('At least three devices are required.')
+              errorData: _("At least three devices are required.")
             - constraint:
                 operator: if
                 arg0:
                   operator: eq
                   arg0:
                     prop: vdevtype
-                  arg1: 'raidz2'
+                  arg1: "raidz2"
                 arg1:
                   operator: '>='
                   arg0:
@@ -89,14 +89,14 @@ data:
                     arg0:
                       prop: devices
                   arg1: 4
-              errorData: _('At least four devices are required.')
+              errorData: _("At least four devices are required.")
             - constraint:
                 operator: if
                 arg0:
                   operator: eq
                   arg0:
                     prop: vdevtype
-                  arg1: 'raidz3'
+                  arg1: "raidz3"
                 arg1:
                   operator: '>='
                   arg0:
@@ -104,7 +104,7 @@ data:
                     arg0:
                       prop: devices
                   arg1: 5
-              errorData: _('At least five devices are required.')
+              errorData: _("At least five devices are required.")
       - type: select
         name: devalias
         label: _("Device alias")

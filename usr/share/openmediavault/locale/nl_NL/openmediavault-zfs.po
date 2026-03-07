@@ -5,14 +5,14 @@
 # Translators:
 # okpail <okpail@gmail.com>, 2014
 # Varkentjes, 2020
-# Stephan Paternotte <stephan@paternottes.net>, 2025
+# Stephan Paternotte <stephan@paternottes.net>, 2025-2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 23:59+0000\n"
+"POT-Creation-Date: 2026-03-07 17:32+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2025\n"
+"Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2025-2026\n"
 "Language-Team: Dutch (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,14 +20,41 @@ msgstr ""
 "Language: nl\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "A different name must be specified."
+msgstr ""
+
 msgid "Add"
 msgstr "Toevoegen"
 
-msgid "Add filesystem|snap|volume"
-msgstr "Filesystem|snap|volume toevoegen"
+msgid "Add filesystem"
+msgstr ""
+
+msgid "Add new"
+msgstr ""
+
+msgid "Add new + delete missing"
+msgstr ""
 
 msgid "Add pool"
 msgstr "Pool toevoegen"
+
+msgid "Add snapshot"
+msgstr ""
+
+msgid "Add volume"
+msgstr ""
+
+msgid "Adding filesystem ..."
+msgstr ""
+
+msgid "Adding missing ZFS mntent entries ..."
+msgstr ""
+
+msgid "Adding snapshot ..."
+msgstr ""
+
+msgid "Adding volume ..."
+msgstr ""
 
 msgid "Are you sure you want to delete to this snapshot?"
 msgstr "Weet u zeker dat u deze snapshot wilt verwijderen?"
@@ -41,8 +68,23 @@ msgstr "Weet u zeker dat u wilt exporteren?"
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "Weet u zeker dat u terug wilt naar deze snapshot?"
 
+msgid "Are you sure you want to scrub this pool?"
+msgstr ""
+
 msgid "Ashift value"
 msgstr "Ashift waarde"
+
+msgid "At least five devices are required."
+msgstr ""
+
+msgid "At least four devices are required."
+msgstr ""
+
+msgid "At least three devices are required."
+msgstr ""
+
+msgid "At least two devices are required."
+msgstr ""
 
 msgid "Available"
 msgstr "Beschikbaar"
@@ -59,6 +101,12 @@ msgstr "Op basis van pad"
 msgid "Clone"
 msgstr "Klonen"
 
+msgid "Clone snapshot"
+msgstr ""
+
+msgid "Cloning snapshot ..."
+msgstr ""
+
 msgid "Compression"
 msgstr "Compressie"
 
@@ -73,6 +121,9 @@ msgstr "Pool aangemaakt."
 
 msgid "Delete"
 msgstr "Verwijderen"
+
+msgid "Delete missing"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr "Object verwijderen…"
@@ -92,11 +143,8 @@ msgstr "Apparaten"
 msgid "Discover"
 msgstr "Ontdekken"
 
-msgid "Discover complete."
-msgstr "Ontdekking voltooid."
-
-msgid "Discovering new pools ..."
-msgstr "Nieuwe pools ontdekken…"
+msgid "Do you really want to expand the ZFS pool?"
+msgstr ""
 
 msgid "Edit property"
 msgstr "Eigenschap bewerken"
@@ -110,20 +158,28 @@ msgstr "Pool uitbreiden"
 msgid "Expanded pool."
 msgstr "Uitgebreide pool."
 
-msgid "Filesystem"
-msgstr "Bestandssysteem"
-
-msgid "Fix packages"
+msgid "Exporting pool ..."
 msgstr ""
 
-msgid "Force"
-msgstr "Forceren"
+msgid "Filesystem added."
+msgstr ""
+
+msgid "Fix packages"
+msgstr "Pakketten repareren"
+
+msgid "Fixing packages ..."
+msgstr ""
 
 msgid "Force creation"
 msgstr "Aanmaak forceren"
 
-msgid "Forces import, even if the pool appears to be potentially active."
-msgstr "Import forceren, zelfs als de pool potentieel actief lijkt te zijn."
+msgid "Force import"
+msgstr ""
+
+msgid ""
+"Force import even if the pool appears to be in use or was not cleanly "
+"exported."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -138,17 +194,29 @@ msgstr "Forceer de creatie van de pool, zelfs als fouten worden gerapporteerd. W
 msgid "Hits"
 msgstr "Hits"
 
-msgid "Import all"
-msgstr "Alles importeren"
+msgid "Import"
+msgstr ""
 
-msgid "Import all missing pools."
-msgstr "Alle ontbrekende pools importeren."
+msgid "Import / Export"
+msgstr ""
+
+msgid "Import all available pools"
+msgstr ""
+
+msgid "Import pool(s)"
+msgstr ""
+
+msgid "Importing pool ..."
+msgstr ""
 
 msgid "Mirror"
 msgstr "Spiegel"
 
 msgid "Misses"
 msgstr "Misses"
+
+msgid "Missing ZFS mntent entries added."
+msgstr ""
 
 msgid "Modified"
 msgstr "Aangepast"
@@ -158,6 +226,9 @@ msgstr "Koppelpunt"
 
 msgid "Name"
 msgstr "Naam"
+
+msgid "Name of the specific pool to import."
+msgstr ""
 
 msgid "New Property"
 msgstr "Nieuwe eigenschap"
@@ -174,8 +245,11 @@ msgstr "Object verwijderd."
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "Optioneel koppelpunt voor de pool. Standaard wordt de poolnaam gebruikt."
 
-msgid "Optional mountpoint. Default is to use the name."
-msgstr "Optioneel koppelpunt. Standaard wordt de naam gebruikt."
+msgid "Optional mountpoint. Default is to use the dataset path."
+msgstr ""
+
+msgid "Packages fixed."
+msgstr ""
 
 msgid "Parent"
 msgstr "Ouder"
@@ -186,8 +260,17 @@ msgstr "Pad"
 msgid "Pool"
 msgstr "Pool"
 
+msgid "Pool exported."
+msgstr ""
+
+msgid "Pool imported."
+msgstr ""
+
 msgid "Pool name"
 msgstr "Pool-naam"
+
+msgid "Pool scrub started."
+msgstr ""
 
 msgid "Pool type"
 msgstr "Pool-type"
@@ -219,11 +302,23 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "Verwijzen"
 
+msgid "Removing stale ZFS mntent entries ..."
+msgstr ""
+
 msgid "Rollback"
 msgstr "Terugdraaien"
 
+msgid "Rolling back snapshot ..."
+msgstr ""
+
+msgid "Scan for and import all pools not currently imported."
+msgstr ""
+
 msgid "Scrub"
 msgstr "Scrub"
+
+msgid "Scrubbing pool ..."
+msgstr ""
 
 msgid "Set ashift"
 msgstr "Stel ashift in"
@@ -234,11 +329,17 @@ msgstr "Grootte"
 msgid "Snap clone name"
 msgstr "Snap-kloon-naam"
 
-msgid "Snapshot"
-msgstr "Snapshot"
+msgid "Snapshot added."
+msgstr ""
+
+msgid "Snapshot cloned."
+msgstr ""
 
 msgid "Snapshot deleted."
 msgstr "Snapshot verwijderd."
+
+msgid "Snapshot rolled back."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "Snapshots"
@@ -262,17 +363,20 @@ msgstr "Specificeert welke apparaatalias moet worden gebruikt. Verander niets te
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "Specificeer de ashift-waarde. Gebruik het alleen als je zeker weet dat je het nodig hebt."
 
+msgid "Stale ZFS mntent entries removed."
+msgstr ""
+
 msgid "State"
 msgstr "Toestand"
 
 msgid "Status"
 msgstr "Status"
 
+msgid "Synchronising ZFS mntent entries ..."
+msgstr ""
+
 msgid "Thin provisioning"
 msgstr "Thin provisioning"
-
-msgid "Tools"
-msgstr "Hulpmiddelen"
 
 msgid "Type"
 msgstr "Type"
@@ -286,8 +390,8 @@ msgstr "Waarde"
 msgid "Vdev type"
 msgstr "Vdev type"
 
-msgid "Volume"
-msgstr "Volume"
+msgid "Volume added."
+msgstr ""
 
 msgid "ZFS Hits/Misses"
 msgstr "ZFS Hits/Misses"
@@ -295,8 +399,8 @@ msgstr "ZFS Hits/Misses"
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
-msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgid "ZFS mntent entries synchronised."
+msgstr ""
 
 msgid "zfs"
 msgstr "zfs"

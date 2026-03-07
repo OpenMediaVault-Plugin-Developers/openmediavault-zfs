@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 23:59+0000\n"
+"POT-Creation-Date: 2026-03-07 17:32+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Chente OMV, 2026\n"
 "Language-Team: Spanish (Spain) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es_ES/)\n"
@@ -19,14 +19,41 @@ msgstr ""
 "Language: es_ES\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
+msgid "A different name must be specified."
+msgstr ""
+
 msgid "Add"
 msgstr "Añadir"
 
-msgid "Add filesystem|snap|volume"
-msgstr "Añadir filesystem|snap|volume"
+msgid "Add filesystem"
+msgstr ""
+
+msgid "Add new"
+msgstr ""
+
+msgid "Add new + delete missing"
+msgstr ""
 
 msgid "Add pool"
 msgstr "Añadir pool"
+
+msgid "Add snapshot"
+msgstr ""
+
+msgid "Add volume"
+msgstr ""
+
+msgid "Adding filesystem ..."
+msgstr ""
+
+msgid "Adding missing ZFS mntent entries ..."
+msgstr ""
+
+msgid "Adding snapshot ..."
+msgstr ""
+
+msgid "Adding volume ..."
+msgstr ""
 
 msgid "Are you sure you want to delete to this snapshot?"
 msgstr "¿Está seguro de que desea eliminar este snapshot?"
@@ -40,8 +67,23 @@ msgstr "¿Está seguro de que desea exportar el pool?"
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "¿Está seguro de que desea deshacer este snapshot?"
 
+msgid "Are you sure you want to scrub this pool?"
+msgstr ""
+
 msgid "Ashift value"
 msgstr "Valor de Ashift"
+
+msgid "At least five devices are required."
+msgstr ""
+
+msgid "At least four devices are required."
+msgstr ""
+
+msgid "At least three devices are required."
+msgstr ""
+
+msgid "At least two devices are required."
+msgstr ""
 
 msgid "Available"
 msgstr "Disponible"
@@ -58,6 +100,12 @@ msgstr "Por ruta"
 msgid "Clone"
 msgstr "Clonar"
 
+msgid "Clone snapshot"
+msgstr ""
+
+msgid "Cloning snapshot ..."
+msgstr ""
+
 msgid "Compression"
 msgstr "Compresión"
 
@@ -72,6 +120,9 @@ msgstr "pool creado."
 
 msgid "Delete"
 msgstr "Eliminar"
+
+msgid "Delete missing"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr "Eliminando objeto ..."
@@ -91,11 +142,8 @@ msgstr "Dispositivos"
 msgid "Discover"
 msgstr "Descubrir"
 
-msgid "Discover complete."
-msgstr "Descubrimiento completo"
-
-msgid "Discovering new pools ..."
-msgstr "Descubriendo nuevos Pools ..."
+msgid "Do you really want to expand the ZFS pool?"
+msgstr ""
 
 msgid "Edit property"
 msgstr "Editar propiedades"
@@ -109,20 +157,28 @@ msgstr "Expandir el Pool"
 msgid "Expanded pool."
 msgstr "Pool expandido."
 
-msgid "Filesystem"
-msgstr "Filesystem"
+msgid "Exporting pool ..."
+msgstr ""
+
+msgid "Filesystem added."
+msgstr ""
 
 msgid "Fix packages"
 msgstr ""
 
-msgid "Force"
-msgstr "Forzar"
+msgid "Fixing packages ..."
+msgstr ""
 
 msgid "Force creation"
 msgstr "Forzar"
 
-msgid "Forces import, even if the pool appears to be potentially active."
-msgstr "Fuerza importación, incluso si el pool parece activo."
+msgid "Force import"
+msgstr ""
+
+msgid ""
+"Force import even if the pool appears to be in use or was not cleanly "
+"exported."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -137,17 +193,29 @@ msgstr "Fuerza la creacción de un Pool incluso si hay errores. !Usar con precau
 msgid "Hits"
 msgstr "Aciertos"
 
-msgid "Import all"
-msgstr "Importar todo"
+msgid "Import"
+msgstr ""
 
-msgid "Import all missing pools."
-msgstr "Importar TODOS los pools posibles."
+msgid "Import / Export"
+msgstr ""
+
+msgid "Import all available pools"
+msgstr ""
+
+msgid "Import pool(s)"
+msgstr ""
+
+msgid "Importing pool ..."
+msgstr ""
 
 msgid "Mirror"
 msgstr "Espejo"
 
 msgid "Misses"
 msgstr "Errores"
+
+msgid "Missing ZFS mntent entries added."
+msgstr ""
 
 msgid "Modified"
 msgstr "Modificado"
@@ -157,6 +225,9 @@ msgstr "Punto de Montaje"
 
 msgid "Name"
 msgstr "Nombre"
+
+msgid "Name of the specific pool to import."
+msgstr ""
 
 msgid "New Property"
 msgstr "Nueva propiedad"
@@ -173,8 +244,11 @@ msgstr "Objeto borrado."
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "Punto de montaje opcional para el pool. Por defecto es el nombre del pool."
 
-msgid "Optional mountpoint. Default is to use the name."
-msgstr "Punto de montaje opcional. Por defecto es el propio nombre."
+msgid "Optional mountpoint. Default is to use the dataset path."
+msgstr ""
+
+msgid "Packages fixed."
+msgstr ""
 
 msgid "Parent"
 msgstr "Parent"
@@ -185,8 +259,17 @@ msgstr "Ruta"
 msgid "Pool"
 msgstr "Pool"
 
+msgid "Pool exported."
+msgstr ""
+
+msgid "Pool imported."
+msgstr ""
+
 msgid "Pool name"
 msgstr "Nombre del pool"
+
+msgid "Pool scrub started."
+msgstr ""
 
 msgid "Pool type"
 msgstr "Tipo de Pool"
@@ -218,11 +301,23 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "Refer"
 
+msgid "Removing stale ZFS mntent entries ..."
+msgstr ""
+
 msgid "Rollback"
 msgstr "Vuelta Atras"
 
+msgid "Rolling back snapshot ..."
+msgstr ""
+
+msgid "Scan for and import all pools not currently imported."
+msgstr ""
+
 msgid "Scrub"
 msgstr "Scrub"
+
+msgid "Scrubbing pool ..."
+msgstr ""
 
 msgid "Set ashift"
 msgstr "Forzar ashift"
@@ -233,11 +328,17 @@ msgstr "Tamaño"
 msgid "Snap clone name"
 msgstr "Nombre del clon Snap"
 
-msgid "Snapshot"
-msgstr "Snapshot (instantánea)"
+msgid "Snapshot added."
+msgstr ""
+
+msgid "Snapshot cloned."
+msgstr ""
 
 msgid "Snapshot deleted."
 msgstr "Instantánea borrada."
+
+msgid "Snapshot rolled back."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "Snapshots"
@@ -261,17 +362,20 @@ msgstr "Especifica que alias de dispositivo debe ser usado. No cambiar a menos q
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "Especifica el valor de ashift. Solo usar si está seguro de que se necesita."
 
+msgid "Stale ZFS mntent entries removed."
+msgstr ""
+
 msgid "State"
 msgstr "Estado"
 
 msgid "Status"
 msgstr "Estado"
 
+msgid "Synchronising ZFS mntent entries ..."
+msgstr ""
+
 msgid "Thin provisioning"
 msgstr "Aprovisionamiento"
-
-msgid "Tools"
-msgstr "Herramientas"
 
 msgid "Type"
 msgstr "Tipo"
@@ -285,8 +389,8 @@ msgstr "Valor"
 msgid "Vdev type"
 msgstr "Tipo de Vdev"
 
-msgid "Volume"
-msgstr "Volumen"
+msgid "Volume added."
+msgstr ""
 
 msgid "ZFS Hits/Misses"
 msgstr "Aciertos/errores de ZFS"
@@ -294,8 +398,8 @@ msgstr "Aciertos/errores de ZFS"
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
-msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgid "ZFS mntent entries synchronised."
+msgstr ""
 
 msgid "zfs"
 msgstr "zfs"

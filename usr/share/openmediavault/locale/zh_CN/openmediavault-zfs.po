@@ -4,14 +4,14 @@
 # 
 # Translators:
 # haai so <s1097854603@gmail.com>, 2021
-# songming <by@songming.me>, 2014,2018,2021-2022,2024
+# songming <by@songming.me>, 2014,2018,2021-2022,2024,2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 23:59+0000\n"
+"POT-Creation-Date: 2026-03-07 17:32+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: songming <by@songming.me>, 2014,2018,2021-2022,2024\n"
+"Last-Translator: songming <by@songming.me>, 2014,2018,2021-2022,2024,2026\n"
 "Language-Team: Chinese (China) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,14 +19,41 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "A different name must be specified."
+msgstr ""
+
 msgid "Add"
 msgstr "添加"
 
-msgid "Add filesystem|snap|volume"
-msgstr "添加文件系统快照卷"
+msgid "Add filesystem"
+msgstr ""
+
+msgid "Add new"
+msgstr ""
+
+msgid "Add new + delete missing"
+msgstr ""
 
 msgid "Add pool"
 msgstr "添加池"
+
+msgid "Add snapshot"
+msgstr ""
+
+msgid "Add volume"
+msgstr ""
+
+msgid "Adding filesystem ..."
+msgstr ""
+
+msgid "Adding missing ZFS mntent entries ..."
+msgstr ""
+
+msgid "Adding snapshot ..."
+msgstr ""
+
+msgid "Adding volume ..."
+msgstr ""
 
 msgid "Are you sure you want to delete to this snapshot?"
 msgstr "您确定要删除此快照？"
@@ -40,8 +67,23 @@ msgstr "您确定要导出？"
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "您确定要回滚快照？"
 
+msgid "Are you sure you want to scrub this pool?"
+msgstr ""
+
 msgid "Ashift value"
 msgstr "Ashift 值"
+
+msgid "At least five devices are required."
+msgstr ""
+
+msgid "At least four devices are required."
+msgstr ""
+
+msgid "At least three devices are required."
+msgstr ""
+
+msgid "At least two devices are required."
+msgstr ""
 
 msgid "Available"
 msgstr "可用"
@@ -58,6 +100,12 @@ msgstr "以路径"
 msgid "Clone"
 msgstr "克隆"
 
+msgid "Clone snapshot"
+msgstr ""
+
+msgid "Cloning snapshot ..."
+msgstr ""
+
 msgid "Compression"
 msgstr "压缩"
 
@@ -72,6 +120,9 @@ msgstr "创建的池。"
 
 msgid "Delete"
 msgstr "删除"
+
+msgid "Delete missing"
+msgstr ""
 
 msgid "Deleting object ..."
 msgstr "删除对象中 ..."
@@ -91,11 +142,8 @@ msgstr "设备"
 msgid "Discover"
 msgstr "发现"
 
-msgid "Discover complete."
-msgstr "发现完成。"
-
-msgid "Discovering new pools ..."
-msgstr "发现新池 ..."
+msgid "Do you really want to expand the ZFS pool?"
+msgstr ""
 
 msgid "Edit property"
 msgstr "编辑特性"
@@ -109,20 +157,28 @@ msgstr "扩展池"
 msgid "Expanded pool."
 msgstr "扩展池。"
 
-msgid "Filesystem"
-msgstr "文件系统"
-
-msgid "Fix packages"
+msgid "Exporting pool ..."
 msgstr ""
 
-msgid "Force"
-msgstr "强制"
+msgid "Filesystem added."
+msgstr ""
+
+msgid "Fix packages"
+msgstr "修复软件包"
+
+msgid "Fixing packages ..."
+msgstr ""
 
 msgid "Force creation"
 msgstr "强制创建"
 
-msgid "Forces import, even if the pool appears to be potentially active."
-msgstr "强制导入，即使可能出现池错误。"
+msgid "Force import"
+msgstr ""
+
+msgid ""
+"Force import even if the pool appears to be in use or was not cleanly "
+"exported."
+msgstr ""
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -137,17 +193,29 @@ msgstr "即使报错也强制创建池，请谨慎使用该设置！"
 msgid "Hits"
 msgstr "Hits"
 
-msgid "Import all"
-msgstr "导入全部"
+msgid "Import"
+msgstr ""
 
-msgid "Import all missing pools."
-msgstr "导入所有丢失的池。"
+msgid "Import / Export"
+msgstr ""
+
+msgid "Import all available pools"
+msgstr ""
+
+msgid "Import pool(s)"
+msgstr ""
+
+msgid "Importing pool ..."
+msgstr ""
 
 msgid "Mirror"
 msgstr "镜像"
 
 msgid "Misses"
 msgstr "Misses"
+
+msgid "Missing ZFS mntent entries added."
+msgstr ""
 
 msgid "Modified"
 msgstr "修改"
@@ -157,6 +225,9 @@ msgstr "挂载点"
 
 msgid "Name"
 msgstr "名称"
+
+msgid "Name of the specific pool to import."
+msgstr ""
 
 msgid "New Property"
 msgstr "新特性"
@@ -173,8 +244,11 @@ msgstr "对象已删除。"
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "池的挂载点可选，默认使用池名称挂载。"
 
-msgid "Optional mountpoint. Default is to use the name."
-msgstr "可选挂载点，默认使用该名称。"
+msgid "Optional mountpoint. Default is to use the dataset path."
+msgstr ""
+
+msgid "Packages fixed."
+msgstr ""
 
 msgid "Parent"
 msgstr "父"
@@ -185,8 +259,17 @@ msgstr "路径"
 msgid "Pool"
 msgstr "池"
 
+msgid "Pool exported."
+msgstr ""
+
+msgid "Pool imported."
+msgstr ""
+
 msgid "Pool name"
 msgstr "池名称"
+
+msgid "Pool scrub started."
+msgstr ""
 
 msgid "Pool type"
 msgstr "池类型"
@@ -218,11 +301,23 @@ msgstr "RAID-Z3"
 msgid "Refer"
 msgstr "Refer"
 
+msgid "Removing stale ZFS mntent entries ..."
+msgstr ""
+
 msgid "Rollback"
 msgstr "回滚"
 
+msgid "Rolling back snapshot ..."
+msgstr ""
+
+msgid "Scan for and import all pools not currently imported."
+msgstr ""
+
 msgid "Scrub"
 msgstr "侦测 (Scrub)"
+
+msgid "Scrubbing pool ..."
+msgstr ""
 
 msgid "Set ashift"
 msgstr "设置ashift"
@@ -233,11 +328,17 @@ msgstr "大小"
 msgid "Snap clone name"
 msgstr "快照克隆名称"
 
-msgid "Snapshot"
-msgstr "快照"
+msgid "Snapshot added."
+msgstr ""
+
+msgid "Snapshot cloned."
+msgstr ""
 
 msgid "Snapshot deleted."
 msgstr "快照已删除。"
+
+msgid "Snapshot rolled back."
+msgstr ""
 
 msgid "Snapshots"
 msgstr "快照"
@@ -261,17 +362,20 @@ msgstr "指定设备的别名，如果你不了解就不建议设置。"
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "指定ashift值，如果你清楚该值的意义才调整它。"
 
+msgid "Stale ZFS mntent entries removed."
+msgstr ""
+
 msgid "State"
 msgstr "状态"
 
 msgid "Status"
 msgstr "状态"
 
+msgid "Synchronising ZFS mntent entries ..."
+msgstr ""
+
 msgid "Thin provisioning"
 msgstr "精简配置"
-
-msgid "Tools"
-msgstr "工具"
 
 msgid "Type"
 msgstr "类型"
@@ -285,8 +389,8 @@ msgstr "值"
 msgid "Vdev type"
 msgstr "Vdev类型"
 
-msgid "Volume"
-msgstr "卷"
+msgid "Volume added."
+msgstr ""
 
 msgid "ZFS Hits/Misses"
 msgstr "ZFS Hits/Misses"
@@ -294,8 +398,8 @@ msgstr "ZFS Hits/Misses"
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
-msgid "Zvol %s [%s, %s]"
-msgstr "Zvol %s [%s, %s]"
+msgid "ZFS mntent entries synchronised."
+msgstr ""
 
 msgid "zfs"
 msgstr "zfs"

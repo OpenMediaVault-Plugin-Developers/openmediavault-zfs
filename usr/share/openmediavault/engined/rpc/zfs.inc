@@ -1,6 +1,7 @@
 <?php
-/**
- * Copyright (C) 2014-2026 openmediavault plugin developers
+/*
+ * @author    OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+ * @copyright Copyright (c) 2014-2026 openmediavault plugin developers
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,272 +17,177 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use OMV\Config\Database;
-use OMV\Config\ConfigObject;
-use OMV\Exception;
-use OMV\Rpc\Rpc;
-use OMV\Rpc\ServiceAbstract;
-use OMV\Engine\Notify\Dispatcher;
-require_once("/usr/share/omvzfs/Utils.php");
-require_once("/usr/share/omvzfs/Snapshot.php");
-require_once("/usr/share/omvzfs/Zvol.php");
-require_once("/usr/share/omvzfs/Zpool.php");
-require_once("/usr/share/omvzfs/Filesystem.php");
-require_once("/usr/share/omvzfs/VdevState.php");
-
-class OMVRpcServiceZFS extends ServiceAbstract {
-    private $dataModelPath = "conf.service.zfs";
-
-    public function __construct(Database $database = null, Dispatcher $dispatcher = null){
-        $this->database = $database ? $database : Database::getInstance();
-        $this->dispatcher = $dispatcher ? $dispatcher : Dispatcher::getInstance();
+class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
+{
+    public function getName()
+    {
+        return 'zfs';
     }
 
-    public function getName() {
-        return "zfs";
-    }
-
-    /* Initialize the RPC service. Different methods of the RPC service are declared here*/
     public function initialize()
     {
-        $this->registerMethod("doDiscover");
-        $this->registerMethod("doDiscoverBg");
-        $this->registerMethod("addPool");
-        $this->registerMethod("importPool");
-        $this->registerMethod("exportPool");
-        $this->registerMethod("getObjectTree");
-        $this->registerMethod("listCompressionTypes");
-        $this->registerMethod("listPools");
-        $this->registerMethod("listPoolsBg");
-        $this->registerMethod("getAllSnapshots");
-        $this->registerMethod("getAllSnapshotsBg");
-        $this->registerMethod("addObject");
-        $this->registerMethod("addObjectBg");
-        $this->registerMethod("deleteObject");
-        $this->registerMethod("deleteObjectBg");
-        $this->registerMethod("getProperties");
-        $this->registerMethod("setProperties");
-        $this->registerMethod("inherit");
-        $this->registerMethod("getObjectDetails");
-        $this->registerMethod("expandPool");
-        $this->registerMethod("scrubPool");
-        $this->registerMethod("getCandidates");
-        $this->registerMethod("getEmptyCandidates");
-        $this->registerMethod("rename");
-        $this->registerMethod("getSettings");
-        $this->registerMethod("setSettings");
-        $this->registerMethod("rollbackSnapshot");
-        $this->registerMethod("set");
-        $this->registerMethod("getStats");
-        $this->registerMethod("fixPackages");
-        $this->registerMethod("enableEncryption");
-        $this->registerMethod("loadEncryptionKey");
-        $this->registerMethod("unloadEncryptionKey");
-        $this->registerMethod("changeEncryptionKey");
-        $this->registerMethod("getEncryptionStatus");
-    }
-
-    public function set($params, $context)
-    {
-        // empty function for details window
-        // TODO:  change window type for details
+        $this->registerMethod('doDiscover');
+        $this->registerMethod('doDiscoverBg');
+        $this->registerMethod('addPool');
+        $this->registerMethod('importPool');
+        $this->registerMethod('exportPool');
+        $this->registerMethod('listCompressionTypes');
+        $this->registerMethod('listPools');
+        $this->registerMethod('listPoolsBg');
+        $this->registerMethod('getAllSnapshots');
+        $this->registerMethod('getAllSnapshotsBg');
+        $this->registerMethod('addObject');
+        $this->registerMethod('deleteObject');
+        $this->registerMethod('deleteObjectBg');
+        $this->registerMethod('getProperties');
+        $this->registerMethod('setProperties');
+        $this->registerMethod('getObjectDetails');
+        $this->registerMethod('expandPool');
+        $this->registerMethod('scrubPool');
+        $this->registerMethod('getEmptyCandidates');
+        $this->registerMethod('rollbackSnapshot');
+        $this->registerMethod('getStats');
+        $this->registerMethod('fixPackages');
+        $this->registerMethod('enableEncryption');
+        $this->registerMethod('loadEncryptionKey');
+        $this->registerMethod('unloadEncryptionKey');
+        $this->registerMethod('changeEncryptionKey');
+        $this->registerMethod('getEncryptionStatus');
     }
 
     public function doDiscover($params, $context)
     {
         // Validate the RPC caller context.
-        $this->validateMethodContext($context, ["role" => OMV_ROLE_ADMINISTRATOR]);
-        // Adds missing ZFS filesystems to the OMV core
-        OMVModuleZFSUtil::fixOMVMntEnt($context);
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $addMissing  = $params['addMissing']  ?? true;
+        $deleteStale = $params['deleteStale'] ?? false;
+        self::fixOMVMntEnt($context, $addMissing, $deleteStale);
     }
 
     public function doDiscoverBg($params, $context)
     {
-        return $this->callMethodBg("doDiscover", $params, $context);
+        return $this->callMethodBg('doDiscover', $params, $context);
     }
 
     public function getStats($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-
-        $arcstats = file("/proc/spl/kstat/zfs/arcstats");
-
-        foreach($arcstats as $line) {
-          if (strpos($line,"hits") === 0) {
-            $parts = preg_split('/\s+/', $line);
-            $hits = $parts[2];
-          }
-          if (strpos($line,"misses") === 0) {
-            $parts = preg_split('/\s+/', $line);
-            $misses = $parts[2];
-          }
-          if (strpos($line,"size") === 0) {
-            $parts = preg_split('/\s+/', $line);
-            $size = $parts[2];
-          }
+        $arcstats = file('/proc/spl/kstat/zfs/arcstats');
+        $hits = 0;
+        $misses = 0;
+        $size = 0;
+        foreach ($arcstats as $line) {
+            if (strpos($line, 'hits') === 0) {
+                $parts = preg_split('/\s+/', $line);
+                $hits = $parts[2];
+            }
+            if (strpos($line, 'misses') === 0) {
+                $parts = preg_split('/\s+/', $line);
+                $misses = $parts[2];
+            }
+            if (strpos($line, 'size') === 0) {
+                $parts = preg_split('/\s+/', $line);
+                $size = $parts[2];
+            }
         }
         if ($hits > 0 || $misses > 0) {
-            $stats = [
-              "hits" => $hits,
-              "misses" => $misses,
-              "hitsMisses" => $hits + $misses,
-              "ratio" => ($hits / ($hits + $misses)) * 100,
-              "size" => $size
-            ];
-        } else {
-            $stats = [
-              "hits" => 0,
-              "misses" => 0,
-              "hitsMisses" => 0,
-              "ratio" => 0,
-              "size" => 0
+            return [
+                'hits'       => $hits,
+                'misses'     => $misses,
+                'hitsMisses' => $hits + $misses,
+                'ratio'      => ($hits / ($hits + $misses)) * 100,
+                'size'       => $size,
             ];
         }
-        return ($stats);
+        return ['hits' => 0, 'misses' => 0, 'hitsMisses' => 0, 'ratio' => 0, 'size' => 0];
     }
 
     public function addPool($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.addpool');
-
         if (preg_match('/[\s]+/', $params['name'])) {
-            throw new OMVModuleZFSException("Spaces are not allowed in pool name");
+            throw new \OMV\Exception('Spaces are not allowed in pool name');
         }
-        switch ($params['pooltype']) {
-            case "basic":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
-                break;
-            case "mirror":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
-                break;
-            case "raidz1":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
-                break;
-            case "raidz2":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
-                break;
-            case "raidz3":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
-                break;
-            default:
-                throw new OMVModuleZFSException("Incorrect pool type specified");
-                break;
-        }
-        //Check for user supplied options (order is important)
-        $opts = "";
+        // Build zpool create options.
+        $opts  = '';
         if ($params['force']) {
-            $opts .= "-f ";
+            $opts .= '-f ';
         }
         if ($params['ashift']) {
-            $opts .= sprintf("-o ashift=%s ", $params['ashiftval']);
+            $opts .= sprintf('-o ashift=%s ', $params['ashiftval']);
         }
-        $opts .= "-o failmode=continue ";
-        $opts .= "-o autoexpand=on ";
-        $opts .= "-O atime=off ";
-        $opts .= "-O acltype=posix ";
-        $opts .= "-O xattr=sa ";
+        $opts .= '-o failmode=continue -o autoexpand=on -O atime=off -O acltype=posix -O xattr=sa ';
         if (strlen($params['mountpoint']) > 0) {
-            $opts .= sprintf('-m "%s" ', $params['mountpoint']);
+            $opts .= sprintf('-m %s ', escapeshellarg($params['mountpoint']));
         }
-
-        //$disks = preg_split("/[,;]/", $params['devices']);
+        // Resolve device aliases.
         $disks = $params['devices'];
-
-        switch ($params['devalias']) {
-        case "path":
+        if ($params['devalias'] === 'path' && file_exists('/dev/disk/by-path/')) {
             try {
-                if (file_exists("/dev/disk/by-path/")) {
-                    $tmp_disks = [];
-                    foreach ($disks as $disk) {
-                        $tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
-                    }
-                    $disks = $tmp_disks;
-                }
-            } catch (Exception $e) {
-                //Do nothing if an excpetion is thrown (fallback on /dev/)
-            }
-            break;
-        case "id":
+                $disks = array_map(['self', 'getDiskPath'], $disks);
+            } catch (\Exception $e) {}
+        } elseif ($params['devalias'] === 'id' && file_exists('/dev/disk/by-id/')) {
             try {
-                if (file_exists("/dev/disk/by-id/")) {
-                    $tmp_disks = [];
-                    foreach ($disks as $disk) {
-                        $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
-                    }
-                    $disks = $tmp_disks;
-                }
-            } catch (Exception $e) {
-                //Do nothing if an excpetion is thrown (fallback on /dev/)
-            }
-            break;
-        case "dev":
-            break;
+                $disks = array_map(['self', 'getDiskId'], $disks);
+            } catch (\Exception $e) {}
         }
-
-        $vdev = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-        $pool = OMVModuleZFSZpool::create($vdev, $opts);
-        //$tmp = new OMVModuleZFSZpool($params['name']);
-
+        // Create the pool.
+        $cmd = sprintf('zpool create %s%s %s 2>&1',
+            $opts,
+            escapeshellarg($params['name']),
+            self::buildVdevString($params['pooltype'], $disks));
+        self::zfsExec($cmd, $out, $res);
+        // Set compression if requested.
         if ($params['compress']) {
-            $objects = [];
-            $objects["compression"] = $params['compresstype'];
-            $pool->setProperties($objects);
+            $cmd = sprintf('zfs set compression=%s %s 2>&1',
+                escapeshellarg($params['compresstype']),
+                escapeshellarg($params['name']));
+            self::zfsExec($cmd, $out, $res);
         }
-
-        // Adds missing ZFS filesystems to the OMV core
-        OMVModuleZFSUtil::fixOMVMntEnt($context);
-
-        // Apply changes immmediately
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-            'modules' => [ 'collectd', 'fstab', 'monit', 'quota' ],
-            'force' => TRUE
-        ], $context);
+        // Sync OMV mount entries and apply config.
+        self::fixOMVMntEnt($context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
     }
 
     public function importPool($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.importpool');
-
-        $cmd = "zpool import ";
-        if ($params['force'])
-            $cmd .= "-f ";
-        if ($params['all'])
-            $cmd .= "-a ";
-        else if (strlen($params['poolname']) !== 0)
-            $cmd .= "\"" . $params['poolname'] . "\" ";
-        $cmd .= "2>&1";
-
-        OMVModuleZFSUtil::exec($cmd,$out,$res);
+        $cmd = 'zpool import ';
+        if ($params['force']) {
+            $cmd .= '-f ';
+        }
+        if ($params['all']) {
+            $cmd .= '-a ';
+        } elseif (strlen($params['poolname']) !== 0) {
+            $cmd .= escapeshellarg($params['poolname']) . ' ';
+        }
+        $cmd .= '2>&1';
+        self::zfsExec($cmd, $out, $res);
     }
 
     public function exportPool($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.name');
-
-        $pool = new OMVModuleZFSZpool($params['name']);
-        $pool->export();
-    }
-
-    public function getObjectTree($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $objects = OMVModuleZFSUtil::getZFSFlatArray();
-        $new = [];
-        foreach ($objects as $a){
-            $new[$a['parentid']][] = $a;
-        }
-        $tree['data'] = OMVModuleZFSUtil::createTree($new, $new['root']);
-        return $tree;
+        $cmd = sprintf('zpool export %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
     }
 
     public function listCompressionTypes($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $objects = [];
-        $objects[] = 'gzip';
+        $objects = ['gzip'];
         for ($i = 0; $i < 10; $i++) {
             $objects[] = sprintf('gzip-%d', $i);
         }
@@ -301,680 +207,1027 @@ class OMVRpcServiceZFS extends ServiceAbstract {
         }
         $objects[] = 'zstd-fast-500';
         $objects[] = 'zstd-fast-1000';
-        return ($objects);
+        return $objects;
     }
 
     public function listPools($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $objects = OMVModuleZFSUtil::getZFSFlatArray();
+        $objects = self::getZFSFlatArray();
         return $this->applyFilter($objects, $params['start'],
-          $params['limit'], $params['sortfield'], $params['sortdir']);
+            $params['limit'], $params['sortfield'], $params['sortdir']);
     }
 
     public function listPoolsBg($params, $context)
     {
-        return $this->callMethodBg("listPools", $params, $context);
+        return $this->callMethodBg('listPools', $params, $context);
     }
 
     public function getAllSnapshots($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, "rpc.common.getlist");
-        $objects = OMVModuleZFSUtil::getAllSnapshots();
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+        $objects = self::getAllSnapshotsData();
         return $this->applyFilter($objects, $params['start'],
-          $params['limit'], $params['sortfield'], $params['sortdir']);
+            $params['limit'], $params['sortfield'], $params['sortdir']);
     }
 
     public function getAllSnapshotsBg($params, $context)
     {
-        return $this->callMethodBg("getAllSnapshots", $params, $context);
+        return $this->callMethodBg('getAllSnapshots', $params, $context);
     }
-
 
     public function addObject($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.addobject');
-
         if (preg_match('/[\s]+/', $params['name'])) {
-            throw new OMVModuleZFSException("Spaces are not allowed in object names");
+            throw new \OMV\Exception('Spaces are not allowed in object names');
         }
         switch ($params['type']) {
-            case "clone":
-                $tmp = new OMVModuleZFSSnapshot($params['path']);
-                $tmp->clonesnap($params['pool'] . '/'.  $params['clonename']);
+            case 'clone':
+                $target = $params['pool'] . '/' . $params['clonename'];
+                $cmd = sprintf('zfs clone -p %s %s 2>&1',
+                    escapeshellarg($params['path']),
+                    escapeshellarg($target));
+                self::zfsExec($cmd, $out, $res);
+                self::addOMVMntEntForDataset($context, $target);
                 break;
-            case "filesystem":
-                $name = $params['path'] . "/" . $params['name'];
-                $tmp = OMVModuleZFSFilesystem::create($name);
+            case 'filesystem':
+                $name = $params['path'] . '/' . $params['name'];
+                $cmd = sprintf('zfs create -p %s 2>&1', escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
                 if (strlen($params['mountpoint']) > 0) {
-                    $properties = [
-                        'mountpoint' => $params['mountpoint'],
-                        'atime' => 'off',
-                        'acltype' => 'posix',
-                        'xattr' => 'sa'
-                    ];
-                    $tmp->setProperties($properties);
+                    foreach (['mountpoint' => $params['mountpoint'], 'atime' => 'off',
+                              'acltype' => 'posix', 'xattr' => 'sa'] as $k => $v) {
+                        $cmd = sprintf('zfs set %s=%s %s 2>&1',
+                            escapeshellarg($k), escapeshellarg($v), escapeshellarg($name));
+                        self::zfsExec($cmd, $out, $res);
+                    }
                 }
-                // $mntent_uuid = \OMV\Uuid::uuid4();
-                // OMVModuleZFSUtil::setMntentProperty($mntent_uuid,$name);
-                $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
-                  "org.openmediavault.storage.zfs.filesystem", $context);
+                \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
+                    'org.openmediavault.storage.zfs.filesystem', $context);
+                self::addOMVMntEntForDataset($context, $name);
                 break;
-            case "snapshot":
-                $name = $params['path'] . "@" . $params['name'];
-                OMVModuleZFSSnapshot::create($name);
+            case 'snapshot':
+                $name = $params['path'] . '@' . $params['name'];
+                $cmd = sprintf('zfs snapshot %s 2>&1', escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
                 break;
-            case "volume":
-                $name = $params['path'] . "/" . $params['name'];
-                $volsize = str_replace([' ','i'], '', $params['size']);
-                OMVModuleZFSZvol::create($name, $volsize, null, boolval($params['thinvol']));
+            case 'volume':
+                $name    = $params['path'] . '/' . $params['name'];
+                $volsize = str_replace([' ', 'i'], '', $params['size']);
+                $sparse  = boolval($params['thinvol']) ? '-s ' : '';
+                $cmd = sprintf('zfs create -p %s-V %s %s 2>&1',
+                    $sparse, escapeshellarg($volsize), escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
                 break;
             default:
-                throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
-                break;
+                throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
         }
-        // Adds missing ZFS filesystems to the OMV core
-        OMVModuleZFSUtil::fixOMVMntEnt($context);
-        // Apply changes immmediately
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-            'modules' => [ 'collectd', 'fstab', 'monit', 'quota' ],
-            'force' => TRUE
-        ], $context);
-    }
-
-    public function addObjectBg($params, $context)
-    {
-        return $this->callMethodBg("addObject", $params, $context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
     }
 
     public function deleteObject($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.deleteobject');
-
         $name = $params['name'];
-        $mp = $params['mp'];
+        $mp   = $params['mp'] ?? '';
         switch ($params['type']) {
-            case "Filesystem":
-                $tmp = new OMVModuleZFSFilesystem($name);
-                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp,$mp))
-                    throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
-                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp,$mp);
-                $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
-                  "org.openmediavault.storage.zfs.filesystem", $context);
+            case 'Filesystem':
+                if (self::checkOMVShares($context, $mp)) {
+                    throw new \OMV\Exception(
+                        'Before deleting this filesystem, you must delete shares referencing it.');
+                }
+                self::deleteOMVMntEnt($context, $name, $mp);
+                \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
+                    'org.openmediavault.storage.zfs.filesystem', $context);
                 break;
-            case "Snapshot":
-                $tmp = new OMVModuleZFSSnapshot($name);
-                $tmp->destroy();
+            case 'Snapshot':
+            case 'Volume':
+                $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
                 break;
-            case "Volume":
-                $tmp = new OMVModuleZFSZvol($name);
-                $tmp->destroy();
-                break;
-            case "Pool":
-                $tmp = new OMVModuleZFSZpool($name);
-                var_dump($tmp);
-                if (OMVModuleZFSUtil::checkOMVShares($context,$tmp,$mp))
-                    throw new OMVModuleZFSException("Before deleting this filesystem, You must delete shares referencing this filesystem.");
-                OMVModuleZFSUtil::deleteOMVMntEnt($context,$tmp,$mp);
-
-                $devices = $tmp->getAllDevices([
-                    "excludeStates" => [
-                        OMVModuleZFSVdevState::STATE_SPARE_INUSE,
-                        OMVModuleZFSVdevState::STATE_UNAVAIL,
-                        OMVModuleZFSVdevState::STATE_SPLIT,
-                    ]
-                ]);
-
-                OMVModuleZFSZpool::clearZFSLabel($devices);
+            case 'Pool':
+                if (self::checkOMVShares($context, $mp)) {
+                    throw new \OMV\Exception(
+                        'Before deleting this pool, you must delete shares referencing it.');
+                }
+                // Remove the fstab entry for the pool root.
+                $fstabObj = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mp], $context);
+                if ($fstabObj && $fstabObj['type'] === 'zfs') {
+                    \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $fstabObj['uuid']], $context);
+                    \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+                        ['modules' => ['fstab'], 'force' => true], $context);
+                }
+                // Collect devices before destroying so we can clear labels.
+                $devices = self::zpoolGetAllDevices($name, ['INUSE', 'UNAVAIL', 'SPLIT']);
+                $cmd = sprintf('zpool destroy %s 2>&1', escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
+                foreach ($devices as $device) {
+                    self::zfsTryExec(sprintf('zpool labelclear %s 2>&1', escapeshellarg($device)));
+                }
                 break;
             default:
-                throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
-                break;
+                throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
         }
-        // Adds missing ZFS filesystems to the OMV core
-        OMVModuleZFSUtil::fixOMVMntEnt($context);
-
-        // Apply changes immmediately
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-            'modules' => [ 'collectd', 'monit', 'quota' ],
-            'force' => TRUE
-        ], $context);
+        // Sync OMV mount entries and apply config.
+        self::fixOMVMntEnt($context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'monit', 'quota'], 'force' => true], $context);
     }
 
     public function deleteObjectBg($params, $context)
     {
-        return $this->callMethodBg("deleteObject", $params, $context);
+        return $this->callMethodBg('deleteObject', $params, $context);
     }
 
     public function getProperties($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        //$this->validateMethodParams($params, 'rpc.zfs.getproperties');
-
-        $objects = [];
-        $name = $params['name'];
-        switch ($params['type']) {
-            case "Filesystem":
-                $tmp = new OMVModuleZFSFilesystem($name);
-                break;
-            case "Snapshot":
-                $tmp = new OMVModuleZFSSnapshot($name);
-                break;
-            case "Volume":
-                $tmp = new OMVModuleZFSZvol($name);
-                break;
-            case "Pool":
-                $tmp = new OMVModuleZFSZpool($name);
-                break;
-            default:
-                throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
-                break;
-        }
-        $tmp->updateAllProperties();
-        $properties = $tmp->getProperties();
-
+        $objects    = [];
+        $properties = self::zfsGetAllPropertiesRaw($params['name']);
         foreach ($properties as $propertyk => $propertyv) {
-            if (!(strcmp($propertyv['source'], "-") == 0)) {
-                $objects[] = array('property' => $propertyk,
-                    'value' => $propertyv['value'],
-                    'source' => $propertyv['source'],
-                    'modified' => "false");
+            if ($propertyv['source'] === '-') {
+                continue;
             }
+            $objects[] = [
+                'property' => $propertyk,
+                'value'    => $propertyv['value'],
+                'source'   => $propertyv['source'],
+                'modified' => 'false',
+            ];
         }
-        return [ "properties" => $objects ];
+        return ['properties' => $objects];
     }
 
     public function setProperties($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.setproperties');
-
-        switch ($params['type']) {
-            case "Filesystem":
-                $tmp = new OMVModuleZFSFilesystem($params['name']);
-                break;
-            case "Snapshot":
-                $tmp = new OMVModuleZFSSnapshot($params['name']);
-                break;
-            case "Volume":
-                $tmp = new OMVModuleZFSZvol($params['name']);
-                break;
-            case "Pool":
-                $tmp = new OMVModuleZFSZpool($params['name']);
-                break;
-            default:
-                throw new OMVModuleZFSException("Illegal type provided: " . $params['type']);
-                break;
-        }
         foreach ($params['properties'] as $property) {
             if ($property['modified'] !== true) {
                 continue;
             }
-            unset($objects);
-            $objects = [];
-            $objects[$property['property']] = $property['value'];
-            $tmp->setProperties($objects);
-            if ((strcmp($property['property'], "mountpoint") === 0)) {
-                OMVModuleZFSUtil::relocateOMVMntEnt($context,$tmp);
-                $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
-                    "org.openmediavault.conf.system.sharedfolder", $context);
+            $cmd = sprintf('zfs set %s=%s %s 2>&1',
+                escapeshellarg($property['property']),
+                escapeshellarg($property['value']),
+                escapeshellarg($params['name']));
+            self::zfsExec($cmd, $out, $res);
+            if ($property['property'] === 'mountpoint') {
+                self::relocateOMVMntEnt($context, $params['name']);
+                \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
+                    'org.openmediavault.conf.system.sharedfolder', $context);
             }
         }
-
-        // If we updated a dataset, we should notify.
-        if ($tmp instanceof OMVModuleZFSFilesystem) {
-            $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
-              "org.openmediavault.storage.zfs.filesystem", $context);
-            // Apply changes immmediately
-            \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-                'modules' => [ 'collectd', 'monit', 'quota' ],
-                'force' => TRUE
-            ], $context);
+        if ($params['type'] === 'Filesystem') {
+            \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
+                'org.openmediavault.storage.zfs.filesystem', $context);
+            \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+                ['modules' => ['collectd', 'monit', 'quota'], 'force' => true], $context);
         }
-    }
-
-    public function inherit($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.inherit');
-
-        // Create the background process.
-        return $this->execBgProc(function($bgStatusFilename, $bgOutputFilename)
-            use ($params) {
-                switch ($params['type']) {
-                    case "Filesystem":
-                        $tmp = new OMVModuleZFSFilesystem($params['name']);
-                        break;
-                    case "Snapshot":
-                        $tmp = new OMVModuleZFSSnapshot($params['name']);
-                        break;
-                    case "Volume":
-                        $tmp = new OMVModuleZFSZvol($params['name']);
-                        break;
-                    case "Pool":
-                        $tmp = new OMVModuleZFSZpool($params['name']);
-                        break;
-                    default:
-                        throw new OMVModuleZFSException("Illegal type provided: " .
-                            $params['type']);
-                        break;
-                }
-                $tmp->inherit($params['property']);
-            }
-        );
     }
 
     public function getObjectDetails($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.objectdetails');
-
-        $output = "";
+        $output = '';
         switch ($params['type']) {
-            case "Filesystem":
+            case 'Filesystem':
                 $output .= "Filesystem details (zfs get all):\n\r\n\r";
-                $cmd = "zfs get all \"{$params['name']}\"";
+                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
-            case "Volume":
+            case 'Volume':
                 $output .= "Volume details (zfs get all):\n\r\n\r";
-                $cmd = "zfs get all \"{$params['name']}\"";
+                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
-            case "Snapshot":
+            case 'Snapshot':
                 $output .= "Snapshot details (zfs get all):\n\r\n\r";
-                $cmd = "zfs get all \"{$params['name']}\"";
+                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
-            case "Pool":
+            case 'Pool':
                 $output .= "Pool status (zpool status):\n\r\n\r";
-                $cmd = "zpool status \"{$params['name']}\"";
-                OMVModuleZFSUtil::exec($cmd,$out,$res);
+                self::zfsExec('zpool status ' . escapeshellarg($params['name']), $out, $res);
                 $output .= implode("\n\r", $out);
-                unset($out);
                 $output .= "\n\r\n\rPool details (zpool get all):\n\r\n\r";
-                $cmd = "zpool get all \"{$params['name']}\"";
-                OMVModuleZFSUtil::exec($cmd,$out,$res);
+                self::zfsExec('zpool get all ' . escapeshellarg($params['name']), $out, $res);
                 $output .= implode("\n\r", $out);
-                unset($out);
                 $output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
-                $cmd = "zfs get all \"{$params['name']}\"";
+                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
             default:
-                throw new OMVModuleZFSException("Incorrect type provided");
+                throw new \OMV\Exception('Incorrect type provided');
         }
-        OMVModuleZFSUtil::exec($cmd,$out,$res);
+        self::zfsExec($cmd, $out, $res);
         $output .= implode("\n\r", $out);
-        return ($output);
+        return $output;
     }
 
     public function expandPool($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.expandpool');
-
-        // Validate pool name
         if (empty($params['name'])) {
-            throw new OMVModuleZFSException("Pool name cannot be empty");
+            throw new \OMV\Exception('Pool name cannot be empty');
         }
-
-        // Validate devices
         if (!is_array($params['devices']) || empty($params['devices'])) {
-            throw new OMVModuleZFSException("No devices selected for expansion");
+            throw new \OMV\Exception('No devices selected for expansion');
         }
-
-        $pool = new OMVModuleZFSZpool($params['name']);
+        // Validate minimum disk requirements.
+        $minDisks = ['mirror' => 2, 'raidz1' => 3, 'raidz2' => 4, 'raidz3' => 5];
         $diskCount = count($params['devices']);
-
-        // Validate vdev type and minimum disk requirements
-        switch ($params['vdevtype']) {
-            case "basic":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSPLAIN;
-                // Basic vdev can have any number of disks
-                break;
-            case "mirror":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSMIRROR;
-                if ($diskCount < 2) {
-                    throw new OMVModuleZFSException("Mirror requires at least 2 disks");
-                }
-                break;
-            case "raidz1":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ1;
-                if ($diskCount < 3) {
-                    throw new OMVModuleZFSException("RAID-Z1 requires at least 3 disks");
-                }
-                break;
-            case "raidz2":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ2;
-                if ($diskCount < 4) {
-                    throw new OMVModuleZFSException("RAID-Z2 requires at least 4 disks");
-                }
-                break;
-            case "raidz3":
-                $pooltype = OMVModuleZFSVdevType::OMVMODULEZFSRAIDZ3;
-                if ($diskCount < 5) {
-                    throw new OMVModuleZFSException("RAID-Z3 requires at least 5 disks");
-                }
-                break;
-            default:
-                throw new OMVModuleZFSException("Incorrect pool type specified");
+        if (isset($minDisks[$params['vdevtype']]) && $diskCount < $minDisks[$params['vdevtype']]) {
+            throw new \OMV\Exception(sprintf('Not enough disks for %s', $params['vdevtype']));
         }
-
-        // Prepare options
-        $opts = "";
-        if ($params['force']) {
-            $opts .= "-f ";
-        }
-
-        // Prepare disk list with device alias resolution
+        // Resolve device aliases.
         $disks = $params['devices'];
-
-        switch ($params['devalias']) {
-            case "path":
-                try {
-                    if (file_exists("/dev/disk/by-path/")) {
-                        $tmp_disks = [];
-                        foreach ($disks as $disk) {
-                            $tmp_disks[] = OMVModuleZFSUtil::getDiskPath($disk);
-                        }
-                        $disks = $tmp_disks;
-                    }
-                } catch (OMVModuleZFSException $e) {
-                    //Do nothing if an exception is thrown (fallback on /dev/)
-                }
-                break;
-            case "id":
-                try {
-                    if (file_exists("/dev/disk/by-id/")) {
-                        $tmp_disks = [];
-                        foreach ($disks as $disk) {
-                            $tmp_disks[] = OMVModuleZFSUtil::getDiskId($disk);
-                        }
-                        $disks = $tmp_disks;
-                    }
-                } catch (OMVModuleZFSException $e) {
-                    //Do nothing if an exception is thrown (fallback on /dev/)
-                }
-                break;
-            case "dev":
-                break;
+        if ($params['devalias'] === 'path' && file_exists('/dev/disk/by-path/')) {
+            try {
+                $disks = array_map(['self', 'getDiskPath'], $disks);
+            } catch (\Exception $e) {}
+        } elseif ($params['devalias'] === 'id' && file_exists('/dev/disk/by-id/')) {
+            try {
+                $disks = array_map(['self', 'getDiskId'], $disks);
+            } catch (\Exception $e) {}
         }
-
-        // Create vdev and add to pool
-        $vdev[] = new OMVModuleZFSVdev($params['name'], $pooltype, $disks);
-        $pool->addVdev($vdev, $opts);
+        $opts = $params['force'] ? '-f ' : '';
+        $cmd = sprintf('zpool add %s%s %s 2>&1',
+            $opts,
+            escapeshellarg($params['name']),
+            self::buildVdevString($params['vdevtype'], $disks));
+        self::zfsExec($cmd, $out, $res);
     }
 
     public function scrubPool($params, $context)
     {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.name');
-        $pool = new OMVModuleZFSZpool($params['name']);
-        $process = $pool->scrub();
-    }
-
-    public function getCandidates($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $fs = new OMVRpcServiceFileSystemMgmt();
-        $objects = $fs->getCandidates($params, $context);
-        $devs = [];
-        foreach ($objects as $object) {
-            if (!(preg_match('/zd[0-9]+(p\d+)?$/', $object['devicefile']))) {
-                $devs[] = $object;
-            }
-        }
-        return $devs;
-    }
-
-    public function getEmptyCandidates($params, $context) {
         // Validate the RPC caller context.
-        $this->validateMethodContext($context, [ "role" => OMV_ROLE_ADMINISTRATOR ]);
-        // Get a list of all potential usable devices.
-        if (FALSE === ($devs = \OMV\System\Storage\StorageDevice::enumerateUnused()))
-            throw new \OMV\Exception("Failed to get list of unused devices.");
-        // Prepare the result list.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool scrub %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function getEmptyCandidates($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        if (false === ($devs = \OMV\System\Storage\StorageDevice::enumerateUnused())) {
+            throw new \OMV\Exception('Failed to get list of unused devices.');
+        }
         $result = [];
-        foreach ($devs as $devk => $devv) {
-            // Get the object that implements the given storage device.
+        $db = \OMV\Config\Database::getInstance();
+        foreach ($devs as $devv) {
             $sd = \OMV\System\Storage\StorageDevice::getStorageDevice($devv);
-            if (is_null($sd) || !$sd->exists())
+            if (is_null($sd) || !$sd->exists()) {
                 continue;
-            // Skip read-only devices like CDROM.
-            if (TRUE === $sd->isReadOnly())
+            }
+            if ($sd->isReadOnly() || $sd->isUsb()) {
                 continue;
-            // Skip devices that are connected via USB.
-            if (TRUE === $sd->isUsb())
+            }
+            if ($db->exists('conf.service', [
+                'operator' => 'stringContains',
+                'arg0'     => 'devicefile',
+                'arg1'     => $sd->getDeviceFile(),
+            ])) {
                 continue;
-            // Check if the device is referenced/used by a plugin.
-            $db = \OMV\Config\Database::getInstance();
-            if (TRUE === $db->exists("conf.service", [
-              "operator" => "stringContains",
-              "arg0" => "devicefile",
-              "arg1" => $sd->getDeviceFile()
-              ]))
+            }
+            if (false !== \OMV\System\Filesystem\Filesystem::hasFileSystem($sd->getDeviceFile())) {
                 continue;
-            // Does this device already contain a filesystem?
-            if (FALSE !== \OMV\System\Filesystem\Filesystem::hasFileSystem(
-              $sd->getDeviceFile()))
-                continue;
-            // The device is a potential candidate to be a member of a
-            // zfs RAID.
+            }
             $result[] = [
-                "devicefile" => $sd->getDeviceFile(),
-                "size" => $sd->getSize(),
-                "vendor" => $sd->getVendor(),
-                "serialnumber" => $sd->getSerialNumber(),
-                "description" => $sd->getDescription()
+                'devicefile'   => $sd->getDeviceFile(),
+                'size'         => $sd->getSize(),
+                'vendor'       => $sd->getVendor(),
+                'serialnumber' => $sd->getSerialNumber(),
+                'description'  => $sd->getDescription(),
             ];
         }
         return $result;
     }
 
-    public function rename($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.rename');
-
-        preg_match('/^(.*)' . preg_quote($params['oldname'], '/') . '$/', $params['oldpath'], $matches);
-        $pre = "";
-        if (isset($matches[1])) {
-            $pre = $matches[1];
-        }
-        $newpath = $pre . $params['newname'];
-
-        switch($params['type']) {
-            case "Filesystem":
-                //Rename the object first
-                $ds = new OMVModuleZFSFilesystem($params['oldpath']);
-                $ds->rename($newpath);
-                renameOMVMntEnt($context,$ds);
-                $this->dispatcher->notify(OMV_NOTIFY_MODIFY,
-                  "org.openmediavault.storage.zfs.filesystem", $context);
-                break;
-
-            case "Volume":
-                $vol = new OMVModuleZFSZvol();
-                $vol->load($params['oldpath']);
-                $vol->rename($newpath);
-                break;
-
-            case "Snapshot":
-                $snap = new OMVModuleZFSSnapshot($params['oldpath']);
-                $snap->rename($newpath);
-                break;
-        }
-        // Apply changes immmediately
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-            'modules' => [ 'collectd', 'monit', 'quota' ],
-            'force' => TRUE
-        ], $context);
-    }
-
-    /**
-     * Get the general ZFS configuration settings.
-     *
-     * @param params The method params
-     * @param context The context of the caller.
-     * @return A JSON object containing the fields required
-     *  to configure Kerberos.
-     * @throw E_CONFIG_GET_OBJECT_FAILED
-     */
-    function getSettings($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $object = $this->database->getAssoc($this->dataModelPath);
-        return $object;
-    }
-
-    /**
-     * Set the general ZFS configuration settings.
-     *
-     * @param params An array containing all of the fields and values.
-     * @param context The context of the caller.
-     * @return The stored configuration object.
-     * @throw E_CONFIG_SET_OBJECT_FAILED
-     */
-    function setSettings($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $this->validateMethodParams($params, 'rpc.zfs.setsettings');
-        $object = $this->database->getAssoc($this->dataModelPath);
-        $object->setAssoc($params);
-        $this->database->set($object);
-        return $object;
-    }
-
     public function rollbackSnapshot($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.name');
-
-        $snap = new OMVModuleZFSSnapshot($params['name']);
-        $snap->rollback();
-
-        return $snap;
+        $cmd = sprintf('zfs rollback %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
     }
 
     public function fixPackages($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges', [
-            'modules' => [ 'zfs' ],
-            'force' => TRUE
-        ], $context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['zfs'], 'force' => true], $context);
     }
 
     public function enableEncryption($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.enableencryption');
-
-        // Build zfs create command with encryption
-        $encryptionOpt = '-o encryption=' . $params['encryptiontype'];
-
-        // Special handling for key format
-        if ($params['keyformat'] === 'hex') {
-            $encryptionOpt .= ' -o keyformat=hex';
-        } else {
-            $encryptionOpt .= ' -o keyformat=passphrase';
+        $keyformat    = ($params['keyformat'] === 'hex') ? 'hex' : 'passphrase';
+        $encryptOpts  = sprintf('-o encryption=%s -o keyformat=%s',
+            escapeshellarg($params['encryptiontype']),
+            $keyformat);
+        if (!preg_match('/^[a-zA-Z0-9\-_\.]+\/[a-zA-Z0-9\-_\.]+/', $params['path'])) {
+            throw new \OMV\Exception('Invalid path for encryption');
         }
-
-        // For creating new datasets with encryption
-        if (preg_match('/^[a-zA-Z0-9\-_\.]+\/[a-zA-Z0-9\-_\.]+/', $params['path'])) {
-            // This is a new dataset under existing pool
-            $cmd = "zfs create " . $encryptionOpt . " \"" . $params['path'] . "\"";
-
-            // Execute with key via stdin
-            $descriptors = [
-                0 => ['pipe', 'r'],
-                1 => ['pipe', 'w'],
-                2 => ['pipe', 'w']
-            ];
-            $process = proc_open($cmd, $descriptors, $pipes);
-
-            if (is_resource($process)) {
-                fwrite($pipes[0], $params['key'] . "\n");
-                fclose($pipes[0]);
-                $output = stream_get_contents($pipes[1]);
-                $error = stream_get_contents($pipes[2]);
-                fclose($pipes[1]);
-                fclose($pipes[2]);
-                $result = proc_close($process);
-
-                if ($result !== 0) {
-                    throw new \OMV\Exception("Failed to enable encryption: " . trim($error ?: $output));
-                }
-            }
-
-            $dataset = new OMVModuleZFSFilesystem($params['path']);
-            $status = $dataset->getEncryptionStatus();
-            return self::flattenEncryptionStatus($params['path'], $status);
-        } else {
-            throw new \OMV\Exception("Invalid path for encryption");
-        }
+        $cmd = sprintf('zfs create %s %s', $encryptOpts, escapeshellarg($params['path']));
+        self::execWithStdin($cmd, $params['key']);
+        $status = self::zfsGetEncryptionStatus($params['path']);
+        return self::flattenEncryptionStatus($params['path'], $status);
     }
 
     public function loadEncryptionKey($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.loadencryptionkey');
-
-        // OMVModuleZFSFilesystem works for both pool root datasets and
-        // child filesystems because ZFS encryption operates at the
-        // dataset level via `zfs` commands.
-        $ds = new OMVModuleZFSFilesystem($params['name']);
-        $ds->loadEncryptionKey($params['key'], $params['keyformat']);
+        $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
+        self::execWithStdin($cmd, $params['key']);
         return ['status' => 'loaded'];
     }
 
     public function unloadEncryptionKey($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
-
-        $ds = new OMVModuleZFSFilesystem($params['name']);
-        $ds->unloadEncryptionKey();
+        $cmd = sprintf('zfs unload-key %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
         return ['status' => 'unloaded'];
     }
 
     public function changeEncryptionKey($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.changeencryptionkey');
-
-        $ds = new OMVModuleZFSFilesystem($params['name']);
-        $ds->changeEncryptionKey($params['oldkey'], $params['newkey'], $params['keyformat']);
+        // Try to load the old key first (may already be loaded; ignore failure).
+        try {
+            self::execWithStdin('zfs load-key ' . escapeshellarg($params['name']), $params['oldkey']);
+        } catch (\Exception $e) {}
+        self::execWithStdin('zfs change-key ' . escapeshellarg($params['name']), $params['newkey']);
         return ['status' => 'changed'];
     }
 
     public function getEncryptionStatus($params, $context)
     {
+        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.encryptionstatus');
-
-        $ds = new OMVModuleZFSFilesystem($params['name']);
-        $status = $ds->getEncryptionStatus();
+        $status = self::zfsGetEncryptionStatus($params['name']);
         return self::flattenEncryptionStatus($params['name'], $status);
     }
 
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Flatten the nested encryption status array into a flat object
-     * whose keys match the formPage field names directly.
+     * Execute a shell command via OMV\System\Process, throwing on failure.
      */
-    private static function flattenEncryptionStatus($name, $status)
+    private static function zfsExec(string $cmd, &$out = null, &$res = null): void
+    {
+        if (file_exists('/var/log/zfs_commands.log')) {
+            file_put_contents('/var/log/zfs_commands.log', $cmd . PHP_EOL, FILE_APPEND);
+        }
+        $process = new \OMV\System\Process($cmd);
+        $process->execute($out, $res);
+    }
+
+    /**
+     * Execute a shell command, returning false instead of throwing on failure.
+     */
+    private static function zfsTryExec(string $cmd, &$out = null, &$res = null): bool
+    {
+        try {
+            self::zfsExec($cmd, $out, $res);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Execute a command that reads a secret from stdin (e.g. zfs load-key).
+     */
+    private static function execWithStdin(string $cmd, string $input): void
+    {
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $process     = proc_open($cmd, $descriptors, $pipes);
+        if (!is_resource($process)) {
+            throw new \OMV\Exception(sprintf('Failed to start process: %s', $cmd));
+        }
+        fwrite($pipes[0], $input . "\n");
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $result = proc_close($process);
+        if ($result !== 0) {
+            throw new \OMV\Exception('Command failed: ' . trim($stderr ?: $stdout));
+        }
+    }
+
+    /**
+     * Build a zpool vdev command string, e.g. "mirror /dev/sda /dev/sdb".
+     */
+    private static function buildVdevString(string $type, array $disks): string
+    {
+        $diskStr = implode(' ', array_map('escapeshellarg', $disks));
+        switch ($type) {
+            case 'basic':  return $diskStr;
+            case 'mirror': return 'mirror ' . $diskStr;
+            case 'raidz1': return 'raidz1 ' . $diskStr;
+            case 'raidz2': return 'raidz2 ' . $diskStr;
+            case 'raidz3': return 'raidz3 ' . $diskStr;
+            default:       throw new \OMV\Exception('Unknown vdev type: ' . $type);
+        }
+    }
+
+    /**
+     * Get all physical device paths from a pool via zpool status -P,
+     * excluding devices with states in $excludeStates (e.g. ['INUSE','UNAVAIL','SPLIT']).
+     */
+    public static function zpoolGetAllDevices(string $poolName, array $excludeStates = []): array
+    {
+        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($poolName));
+        self::zfsExec($cmd, $out, $res);
+        $devices  = [];
+        $inConfig = false;
+        foreach ($out as $line) {
+            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
+                $inConfig = true;
+                continue;
+            }
+            if (!$inConfig) {
+                continue;
+            }
+            if (trim($line) === '') {
+                break;
+            }
+            // Lines with absolute device paths have deep indentation.
+            if (preg_match('/^\s{4,}(\/\S+)\s+(\S+)/', $line, $m)) {
+                if (!in_array($m[2], $excludeStates)) {
+                    $devices[] = $m[1];
+                }
+            }
+        }
+        return $devices;
+    }
+
+    /**
+     * Return all ZFS properties for a dataset as ['propname' => ['value'=>..., 'source'=>...]].
+     */
+    private static function zfsGetAllPropertiesRaw(string $name): array
+    {
+        $cmd = sprintf('zfs get -H all %s 2>&1', escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        $properties = [];
+        foreach ($out as $line) {
+            $parts = preg_split('/\t+/', $line);
+            if (count($parts) >= 4) {
+                $properties[$parts[1]] = ['value' => $parts[2], 'source' => $parts[3]];
+            }
+        }
+        return $properties;
+    }
+
+    /**
+     * Return true if the named ZFS filesystem exists.
+     */
+    private static function zfsFilesystemExists(string $name): bool
+    {
+        return self::zfsTryExec(
+            sprintf('zfs list -H -t filesystem %s 2>&1', escapeshellarg($name)));
+    }
+
+    /**
+     * Resolve a /dev/sdX path to its /dev/disk/by-id symlink.
+     */
+    private static function getDiskId(string $disk): string
+    {
+        preg_match('/^\/dev\/(.*)$/', $disk, $id);
+        $cmd = "ls -la /dev/disk/by-id | grep '" . preg_quote($id[1], "'") . "\$'";
+        self::zfsExec($cmd, $out, $res);
+        if (!empty($out)) {
+            $cols = preg_split('/[\s]+/', $out[0]);
+            return $cols[count($cols) - 3];
+        }
+        return $disk;
+    }
+
+    /**
+     * Resolve a /dev/sdX path to its /dev/disk/by-path symlink.
+     */
+    private static function getDiskPath(string $disk): string
+    {
+        preg_match('/^\/dev\/(.*)$/', $disk, $id);
+        $cmd = "ls -la /dev/disk/by-path | grep '" . preg_quote($id[1], "'") . "\$'";
+        self::zfsExec($cmd, $out, $res);
+        if (!empty($out)) {
+            $cols = preg_split('/[\s]+/', $out[0]);
+            return $cols[count($cols) - 3];
+        }
+        return $disk;
+    }
+
+    /**
+     * Extract the pool name from a dataset path (first component before '/').
+     */
+    private static function getPoolFromFsname(string $fsname): string
+    {
+        $pos = strpos($fsname, '/');
+        return ($pos === false) ? $fsname : substr($fsname, 0, $pos);
+    }
+
+    /**
+     * Return true if the named pool is currently imported.
+     */
+    private static function isPoolImported(string $name): bool
+    {
+        return self::zfsTryExec(sprintf('zpool status %s', escapeshellarg($name)));
+    }
+
+    /**
+     * Write the OMV mntent UUID into a ZFS dataset user property.
+     */
+    private static function setMntentProperty(string $uuid, string $fsname): void
+    {
+        if (!self::isPoolImported(self::getPoolFromFsname($fsname))) {
+            return;
+        }
+        $cmd = sprintf('zfs set omvzfsplugin:uuid=%s %s 2>&1',
+            escapeshellarg($uuid), escapeshellarg($fsname));
+        self::zfsTryExec($cmd);
+    }
+
+    /**
+     * Return true if any shared folder references the fstab entry for $mountpoint.
+     */
+    private static function checkOMVShares($context, string $mountpoint): bool
+    {
+        if (empty($mountpoint) || $mountpoint === '-') {
+            return false;
+        }
+        $object = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mountpoint], $context);
+        if (!$object) {
+            return false;
+        }
+        $uuid   = $object['uuid'];
+        $shares = \OMV\Rpc\Rpc::call('ShareMgmt', 'enumerateSharedFolders', [], $context);
+        foreach ($shares as $share) {
+            if ($share['mntentref'] === $uuid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remove the fstab entry for $mountpoint and destroy the ZFS filesystem.
+     */
+    private static function deleteOMVMntEnt($context, string $name, string $mountpoint): void
+    {
+        $object = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mountpoint], $context);
+        if (!$object || $object['type'] !== 'zfs' || $object['dir'] !== $mountpoint) {
+            throw new \OMV\Exception(sprintf('No ZFS mntent found for: %s', $mountpoint));
+        }
+        \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['fstab'], 'force' => true], $context);
+        if (self::zfsFilesystemExists($name)) {
+            self::zfsExec(sprintf('zfs destroy %s 2>&1', escapeshellarg($name)), $out, $res);
+        }
+    }
+
+    /**
+     * Update fstab dir entries when a dataset's mountpoint property changes.
+     */
+    private static function relocateOMVMntEnt($context, string $name): void
+    {
+        $db  = \OMV\Config\Database::getInstance();
+        $cmd = sprintf('zfs list -H -p -r -t filesystem -o name %s 2>&1', escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        foreach ($out as $line) {
+            $child = trim($line);
+            if (empty($child)) {
+                continue;
+            }
+            $cmd2   = sprintf('zfs get -H -p mountpoint %s 2>&1', escapeshellarg($child));
+            self::zfsExec($cmd2, $mout, $mres);
+            $parts      = preg_split('/\t+/', $mout[0] ?? '');
+            $mountpoint = $parts[2] ?? '';
+            $object     = \OMV\Rpc\Rpc::call('FsTab', 'getByFsName', ['fsname' => $child], $context);
+            if ($object) {
+                $object['dir'] = $mountpoint;
+                $config        = $db->get('conf.system.filesystem.mountpoint', $object['uuid']);
+                $db->set($config, true);
+            }
+        }
+    }
+
+    /**
+     * Update shared folder mntentref from an old UUID to a new one.
+     */
+    private static function fixOMVSharedFolders(
+        string $oldUuid,
+        string $newUuid,
+        array  $sfObjects,
+        $context
+    ): void {
+        foreach ($sfObjects as $sf) {
+            if ($sf['mntentref'] !== $oldUuid) {
+                continue;
+            }
+            unset($sf['mntent'], $sf['_used'], $sf['privileges']);
+            $sf['mntentref'] = $newUuid;
+            \OMV\Rpc\Rpc::call('ShareMgmt', 'set', $sf, $context);
+        }
+    }
+
+    /**
+     * Add any missing ZFS datasets to the OMV fstab database and fix
+     * shared folder UUID references when mntent UUIDs have changed.
+     */
+    private static function addOMVMntEntForDataset($context, string $fsname): void
+    {
+        // Get the actual mountpoint from ZFS.
+        $cmd = sprintf('zfs get -H -o value mountpoint %s 2>&1', escapeshellarg($fsname));
+        if (!self::zfsTryExec($cmd, $o, $r) || $r !== 0) {
+            return;
+        }
+        $mountpoint = trim(implode('', $o));
+        if (in_array($mountpoint, ['-', 'none', 'legacy', '/'])) {
+            return;
+        }
+        // Skip if an mntent entry already exists for this dataset.
+        $entries = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
+        foreach ($entries as $entry) {
+            if (isset($entry['fsname']) && $entry['fsname'] === $fsname) {
+                self::setMntentProperty($entry['uuid'], $fsname);
+                return;
+            }
+        }
+        $uuid = \OMV\Environment::get('OMV_CONFIGOBJECT_NEW_UUID');
+        \OMV\Rpc\Rpc::call('FsTab', 'set', [
+            'uuid'   => $uuid,
+            'fsname' => $fsname,
+            'dir'    => $mountpoint,
+            'type'   => 'zfs',
+            'opts'   => '',
+            'freq'   => 0,
+            'passno' => 0,
+        ], $context);
+        self::setMntentProperty($uuid, $fsname);
+    }
+
+    private static function fixOMVMntEnt($context, bool $addMissing = true, bool $deleteStale = false): void
+    {
+        // Back up config.xml, keeping the 20 most recent copies.
+        $src       = '/etc/openmediavault/config.xml';
+        $dir       = '/etc/openmediavault/';
+        $timestamp = date('Ymd-His');
+        if (!@copy($src, $dir . 'config-zfs-' . $timestamp . '.xml')) {
+            throw new \OMV\Exception(sprintf('Failed to backup %s', $src));
+        }
+        $files = glob($dir . 'config-*.xml', GLOB_NOSORT) ?: [];
+        usort($files, function ($a, $b) { return filemtime($b) <=> filemtime($a); });
+        foreach (array_slice($files, 20) as $file) {
+            @unlink($file);
+        }
+        // Build list of mountable ZFS datasets from the system.
+        $current = [];
+        try {
+            self::zfsExec('zfs list -H -o name,mountpoint', $out, $res);
+            foreach ($out as $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+                $parts = preg_split('/\s+/', $line, 2);
+                if (count($parts) !== 2) {
+                    continue;
+                }
+                [$name, $mntpoint] = $parts;
+                if (in_array($mntpoint, ['-', 'none', 'legacy', '/'])) {
+                    continue;
+                }
+                $current[] = ['fsname' => $name, 'dir' => $mntpoint];
+            }
+        } catch (\Exception $e) {
+            return;
+        }
+        // Get existing ZFS fstab entries.
+        $prev = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
+        $prev = array_values(array_filter($prev, function ($e) {
+            return isset($e['type']) && $e['type'] === 'zfs';
+        }));
+        // Compare entries by fsname and dir.
+        $compare = function ($a, $b) {
+            $c = strcmp($a['fsname'], $b['fsname']);
+            return $c !== 0 ? $c : strcmp($a['dir'], $b['dir']);
+        };
+        // Add entries that are in $current but missing from $prev.
+        if ($addMissing) {
+            foreach (array_udiff($current, $prev, $compare) as $object) {
+                $uuid = \OMV\Environment::get('OMV_CONFIGOBJECT_NEW_UUID');
+                \OMV\Rpc\Rpc::call('FsTab', 'set', [
+                    'uuid'   => $uuid,
+                    'fsname' => $object['fsname'],
+                    'dir'    => $object['dir'],
+                    'type'   => 'zfs',
+                    'opts'   => '',
+                    'freq'   => 0,
+                    'passno' => 0,
+                ], $context);
+            }
+        }
+        // Delete entries that are in $prev but no longer in $current.
+        if ($deleteStale) {
+            foreach (array_udiff($prev, $current, $compare) as $object) {
+                \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
+            }
+        }
+        // Refresh the list and fix any shared folder UUID mappings.
+        // Only process entries whose dataset still exists on the system to
+        // avoid errors when stale mntent entries have not been deleted.
+        $currentFsnames = array_column($current, 'fsname');
+        $zfsMntent = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
+        $zfsMntent = array_values(array_filter($zfsMntent, function ($e) use ($currentFsnames) {
+            return isset($e['type']) && $e['type'] === 'zfs'
+                && in_array($e['fsname'], $currentFsnames);
+        }));
+        $sfObjects = \OMV\Rpc\Rpc::call('ShareMgmt', 'enumerateSharedFolders', [], $context);
+        foreach ($zfsMntent as $dataset) {
+            $fsname = $dataset['fsname'];
+            $pool   = self::getPoolFromFsname($fsname);
+            if (!self::isPoolImported($pool)) {
+                continue;
+            }
+            // Read mountpoint and stored UUID from the ZFS dataset in one call.
+            $cmd = sprintf('zfs get -H -p mountpoint,omvzfsplugin:uuid %s 2>&1',
+                escapeshellarg($fsname));
+            self::zfsExec($cmd, $o, $r);
+            $props = [];
+            foreach ($o as $line) {
+                $parts = preg_split('/\t+/', $line);
+                if (count($parts) >= 4) {
+                    $props[$parts[1]] = ['value' => $parts[2], 'source' => $parts[3]];
+                }
+            }
+            $mountpoint  = $props['mountpoint']['value'] ?? '';
+            $oldUuidProp = $props['omvzfsplugin:uuid'] ?? null;
+            $oldUuid     = ($oldUuidProp
+                && $oldUuidProp['value'] !== ''
+                && $oldUuidProp['source'] === 'local')
+                ? $oldUuidProp['value']
+                : null;
+            $newUuid = $dataset['uuid'];
+            if ($oldUuid && $oldUuid !== $newUuid) {
+                $matchingSfs = array_filter($sfObjects, function ($sf) use ($mountpoint) {
+                    return isset($sf['mntent']['dir'])
+                        && rtrim($sf['mntent']['dir'], '/') === rtrim($mountpoint, '/');
+                });
+                if (!empty($matchingSfs)) {
+                    self::fixOMVSharedFolders($oldUuid, $newUuid, array_values($matchingSfs), $context);
+                }
+            }
+            self::setMntentProperty($newUuid, $fsname);
+        }
+    }
+
+    /**
+     * Return a flat array of all pools, filesystems, and volumes with their stats.
+     */
+    private static function getZFSFlatArray(): array
+    {
+        $prefix  = 'root/pool-';
+        $objects = [];
+        // One zfs list call returns all the data we need for sizing/type/origin.
+        $cmd = 'zfs list -H -p -t filesystem,volume '
+             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation 2>&1';
+        self::zfsExec($cmd, $out, $res);
+        foreach ($out as $line) {
+            $parts = preg_split('/\t/', $line);
+            if (count($parts) < 9) {
+                continue;
+            }
+            [$path, $type, $used, $available, $mountpoint,
+             $origin, $volsize, $logicalused, $refreservation] = $parts;
+            $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
+            $isFilesystem = ($type === 'filesystem' && !$isPool);
+            $isVolume     = ($type === 'volume');
+            if ($isPool) {
+                $usedBytes = ($used !== '-') ? (int)$used : 0;
+                $availBytes = ($available !== '-') ? (int)$available : 0;
+                $size       = $usedBytes + $availBytes;
+                $objects[] = [
+                    'id'          => $prefix . $path,
+                    'parentid'    => 'root',
+                    'name'        => $path,
+                    'type'        => 'Pool',
+                    'icon'        => 'images/raid.png',
+                    'expanded'    => true,
+                    'path'        => $path,
+                    'origin'      => 'n/a',
+                    'size'        => $size,
+                    'used'        => $usedBytes,
+                    'usedpercent' => $size > 0 ? ($usedBytes / $size * 100) : 0,
+                    'available'   => $availBytes,
+                    'mountpoint'  => ($mountpoint !== '-') ? $mountpoint : '',
+                    'lastscrub'   => self::zpoolGetLatestScrub($path),
+                    'state'       => self::zpoolGetPoolState($path),
+                    'status'      => self::zpoolGetPoolStatus($path),
+                ];
+            } elseif ($isFilesystem) {
+                preg_match('/(.*)\/(.*)$/', $path, $result);
+                $usedBytes  = ($used !== '-') ? (int)$used : 0;
+                $availBytes = ($available !== '-') ? (int)$available : 0;
+                $size       = $usedBytes + $availBytes;
+                $objects[] = [
+                    'id'          => $prefix . $path,
+                    'parentid'    => $prefix . $result[1],
+                    'name'        => $result[2],
+                    'type'        => 'Filesystem',
+                    'icon'        => 'images/filesystem.png',
+                    'path'        => $path,
+                    'expanded'    => true,
+                    'origin'      => ($origin !== '-' && $origin !== '') ? $origin : 'n/a',
+                    'size'        => $size,
+                    'used'        => $usedBytes,
+                    'usedpercent' => $size > 0 ? ($usedBytes / $size * 100) : 0,
+                    'available'   => $availBytes,
+                    'mountpoint'  => ($mountpoint !== '-') ? $mountpoint : '',
+                    'lastscrub'   => 'n/a',
+                    'state'       => 'n/a',
+                    'status'      => 'n/a',
+                ];
+            } elseif ($isVolume) {
+                preg_match('/(.*)\/(.*)$/', $path, $result);
+                $volSizeBytes = ($volsize !== '-') ? (int)$volsize : 0;
+                $logUsedBytes = ($logicalused !== '-') ? (int)$logicalused : 0;
+                $isThin       = (trim($refreservation) === 'none');
+                $objects[] = [
+                    'id'          => $prefix . $path,
+                    'parentid'    => $prefix . $result[1],
+                    'name'        => $result[2],
+                    'type'        => 'Volume',
+                    'icon'        => $isThin ? 'images/zfs_thinvol.png' : 'images/save.png',
+                    'path'        => $path,
+                    'expanded'    => true,
+                    'origin'      => ($origin !== '-' && $origin !== '') ? $origin : 'n/a',
+                    'size'        => $volSizeBytes,
+                    'used'        => $logUsedBytes,
+                    'usedpercent' => $volSizeBytes > 0 ? ($logUsedBytes / $volSizeBytes * 100) : 0,
+                    'available'   => $volSizeBytes - $logUsedBytes,
+                    'mountpoint'  => 'n/a',
+                    'lastscrub'   => 'n/a',
+                    'state'       => 'n/a',
+                    'status'      => 'n/a',
+                ];
+            }
+        }
+        return $objects;
+    }
+
+    /**
+     * Return a flat array of all ZFS snapshots.
+     */
+    private static function getAllSnapshotsData(): array
+    {
+        $prefix  = 'root/pool-';
+        $objects = [];
+        $cmd     = 'zfs list -H -p -t snapshot -o name,used,refer 2>&1';
+        self::zfsExec($cmd, $out, $res);
+        foreach ($out as $line) {
+            $parts = preg_split('/\t/', $line);
+            if (count($parts) < 3) {
+                continue;
+            }
+            [$path, $used, $refer] = $parts;
+            if (!preg_match('/(.*)\@(.*)$/', $path, $result) || count($result) < 3) {
+                continue;
+            }
+            $objects[] = [
+                'id'     => $prefix . $path,
+                'parent' => $result[1],
+                'name'   => $result[2],
+                'type'   => 'Snapshot',
+                'icon'   => 'images/zfs_snap.png',
+                'path'   => $path,
+                'used'   => (int)$used,
+                'refer'  => (int)$refer,
+            ];
+        }
+        return $objects;
+    }
+
+    /**
+     * Return the date/status of the latest scrub for a pool.
+     */
+    private static function zpoolGetLatestScrub(string $name): string
+    {
+        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
+        foreach ($out as $line) {
+            if (preg_match('/none requested/', $line)) {
+                return 'Never';
+            }
+            if (preg_match('/with [\d]+ errors on (.*)/', $line, $m)) {
+                return $m[1];
+            }
+            if (preg_match('/scrub (in progress since .*)/', $line, $m)) {
+                return $m[1];
+            }
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * Return the health state of a pool (e.g. ONLINE, DEGRADED).
+     */
+    private static function zpoolGetPoolState(string $name): string
+    {
+        self::zfsExec(sprintf('zpool get -H health %s 2>&1', escapeshellarg($name)), $out, $res);
+        $parts = preg_split('/\t+/', $out[0] ?? '');
+        return $parts[2] ?? 'UNKNOWN';
+    }
+
+    /**
+     * Return 'OK' or 'Error' based on the pool's data error count.
+     */
+    private static function zpoolGetPoolStatus(string $name): string
+    {
+        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
+        foreach ($out as $line) {
+            if (preg_match('/errors: (.*)/', $line, $m)) {
+                return (strcmp($m[1], 'No known data errors') === 0) ? 'OK' : 'Error';
+            }
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * Return encryption property values for a dataset.
+     */
+    private static function zfsGetEncryptionStatus(string $name): array
+    {
+        $cmd = sprintf('zfs get -H -p encryption,encryptionroot,keystatus,keyformat %s 2>&1',
+            escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        $status = [];
+        foreach ($out as $line) {
+            if (empty($line)) {
+                continue;
+            }
+            $parts = preg_split('/\t+/', $line);
+            if (count($parts) >= 3) {
+                $status[$parts[1]] = ['value' => $parts[2], 'source' => $parts[3] ?? '-'];
+            }
+        }
+        return $status;
+    }
+
+    /**
+     * Flatten nested encryption status into a flat array matching the form fields.
+     */
+    private static function flattenEncryptionStatus(string $name, array $status): array
     {
         return [
-            'name' => $name,
-            'encryption' => isset($status['encryption']['value'])
+            'name'           => $name,
+            'encryption'     => isset($status['encryption']['value'])
                 ? strtoupper($status['encryption']['value']) : 'OFF',
-            'encryptionroot' => isset($status['encryptionroot']['value'])
-                ? $status['encryptionroot']['value'] : '-',
-            'keystatus' => isset($status['keystatus']['value'])
-                ? $status['keystatus']['value'] : '-',
-            'keyformat' => isset($status['keyformat']['value'])
-                ? $status['keyformat']['value'] : '-',
+            'encryptionroot' => $status['encryptionroot']['value'] ?? '-',
+            'keystatus'      => $status['keystatus']['value'] ?? '-',
+            'keyformat'      => $status['keyformat']['value'] ?? '-',
         ];
     }
 }
-

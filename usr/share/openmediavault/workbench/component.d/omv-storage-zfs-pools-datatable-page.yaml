@@ -169,7 +169,8 @@ data:
                       request:
                         service: Zfs
                         method: addObject
-                    successUrl: /services/zfs/pools
+                        progressMessage: _("Adding object ...")
+                        successNotification: _("Object added.")
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
@@ -212,7 +213,8 @@ data:
                 params:
                   name: "{{ _selected[0].path }}"
                 task: false
-                successUrl: /storage/zfs/pools
+                progressMessage: _("Scrubbing pool ...")
+                successNotification: _("Pool scrub started.")
           - text: _("zpool import")
             icon: mdi:import
             execute:
@@ -250,6 +252,8 @@ data:
                       request:
                         service: Zfs
                         method: importPool
+                        progressMessage: _("Importing pool ...")
+                        successNotification: _("Pool imported.")
           - text: _("zpool export")
             icon: mdi:export
             confirmationDialogConfig:
@@ -271,6 +275,8 @@ data:
                 params:
                   name: "{{ _selected[0].path }}"
                 task: false
+                progressMessage: _("Exporting pool ...")
+                successNotification: _("Pool exported.")
           - text: _("Fix packages")
             icon: mdi:folder-wrench-outline
             execute:
@@ -279,6 +285,8 @@ data:
                 service: Zfs
                 method: fixPackages
                 task: false
+                progressMessage: _("Fixing packages ...")
+                successNotification: _("Packages fixed.")
       - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete

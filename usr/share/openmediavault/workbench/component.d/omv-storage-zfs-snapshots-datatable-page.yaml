@@ -113,6 +113,8 @@ data:
                   request:
                     service: Zfs
                     method: addObject
+                    progressMessage: _("Cloning snapshot ...")
+                    successNotification: _("Snapshot cloned.")
       - type: iconButton
         tooltip: _("Rollback")
         icon: mdi:arrow-u-left-top
@@ -130,4 +132,5 @@ data:
             params:
               name: "{{ _selected[0].path }}"
             task: false
-            successUrl: /storage/zfs/snapshots
+            progressMessage: _("Rolling back snapshot ...")
+            successNotification: _("Snapshot rolled back.")

@@ -1258,7 +1258,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $quotaBytes  = ($quota !== '-' && $quota !== 'none' && (int)$quota > 0) ? (int)$quota : 0;
                 // A filesystem has no fixed size unless a quota is set.
                 // used+available would just be dataset_used + pool_free, which is misleading.
-                // Return null when unconstrained so the UI renders '-' instead of '0.00 B'.
+                // Return null when unconstrained so the UI renders '' instead of '0.00 B'.
                 $size        = $quotaBytes > 0 ? $quotaBytes : null;
                 $availBytes  = $quotaBytes > 0 ? max(0, $quotaBytes - $usedBytes) : null;
                 $objects[] = [

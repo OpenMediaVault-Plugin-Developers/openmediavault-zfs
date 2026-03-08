@@ -28,6 +28,7 @@ data:
         flexGrow: 1
         sortable: true
         cellTemplateName: binaryUnit
+        hidden: true
       - name: _("Used")
         prop: usedpercent
         flexGrow: 1
@@ -61,18 +62,18 @@ data:
         prop: encryption
         flexGrow: 1
         sortable: true
-        hidden: false
+        hidden: true
       - name: _("Key status")
         prop: keystatus
         flexGrow: 1
         sortable: true
-        hidden: false
+        hidden: true
       - name: _("Auto-unlock")
         prop: autounlock
         flexGrow: 1
         sortable: true
         cellTemplateName: checkIcon
-        hidden: false
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database

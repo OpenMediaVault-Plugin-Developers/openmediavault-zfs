@@ -1190,6 +1190,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $prefix  = 'root/pool-';
         $objects = [];
+        // Fetch pool status for all pools in a single zpool status -j call.
+        $poolStatus = self::zpoolFetchAllStatus();
         // Fetch encryption properties for all datasets in one call.
         $encMap = [];
         self::zfsTryExec(
@@ -1228,7 +1230,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $usedBytes  = ($used !== '-') ? (int)$used : 0;
                 $availBytes = ($available !== '-') ? (int)$available : 0;
                 $size       = $usedBytes + $availBytes;
-                $scrubState = self::zpoolGetScrubState($path);
+                $ps         = $poolStatus[$path] ?? [];
                 $objects[] = [
                     'id'          => $prefix . $path,
                     'parentid'    => 'root',
@@ -1243,11 +1245,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'usedpercent' => $size > 0 ? ($usedBytes / $size * 100) : 0,
                     'available'   => $availBytes,
                     'mountpoint'  => ($mountpoint !== '-') ? $mountpoint : '',
-                    'lastscrub'   => self::zpoolGetLatestScrub($path),
-                    'state'       => self::zpoolGetPoolState($path),
-                    'status'      => self::zpoolGetPoolStatus($path),
-                    'scrubstate'  => $scrubState,
-                    'scrubactive' => in_array($scrubState, ['running', 'paused']),
+                    'lastscrub'   => $ps['lastscrub']   ?? 'Unknown',
+                    'state'       => $ps['state']        ?? 'UNKNOWN',
+                    'status'      => $ps['status']       ?? 'Unknown',
+                    'scrubstate'  => $ps['scrubstate']   ?? 'unknown',
+                    'scrubactive' => $ps['scrubactive']  ?? false,
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
@@ -1350,75 +1352,58 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Return the current scrub state for a pool: 'running', 'paused',
-     * 'completed', 'stopped', 'none', or 'unknown'.
+     * Fetch health and scrub status for all pools in a single zpool status -j
+     * call. Returns an array keyed by pool name with keys: state, status,
+     * scrubstate, scrubactive, lastscrub.
      */
-    private static function zpoolGetScrubState(string $name): string
+    private static function zpoolFetchAllStatus(): array
     {
-        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
-        foreach ($out as $line) {
-            $line = trim($line);
-            if (preg_match('/scrub in progress/', $line)) {
-                return 'running';
-            }
-            if (preg_match('/scrub paused/', $line)) {
-                return 'paused';
-            }
-            if (preg_match('/scrub canceled/', $line)) {
-                return 'stopped';
-            }
-            if (preg_match('/none requested/', $line)) {
-                return 'none';
-            }
-            if (preg_match('/scrub repaired/', $line)) {
-                return 'completed';
-            }
+        $result = [];
+        if (!self::zfsTryExec('zpool status -j 2>&1', $out)) {
+            return $result;
         }
-        return 'unknown';
-    }
-
-    /**
-     * Return the date/status of the latest scrub for a pool.
-     */
-    private static function zpoolGetLatestScrub(string $name): string
-    {
-        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
-        foreach ($out as $line) {
-            if (preg_match('/none requested/', $line)) {
-                return 'Never';
-            }
-            if (preg_match('/with [\d]+ errors on (.*)/', $line, $m)) {
-                return $m[1];
-            }
-            if (preg_match('/scrub (in progress since .*)/', $line, $m)) {
-                return $m[1];
-            }
+        $json = json_decode(implode('', $out), true);
+        if (!is_array($json) || !isset($json['pools'])) {
+            return $result;
         }
-        return 'Unknown';
-    }
-
-    /**
-     * Return the health state of a pool (e.g. ONLINE, DEGRADED).
-     */
-    private static function zpoolGetPoolState(string $name): string
-    {
-        self::zfsExec(sprintf('zpool get -H health %s 2>&1', escapeshellarg($name)), $out, $res);
-        $parts = preg_split('/\t+/', $out[0] ?? '');
-        return $parts[2] ?? 'UNKNOWN';
-    }
-
-    /**
-     * Return 'OK' or 'Error' based on the pool's data error count.
-     */
-    private static function zpoolGetPoolStatus(string $name): string
-    {
-        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
-        foreach ($out as $line) {
-            if (preg_match('/errors: (.*)/', $line, $m)) {
-                return (strcmp($m[1], 'No known data errors') === 0) ? 'OK' : 'Error';
+        foreach ($json['pools'] as $name => $pool) {
+            $state      = $pool['state'] ?? 'UNKNOWN';
+            $errorCount = (int)($pool['error_count'] ?? 0);
+            $status     = ($errorCount === 0) ? 'OK' : 'Error';
+            $scan       = $pool['scan_stats'] ?? [];
+            switch (strtoupper($scan['state'] ?? 'NONE')) {
+                case 'SCANNING': $scrubstate = 'running';   break;
+                case 'PAUSED':   $scrubstate = 'paused';    break;
+                case 'CANCELED': $scrubstate = 'stopped';   break;
+                case 'FINISHED': $scrubstate = 'completed'; break;
+                default:         $scrubstate = 'none';      break;
             }
+            switch ($scrubstate) {
+                case 'running':
+                    $lastscrub = 'in progress since ' . ($scan['start_time'] ?? 'Unknown');
+                    break;
+                case 'completed':
+                    $lastscrub = $scan['end_time'] ?? 'Unknown';
+                    break;
+                case 'paused':
+                    $lastscrub = 'paused (started ' . ($scan['start_time'] ?? 'Unknown') . ')';
+                    break;
+                case 'stopped':
+                    $lastscrub = 'canceled on ' . ($scan['end_time'] ?? 'Unknown');
+                    break;
+                default:
+                    $lastscrub = 'Never';
+                    break;
+            }
+            $result[$name] = [
+                'state'       => $state,
+                'status'      => $status,
+                'scrubstate'  => $scrubstate,
+                'scrubactive' => in_array($scrubstate, ['running', 'paused']),
+                'lastscrub'   => $lastscrub,
+            ];
         }
-        return 'Unknown';
+        return $result;
     }
 
     /**

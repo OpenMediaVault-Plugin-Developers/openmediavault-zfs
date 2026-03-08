@@ -79,6 +79,11 @@ data:
         flexGrow: 1
         sortable: true
         hidden: true
+      - name: _("Last scrub")
+        prop: lastscrub
+        flexGrow: 2
+        sortable: true
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database

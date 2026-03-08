@@ -57,6 +57,16 @@ data:
         prop: status
         flexGrow: 1
         sortable: true
+      - name: _("Encryption")
+        prop: encryption
+        flexGrow: 1
+        sortable: true
+        hidden: false
+      - name: _("Key status")
+        prop: keystatus
+        flexGrow: 1
+        sortable: true
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database
@@ -124,6 +134,76 @@ data:
                         method: addObject
                         progressMessage: _("Adding filesystem ...")
                         successNotification: _("Filesystem added.")
+          - text: _("Add encrypted filesystem")
+            icon: mdi:folder-key
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Add encrypted filesystem")
+                fields:
+                  - type: textInput
+                    name: path
+                    label: _("Prefix")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: textInput
+                    name: name
+                    label: _("Name")
+                    value: ""
+                    validators:
+                      required: true
+                      patternType: shareName
+                  - type: select
+                    name: encryptiontype
+                    label: _("Algorithm")
+                    value: "aes-256-gcm"
+                    store:
+                      data:
+                        - ["aes-128-ccm", "AES-128-CCM"]
+                        - ["aes-192-ccm", "AES-192-CCM"]
+                        - ["aes-256-ccm", "AES-256-CCM"]
+                        - ["aes-128-gcm", "AES-128-GCM"]
+                        - ["aes-192-gcm", "AES-192-GCM"]
+                        - ["aes-256-gcm", "AES-256-GCM (recommended)"]
+                  - type: passwordInput
+                    name: key
+                    label: _("Passphrase")
+                    value: ""
+                    validators:
+                      required: true
+                      minLength: 8
+                  - type: passwordInput
+                    name: keyconfirm
+                    label: _("Confirm passphrase")
+                    value: ""
+                    validators:
+                      required: true
+                      custom:
+                        - constraint:
+                            operator: eq
+                            arg0:
+                              prop: key
+                            arg1:
+                              prop: keyconfirm
+                          errorData: _("Passphrases do not match.")
+                  - type: checkbox
+                    name: autounlock
+                    label: _("Auto-unlock at boot")
+                    value: false
+                    hint: _("Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically on startup.")
+                buttons:
+                  submit:
+                    text: _("Add")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: enableEncryption
+                        progressMessage: _("Creating encrypted filesystem ...")
+                        successNotification: _("Encrypted filesystem created.")
           - text: _("Add volume")
             icon: mdi:harddisk-plus
             enabledConstraints:
@@ -313,6 +393,169 @@ data:
             task: false
             progressMessage: _("Scrubbing pool ...")
             successNotification: _("Pool scrub started.")
+      - type: menu
+        icon: mdi:lock
+        tooltip: _("Encryption")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+          constraint:
+            - operator: ne
+              arg0:
+                prop: encryption
+              arg1: "OFF"
+        actions:
+          - text: _("Load key (unlock)")
+            icon: mdi:lock-open
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Load encryption key")
+                fields:
+                  - type: textInput
+                    name: name
+                    label: _("Dataset")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: passwordInput
+                    name: key
+                    label: _("Passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                buttons:
+                  submit:
+                    text: _("Load key")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: loadEncryptionKey
+                        progressMessage: _("Loading encryption key ...")
+                        successNotification: _("Encryption key loaded.")
+          - text: _("Unload key (lock)")
+            icon: mdi:lock
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to unload the encryption key? The dataset will become inaccessible until it is unlocked again.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: unloadEncryptionKey
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Unloading encryption key ...")
+                successNotification: _("Encryption key unloaded.")
+          - text: _("Enable auto-unlock at boot")
+            icon: mdi:lock-clock
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Enable auto-unlock at boot")
+                fields:
+                  - type: textInput
+                    name: name
+                    label: _("Dataset")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: hint
+                    hintType: info
+                    text: _("The passphrase will be saved to /etc/zfs/keys/ and ZFS will load it automatically at boot. Ensure your system disk is secured.")
+                  - type: passwordInput
+                    name: key
+                    label: _("Passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                  - type: passwordInput
+                    name: keyconfirm
+                    label: _("Confirm passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                      custom:
+                        - constraint:
+                            operator: eq
+                            arg0:
+                              prop: key
+                            arg1:
+                              prop: keyconfirm
+                          errorData: _("Passphrases do not match.")
+                buttons:
+                  submit:
+                    text: _("Enable auto-unlock")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: setAutoUnlock
+                        progressMessage: _("Enabling auto-unlock ...")
+                        successNotification: _("Auto-unlock enabled. The key will be loaded automatically at boot.")
+          - text: _("Disable auto-unlock at boot")
+            icon: mdi:lock-remove
+            confirmationDialogConfig:
+              template: confirmation-critical
+              message: _("Are you sure you want to disable auto-unlock? The saved keyfile will be deleted and you will need to enter the passphrase manually after each reboot.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: removeAutoUnlock
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Disabling auto-unlock ...")
+                successNotification: _("Auto-unlock disabled. Keyfile removed.")
+          - text: _("Change encryption key")
+            icon: mdi:key-change
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Change encryption key")
+                fields:
+                  - type: textInput
+                    name: name
+                    label: _("Dataset")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: passwordInput
+                    name: oldkey
+                    label: _("Current passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                  - type: passwordInput
+                    name: newkey
+                    label: _("New passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                  - type: passwordInput
+                    name: newkeyconfirm
+                    label: _("Confirm new passphrase / key")
+                    value: ""
+                    validators:
+                      required: true
+                      custom:
+                        - constraint:
+                            operator: eq
+                            arg0:
+                              prop: newkey
+                            arg1:
+                              prop: newkeyconfirm
+                          errorData: _("New passphrases do not match.")
+                buttons:
+                  submit:
+                    text: _("Change key")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: changeEncryptionKey
+                        progressMessage: _("Changing encryption key ...")
+                        successNotification: _("Encryption key changed.")
       - type: menu
         icon: mdi:magnify-plus-outline
         tooltip: _("Discover")

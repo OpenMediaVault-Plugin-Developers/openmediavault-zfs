@@ -53,6 +53,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('unloadEncryptionKey');
         $this->registerMethod('changeEncryptionKey');
         $this->registerMethod('getEncryptionStatus');
+        $this->registerMethod('setAutoUnlock');
+        $this->registerMethod('removeAutoUnlock');
     }
 
     public function doDiscover($params, $context)
@@ -124,6 +126,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (strlen($params['mountpoint']) > 0) {
             $opts .= sprintf('-m %s ', escapeshellarg($params['mountpoint']));
         }
+        // Add encryption options if requested.
+        $encrypt = !empty($params['encrypt']);
+        if ($encrypt) {
+            $enctype = $params['encryptiontype'] ?? 'aes-256-gcm';
+            $opts .= sprintf('-O encryption=%s -O keyformat=passphrase -O keylocation=prompt ',
+                escapeshellarg($enctype));
+        }
         // Resolve device aliases.
         $disks = $params['devices'];
         if ($params['devalias'] === 'path' && file_exists('/dev/disk/by-path/')) {
@@ -135,18 +144,35 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $disks = array_map(['self', 'getDiskId'], $disks);
             } catch (\Exception $e) {}
         }
-        // Create the pool.
+        // Create the pool, piping the passphrase via stdin if encryption is enabled.
         $cmd = sprintf('zpool create %s%s %s 2>&1',
             $opts,
             escapeshellarg($params['name']),
             self::buildVdevString($params['pooltype'], $disks));
-        self::zfsExec($cmd, $out, $res);
+        if ($encrypt) {
+            self::execWithStdin($cmd, $params['key']);
+        } else {
+            self::zfsExec($cmd, $out, $res);
+        }
         // Set compression if requested.
         if ($params['compress']) {
             $cmd = sprintf('zfs set compression=%s %s 2>&1',
                 escapeshellarg($params['compresstype']),
                 escapeshellarg($params['name']));
             self::zfsExec($cmd, $out, $res);
+        }
+        // Enable auto-unlock if requested: save keyfile and update keylocation.
+        if ($encrypt && !empty($params['autounlock'])) {
+            $keyfile = self::getKeyfilePath($params['name']);
+            $keydir  = dirname($keyfile);
+            if (!is_dir($keydir)) {
+                mkdir($keydir, 0700, true);
+            }
+            file_put_contents($keyfile, $params['key']);
+            chmod($keyfile, 0600);
+            self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
+                escapeshellarg('file://' . $keyfile),
+                escapeshellarg($params['name'])), $out, $res);
         }
         // Sync OMV mount entries and apply config.
         self::fixOMVMntEnt($context);
@@ -547,17 +573,32 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.enableencryption');
-        $keyformat    = ($params['keyformat'] === 'hex') ? 'hex' : 'passphrase';
-        $encryptOpts  = sprintf('-o encryption=%s -o keyformat=%s',
-            escapeshellarg($params['encryptiontype']),
-            $keyformat);
-        if (!preg_match('/^[a-zA-Z0-9\-_\.]+\/[a-zA-Z0-9\-_\.]+/', $params['path'])) {
-            throw new \OMV\Exception('Invalid path for encryption');
+        if (preg_match('/[\s]+/', $params['name'])) {
+            throw new \OMV\Exception('Spaces are not allowed in dataset names');
         }
-        $cmd = sprintf('zfs create %s %s', $encryptOpts, escapeshellarg($params['path']));
+        $fullPath    = rtrim($params['path'], '/') . '/' . $params['name'];
+        $encryptOpts = sprintf('-o encryption=%s -o keyformat=passphrase -o keylocation=prompt',
+            escapeshellarg($params['encryptiontype']));
+        $cmd = sprintf('zfs create %s %s 2>&1', $encryptOpts, escapeshellarg($fullPath));
         self::execWithStdin($cmd, $params['key']);
-        $status = self::zfsGetEncryptionStatus($params['path']);
-        return self::flattenEncryptionStatus($params['path'], $status);
+        // Enable auto-unlock if requested: save keyfile and update keylocation.
+        if (!empty($params['autounlock'])) {
+            $keyfile = self::getKeyfilePath($fullPath);
+            $keydir  = dirname($keyfile);
+            if (!is_dir($keydir)) {
+                mkdir($keydir, 0700, true);
+            }
+            file_put_contents($keyfile, $params['key']);
+            chmod($keyfile, 0600);
+            self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
+                escapeshellarg('file://' . $keyfile),
+                escapeshellarg($fullPath)), $out, $res);
+        }
+        self::addOMVMntEntForDataset($context, $fullPath);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        $status = self::zfsGetEncryptionStatus($fullPath);
+        return self::flattenEncryptionStatus($fullPath, $status);
     }
 
     public function loadEncryptionKey($params, $context)
@@ -577,6 +618,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
+        // Unmount the dataset (and children) first — ZFS refuses to unload a key
+        // while the dataset is mounted.
+        self::zfsTryExec(sprintf('zfs unmount -f %s 2>&1', escapeshellarg($params['name'])));
         $cmd = sprintf('zfs unload-key %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
         return ['status' => 'unloaded'];
@@ -604,6 +648,52 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.encryptionstatus');
         $status = self::zfsGetEncryptionStatus($params['name']);
         return self::flattenEncryptionStatus($params['name'], $status);
+    }
+
+    public function setAutoUnlock($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.setautounlock');
+        $name    = $params['name'];
+        $keyfile = self::getKeyfilePath($name);
+        // Ensure the keys directory exists with restricted permissions.
+        $keydir = dirname($keyfile);
+        if (!is_dir($keydir)) {
+            if (!mkdir($keydir, 0700, true)) {
+                throw new \OMV\Exception(sprintf('Failed to create key directory: %s', $keydir));
+            }
+        }
+        // Write the key to the keyfile with restricted permissions.
+        if (file_put_contents($keyfile, $params['key']) === false) {
+            throw new \OMV\Exception(sprintf('Failed to write keyfile: %s', $keyfile));
+        }
+        chmod($keyfile, 0600);
+        // Point the dataset's keylocation at the file so ZFS loads it automatically at boot.
+        $cmd = sprintf('zfs set keylocation=%s %s 2>&1',
+            escapeshellarg('file://' . $keyfile),
+            escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        return ['autounlock' => true, 'keylocation' => 'file://' . $keyfile];
+    }
+
+    public function removeAutoUnlock($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.removeautounlock');
+        $name    = $params['name'];
+        $keyfile = self::getKeyfilePath($name);
+        // Reset keylocation back to prompt before removing the file.
+        $cmd = sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        // Remove the keyfile if it exists.
+        if (file_exists($keyfile)) {
+            unlink($keyfile);
+        }
+        return ['autounlock' => false, 'keylocation' => 'prompt'];
     }
 
     // -------------------------------------------------------------------------
@@ -1032,6 +1122,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $prefix  = 'root/pool-';
         $objects = [];
+        // Fetch encryption properties for all datasets in one call.
+        $encMap = [];
+        self::zfsTryExec(
+            'zfs get -H -p encryption,keystatus,keylocation -t filesystem,volume 2>&1',
+            $encOut
+        );
+        foreach ($encOut as $line) {
+            $parts = preg_split('/\t/', $line);
+            if (count($parts) < 3) {
+                continue;
+            }
+            $encMap[$parts[0]][$parts[1]] = $parts[2];
+        }
         // One zfs list call returns all the data we need for sizing/type/origin.
         $cmd = 'zfs list -H -p -t filesystem,volume '
              . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation 2>&1';
@@ -1046,6 +1149,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
             $isFilesystem = ($type === 'filesystem' && !$isPool);
             $isVolume     = ($type === 'volume');
+            $enc          = strtoupper($encMap[$path]['encryption'] ?? 'off');
+            $keystatus    = $encMap[$path]['keystatus']   ?? '-';
+            $keylocation  = $encMap[$path]['keylocation'] ?? 'none';
+            $encrypted    = ($enc !== 'OFF');
+            $autounlock   = ($encrypted
+                && strpos($keylocation, 'file://') === 0
+                && file_exists(self::getKeyfilePath($path)));
             if ($isPool) {
                 $usedBytes = ($used !== '-') ? (int)$used : 0;
                 $availBytes = ($available !== '-') ? (int)$available : 0;
@@ -1067,6 +1177,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => self::zpoolGetLatestScrub($path),
                     'state'       => self::zpoolGetPoolState($path),
                     'status'      => self::zpoolGetPoolStatus($path),
+                    'encryption'  => $enc,
+                    'keystatus'   => $keystatus,
+                    'autounlock'  => $autounlock,
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1090,6 +1203,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => 'n/a',
                     'state'       => 'n/a',
                     'status'      => 'n/a',
+                    'encryption'  => $enc,
+                    'keystatus'   => $keystatus,
+                    'autounlock'  => $autounlock,
                 ];
             } elseif ($isVolume) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1113,6 +1229,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => 'n/a',
                     'state'       => 'n/a',
                     'status'      => 'n/a',
+                    'encryption'  => $enc,
+                    'keystatus'   => $keystatus,
+                    'autounlock'  => $autounlock,
                 ];
             }
         }
@@ -1196,11 +1315,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
+     * Return the path where a dataset's auto-unlock keyfile is stored.
+     */
+    private static function getKeyfilePath(string $name): string
+    {
+        // Sanitize the dataset name for use as a filename (replace / with _).
+        $safe = str_replace('/', '_', $name);
+        return '/etc/zfs/keys/' . $safe . '.key';
+    }
+
+    /**
      * Return encryption property values for a dataset.
      */
     private static function zfsGetEncryptionStatus(string $name): array
     {
-        $cmd = sprintf('zfs get -H -p encryption,encryptionroot,keystatus,keyformat %s 2>&1',
+        $cmd = sprintf('zfs get -H -p encryption,encryptionroot,keystatus,keyformat,keylocation %s 2>&1',
             escapeshellarg($name));
         self::zfsExec($cmd, $out, $res);
         $status = [];
@@ -1221,6 +1350,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      */
     private static function flattenEncryptionStatus(string $name, array $status): array
     {
+        $keylocation = $status['keylocation']['value'] ?? 'prompt';
+        $keyfile     = self::getKeyfilePath($name);
+        $autounlock  = (strpos($keylocation, 'file://') === 0 && file_exists($keyfile));
         return [
             'name'           => $name,
             'encryption'     => isset($status['encryption']['value'])
@@ -1228,6 +1360,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             'encryptionroot' => $status['encryptionroot']['value'] ?? '-',
             'keystatus'      => $status['keystatus']['value'] ?? '-',
             'keyformat'      => $status['keyformat']['value'] ?? '-',
+            'keylocation'    => $keylocation,
+            'autounlock'     => $autounlock,
         ];
     }
 }

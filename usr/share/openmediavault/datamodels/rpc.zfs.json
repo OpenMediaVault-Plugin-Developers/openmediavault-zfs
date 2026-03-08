@@ -47,6 +47,22 @@
         "ashiftval": {
           "type": "integer",
           "required": true
+        },
+        "encrypt": {
+          "type": "boolean",
+          "required": false
+        },
+        "encryptiontype": {
+          "type": "string",
+          "required": false
+        },
+        "key": {
+          "type": "string",
+          "required": false
+        },
+        "autounlock": {
+          "type": "boolean",
+          "required": false
         }
       }
     }
@@ -346,6 +362,129 @@
         },
         "thinvol": {
           "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.enableencryption",
+    "params": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "encryptiontype": {
+          "type": "string",
+          "required": true
+        },
+        "key": {
+          "type": "string",
+          "required": true
+        },
+        "autounlock": {
+          "type": "boolean",
+          "required": false
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.loadencryptionkey",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "key": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.unloadencryptionkey",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.changeencryptionkey",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "oldkey": {
+          "type": "string",
+          "required": true
+        },
+        "newkey": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.encryptionstatus",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.setautounlock",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "key": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.removeautounlock",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
         }
       }
     }

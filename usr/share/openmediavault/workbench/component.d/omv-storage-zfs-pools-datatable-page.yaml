@@ -66,7 +66,13 @@ data:
         prop: keystatus
         flexGrow: 1
         sortable: true
-        hidden: true
+        hidden: false
+      - name: _("Auto-unlock")
+        prop: autounlock
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: false
     actions:
       - type: menu
         icon: mdi:database
@@ -407,6 +413,14 @@ data:
         actions:
           - text: _("Load key (unlock)")
             icon: mdi:lock-open
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: keystatus
+                  arg1: "available"
             execute:
               type: formDialog
               formDialog:
@@ -435,6 +449,14 @@ data:
                         successNotification: _("Encryption key loaded.")
           - text: _("Unload key (lock)")
             icon: mdi:lock
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: keystatus
+                  arg1: "available"
             confirmationDialogConfig:
               template: confirmation
               message: _("Are you sure you want to unload the encryption key? The dataset will become inaccessible until it is unlocked again.")
@@ -450,6 +472,13 @@ data:
                 successNotification: _("Encryption key unloaded.")
           - text: _("Enable auto-unlock at boot")
             icon: mdi:lock-clock
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: falsy
+                  arg0:
+                    prop: autounlock
             execute:
               type: formDialog
               formDialog:
@@ -495,6 +524,13 @@ data:
                         successNotification: _("Auto-unlock enabled. The key will be loaded automatically at boot.")
           - text: _("Disable auto-unlock at boot")
             icon: mdi:lock-remove
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: truthy
+                  arg0:
+                    prop: autounlock
             confirmationDialogConfig:
               template: confirmation-critical
               message: _("Are you sure you want to disable auto-unlock? The saved keyfile will be deleted and you will need to enter the passphrase manually after each reboot.")
@@ -510,6 +546,14 @@ data:
                 successNotification: _("Auto-unlock disabled. Keyfile removed.")
           - text: _("Change encryption key")
             icon: mdi:key-change
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: encryption
+                  arg1: "OFF"
             execute:
               type: formDialog
               formDialog:

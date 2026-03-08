@@ -173,6 +173,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
                 escapeshellarg('file://' . $keyfile),
                 escapeshellarg($params['name'])), $out, $res);
+            self::updateZfsListCache($params['name']);
         }
         // Sync OMV mount entries and apply config.
         self::fixOMVMntEnt($context);
@@ -593,6 +594,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
                 escapeshellarg('file://' . $keyfile),
                 escapeshellarg($fullPath)), $out, $res);
+            self::updateZfsListCache(explode('/', $fullPath)[0]);
         }
         self::addOMVMntEntForDataset($context, $fullPath);
         \OMV\Rpc\Rpc::call('Config', 'applyChanges',
@@ -675,6 +677,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             escapeshellarg('file://' . $keyfile),
             escapeshellarg($name));
         self::zfsExec($cmd, $out, $res);
+        // Update the zfs-mount-generator cache so systemd generates the key-load unit at boot.
+        self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => true, 'keylocation' => 'file://' . $keyfile];
     }
 
@@ -693,6 +697,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (file_exists($keyfile)) {
             unlink($keyfile);
         }
+        // Update the zfs-mount-generator cache to reflect the removed auto-unlock.
+        self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => false, 'keylocation' => 'prompt'];
     }
 
@@ -1322,6 +1328,38 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Sanitize the dataset name for use as a filename (replace / with _).
         $safe = str_replace('/', '_', $name);
         return '/etc/zfs/keys/' . $safe . '.key';
+    }
+
+    /**
+     * Update the ZFS list cache for a pool so that zfs-mount-generator can
+     * generate the appropriate systemd key-load units at boot.
+     * The cache file at /etc/zfs/zfs-list.cache/<pool> must exist and be
+     * populated for encrypted datasets with keylocation=file:// to
+     * auto-unlock during boot.
+     */
+    private static function updateZfsListCache(string $poolName): void
+    {
+        $cacheDir  = '/etc/zfs/zfs-list.cache';
+        $cacheFile = $cacheDir . '/' . $poolName;
+        if (!is_dir($cacheDir)) {
+            mkdir($cacheDir, 0755, true);
+        }
+        $props = 'name,mountpoint,canmount,atime,relatime,devices,exec,'
+               . 'readonly,setuid,nbmand,encroot,keylocation,'
+               . 'org.openzfs.systemd:requires,'
+               . 'org.openzfs.systemd:requires-mounts-for,'
+               . 'org.openzfs.systemd:before,'
+               . 'org.openzfs.systemd:after,'
+               . 'org.openzfs.systemd:wanted-by,'
+               . 'org.openzfs.systemd:required-by,'
+               . 'org.openzfs.systemd:nofail,'
+               . 'org.openzfs.systemd:ignore';
+        $cmd = sprintf('zfs list -H -t filesystem -o %s -r %s 2>/dev/null',
+            escapeshellarg($props),
+            escapeshellarg($poolName));
+        self::zfsTryExec($cmd, $lines);
+        sort($lines);
+        file_put_contents($cacheFile, implode("\n", $lines) . "\n");
     }
 
     /**

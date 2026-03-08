@@ -74,6 +74,11 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Scrub state")
+        prop: scrubstate
+        flexGrow: 1
+        sortable: true
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database
@@ -376,7 +381,7 @@ data:
         execute:
           type: url
           url: "/storage/zfs/pools/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
-      - type: iconButton
+      - type: menu
         icon: mdi:progress-wrench
         tooltip: _("Scrub")
         enabledConstraints:
@@ -387,19 +392,104 @@ data:
               arg0:
                 prop: type
               arg1: "Pool"
-        confirmationDialogConfig:
-          template: confirmation
-          message: _("Are you sure you want to scrub this pool?")
-        execute:
-          type: request
-          request:
-            service: Zfs
-            method: scrubPool
-            params:
-              name: "{{ _selected[0].path }}"
-            task: false
-            progressMessage: _("Scrubbing pool ...")
-            successNotification: _("Pool scrub started.")
+        actions:
+          - text: _("Start scrub")
+            icon: mdi:play
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: scrubstate
+                  arg1: "running"
+                - operator: ne
+                  arg0:
+                    prop: scrubstate
+                  arg1: "paused"
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to start a scrub?")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: scrubPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Starting scrub ...")
+                successNotification: _("Scrub started.")
+          - text: _("Stop scrub")
+            icon: mdi:stop
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: truthy
+                  arg0:
+                    prop: scrubactive
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to stop the scrub?")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: stopScrub
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Stopping scrub ...")
+                successNotification: _("Scrub stopped.")
+          - text: _("Pause scrub")
+            icon: mdi:pause
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: scrubstate
+                  arg1: "running"
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: pauseScrub
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Pausing scrub ...")
+                successNotification: _("Scrub paused.")
+          - text: _("Resume scrub")
+            icon: mdi:play-pause
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: eq
+                  arg0:
+                    prop: scrubstate
+                  arg1: "paused"
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: scrubPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Resuming scrub ...")
+                successNotification: _("Scrub resumed.")
+          - text: _("Scrub status")
+            icon: mdi:information-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/scrub-status/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:lock
         tooltip: _("Encryption")

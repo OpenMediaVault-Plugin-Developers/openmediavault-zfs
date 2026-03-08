@@ -44,6 +44,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getObjectDetails');
         $this->registerMethod('expandPool');
         $this->registerMethod('scrubPool');
+        $this->registerMethod('stopScrub');
+        $this->registerMethod('pauseScrub');
+        $this->registerMethod('getScrubStatus');
         $this->registerMethod('getEmptyCandidates');
         $this->registerMethod('rollbackSnapshot');
         $this->registerMethod('getStats');
@@ -510,6 +513,53 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.name');
         $cmd = sprintf('zpool scrub %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
+    }
+
+    public function stopScrub($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool scrub -s %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function pauseScrub($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool scrub -p %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function getScrubStatus($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($params['name'])), $out, $res);
+        $scrubLines = [];
+        $inScan = false;
+        foreach ($out as $line) {
+            if (preg_match('/^\s*scan:/', $line)) {
+                $inScan = true;
+                $scrubLines[] = trim($line);
+            } elseif ($inScan) {
+                // Stop at the next field label (e.g. "config:", "errors:")
+                if (preg_match('/^\s*\w+:/', $line)) {
+                    break;
+                }
+                $scrubLines[] = trim($line);
+            }
+        }
+        if (empty($scrubLines)) {
+            return sprintf("No scrub information available for pool '%s'.", $params['name']);
+        }
+        return implode("\n\r", $scrubLines);
     }
 
     public function getEmptyCandidates($params, $context)
@@ -1163,9 +1213,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 && strpos($keylocation, 'file://') === 0
                 && file_exists(self::getKeyfilePath($path)));
             if ($isPool) {
-                $usedBytes = ($used !== '-') ? (int)$used : 0;
+                $usedBytes  = ($used !== '-') ? (int)$used : 0;
                 $availBytes = ($available !== '-') ? (int)$available : 0;
                 $size       = $usedBytes + $availBytes;
+                $scrubState = self::zpoolGetScrubState($path);
                 $objects[] = [
                     'id'          => $prefix . $path,
                     'parentid'    => 'root',
@@ -1183,6 +1234,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => self::zpoolGetLatestScrub($path),
                     'state'       => self::zpoolGetPoolState($path),
                     'status'      => self::zpoolGetPoolStatus($path),
+                    'scrubstate'  => $scrubState,
+                    'scrubactive' => in_array($scrubState, ['running', 'paused']),
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
@@ -1209,6 +1262,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => 'n/a',
                     'state'       => 'n/a',
                     'status'      => 'n/a',
+                    'scrubstate'  => 'n/a',
+                    'scrubactive' => false,
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
@@ -1235,6 +1290,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'lastscrub'   => 'n/a',
                     'state'       => 'n/a',
                     'status'      => 'n/a',
+                    'scrubstate'  => 'n/a',
+                    'scrubactive' => false,
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
@@ -1274,6 +1331,34 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             ];
         }
         return $objects;
+    }
+
+    /**
+     * Return the current scrub state for a pool: 'running', 'paused',
+     * 'completed', 'stopped', 'none', or 'unknown'.
+     */
+    private static function zpoolGetScrubState(string $name): string
+    {
+        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($name)), $out, $res);
+        foreach ($out as $line) {
+            $line = trim($line);
+            if (preg_match('/scrub in progress/', $line)) {
+                return 'running';
+            }
+            if (preg_match('/scrub paused/', $line)) {
+                return 'paused';
+            }
+            if (preg_match('/scrub canceled/', $line)) {
+                return 'stopped';
+            }
+            if (preg_match('/none requested/', $line)) {
+                return 'none';
+            }
+            if (preg_match('/scrub repaired/', $line)) {
+                return 'completed';
+            }
+        }
+        return 'unknown';
     }
 
     /**

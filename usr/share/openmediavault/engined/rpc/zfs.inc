@@ -436,8 +436,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $output = '';
         switch ($params['type']) {
             case 'Filesystem':
-                $output .= "Filesystem details (zfs get all):\n\r\n\r";
-                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
+                $output .= "Filesystem details (zfs list):\n\r\n\r";
+                $cmd = 'zfs list -o name,type,used,avail,refer,mountpoint,compression,compressratio,encryption ' . escapeshellarg($params['name']);
                 break;
             case 'Volume':
                 $output .= "Volume details (zfs get all):\n\r\n\r";
@@ -448,11 +448,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
             case 'Pool':
-                $output .= "Pool status (zpool status):\n\r\n\r";
-                self::zfsExec('zpool status ' . escapeshellarg($params['name']), $out, $res);
+                $output .= "Pool status (zpool status -v):\n\r\n\r";
+                self::zfsExec('zpool status -v ' . escapeshellarg($params['name']), $out, $res);
                 $output .= implode("\n\r", $out);
-                $output .= "\n\r\n\rPool details (zpool get all):\n\r\n\r";
-                self::zfsExec('zpool get all ' . escapeshellarg($params['name']), $out, $res);
+                $output .= "\n\r\n\rPool details (zpool list -v):\n\r\n\r";
+                self::zfsExec('zpool list -v ' . escapeshellarg($params['name']), $out, $res);
                 $output .= implode("\n\r", $out);
                 $output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
                 $cmd = 'zfs get all ' . escapeshellarg($params['name']);

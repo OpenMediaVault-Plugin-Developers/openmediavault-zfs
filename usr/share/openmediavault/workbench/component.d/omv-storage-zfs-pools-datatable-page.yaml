@@ -297,6 +297,21 @@ data:
                         method: addObject
                         progressMessage: _("Adding snapshot ...")
                         successNotification: _("Snapshot added.")
+          - text: _("Quick snapshot")
+            icon: mdi:camera
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: quickSnapshot
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Creating snapshot ...")
+                successNotification: _("Snapshot created.")
       - type: menu
         icon: mdi:swap-horizontal
         tooltip: _("Import / Export")

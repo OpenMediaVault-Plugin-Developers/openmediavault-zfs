@@ -47,6 +47,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('stopScrub');
         $this->registerMethod('pauseScrub');
         $this->registerMethod('getScrubStatus');
+        $this->registerMethod('quickSnapshot');
         $this->registerMethod('getEmptyCandidates');
         $this->registerMethod('rollbackSnapshot');
         $this->registerMethod('getStats');
@@ -322,6 +323,17 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         \OMV\Rpc\Rpc::call('Config', 'applyChanges',
             ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+    }
+
+    public function quickSnapshot($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $snapshotName = $params['name'] . '@' . date('Y-m-d_H-i-s');
+        $cmd = sprintf('zfs snapshot %s 2>&1', escapeshellarg($snapshotName));
+        self::zfsExec($cmd, $out, $res);
     }
 
     public function deleteObject($params, $context)

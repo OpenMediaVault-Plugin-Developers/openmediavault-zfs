@@ -10,6 +10,14 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Fix auto-unlock at boot by populating zfs-mount-generator cache
   * Add encryption, key status, and auto-unlock columns to pool list
   * Disable encryption menu actions based on current state
+  * Replace scrub button with scrub menu: start, stop, pause, resume, status
+    - Buttons enabled/disabled based on current scrub state
+    - Add hidden scrub state and last scrub columns to pool list
+    - Scrub status navigates to a dedicated page showing only the scan section
+  * Use zpool status -j for all pool status queries (single call for all pools)
+  * Add quick snapshot button that creates a timestamped snapshot without a dialog
+  * Fix filesystem size calculation to use quota instead of used+available
+    - Filesystems without a quota show '' for size and available
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Mar 2026 03:14:32 +0000
 

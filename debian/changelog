@@ -1,6 +1,15 @@
 openmediavault-zfs (8.1) UNRELEASED; urgency=medium
 
-  * show messages when performing actions
+  * Rewrite backend for better maintainability and performance
+  * Show progress messages when performing actions
+  * Add encryption support for filesystems and pools
+    - Create encrypted filesystem with passphrase
+    - Load / unload encryption key
+    - Change encryption key
+    - Enable / disable auto-unlock at boot (saves passphrase to /etc/zfs/keys/)
+  * Fix auto-unlock at boot by populating zfs-mount-generator cache
+  * Add encryption, key status, and auto-unlock columns to pool list
+  * Disable encryption menu actions based on current state
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Mar 2026 03:14:32 +0000
 

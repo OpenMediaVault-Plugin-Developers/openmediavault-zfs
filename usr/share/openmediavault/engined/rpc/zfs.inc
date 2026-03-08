@@ -1205,15 +1205,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         // One zfs list call returns all the data we need for sizing/type/origin.
         $cmd = 'zfs list -H -p -t filesystem,volume '
-             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation 2>&1';
+             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation,quota 2>&1';
         self::zfsExec($cmd, $out, $res);
         foreach ($out as $line) {
             $parts = preg_split('/\t/', $line);
-            if (count($parts) < 9) {
+            if (count($parts) < 10) {
                 continue;
             }
             [$path, $type, $used, $available, $mountpoint,
-             $origin, $volsize, $logicalused, $refreservation] = $parts;
+             $origin, $volsize, $logicalused, $refreservation, $quota] = $parts;
             $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
             $isFilesystem = ($type === 'filesystem' && !$isPool);
             $isVolume     = ($type === 'volume');
@@ -1254,9 +1254,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
-                $usedBytes  = ($used !== '-') ? (int)$used : 0;
-                $availBytes = ($available !== '-') ? (int)$available : 0;
-                $size       = $usedBytes + $availBytes;
+                $usedBytes   = ($used !== '-') ? (int)$used : 0;
+                $quotaBytes  = ($quota !== '-' && $quota !== 'none' && (int)$quota > 0) ? (int)$quota : 0;
+                // A filesystem has no fixed size unless a quota is set.
+                // used+available would just be dataset_used + pool_free, which is misleading.
+                // Return null when unconstrained so the UI renders '-' instead of '0.00 B'.
+                $size        = $quotaBytes > 0 ? $quotaBytes : null;
+                $availBytes  = $quotaBytes > 0 ? max(0, $quotaBytes - $usedBytes) : null;
                 $objects[] = [
                     'id'          => $prefix . $path,
                     'parentid'    => $prefix . $result[1],

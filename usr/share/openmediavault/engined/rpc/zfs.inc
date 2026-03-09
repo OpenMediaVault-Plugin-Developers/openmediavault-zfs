@@ -448,35 +448,40 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.objectdetails');
+
+        $name = escapeshellarg($params['name']);
         $output = '';
+
         switch ($params['type']) {
             case 'Filesystem':
-                $output .= "Filesystem details (zfs list):\n\r\n\r";
-                $cmd = 'zfs list -o name,type,used,avail,refer,mountpoint,compression,compressratio,encryption ' . escapeshellarg($params['name']);
+                self::zfsExec("zfs list -o name,type,used,avail,refer,mountpoint,compression,compressratio,encryption $name", $out, $res);
+                $output  = "Filesystem status (zfs list):\n\r\n\r" . implode("\n\r", $out);
+                $output .= "\n\r\n\rFilesystem details (zfs get all):\n\r\n\r";
                 break;
+
             case 'Volume':
-                $output .= "Volume details (zfs get all):\n\r\n\r";
-                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
+                $output = "Volume details (zfs get all):\n\r\n\r";
                 break;
+
             case 'Snapshot':
-                $output .= "Snapshot details (zfs get all):\n\r\n\r";
-                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
+                $output = "Snapshot details (zfs get all):\n\r\n\r";
                 break;
+
             case 'Pool':
-                $output .= "Pool status (zpool status -v):\n\r\n\r";
-                self::zfsExec('zpool status -v ' . escapeshellarg($params['name']), $out, $res);
-                $output .= implode("\n\r", $out);
-                $output .= "\n\r\n\rPool details (zpool list -v):\n\r\n\r";
-                self::zfsExec('zpool list -v ' . escapeshellarg($params['name']), $out, $res);
-                $output .= implode("\n\r", $out);
+                self::zfsExec("zpool status -v $name", $out, $res);
+                $output  = "Pool status (zpool status -v):\n\r\n\r" . implode("\n\r", $out);
+                self::zfsExec("zpool list -v $name", $out, $res);
+                $output .= "\n\r\n\rPool details (zpool list -v):\n\r\n\r" . implode("\n\r", $out);
                 $output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
-                $cmd = 'zfs get all ' . escapeshellarg($params['name']);
                 break;
+
             default:
                 throw new \OMV\Exception('Incorrect type provided');
         }
-        self::zfsExec($cmd, $out, $res);
+
+        self::zfsExec("zfs get all $name", $out, $res);
         $output .= implode("\n\r", $out);
+
         return $output;
     }
 

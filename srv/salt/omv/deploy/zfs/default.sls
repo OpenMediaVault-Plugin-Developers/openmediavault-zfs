@@ -65,7 +65,6 @@ zfs_provider_purge_dkms_bits:
   pkg.removed:
     - pkgs:
       - zfs-dkms
-      - dkms
     - purge: True
     - require:
       - pkg: zfs_provider_install_selected

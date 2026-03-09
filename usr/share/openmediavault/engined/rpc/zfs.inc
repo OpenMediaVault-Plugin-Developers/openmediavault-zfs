@@ -1231,6 +1231,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $objects = [];
         // Fetch pool status for all pools in a single zpool status -j call.
         $poolStatus = self::zpoolFetchAllStatus();
+        // Fetch physical SIZE/ALLOC/FREE for all pools.
+        $poolSizes  = self::zpoolFetchAllSizes();
         // Fetch encryption properties for all datasets in one call.
         $encMap = [];
         self::zfsTryExec(
@@ -1266,9 +1268,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 && strpos($keylocation, 'file://') === 0
                 && file_exists(self::getKeyfilePath($path)));
             if ($isPool) {
-                $usedBytes  = ($used !== '-') ? (int)$used : 0;
-                $availBytes = ($available !== '-') ? (int)$available : 0;
-                $size       = $usedBytes + $availBytes;
+                $pz         = $poolSizes[$path] ?? null;
+                $size       = $pz ? $pz['size']  : 0;
+                $usedBytes  = $pz ? $pz['alloc'] : 0;
+                $availBytes = $pz ? $pz['free']  : 0;
                 $ps         = $poolStatus[$path] ?? [];
                 $objects[] = [
                     'id'          => $prefix . $path,
@@ -1296,12 +1299,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
                 $usedBytes   = ($used !== '-') ? (int)$used : 0;
+                $availRaw    = ($available !== '-') ? (int)$available : 0;
                 $quotaBytes  = ($quota !== '-' && $quota !== 'none' && (int)$quota > 0) ? (int)$quota : 0;
                 // A filesystem has no fixed size unless a quota is set.
-                // used+available would just be dataset_used + pool_free, which is misleading.
-                // Return null when unconstrained so the UI renders '' instead of '0.00 B'.
                 $size        = $quotaBytes > 0 ? $quotaBytes : null;
-                $availBytes  = $quotaBytes > 0 ? max(0, $quotaBytes - $usedBytes) : null;
+                // AVAIL from zfs list is the actual space available to this dataset
+                // (pool free space, or quota remaining if a quota is set).
+                $availBytes  = $availRaw;
                 $objects[] = [
                     'id'          => $prefix . $path,
                     'parentid'    => $prefix . $result[1],
@@ -1390,6 +1394,31 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             ];
         }
         return $objects;
+    }
+
+    /**
+     * Fetch physical size, allocated, and free bytes for all pools via
+     * zpool list -Hp. Returns an array keyed by pool name.
+     */
+    private static function zpoolFetchAllSizes(): array
+    {
+        $result = [];
+        if (!self::zfsTryExec('zpool list -Hp -o name,size,alloc,free 2>&1', $out)) {
+            return $result;
+        }
+        foreach ($out as $line) {
+            $parts = preg_split('/\t/', trim($line));
+            if (count($parts) < 4) {
+                continue;
+            }
+            [$name, $size, $alloc, $free] = $parts;
+            $result[$name] = [
+                'size'  => ($size  !== '-') ? (int)$size  : 0,
+                'alloc' => ($alloc !== '-') ? (int)$alloc : 0,
+                'free'  => ($free  !== '-') ? (int)$free  : 0,
+            ];
+        }
+        return $result;
     }
 
     /**

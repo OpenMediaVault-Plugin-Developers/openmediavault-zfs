@@ -19,6 +19,11 @@ data:
         prop: name
         flexGrow: 1
         sortable: true
+      - name: _("Size")
+        prop: size
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
       - name: _("Used")
         prop: usedpercent
         flexGrow: 1

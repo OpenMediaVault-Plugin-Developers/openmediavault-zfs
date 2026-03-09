@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.datasets"
+  text: _("Datasets")
+  position: 15
+  icon: mdi:folder-multiple-outline
+  url: "/storage/zfs/datasets"

@@ -34,6 +34,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('listCompressionTypes');
         $this->registerMethod('listPools');
         $this->registerMethod('listPoolsBg');
+        $this->registerMethod('listPoolsOnly');
+        $this->registerMethod('listPoolsOnlyBg');
+        $this->registerMethod('listDatasets');
+        $this->registerMethod('listDatasetsBg');
         $this->registerMethod('getAllSnapshots');
         $this->registerMethod('getAllSnapshotsBg');
         $this->registerMethod('addObject');
@@ -253,6 +257,36 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     public function listPoolsBg($params, $context)
     {
         return $this->callMethodBg('listPools', $params, $context);
+    }
+
+    public function listPoolsOnly($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $objects = array_values(array_filter(self::getZFSFlatArray(), function($obj) {
+            return $obj['type'] === 'Pool';
+        }));
+        return $this->applyFilter($objects, $params['start'],
+            $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function listPoolsOnlyBg($params, $context)
+    {
+        return $this->callMethodBg('listPoolsOnly', $params, $context);
+    }
+
+    public function listDatasets($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $objects = array_values(array_filter(self::getZFSFlatArray(), function($obj) {
+            return in_array($obj['type'], ['Filesystem', 'Volume']);
+        }));
+        return $this->applyFilter($objects, $params['start'],
+            $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function listDatasetsBg($params, $context)
+    {
+        return $this->callMethodBg('listDatasets', $params, $context);
     }
 
     public function getAllSnapshots($params, $context)
@@ -1275,6 +1309,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'type'        => 'Filesystem',
                     'icon'        => 'images/filesystem.png',
                     'path'        => $path,
+                    'pool'        => explode('/', $path)[0],
                     'expanded'    => true,
                     'origin'      => ($origin !== '-' && $origin !== '') ? $origin : 'n/a',
                     'size'        => $size,
@@ -1303,6 +1338,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'type'        => 'Volume',
                     'icon'        => $isThin ? 'images/zfs_thinvol.png' : 'images/save.png',
                     'path'        => $path,
+                    'pool'        => explode('/', $path)[0],
                     'expanded'    => true,
                     'origin'      => ($origin !== '-' && $origin !== '') ? $origin : 'n/a',
                     'size'        => $volSizeBytes,
@@ -1376,9 +1412,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $errorCount = (int)($pool['error_count'] ?? 0);
             $status     = ($errorCount === 0) ? 'OK' : 'Error';
             $scan       = $pool['scan_stats'] ?? [];
-            switch (strtoupper($scan['state'] ?? 'NONE')) {
-                case 'SCANNING': $scrubstate = 'running';   break;
-                case 'PAUSED':   $scrubstate = 'paused';    break;
+            $scanState  = strtoupper($scan['state'] ?? 'NONE');
+            $scrubPause = $scan['scrub_pause'] ?? '-';
+            switch ($scanState) {
+                case 'SCANNING': $scrubstate = ($scrubPause !== '-') ? 'paused' : 'running'; break;
                 case 'CANCELED': $scrubstate = 'stopped';   break;
                 case 'FINISHED': $scrubstate = 'completed'; break;
                 default:         $scrubstate = 'none';      break;

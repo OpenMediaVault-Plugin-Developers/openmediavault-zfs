@@ -42,6 +42,15 @@ data:
         sortable: true
     actions:
       - type: iconButton
+        icon: mdi:information-outline
+        tooltip: _("Details")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: url
+          url: "/storage/zfs/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+      - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete
         enabledConstraints:

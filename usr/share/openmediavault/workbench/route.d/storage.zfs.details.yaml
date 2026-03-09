@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/details/:name/:type"
+  editing: true
+  component: omv-storage-zfs-details-text-page

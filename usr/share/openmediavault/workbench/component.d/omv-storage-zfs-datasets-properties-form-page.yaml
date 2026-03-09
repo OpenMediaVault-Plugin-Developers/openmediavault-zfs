@@ -1,0 +1,103 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-datasets-properties-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      get:
+        method: getProperties
+        params:
+          name: "{{ _routeQueryParams.name }}"
+          type: "{{ _routeQueryParams.type }}"
+      post:
+        method: setProperties
+    fields:
+      - type: hidden
+        name: uuid
+        value: "{{ newconfobjuuid }}"
+      - type: hidden
+        name: name
+        value: "{{ _routeQueryParams.name }}"
+      - type: hidden
+        name: type
+        value: "{{ _routeQueryParams.type }}"
+      - type: datatable
+        name: properties
+        label: _("Properties")
+        hasHeader: true
+        hasFooter: true
+        hasSearchField: true
+        sorters:
+          - dir: asc
+            prop: property
+        columns:
+          - name: _("Property")
+            prop: property
+            flexGrow: 1
+            sortable: true
+          - name: _("Value")
+            prop: value
+            flexGrow: 1
+            sortable: true
+          - name: _("Source")
+            prop: source
+            flexGrow: 1
+            sortable: true
+          - name: _("Modified")
+            prop: modified
+            flexGrow: 1
+            hidden: true
+          - name: _("New Property")
+            prop: newproperty
+            flexGrow: 1
+            hidden: true
+        actions:
+          - template: add
+            formDialogConfig:
+              title: _("New property")
+              fields:
+                - type: textInput
+                  name: property
+                  label: _("Name")
+                  value: ""
+                - type: textInput
+                  name: value
+                  label: _("Value")
+                  value: ""
+                - type: hidden
+                  name: source
+                  value: "local"
+                - type: hidden
+                  name: modified
+                  value: true
+                - type: hidden
+                  name: newproperty
+                  value: true
+          - template: edit
+            formDialogConfig:
+              title: _("Edit property")
+              fields:
+                - type: textInput
+                  name: property
+                  label: _("Property")
+                  readonly: true
+                - type: textInput
+                  name: value
+                  label: _("Value")
+              transform:
+                source: "local"
+                modified: true
+                newproperty: false
+        valueType: object
+        value: []
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/datasets"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/datasets"

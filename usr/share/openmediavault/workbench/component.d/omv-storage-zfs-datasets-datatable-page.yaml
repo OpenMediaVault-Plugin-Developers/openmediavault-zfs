@@ -1,24 +1,39 @@
 version: "1.0"
 type: component
 data:
-  name: omv-storage-zfs-pools-datatable-page
+  name: omv-storage-zfs-datasets-datatable-page
   type: datatablePage
   config:
     autoReload: false
     hasSearchField: true
     rowId: id
-    stateId: fc0545e0-50b2-11ec-bf5c-37dde54fc31c
+    stateId: 2a3f8c10-50b3-11ec-bf5c-37dde54fc31c
     store:
       proxy:
         service: Zfs
         get:
-          method: listPoolsOnlyBg
+          method: listDatasetsBg
           task: true
     columns:
       - name: _("Name")
         prop: name
         flexGrow: 1
         sortable: true
+      - name: _("Pool")
+        prop: pool
+        flexGrow: 1
+        sortable: true
+        hidden: true
+      - name: _("Type")
+        prop: type
+        flexGrow: 1
+        sortable: true
+      - name: _("Size")
+        prop: size
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+        hidden: true
       - name: _("Used")
         prop: usedpercent
         flexGrow: 1
@@ -31,14 +46,15 @@ data:
         flexGrow: 1
         sortable: true
         cellTemplateName: binaryUnit
-      - name: _("State")
-        prop: state
-        flexGrow: 1
+      - name: _("Mountpoint")
+        prop: mountpoint
+        flexGrow: 2
         sortable: true
-      - name: _("Status")
-        prop: status
-        flexGrow: 1
+      - name: _("Path")
+        prop: path
+        flexGrow: 2
         sortable: true
+        hidden: true
       - name: _("Encryption")
         prop: encryption
         flexGrow: 1
@@ -55,34 +71,7 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
-      - name: _("Scrub state")
-        prop: scrubstate
-        flexGrow: 1
-        sortable: true
-        hidden: true
-      - name: _("Last scrub")
-        prop: lastscrub
-        flexGrow: 2
-        sortable: true
-        hidden: true
     actions:
-      - type: menu
-        icon: mdi:database
-        tooltip: _("Pool")
-        actions:
-          - text: _("Add pool")
-            icon: mdi:database-plus
-            execute:
-              type: url
-              url: "/storage/zfs/pools/create"
-          - text: _("Expand pool")
-            icon: mdi:database-arrow-right
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: url
-              url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
       - type: menu
         icon: mdi:plus
         tooltip: _("Add")
@@ -99,7 +88,7 @@ data:
                 fields:
                   - type: textInput
                     name: path
-                    label: _("Pool")
+                    label: _("Prefix")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: textInput
@@ -139,7 +128,7 @@ data:
                 fields:
                   - type: textInput
                     name: path
-                    label: _("Pool")
+                    label: _("Prefix")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: textInput
@@ -209,7 +198,7 @@ data:
                 fields:
                   - type: textInput
                     name: path
-                    label: _("Pool")
+                    label: _("Prefix")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: textInput
@@ -255,7 +244,7 @@ data:
                 fields:
                   - type: textInput
                     name: path
-                    label: _("Pool")
+                    label: _("Prefix")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: textInput
@@ -293,67 +282,6 @@ data:
                 task: false
                 progressMessage: _("Creating snapshot ...")
                 successNotification: _("Snapshot created.")
-      - type: menu
-        icon: mdi:swap-horizontal
-        tooltip: _("Import / Export")
-        actions:
-          - text: _("zpool import")
-            icon: mdi:import
-            execute:
-              type: formDialog
-              formDialog:
-                title: _("Import pool(s)")
-                fields:
-                  - type: checkbox
-                    name: all
-                    label: _("Import all available pools")
-                    value: false
-                    hint: _("Scan for and import all pools not currently imported.")
-                  - type: textInput
-                    name: poolname
-                    label: _("Pool name")
-                    value: ""
-                    hint: _("Name of the specific pool to import.")
-                    modifiers:
-                      - type: visible
-                        constraint:
-                          operator: falsy
-                          arg0:
-                            prop: all
-                  - type: divider
-                  - type: checkbox
-                    name: force
-                    label: _("Force import")
-                    value: false
-                    hint: _("Force import even if the pool appears to be in use or was not cleanly exported.")
-                buttons:
-                  submit:
-                    text: _("Import")
-                    execute:
-                      type: request
-                      request:
-                        service: Zfs
-                        method: importPool
-                        progressMessage: _("Importing pool ...")
-                        successNotification: _("Pool imported.")
-          - text: _("zpool export")
-            icon: mdi:export
-            confirmationDialogConfig:
-              template: confirmation-critical
-              message: _("Are you sure you want to export?")
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: exportPool
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Exporting pool ...")
-                successNotification: _("Pool exported.")
       - type: iconButton
         icon: mdi:desktop-classic
         tooltip: _("Properties")
@@ -362,7 +290,7 @@ data:
           maxSelected: 1
         execute:
           type: url
-          url: "/storage/zfs/pools/properties/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+          url: "/storage/zfs/dataset-properties?name={{ _selected[0].path | encodeuricomponent }}&type={{ _selected[0].type }}"
       - type: iconButton
         icon: mdi:information-outline
         tooltip: _("Details")
@@ -372,110 +300,6 @@ data:
         execute:
           type: url
           url: "/storage/zfs/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
-      - type: menu
-        icon: mdi:progress-wrench
-        tooltip: _("Scrub")
-        enabledConstraints:
-          minSelected: 1
-          maxSelected: 1
-        actions:
-          - text: _("Start scrub")
-            icon: mdi:play
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-              constraint:
-                - operator: ne
-                  arg0:
-                    prop: scrubstate
-                  arg1: "running"
-                - operator: ne
-                  arg0:
-                    prop: scrubstate
-                  arg1: "paused"
-            confirmationDialogConfig:
-              template: confirmation
-              message: _("Are you sure you want to start a scrub?")
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: scrubPool
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Starting scrub ...")
-                successNotification: _("Scrub started.")
-          - text: _("Stop scrub")
-            icon: mdi:stop
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-              constraint:
-                - operator: truthy
-                  arg0:
-                    prop: scrubactive
-            confirmationDialogConfig:
-              template: confirmation
-              message: _("Are you sure you want to stop the scrub?")
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: stopScrub
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Stopping scrub ...")
-                successNotification: _("Scrub stopped.")
-          - text: _("Pause scrub")
-            icon: mdi:pause
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-              constraint:
-                - operator: eq
-                  arg0:
-                    prop: scrubstate
-                  arg1: "running"
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: pauseScrub
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Pausing scrub ...")
-                successNotification: _("Scrub paused.")
-          - text: _("Resume scrub")
-            icon: mdi:play-pause
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-              constraint:
-                - operator: eq
-                  arg0:
-                    prop: scrubstate
-                  arg1: "paused"
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: scrubPool
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Resuming scrub ...")
-                successNotification: _("Scrub resumed.")
-          - text: _("Scrub status")
-            icon: mdi:information-outline
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: url
-              url: "/storage/zfs/pools/scrub-status/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:lock
         tooltip: _("Encryption")
@@ -505,7 +329,7 @@ data:
                 fields:
                   - type: textInput
                     name: name
-                    label: _("Pool")
+                    label: _("Dataset")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: passwordInput
@@ -536,7 +360,7 @@ data:
                   arg1: "available"
             confirmationDialogConfig:
               template: confirmation
-              message: _("Are you sure you want to unload the encryption key? The pool will become inaccessible until it is unlocked again.")
+              message: _("Are you sure you want to unload the encryption key? The dataset will become inaccessible until it is unlocked again.")
             execute:
               type: request
               request:
@@ -563,7 +387,7 @@ data:
                 fields:
                   - type: textInput
                     name: name
-                    label: _("Pool")
+                    label: _("Dataset")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: hint
@@ -626,6 +450,11 @@ data:
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: encryption
+                  arg1: "OFF"
             execute:
               type: formDialog
               formDialog:
@@ -633,7 +462,7 @@ data:
                 fields:
                   - type: textInput
                     name: name
-                    label: _("Pool")
+                    label: _("Dataset")
                     value: "{{ _selected[0].path }}"
                     readonly: true
                   - type: passwordInput

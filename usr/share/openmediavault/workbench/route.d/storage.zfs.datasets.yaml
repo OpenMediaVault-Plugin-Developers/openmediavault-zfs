@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/datasets"
+  title: _("Datasets")
+  component: omv-storage-zfs-datasets-datatable-page

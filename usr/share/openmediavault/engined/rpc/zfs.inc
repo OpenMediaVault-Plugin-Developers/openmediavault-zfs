@@ -694,6 +694,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 self::zfsExec($cmd, $out, $res);
                 foreach ($devices as $device) {
                     self::zfsTryExec(sprintf('zpool labelclear %s 2>&1', escapeshellarg($device)));
+                    self::zfsTryExec(sprintf('wipefs -a %s 2>&1', escapeshellarg($device)));
+                    print_r("wipefs");
                 }
                 self::cleanupJobsForPool($name);
                 break;
@@ -1203,8 +1205,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (trim($line) === '') {
                 break;
             }
-            // Lines with absolute device paths have deep indentation.
-            if (preg_match('/^\s{4,}(\/\S+)\s+(\S+)/', $line, $m)) {
+            // Lines with absolute device paths start with / after leading whitespace.
+            if (preg_match('/^\s+(\/\S+)\s+(\S+)/', $line, $m)) {
                 if (!in_array($m[2], $excludeStates)) {
                     $devices[] = $m[1];
                 }

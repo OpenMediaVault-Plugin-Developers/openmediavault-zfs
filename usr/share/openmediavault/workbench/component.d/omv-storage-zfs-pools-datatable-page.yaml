@@ -834,5 +834,5 @@ data:
               mp: "{{ _selected[0].mountpoint }}"
               type: "{{ _selected[0].type }}"
             task: true
-            progressMessage: _("Deleting object ...")
-            successNotification: _("Object deleted.")
+            progressMessage: _("Deleting pool ...")
+            successNotification: _("Pool deleted.")

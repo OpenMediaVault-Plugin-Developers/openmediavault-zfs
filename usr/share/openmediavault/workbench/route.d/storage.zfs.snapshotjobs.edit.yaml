@@ -1,0 +1,8 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/snapshotjobs/edit/:uuid"
+  title: _("Edit")
+  editing: true
+  notificationTitle: _("Updated snapshot job.")
+  component: omv-storage-zfs-snapshotjobs-form-page

@@ -10,6 +10,12 @@ case "$1" in
         # Activate package triggers
         dpkg-trigger update-workbench
 
+        # Initialize configuration database.
+        omv-confdbadm create "conf.service.zfs"
+        if [ -n "$2" ]; then
+            omv-confdbadm migrate "conf.service.zfs" "${2}"
+        fi
+
         # add zfs-zed notfication
         xpath="/config/system/notification/notifications"
         if ! omv_config_exists "${xpath}/notification[id='zfs']"; then
@@ -18,7 +24,7 @@ case "$1" in
             object="${object}<enable>0</enable>"
             omv_config_add_node_data "${xpath}" "notification" "${object}"
         fi
-        omv-salt deploy run --no-color --quiet zfszed || :
+        omv-salt deploy run --no-color --quiet zfszed zfscron || :
         omv_module_set_dirty zfs
 
         # load zfs kernel module

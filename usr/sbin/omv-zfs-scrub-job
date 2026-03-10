@@ -1,0 +1,9 @@
+#!/bin/bash
+# Trigger a ZFS pool scrub.
+# Usage: omv-zfs-scrub-job <pool>
+set -euo pipefail
+
+POOL="$1"
+echo "$(date -Iseconds): Starting scrub on pool ${POOL}"
+zpool scrub "${POOL}"
+echo "$(date -Iseconds): Scrub started on pool ${POOL}. Use 'zpool status ${POOL}' to monitor progress."

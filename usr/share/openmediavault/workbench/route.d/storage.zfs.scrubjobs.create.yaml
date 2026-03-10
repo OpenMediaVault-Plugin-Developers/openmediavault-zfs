@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/scrubjobs/create"
+  title: _("Create")
+  notificationTitle: _("Created scrub job.")
+  component: omv-storage-zfs-scrubjobs-form-page

@@ -57,6 +57,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getStats');
         $this->registerMethod('getPoolHealth');
         $this->registerMethod('getArcStats');
+        $this->registerMethod('getDatasetNames');
+        $this->registerMethod('getPoolNames');
+        $this->registerMethod('getSnapshotJobList');
+        $this->registerMethod('getSnapshotJob');
+        $this->registerMethod('setSnapshotJob');
+        $this->registerMethod('deleteSnapshotJob');
+        $this->registerMethod('runSnapshotJob');
+        $this->registerMethod('getScrubJobList');
+        $this->registerMethod('getScrubJob');
+        $this->registerMethod('setScrubJob');
+        $this->registerMethod('deleteScrubJob');
+        $this->registerMethod('runScrubJob');
         $this->registerMethod('fixPackages');
         $this->registerMethod('enableEncryption');
         $this->registerMethod('loadEncryptionKey');
@@ -198,6 +210,174 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         return implode("\n\r", $lines);
     }
+
+    public function getDatasetNames($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $result = [];
+        if (!self::zfsTryExec('zfs list -H -t filesystem,volume -o name 2>&1', $out)) {
+            return $result;
+        }
+        foreach ($out as $line) {
+            $name = trim($line);
+            if ($name !== '') {
+                $result[] = [$name, $name];
+            }
+        }
+        return $result;
+    }
+
+    public function getPoolNames($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $result = [];
+        if (!self::zfsTryExec('zpool list -H -o name 2>&1', $out)) {
+            return $result;
+        }
+        foreach ($out as $line) {
+            $name = trim($line);
+            if ($name !== '') {
+                $result[] = [$name, $name];
+            }
+        }
+        return $result;
+    }
+
+    // -------------------------------------------------------------------------
+    // Snapshot scheduling
+    // -------------------------------------------------------------------------
+
+    public function getSnapshotJobList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->get('conf.service.zfs.snapshotjob');
+        $result = array_map(fn($o) => $o->getAssoc(), $objects);
+        return $this->applyFilter($result, $params['start'],
+            $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function getSnapshotJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.snapshotjob', $params['uuid']);
+        $result = $obj->getAssoc();
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            $result[$f] = array_map('trim', explode(',', $result[$f]));
+        }
+        return $result;
+    }
+
+    public function setSnapshotJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.setsnapshotjob');
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            if (is_array($params[$f])) {
+                $params[$f] = implode(',', $params[$f]);
+            }
+        }
+        $db = \OMV\Config\Database::getInstance();
+        $obj = new \OMV\Config\ConfigObject('conf.service.zfs.snapshotjob');
+        $obj->setAssoc($params);
+        $db->set($obj);
+        return $obj->getAssoc();
+    }
+
+    public function deleteSnapshotJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.snapshotjob', $params['uuid']);
+        $db->delete($obj);
+    }
+
+    public function runSnapshotJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.snapshotjob', $params['uuid']);
+        $j = $obj->getAssoc();
+        $cmd = sprintf('/usr/sbin/omv-zfs-snapshot %s %s %d 2>&1',
+            escapeshellarg($j['dataset']),
+            escapeshellarg($j['prefix']),
+            (int)$j['retention']);
+        exec($cmd, $out, $res);
+        if ($res !== 0) {
+            throw new \OMV\Exception('Snapshot job failed: ' . implode("\n", $out));
+        }
+        return implode("\n", $out);
+    }
+
+    // -------------------------------------------------------------------------
+    // Scrub scheduling
+    // -------------------------------------------------------------------------
+
+    public function getScrubJobList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->get('conf.service.zfs.scrubjob');
+        $result = array_map(fn($o) => $o->getAssoc(), $objects);
+        return $this->applyFilter($result, $params['start'],
+            $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function getScrubJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.scrubjob', $params['uuid']);
+        $result = $obj->getAssoc();
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            $result[$f] = array_map('trim', explode(',', $result[$f]));
+        }
+        return $result;
+    }
+
+    public function setScrubJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.setscrubjob');
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            if (is_array($params[$f])) {
+                $params[$f] = implode(',', $params[$f]);
+            }
+        }
+        $db = \OMV\Config\Database::getInstance();
+        $obj = new \OMV\Config\ConfigObject('conf.service.zfs.scrubjob');
+        $obj->setAssoc($params);
+        $db->set($obj);
+        return $obj->getAssoc();
+    }
+
+    public function deleteScrubJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.scrubjob', $params['uuid']);
+        $db->delete($obj);
+    }
+
+    public function runScrubJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.scrubjob', $params['uuid']);
+        $j = $obj->getAssoc();
+        self::zfsExec(sprintf('zpool scrub %s 2>&1', escapeshellarg($j['pool'])), $out, $res);
+        return implode("\n", $out);
+    }
+
 
     public function addPool($params, $context)
     {

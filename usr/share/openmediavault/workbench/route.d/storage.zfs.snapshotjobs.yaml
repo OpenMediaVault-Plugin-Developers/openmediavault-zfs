@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/snapshotjobs"
+  title: _("Snapshot Jobs")
+  component: omv-storage-zfs-snapshotjobs-datatable-page

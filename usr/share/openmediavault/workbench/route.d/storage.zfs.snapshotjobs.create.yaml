@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/snapshotjobs/create"
+  title: _("Create")
+  notificationTitle: _("Created snapshot job.")
+  component: omv-storage-zfs-snapshotjobs-form-page

@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.scrubjobs"
+  text: _("Scrub Jobs")
+  position: 50
+  icon: mdi:progress-wrench
+  url: "/storage/zfs/scrubjobs"

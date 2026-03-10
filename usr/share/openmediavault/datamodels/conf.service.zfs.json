@@ -7,11 +7,161 @@
     "iterable": false
   },
   "properties": {
-    "autoShareNestedEnabled": {
-      "type": "boolean"
+    "snapshotjobs": {
+      "type": "object",
+      "properties": {
+        "job": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "enable": {
+                "type": "boolean"
+              },
+              "dataset": {
+                "type": "string"
+              },
+              "prefix": {
+                "type": "string",
+                "default": "auto"
+              },
+              "retention": {
+                "type": "integer",
+                "default": 7
+              },
+              "execution": {
+                "type": "string",
+                "enum": [
+                  "exactly",
+                  "hourly",
+                  "daily",
+                  "weekly",
+                  "monthly",
+                  "yearly",
+                  "reboot"
+                ],
+                "default": "daily"
+              },
+              "minute": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynminute": {
+                "type": "boolean",
+                "default": false
+              },
+              "hour": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynhour": {
+                "type": "boolean",
+                "default": false
+              },
+              "dayofmonth": {
+                "type": "string",
+                "default": "*"
+              },
+              "everyndayofmonth": {
+                "type": "boolean",
+                "default": false
+              },
+              "month": {
+                "type": "string",
+                "default": "*"
+              },
+              "dayofweek": {
+                "type": "string",
+                "default": "*"
+              },
+              "sendemail": {
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     },
-    "autoShareNestedProperty": {
-      "type": "string"
+    "scrubjobs": {
+      "type": "object",
+      "properties": {
+        "job": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "enable": {
+                "type": "boolean"
+              },
+              "pool": {
+                "type": "string"
+              },
+              "execution": {
+                "type": "string",
+                "enum": [
+                  "exactly",
+                  "hourly",
+                  "daily",
+                  "weekly",
+                  "monthly",
+                  "yearly",
+                  "reboot"
+                ],
+                "default": "monthly"
+              },
+              "minute": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynminute": {
+                "type": "boolean",
+                "default": false
+              },
+              "hour": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynhour": {
+                "type": "boolean",
+                "default": false
+              },
+              "dayofmonth": {
+                "type": "string",
+                "default": "1"
+              },
+              "everyndayofmonth": {
+                "type": "boolean",
+                "default": false
+              },
+              "month": {
+                "type": "string",
+                "default": "*"
+              },
+              "dayofweek": {
+                "type": "string",
+                "default": "*"
+              },
+              "sendemail": {
+                "type": "boolean"
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

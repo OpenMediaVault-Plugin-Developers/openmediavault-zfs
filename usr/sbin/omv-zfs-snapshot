@@ -1,0 +1,29 @@
+#!/bin/bash
+# Create a ZFS snapshot and prune old ones by retention count.
+# Usage: omv-zfs-snapshot <dataset> <prefix> <retention>
+set -euo pipefail
+
+DATASET="$1"
+PREFIX="$2"
+RETENTION="${3:-7}"
+SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
+
+echo "$(date -Iseconds): Creating snapshot ${DATASET}@${SNAPNAME}"
+zfs snapshot "${DATASET}@${SNAPNAME}"
+
+# List snapshots matching our prefix, oldest first
+SNAPS=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" 2>/dev/null \
+    | grep "^${DATASET}@${PREFIX}-" || true)
+
+COUNT=$(printf '%s\n' "${SNAPS}" | grep -c . || true)
+
+if [ "${COUNT}" -gt "${RETENTION}" ]; then
+    TO_DELETE=$(printf '%s\n' "${SNAPS}" | head -n $(( COUNT - RETENTION )))
+    while IFS= read -r snap; do
+        [ -n "${snap}" ] || continue
+        echo "$(date -Iseconds): Pruning old snapshot ${snap}"
+        zfs destroy "${snap}"
+    done <<< "${TO_DELETE}"
+fi
+
+echo "$(date -Iseconds): Done. ${DATASET} has $(printf '%s\n' "${SNAPS}" | grep -c . || true) snapshot(s) matching prefix '${PREFIX}'."

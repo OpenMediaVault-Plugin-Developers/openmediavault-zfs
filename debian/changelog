@@ -18,6 +18,19 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Add quick snapshot button that creates a timestamped snapshot without a dialog
   * Fix filesystem size calculation to use quota instead of used+available
     - Filesystems without a quota show '' for size and available
+  * Add fragmentation and dedup ratio columns to pools tab (hidden by default)
+  * Add compression, compress ratio, and referenced columns to datasets tab (hidden by default)
+  * Add ARC Size and Pool Health dashboard widgets
+  * Add ARC Stats tab showing detailed ARC statistics
+  * Clarify auto-unlock dialogs to state that passphrases are stored unencrypted
+  * Add scheduled snapshot jobs
+    - Configure dataset, prefix, retention count, and schedule
+    - Compose-style schedule form (hourly/daily/weekly/monthly/yearly/exactly)
+    - Run jobs on demand
+  * Add scheduled scrub jobs
+    - Configure pool and schedule
+    - Compose-style schedule form
+    - Run jobs on demand
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Mar 2026 03:14:32 +0000
 

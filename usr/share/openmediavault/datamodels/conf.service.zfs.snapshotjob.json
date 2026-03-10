@@ -1,0 +1,27 @@
+{
+  "type": "config",
+  "id": "conf.service.zfs.snapshotjob",
+  "queryinfo": {
+    "xpath": "//services/zfs/snapshotjobs/job",
+    "iterable": true,
+    "idproperty": "uuid"
+  },
+  "properties": {
+    "uuid": { "type": "string", "format": "uuidv4" },
+    "enable": { "type": "boolean" },
+    "dataset": { "type": "string" },
+    "prefix": { "type": "string" },
+    "retention": { "type": "integer" },
+    "execution": { "type": "string" },
+    "minute": { "type": "string" },
+    "hour": { "type": "string" },
+    "dayofmonth": { "type": "string" },
+    "month": { "type": "string" },
+    "dayofweek": { "type": "string" },
+    "everynminute": { "type": "boolean" },
+    "everynhour": { "type": "boolean" },
+    "everyndayofmonth": { "type": "boolean" },
+    "sendemail": { "type": "boolean" },
+    "comment": { "type": "string" }
+  }
+}

@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/scrubjobs"
+  title: _("Scrub Jobs")
+  component: omv-storage-zfs-scrubjobs-datatable-page

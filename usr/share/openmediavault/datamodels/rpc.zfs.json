@@ -103,23 +103,6 @@
   },
   {
     "type": "rpc",
-    "id": "rpc.zfs.setsettings",
-    "params": {
-      "type": "object",
-      "properties": {
-        "autoShareNestedEnabled": {
-          "type": "boolean",
-          "required": true
-        },
-        "autoShareNestedProperty": {
-          "type": "string",
-          "required": false
-        }
-      }
-    }
-  },
-  {
-    "type": "rpc",
     "id": "rpc.zfs.rename",
     "params": {
       "type": "object",
@@ -499,6 +482,70 @@
           "type": "string",
           "required": true
         }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.setsnapshotjob",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "oneOf": [{ "format": "uuidv4" }, { "enum": ["undefined"] }],
+          "required": true
+        },
+        "enable": { "type": "boolean", "required": true },
+        "dataset": { "type": "string", "required": true },
+        "prefix": { "type": "string", "required": true },
+        "retention": { "type": "integer", "minimum": 1, "required": true },
+        "execution": {
+          "type": "string",
+          "enum": ["exactly","hourly","daily","weekly","monthly","yearly","reboot"],
+          "required": true
+        },
+        "minute": { "type": "array", "items": { "type": "string" } },
+        "hour": { "type": "array", "items": { "type": "string" } },
+        "dayofmonth": { "type": "array", "items": { "type": "string" } },
+        "month": { "type": "array", "items": { "type": "string" } },
+        "dayofweek": { "type": "array", "items": { "type": "string" } },
+        "everynminute": { "type": "boolean" },
+        "everynhour": { "type": "boolean" },
+        "everyndayofmonth": { "type": "boolean" },
+        "sendemail": { "type": "boolean" },
+        "comment": { "type": "string" }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.setscrubjob",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "oneOf": [{ "format": "uuidv4" }, { "enum": ["undefined"] }],
+          "required": true
+        },
+        "enable": { "type": "boolean", "required": true },
+        "pool": { "type": "string", "required": true },
+        "execution": {
+          "type": "string",
+          "enum": ["exactly","hourly","daily","weekly","monthly","yearly","reboot"],
+          "required": true
+        },
+        "minute": { "type": "array", "items": { "type": "string" } },
+        "hour": { "type": "array", "items": { "type": "string" } },
+        "dayofmonth": { "type": "array", "items": { "type": "string" } },
+        "month": { "type": "array", "items": { "type": "string" } },
+        "dayofweek": { "type": "array", "items": { "type": "string" } },
+        "everynminute": { "type": "boolean" },
+        "everynhour": { "type": "boolean" },
+        "everyndayofmonth": { "type": "boolean" },
+        "sendemail": { "type": "boolean" },
+        "comment": { "type": "string" }
       }
     }
   }

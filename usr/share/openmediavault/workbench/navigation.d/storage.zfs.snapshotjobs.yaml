@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.snapshotjobs"
+  text: _("Snapshot Jobs")
+  position: 40
+  icon: mdi:camera-timer
+  url: "/storage/zfs/snapshotjobs"

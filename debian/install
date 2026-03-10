@@ -1,3 +1,5 @@
+etc/systemd/system/* etc/systemd/system
 srv/* srv
+usr/sbin/*  usr/sbin
 usr/share/openmediavault/*  usr/share/openmediavault
 usr/share/php/*  usr/share/php

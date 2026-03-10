@@ -564,7 +564,7 @@ data:
                 task: false
                 progressMessage: _("Unloading encryption key ...")
                 successNotification: _("Encryption key unloaded.")
-          - text: _("Enable auto-unlock at boot")
+          - text: _("Enable auto-unlock — local file")
             icon: mdi:lock-clock
             enabledConstraints:
               minSelected: 1
@@ -576,16 +576,19 @@ data:
             execute:
               type: formDialog
               formDialog:
-                title: _("Enable auto-unlock at boot")
+                title: _("Enable auto-unlock at boot (local file)")
                 fields:
                   - type: textInput
                     name: name
                     label: _("Pool")
                     value: "{{ _selected[0].path }}"
                     readonly: true
+                  - type: hidden
+                    name: keyloctype
+                    value: "local"
                   - type: hint
                     hintType: info
-                    text: _("The passphrase will be saved to /etc/zfs/keys/ and ZFS will load it automatically at boot. Ensure your system disk is secured.")
+                    text: _("The passphrase will be saved to /etc/zfs/keys/ on this machine. Protects against drive theft but not theft of the whole server.")
                   - type: passwordInput
                     name: key
                     label: _("Passphrase / key")
@@ -615,7 +618,57 @@ data:
                         service: Zfs
                         method: setAutoUnlock
                         progressMessage: _("Enabling auto-unlock ...")
-                        successNotification: _("Auto-unlock enabled. The key will be loaded automatically at boot.")
+                        successNotification: _("Auto-unlock enabled. The key will be loaded from the local keyfile at boot.")
+          - text: _("Enable auto-unlock — remote HTTPS")
+            icon: mdi:lock-clock
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: falsy
+                  arg0:
+                    prop: autounlock
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Enable auto-unlock at boot (remote HTTPS)")
+                fields:
+                  - type: textInput
+                    name: name
+                    label: _("Pool")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: hidden
+                    name: keyloctype
+                    value: "remote"
+                  - type: hint
+                    hintType: info
+                    text: _("The passphrase will be fetched from a remote HTTPS server at boot. The key is never stored on this machine, protecting against theft of the whole server. Requires network access during boot.")
+                  - type: textInput
+                    name: remoteurl
+                    label: _("Key URL")
+                    value: ""
+                    placeholder: "https://192.168.1.50/keys/pool.key"
+                    validators:
+                      required: true
+                      pattern:
+                        pattern: "^https://.+"
+                        errorData: _("URL must start with https://")
+                  - type: checkbox
+                    name: insecure
+                    label: _("Skip certificate verification")
+                    value: false
+                    hint: _("Allow self-signed or untrusted certificates. Use only on trusted local networks.")
+                buttons:
+                  submit:
+                    text: _("Enable auto-unlock")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: setAutoUnlock
+                        progressMessage: _("Enabling auto-unlock ...")
+                        successNotification: _("Remote auto-unlock enabled. The key will be fetched at boot.")
           - text: _("Disable auto-unlock at boot")
             icon: mdi:lock-remove
             enabledConstraints:
@@ -627,7 +680,7 @@ data:
                     prop: autounlock
             confirmationDialogConfig:
               template: confirmation-critical
-              message: _("Are you sure you want to disable auto-unlock? The saved keyfile will be deleted and you will need to enter the passphrase manually after each reboot.")
+              message: _("Are you sure you want to disable auto-unlock? The saved key or remote URL configuration will be removed and you will need to enter the passphrase manually after each reboot.")
             execute:
               type: request
               request:
@@ -637,7 +690,7 @@ data:
                   name: "{{ _selected[0].path }}"
                 task: false
                 progressMessage: _("Disabling auto-unlock ...")
-                successNotification: _("Auto-unlock disabled. Keyfile removed.")
+                successNotification: _("Auto-unlock disabled.")
           - text: _("Change encryption key")
             icon: mdi:key-change
             enabledConstraints:

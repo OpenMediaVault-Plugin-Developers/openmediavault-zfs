@@ -770,50 +770,78 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
 
     public function setAutoUnlock($params, $context)
     {
-        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.setautounlock');
-        $name    = $params['name'];
-        $keyfile = self::getKeyfilePath($name);
-        // Ensure the keys directory exists with restricted permissions.
-        $keydir = dirname($keyfile);
-        if (!is_dir($keydir)) {
-            if (!mkdir($keydir, 0700, true)) {
-                throw new \OMV\Exception(sprintf('Failed to create key directory: %s', $keydir));
+        $name       = $params['name'];
+        $keyloctype = $params['keyloctype'];
+        if ($keyloctype === 'remote') {
+            $remoteurl = $params['remoteurl'] ?? '';
+            $insecure  = !empty($params['insecure']);
+            if (empty($remoteurl) || strpos($remoteurl, 'https://') !== 0) {
+                throw new \OMV\Exception('Remote URL must start with https://');
             }
+            // Remove any local keyfile if switching from local to remote.
+            $keyfile = self::getKeyfilePath($name);
+            if (file_exists($keyfile)) {
+                unlink($keyfile);
+            }
+            // Write remote metadata with restricted permissions.
+            $metafile = self::getRemoteKeyMetaPath($name);
+            $metadir  = dirname($metafile);
+            if (!is_dir($metadir)) {
+                mkdir($metadir, 0700, true);
+            }
+            file_put_contents($metafile, json_encode(
+                ['dataset' => $name, 'url' => $remoteurl, 'insecure' => $insecure],
+                JSON_PRETTY_PRINT
+            ));
+            chmod($metafile, 0600);
+            // keylocation=prompt — the zfs-remote-unlock service handles key loading at boot.
+            self::zfsExec(sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name)), $out, $res);
+            self::manageRemoteUnlockService();
+        } else {
+            $keyfile = self::getKeyfilePath($name);
+            $keydir  = dirname($keyfile);
+            if (!is_dir($keydir)) {
+                if (!mkdir($keydir, 0700, true)) {
+                    throw new \OMV\Exception(sprintf('Failed to create key directory: %s', $keydir));
+                }
+            }
+            if (file_put_contents($keyfile, $params['key']) === false) {
+                throw new \OMV\Exception(sprintf('Failed to write keyfile: %s', $keyfile));
+            }
+            chmod($keyfile, 0600);
+            // Remove any leftover remote metadata if switching from remote to local.
+            $metafile = self::getRemoteKeyMetaPath($name);
+            if (file_exists($metafile)) {
+                unlink($metafile);
+            }
+            self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
+                escapeshellarg('file://' . $keyfile), escapeshellarg($name)), $out, $res);
+            self::manageRemoteUnlockService();
         }
-        // Write the key to the keyfile with restricted permissions.
-        if (file_put_contents($keyfile, $params['key']) === false) {
-            throw new \OMV\Exception(sprintf('Failed to write keyfile: %s', $keyfile));
-        }
-        chmod($keyfile, 0600);
-        // Point the dataset's keylocation at the file so ZFS loads it automatically at boot.
-        $cmd = sprintf('zfs set keylocation=%s %s 2>&1',
-            escapeshellarg('file://' . $keyfile),
-            escapeshellarg($name));
-        self::zfsExec($cmd, $out, $res);
-        // Update the zfs-mount-generator cache so systemd generates the key-load unit at boot.
         self::updateZfsListCache(explode('/', $name)[0]);
-        return ['autounlock' => true, 'keylocation' => 'file://' . $keyfile];
+        return ['autounlock' => true];
     }
 
     public function removeAutoUnlock($params, $context)
     {
-        // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.removeautounlock');
-        $name    = $params['name'];
+        $name = $params['name'];
+        // Reset keylocation to prompt.
+        self::zfsExec(sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name)), $out, $res);
+        // Remove local keyfile if present.
         $keyfile = self::getKeyfilePath($name);
-        // Reset keylocation back to prompt before removing the file.
-        $cmd = sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name));
-        self::zfsExec($cmd, $out, $res);
-        // Remove the keyfile if it exists.
         if (file_exists($keyfile)) {
             unlink($keyfile);
         }
-        // Update the zfs-mount-generator cache to reflect the removed auto-unlock.
+        // Remove remote metadata if present.
+        $metafile = self::getRemoteKeyMetaPath($name);
+        if (file_exists($metafile)) {
+            unlink($metafile);
+        }
+        self::manageRemoteUnlockService();
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => false, 'keylocation' => 'prompt'];
     }
@@ -1281,9 +1309,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $keystatus    = $encMap[$path]['keystatus']   ?? '-';
             $keylocation  = $encMap[$path]['keylocation'] ?? 'none';
             $encrypted    = ($enc !== 'OFF');
-            $autounlock   = ($encrypted
-                && strpos($keylocation, 'file://') === 0
-                && file_exists(self::getKeyfilePath($path)));
+            $autounlock   = $encrypted && (
+                (strpos($keylocation, 'file://') === 0 && file_exists(self::getKeyfilePath($path))) ||
+                file_exists(self::getRemoteKeyMetaPath($path))
+            );
             if ($isPool) {
                 $pz         = $poolSizes[$path] ?? null;
                 $size       = $pz ? $pz['size']  : 0;
@@ -1566,13 +1595,33 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Return the path where a dataset's auto-unlock keyfile is stored.
+     * Return the path where a dataset's local auto-unlock keyfile is stored.
      */
     private static function getKeyfilePath(string $name): string
     {
-        // Sanitize the dataset name for use as a filename (replace / with _).
         $safe = str_replace('/', '_', $name);
         return '/etc/zfs/keys/' . $safe . '.key';
+    }
+
+    /**
+     * Return the path where a dataset's remote auto-unlock metadata is stored.
+     */
+    private static function getRemoteKeyMetaPath(string $name): string
+    {
+        $safe = str_replace('/', '_', $name);
+        return '/etc/zfs/remote-keys/' . $safe . '.json';
+    }
+
+    /**
+     * Enable/disable the zfs-remote-unlock systemd service depending on
+     * whether any remote-key metadata files currently exist.
+     */
+    private static function manageRemoteUnlockService(): void
+    {
+        $metaDir   = '/etc/zfs/remote-keys';
+        $hasRemote = is_dir($metaDir) && !empty(glob($metaDir . '/*.json'));
+        self::zfsTryExec('systemctl ' . ($hasRemote ? 'enable' : 'disable')
+            . ' --now zfs-remote-unlock.service 2>&1');
     }
 
     /**
@@ -1634,8 +1683,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function flattenEncryptionStatus(string $name, array $status): array
     {
         $keylocation = $status['keylocation']['value'] ?? 'prompt';
-        $keyfile     = self::getKeyfilePath($name);
-        $autounlock  = (strpos($keylocation, 'file://') === 0 && file_exists($keyfile));
+        $autounlock  = (strpos($keylocation, 'file://') === 0 && file_exists(self::getKeyfilePath($name)))
+                    || file_exists(self::getRemoteKeyMetaPath($name));
         return [
             'name'           => $name,
             'encryption'     => isset($status['encryption']['value'])

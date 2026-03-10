@@ -1,0 +1,14 @@
+[Unit]
+Description=Load ZFS encryption keys from remote HTTPS sources
+Documentation=https://github.com/openmediavault/openmediavault
+After=zfs-import.target network-online.target
+Wants=network-online.target
+ConditionDirectoryNotEmpty=/etc/zfs/remote-keys
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/zfs-remote-unlock
+
+[Install]
+WantedBy=zfs.target

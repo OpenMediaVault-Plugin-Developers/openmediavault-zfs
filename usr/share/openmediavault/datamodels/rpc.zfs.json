@@ -469,9 +469,22 @@
           "type": "string",
           "required": true
         },
+        "keyloctype": {
+          "type": "string",
+          "enum": ["local", "remote"],
+          "required": true
+        },
         "key": {
           "type": "string",
-          "required": true
+          "required": false
+        },
+        "remoteurl": {
+          "type": "string",
+          "required": false
+        },
+        "insecure": {
+          "type": "boolean",
+          "required": false
         }
       }
     }

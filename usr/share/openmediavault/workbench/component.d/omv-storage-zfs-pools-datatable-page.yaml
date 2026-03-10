@@ -60,6 +60,18 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Has children")
+        prop: haschildren
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: true
+      - name: _("Has shares")
+        prop: hasshares
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: true
       - name: _("Scrub state")
         prop: scrubstate
         flexGrow: 1
@@ -737,6 +749,13 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
+          constraint:
+            - operator: falsy
+              arg0:
+                prop: haschildren
+            - operator: falsy
+              arg0:
+                prop: hasshares
         confirmationDialogConfig:
           template: confirmation-critical
           message: _("Are you sure you want to delete?")

@@ -380,6 +380,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $mp   = $params['mp'] ?? '';
         switch ($params['type']) {
             case 'Filesystem':
+                if (self::hasChildren($name)) {
+                    throw new \OMV\Exception(
+                        'Cannot delete filesystem "%s": it has child datasets. Delete them first.', $name);
+                }
                 if (self::checkOMVShares($context, $mp)) {
                     throw new \OMV\Exception(
                         'Before deleting this filesystem, you must delete shares referencing it.');
@@ -389,11 +393,22 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'org.openmediavault.storage.zfs.filesystem', $context);
                 break;
             case 'Snapshot':
+                $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($name));
+                self::zfsExec($cmd, $out, $res);
+                break;
             case 'Volume':
+                if (self::hasChildren($name)) {
+                    throw new \OMV\Exception(
+                        'Cannot delete volume "%s": it has child datasets. Delete them first.', $name);
+                }
                 $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
                 break;
             case 'Pool':
+                if (self::hasChildren($name)) {
+                    throw new \OMV\Exception(
+                        'Cannot delete pool "%s": it has datasets. Delete them first.', $name);
+                }
                 if (self::checkOMVShares($context, $mp)) {
                     throw new \OMV\Exception(
                         'Before deleting this pool, you must delete shares referencing it.');
@@ -1230,9 +1245,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $prefix  = 'root/pool-';
         $objects = [];
         // Fetch pool status for all pools in a single zpool status -j call.
-        $poolStatus = self::zpoolFetchAllStatus();
+        $poolStatus  = self::zpoolFetchAllStatus();
         // Fetch physical SIZE/ALLOC/FREE for all pools.
-        $poolSizes  = self::zpoolFetchAllSizes();
+        $poolSizes   = self::zpoolFetchAllSizes();
+        // Build a set of ZFS dataset fsnames that have shared folders.
+        $sharedFsnames = self::buildSharedFsnames();
         // Fetch encryption properties for all datasets in one call.
         $encMap = [];
         self::zfsTryExec(
@@ -1295,6 +1312,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
+                    'hasshares'   => isset($sharedFsnames[$path]),
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1329,6 +1347,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
+                    'hasshares'   => isset($sharedFsnames[$path]),
                 ];
             } elseif ($isVolume) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1358,9 +1377,22 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'encryption'  => $enc,
                     'keystatus'   => $keystatus,
                     'autounlock'  => $autounlock,
+                    'hasshares'   => false,
                 ];
             }
         }
+        // Mark objects that have at least one child dataset/volume.
+        $parentPaths = [];
+        foreach ($objects as $obj) {
+            $slash = strrpos($obj['path'], '/');
+            if ($slash !== false) {
+                $parentPaths[substr($obj['path'], 0, $slash)] = true;
+            }
+        }
+        foreach ($objects as &$obj) {
+            $obj['haschildren'] = isset($parentPaths[$obj['path']]);
+        }
+        unset($obj);
         return $objects;
     }
 
@@ -1475,6 +1507,62 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             ];
         }
         return $result;
+    }
+
+    /**
+     * Return a set of ZFS dataset fsnames that have at least one shared folder
+     * referencing them, keyed by fsname for O(1) lookup.
+     */
+    private static function buildSharedFsnames(): array
+    {
+        $db = \OMV\Config\Database::getInstance();
+        try {
+            $sharedFolders = $db->getAssoc('conf.system.sharedfolder');
+        } catch (\Exception $e) {
+            return [];
+        }
+        if (empty($sharedFolders)) {
+            return [];
+        }
+        // getAssoc returns a single assoc when there is only one item.
+        if (isset($sharedFolders['mntentref'])) {
+            $sharedFolders = [$sharedFolders];
+        }
+        $usedRefs = [];
+        foreach ($sharedFolders as $sf) {
+            $usedRefs[$sf['mntentref']] = true;
+        }
+        try {
+            $mntents = $db->getAssoc('conf.system.filesystem.mountpoint');
+        } catch (\Exception $e) {
+            return [];
+        }
+        if (empty($mntents)) {
+            return [];
+        }
+        if (isset($mntents['fsname'])) {
+            $mntents = [$mntents];
+        }
+        $result = [];
+        foreach ($mntents as $mntent) {
+            if (isset($usedRefs[$mntent['uuid']])) {
+                $result[$mntent['fsname']] = true;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Return true if the given pool or dataset has any child datasets or volumes.
+     */
+    private static function hasChildren(string $name): bool
+    {
+        self::zfsTryExec(
+            sprintf('zfs list -H -d 1 -t filesystem,volume %s 2>&1', escapeshellarg($name)),
+            $out
+        );
+        // First line is the object itself; any additional lines are children.
+        return count($out) > 1;
     }
 
     /**

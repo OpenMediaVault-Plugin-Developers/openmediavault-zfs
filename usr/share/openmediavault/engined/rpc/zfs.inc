@@ -64,11 +64,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('setSnapshotJob');
         $this->registerMethod('deleteSnapshotJob');
         $this->registerMethod('runSnapshotJob');
+        $this->registerMethod('runSnapshotJobBg');
         $this->registerMethod('getScrubJobList');
         $this->registerMethod('getScrubJob');
         $this->registerMethod('setScrubJob');
         $this->registerMethod('deleteScrubJob');
         $this->registerMethod('runScrubJob');
+        $this->registerMethod('runScrubJobBg');
         $this->registerMethod('fixPackages');
         $this->registerMethod('enableEncryption');
         $this->registerMethod('loadEncryptionKey');
@@ -314,6 +316,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         return implode("\n", $out);
     }
 
+    public function runSnapshotJobBg($params, $context)
+    {
+        return $this->callMethodBg('runSnapshotJob', $params, $context);
+    }
+
     // -------------------------------------------------------------------------
     // Scrub scheduling
     // -------------------------------------------------------------------------
@@ -376,6 +383,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $j = $obj->getAssoc();
         self::zfsExec(sprintf('zpool scrub %s 2>&1', escapeshellarg($j['pool'])), $out, $res);
         return implode("\n", $out);
+    }
+
+    public function runScrubJobBg($params, $context)
+    {
+        return $this->callMethodBg('runScrubJob', $params, $context);
     }
 
 

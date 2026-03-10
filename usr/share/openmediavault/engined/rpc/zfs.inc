@@ -1293,15 +1293,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         // One zfs list call returns all the data we need for sizing/type/origin.
         $cmd = 'zfs list -H -p -t filesystem,volume '
-             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation,quota 2>&1';
+             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation,quota,compression,compressratio,refer 2>&1';
         self::zfsExec($cmd, $out, $res);
         foreach ($out as $line) {
             $parts = preg_split('/\t/', $line);
-            if (count($parts) < 10) {
+            if (count($parts) < 13) {
                 continue;
             }
             [$path, $type, $used, $available, $mountpoint,
-             $origin, $volsize, $logicalused, $refreservation, $quota] = $parts;
+             $origin, $volsize, $logicalused, $refreservation, $quota,
+             $compression, $compressratio, $refer] = $parts;
             $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
             $isFilesystem = ($type === 'filesystem' && !$isPool);
             $isVolume     = ($type === 'volume');
@@ -1337,11 +1338,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'state'       => $ps['state']        ?? 'UNKNOWN',
                     'status'      => $ps['status']       ?? 'Unknown',
                     'scrubstate'  => $ps['scrubstate']   ?? 'unknown',
-                    'scrubactive' => $ps['scrubactive']  ?? false,
-                    'encryption'  => $enc,
-                    'keystatus'   => $keystatus,
-                    'autounlock'  => $autounlock,
-                    'hasshares'   => isset($sharedFsnames[$path]),
+                    'scrubactive'   => $ps['scrubactive']  ?? false,
+                    'encryption'    => $enc,
+                    'keystatus'     => $keystatus,
+                    'autounlock'    => $autounlock,
+                    'hasshares'     => isset($sharedFsnames[$path]),
+                    'fragmentation' => $pz ? $pz['frag']  : 0,
+                    'dedup'         => $pz ? $pz['dedup'] : '1.00x',
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1373,10 +1376,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'status'      => 'n/a',
                     'scrubstate'  => 'n/a',
                     'scrubactive' => false,
-                    'encryption'  => $enc,
-                    'keystatus'   => $keystatus,
-                    'autounlock'  => $autounlock,
-                    'hasshares'   => isset($sharedFsnames[$path]),
+                    'encryption'    => $enc,
+                    'keystatus'     => $keystatus,
+                    'autounlock'    => $autounlock,
+                    'hasshares'     => isset($sharedFsnames[$path]),
+                    'compression'   => ($compression !== '-') ? $compression : 'off',
+                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
                 ];
             } elseif ($isVolume) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1403,10 +1409,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'status'      => 'n/a',
                     'scrubstate'  => 'n/a',
                     'scrubactive' => false,
-                    'encryption'  => $enc,
-                    'keystatus'   => $keystatus,
-                    'autounlock'  => $autounlock,
-                    'hasshares'   => false,
+                    'encryption'    => $enc,
+                    'keystatus'     => $keystatus,
+                    'autounlock'    => $autounlock,
+                    'hasshares'     => false,
+                    'compression'   => ($compression !== '-') ? $compression : 'off',
+                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
                 ];
             }
         }
@@ -1464,19 +1473,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function zpoolFetchAllSizes(): array
     {
         $result = [];
-        if (!self::zfsTryExec('zpool list -Hp -o name,size,alloc,free 2>&1', $out)) {
+        if (!self::zfsTryExec('zpool list -Hp -o name,size,alloc,free,frag,dedup 2>&1', $out)) {
             return $result;
         }
         foreach ($out as $line) {
             $parts = preg_split('/\t/', trim($line));
-            if (count($parts) < 4) {
+            if (count($parts) < 6) {
                 continue;
             }
-            [$name, $size, $alloc, $free] = $parts;
+            [$name, $size, $alloc, $free, $frag, $dedup] = $parts;
             $result[$name] = [
                 'size'  => ($size  !== '-') ? (int)$size  : 0,
                 'alloc' => ($alloc !== '-') ? (int)$alloc : 0,
                 'free'  => ($free  !== '-') ? (int)$free  : 0,
+                'frag'  => ($frag  !== '-') ? (float)$frag : 0,
+                'dedup' => ($dedup !== '-') ? trim($dedup) : '1.00x',
             ];
         }
         return $result;

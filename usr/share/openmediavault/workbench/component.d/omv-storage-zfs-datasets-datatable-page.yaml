@@ -46,6 +46,11 @@ data:
         flexGrow: 1
         sortable: true
         cellTemplateName: binaryUnit
+      - name: _("Referenced")
+        prop: refer
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
       - name: _("Mountpoint")
         prop: mountpoint
         flexGrow: 2
@@ -71,6 +76,15 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Compression")
+        prop: compression
+        flexGrow: 1
+        sortable: true
+        hidden: true
+      - name: _("Compress ratio")
+        prop: compressratio
+        flexGrow: 1
+        sortable: true
       - name: _("Has children")
         prop: haschildren
         flexGrow: 1

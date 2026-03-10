@@ -72,6 +72,18 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Fragmentation")
+        prop: fragmentation
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: progressBar
+        cellTemplateConfig:
+          text: '{{ fragmentation }}%'
+      - name: _("Dedup ratio")
+        prop: dedup
+        flexGrow: 1
+        sortable: true
+        hidden: true
       - name: _("Scrub state")
         prop: scrubstate
         flexGrow: 1

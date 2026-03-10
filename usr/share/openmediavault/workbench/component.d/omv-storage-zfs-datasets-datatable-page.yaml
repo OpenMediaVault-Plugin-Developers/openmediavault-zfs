@@ -201,7 +201,7 @@ data:
                     name: autounlock
                     label: _("Auto-unlock at boot")
                     value: false
-                    hint: _("Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically on startup.")
+                    hint: _("Saves the passphrase unencrypted to /etc/zfs/keys/ so the dataset unlocks automatically on startup. Protects against drive theft but not theft of the whole server.")
                 buttons:
                   submit:
                     text: _("Add")
@@ -421,7 +421,7 @@ data:
                     value: "local"
                   - type: hint
                     hintType: info
-                    text: _("The passphrase will be saved to /etc/zfs/keys/ on this machine. Protects against drive theft but not theft of the whole server.")
+                    text: _("The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. Protects against drive theft but not theft of the whole server.")
                   - type: passwordInput
                     name: key
                     label: _("Passphrase / key")

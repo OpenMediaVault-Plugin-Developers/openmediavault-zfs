@@ -252,7 +252,7 @@ data:
         name: autounlock
         label: _("Auto-unlock at boot")
         value: false
-        hint: _("Saves the passphrase to /etc/zfs/keys/ so the pool unlocks automatically on startup. Ensure your system disk is secured.")
+        hint: _("Saves the passphrase unencrypted to /etc/zfs/keys/ so the pool unlocks automatically on startup. Protects against drive theft but not theft of the whole server.")
         modifiers:
           - type: visible
             constraint:

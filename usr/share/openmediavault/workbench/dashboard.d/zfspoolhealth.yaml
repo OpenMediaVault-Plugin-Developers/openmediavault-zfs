@@ -1,0 +1,27 @@
+version: "1.0"
+type: dashboard-widget
+data:
+  id: d66db954-5d68-4fb6-889b-cfbbd3632ffd
+  title: _("ZFS Pool Health")
+  type: datatable
+  permissions:
+    role:
+    - admin
+  datatable:
+    columns:
+    - name: _("Pool")
+      prop: name
+      flexGrow: 1
+      sortable: true
+    - name: _("Health")
+      prop: health
+      flexGrow: 1
+      sortable: true
+    store:
+      proxy:
+        service: Zfs
+        get:
+          method: getPoolHealth
+    sorters:
+    - dir: asc
+      prop: name

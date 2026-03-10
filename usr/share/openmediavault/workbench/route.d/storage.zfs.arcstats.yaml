@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/arcstats"
+  title: _("ARC Stats")
+  component: omv-storage-zfs-arcstats-text-page

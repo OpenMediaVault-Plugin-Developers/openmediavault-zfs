@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.arcstats"
+  text: _("ARC Stats")
+  position: 40
+  icon: mdi:memory
+  url: "/storage/zfs/arcstats"

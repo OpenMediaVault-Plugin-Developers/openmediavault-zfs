@@ -55,6 +55,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getEmptyCandidates');
         $this->registerMethod('rollbackSnapshot');
         $this->registerMethod('getStats');
+        $this->registerMethod('getPoolHealth');
+        $this->registerMethod('getArcStats');
         $this->registerMethod('fixPackages');
         $this->registerMethod('enableEncryption');
         $this->registerMethod('loadEncryptionKey');
@@ -87,19 +89,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $hits = 0;
         $misses = 0;
         $size = 0;
+        $cMax = 0;
         foreach ($arcstats as $line) {
-            if (strpos($line, 'hits') === 0) {
-                $parts = preg_split('/\s+/', $line);
-                $hits = $parts[2];
-            }
-            if (strpos($line, 'misses') === 0) {
-                $parts = preg_split('/\s+/', $line);
-                $misses = $parts[2];
-            }
-            if (strpos($line, 'size') === 0) {
-                $parts = preg_split('/\s+/', $line);
-                $size = $parts[2];
-            }
+            $parts = preg_split('/\s+/', $line);
+            $key = $parts[0] ?? '';
+            if ($key === 'hits')   { $hits   = (int)$parts[2]; }
+            if ($key === 'misses') { $misses = (int)$parts[2]; }
+            if ($key === 'size')   { $size   = (int)$parts[2]; }
+            if ($key === 'c_max')  { $cMax   = (int)$parts[2]; }
         }
         if ($hits > 0 || $misses > 0) {
             return [
@@ -108,9 +105,98 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 'hitsMisses' => $hits + $misses,
                 'ratio'      => ($hits / ($hits + $misses)) * 100,
                 'size'       => $size,
+                'c_max'      => $cMax,
             ];
         }
-        return ['hits' => 0, 'misses' => 0, 'hitsMisses' => 0, 'ratio' => 0, 'size' => 0];
+        return ['hits' => 0, 'misses' => 0, 'hitsMisses' => 0, 'ratio' => 0, 'size' => 0, 'c_max' => $cMax];
+    }
+
+    public function getPoolHealth($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $result = [];
+        if (!self::zfsTryExec('zpool list -H -o name,health 2>&1', $out)) {
+            return $result;
+        }
+        foreach ($out as $line) {
+            $parts = preg_split('/\t/', trim($line));
+            if (count($parts) < 2) {
+                continue;
+            }
+            $result[] = ['name' => $parts[0], 'health' => $parts[1]];
+        }
+        return $result;
+    }
+
+    public function getArcStats($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $arcstats = @file('/proc/spl/kstat/zfs/arcstats');
+        if (!$arcstats) {
+            return 'ARC statistics unavailable (/proc/spl/kstat/zfs/arcstats not found).';
+        }
+        $s = [];
+        foreach ($arcstats as $line) {
+            $parts = preg_split('/\s+/', trim($line));
+            if (count($parts) >= 3 && $parts[0] !== '') {
+                $s[$parts[0]] = (int)$parts[2];
+            }
+        }
+        $g = fn(string $k): int => $s[$k] ?? 0;
+        $fmt = function(int $bytes): string {
+            $units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+            $i = 0;
+            $v = (float)$bytes;
+            while ($v >= 1024 && $i < count($units) - 1) { $v /= 1024; $i++; }
+            return sprintf('%.2f %s', $v, $units[$i]);
+        };
+        $pct = function(int $hits, int $misses): string {
+            $total = $hits + $misses;
+            return $total > 0 ? sprintf('%.2f%%', ($hits / $total) * 100) : 'N/A';
+        };
+        $lines = [];
+        $lines[] = '=== ARC Size ===';
+        $lines[] = sprintf('%-32s %s', 'Current size:', $fmt($g('size')));
+        $lines[] = sprintf('%-32s %s', 'Target (c):', $fmt($g('c')));
+        $lines[] = sprintf('%-32s %s', 'Minimum (c_min):', $fmt($g('c_min')));
+        $lines[] = sprintf('%-32s %s', 'Maximum (c_max):', $fmt($g('c_max')));
+        $lines[] = '';
+        $lines[] = '=== Hit Ratio ===';
+        $lines[] = sprintf('%-32s %s  (%s hits / %s misses)', 'Overall:', $pct($g('hits'), $g('misses')), number_format($g('hits')), number_format($g('misses')));
+        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand data:', $pct($g('demand_data_hits'), $g('demand_data_misses')), number_format($g('demand_data_hits')), number_format($g('demand_data_misses')));
+        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand metadata:', $pct($g('demand_metadata_hits'), $g('demand_metadata_misses')), number_format($g('demand_metadata_hits')), number_format($g('demand_metadata_misses')));
+        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch data:', $pct($g('prefetch_data_hits'), $g('prefetch_data_misses')), number_format($g('prefetch_data_hits')), number_format($g('prefetch_data_misses')));
+        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch metadata:', $pct($g('prefetch_metadata_hits'), $g('prefetch_metadata_misses')), number_format($g('prefetch_metadata_hits')), number_format($g('prefetch_metadata_misses')));
+        $lines[] = '';
+        $lines[] = '=== ARC Lists ===';
+        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MRU hits:', number_format($g('mru_hits')), number_format($g('mru_ghost_hits')));
+        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MFU hits:', number_format($g('mfu_hits')), number_format($g('mfu_ghost_hits')));
+        $lines[] = '';
+        $lines[] = '=== Memory Breakdown ===';
+        $lines[] = sprintf('%-32s %s', 'Data:', $fmt($g('data_size')));
+        $lines[] = sprintf('%-32s %s', 'Metadata:', $fmt($g('metadata_size')));
+        $lines[] = sprintf('%-32s %s', 'Anonymous:', $fmt($g('anon_size')));
+        $lines[] = sprintf('%-32s %s', 'MRU:', $fmt($g('mru_size')));
+        $lines[] = sprintf('%-32s %s', 'MFU:', $fmt($g('mfu_size')));
+        $lines[] = sprintf('%-32s %s', 'Header overhead:', $fmt($g('hdr_size')));
+        $lines[] = '';
+        $compressed   = $g('compressed_size');
+        $uncompressed = $g('uncompressed_size');
+        $compRatio    = $compressed > 0 ? ($uncompressed / $compressed) : 1.0;
+        $lines[] = '=== ARC Compression ===';
+        $lines[] = sprintf('%-32s %s', 'Compressed:', $fmt($compressed));
+        $lines[] = sprintf('%-32s %s', 'Uncompressed:', $fmt($uncompressed));
+        $lines[] = sprintf('%-32s %.2fx', 'Ratio:', $compRatio);
+        $lines[] = '';
+        $lines[] = '=== L2ARC ===';
+        if ($g('l2_size') > 0) {
+            $lines[] = sprintf('%-32s %s', 'Size:', $fmt($g('l2_size')));
+            $lines[] = sprintf('%-32s %s', 'Actual size on disk:', $fmt($g('l2_asize')));
+            $lines[] = sprintf('%-32s %s  (%s / %s)', 'Hit ratio:', $pct($g('l2_hits'), $g('l2_misses')), number_format($g('l2_hits')), number_format($g('l2_misses')));
+        } else {
+            $lines[] = 'Not configured.';
+        }
+        return implode("\n\r", $lines);
     }
 
     public function addPool($params, $context)

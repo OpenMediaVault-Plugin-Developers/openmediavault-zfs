@@ -1,0 +1,29 @@
+version: "1.0"
+type: dashboard-widget
+data:
+  id: 8e674e89-baaa-4053-9efb-06db98f364f4
+  title: _("ZFS ARC Size")
+  type: chart
+  permissions:
+    role:
+    - admin
+  chart:
+    type: advanced-doughnut
+    maxHeight: "150px"
+    maxWidth: "150px"
+    request:
+      service: Zfs
+      method: getStats
+      transform:
+        cMaxFree: '{{ c_max - size }}'
+    label:
+      display: true
+      formatter: template
+      formatterConfig: "{{ value | binaryunit }}"
+    dataConfig:
+    - label: _("Used")
+      prop: size
+      backgroundColor: "#5dacdf"
+    - label: _("Free")
+      prop: cMaxFree
+      backgroundColor: "#e0e0e0"

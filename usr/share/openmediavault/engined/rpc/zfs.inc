@@ -655,6 +655,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                         'Before deleting this filesystem, you must delete shares referencing it.');
                 }
                 self::deleteOMVMntEnt($context, $name, $mp);
+                self::cleanupJobsForDataset($name);
                 \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
                     'org.openmediavault.storage.zfs.filesystem', $context);
                 break;
@@ -669,6 +670,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 }
                 $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
+                self::cleanupJobsForDataset($name);
                 break;
             case 'Pool':
                 if (self::hasChildren($name)) {
@@ -693,6 +695,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 foreach ($devices as $device) {
                     self::zfsTryExec(sprintf('zpool labelclear %s 2>&1', escapeshellarg($device)));
                 }
+                self::cleanupJobsForPool($name);
                 break;
             default:
                 throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
@@ -1316,6 +1319,39 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
         }
         return false;
+    }
+
+    /**
+     * Delete snapshot jobs referencing $dataset (exact match or child of $dataset).
+     * Delete scrub jobs referencing $pool (exact match).
+     */
+    private static function cleanupJobsForDataset(string $dataset): void
+    {
+        $db = \OMV\Config\Database::getInstance();
+        $prefix = $dataset . '/';
+        foreach ($db->get('conf.service.zfs.snapshotjob') as $obj) {
+            $d = $obj->get('dataset');
+            if ($d === $dataset || str_starts_with($d, $prefix)) {
+                $db->delete($obj);
+            }
+        }
+    }
+
+    private static function cleanupJobsForPool(string $pool): void
+    {
+        $db = \OMV\Config\Database::getInstance();
+        $prefix = $pool . '/';
+        foreach ($db->get('conf.service.zfs.snapshotjob') as $obj) {
+            $d = $obj->get('dataset');
+            if ($d === $pool || str_starts_with($d, $prefix)) {
+                $db->delete($obj);
+            }
+        }
+        foreach ($db->get('conf.service.zfs.scrubjob') as $obj) {
+            if ($obj->get('pool') === $pool) {
+                $db->delete($obj);
+            }
+        }
     }
 
     /**

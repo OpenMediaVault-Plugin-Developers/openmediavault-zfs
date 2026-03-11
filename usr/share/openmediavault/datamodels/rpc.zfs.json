@@ -493,7 +493,6 @@
       "properties": {
         "uuid": {
           "type": "string",
-          "oneOf": [{ "format": "uuidv4" }, { "enum": ["undefined"] }],
           "required": true
         },
         "enable": { "type": "boolean", "required": true },
@@ -526,7 +525,6 @@
       "properties": {
         "uuid": {
           "type": "string",
-          "oneOf": [{ "format": "uuidv4" }, { "enum": ["undefined"] }],
           "required": true
         },
         "enable": { "type": "boolean", "required": true },

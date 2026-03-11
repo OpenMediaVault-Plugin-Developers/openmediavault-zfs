@@ -185,6 +185,9 @@ info "Devices  : ${DEVICES[*]}"
 info "Pool type: $POOLTYPE"
 info "Pool name: $POOL"
 
+# OMV sentinel UUID used to signal "create new object" to $db->set().
+OMV_NEW_UUID=$(. /etc/default/openmediavault 2>/dev/null; echo "${OMV_CONFIGOBJECT_NEW_UUID:-fa4b1c66-ef79-11e5-87a0-0002b3a176b4}")
+
 # ===========================================================================
 section "Informational RPCs (no pool required)"
 # ===========================================================================
@@ -192,6 +195,7 @@ section "Informational RPCs (no pool required)"
 assert_rpc "getStats"             "Zfs" "getStats"
 assert_rpc "listCompressionTypes" "Zfs" "listCompressionTypes"
 assert_rpc "getEmptyCandidates"   "Zfs" "getEmptyCandidates"
+assert_rpc "getArcStats"          "Zfs" "getArcStats" "{}" "ARC Size"
 
 # ===========================================================================
 section "Pool — create"
@@ -240,6 +244,9 @@ assert_rpc "setProperties (Pool) — compression=lz4" "Zfs" "setProperties" \
 
 assert_rpc "scrubPool" "Zfs" "scrubPool" "{\"name\":\"$POOL\"}"
 
+assert_rpc "getPoolHealth" "Zfs" "getPoolHealth" "{}" "$POOL"
+assert_rpc "getPoolNames"  "Zfs" "getPoolNames"  "{}" "$POOL"
+
 # ===========================================================================
 section "Filesystem — add, details, properties"
 # ===========================================================================
@@ -265,6 +272,8 @@ assert_rpc "setProperties (Filesystem) — compression=lz4" "Zfs" "setProperties
 
 assert_rpc "setProperties (Filesystem) — atime=off" "Zfs" "setProperties" \
     "{\"name\":\"$POOL/fs1\",\"type\":\"Filesystem\",\"properties\":[{\"property\":\"atime\",\"value\":\"off\",\"modified\":true}]}"
+
+assert_rpc "getDatasetNames" "Zfs" "getDatasetNames" "{}" "$POOL"
 
 # ===========================================================================
 section "Snapshot — add, list, rollback, delete"
@@ -309,6 +318,99 @@ assert_rpc "deleteObject — clone1" "Zfs" "deleteObject" \
 
 assert_rpc "deleteObject — snapshot fs1@snap2" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1@snap2\",\"mp\":\"\",\"type\":\"Snapshot\"}"
+
+# ===========================================================================
+section "Scheduled Snapshot Jobs — CRUD and run"
+# ===========================================================================
+
+SNAP_JOB_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':              '$OMV_NEW_UUID',
+    'enable':            True,
+    'dataset':           '$POOL/fs1',
+    'prefix':            'test-snap-',
+    'retention':         5,
+    'execution':         'daily',
+    'minute':            ['0'],
+    'hour':              ['2'],
+    'dayofmonth':        ['*'],
+    'month':             ['*'],
+    'dayofweek':         ['*'],
+    'everynminute':      False,
+    'everynhour':        False,
+    'everyndayofmonth':  False,
+    'sendemail':         False,
+    'comment':           'test snapshot job',
+}))
+")
+SNAP_JOB_RAW=$(rpc "Zfs" "setSnapshotJob" "$SNAP_JOB_PARAMS" 2>&1) && {
+    SNAP_JOB_UUID=$(echo "$SNAP_JOB_RAW" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    if [ -n "$SNAP_JOB_UUID" ]; then
+        _pass "setSnapshotJob — create"
+    else
+        _fail "setSnapshotJob — create" "UUID not found in response: ${SNAP_JOB_RAW:0:200}"
+    fi
+} || {
+    _fail "setSnapshotJob — create" "${SNAP_JOB_RAW:0:200}"
+    SNAP_JOB_UUID=""
+}
+
+JOB_LIST_PARAMS='{"start":0,"limit":null,"sortfield":null,"sortdir":null}'
+assert_rpc "getSnapshotJobList" "Zfs" "getSnapshotJobList" "$JOB_LIST_PARAMS" "$POOL"
+
+if [ -n "$SNAP_JOB_UUID" ]; then
+    assert_rpc    "getSnapshotJob"      "Zfs" "getSnapshotJob"      "{\"uuid\":\"$SNAP_JOB_UUID\"}" "test-snap-"
+    assert_rpc_bg "runSnapshotJobBg"    "Zfs" "runSnapshotJobBg"    "{\"uuid\":\"$SNAP_JOB_UUID\"}"
+    assert_rpc    "deleteSnapshotJob"   "Zfs" "deleteSnapshotJob"   "{\"uuid\":\"$SNAP_JOB_UUID\"}"
+else
+    _fail "skipping getSnapshotJob/runSnapshotJobBg/deleteSnapshotJob — no UUID" ""
+fi
+
+# ===========================================================================
+section "Scheduled Scrub Jobs — CRUD and run"
+# ===========================================================================
+
+SCRUB_JOB_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':              '$OMV_NEW_UUID',
+    'enable':            True,
+    'pool':              '$POOL',
+    'execution':         'weekly',
+    'minute':            ['0'],
+    'hour':              ['0'],
+    'dayofmonth':        ['*'],
+    'month':             ['*'],
+    'dayofweek':         ['0'],
+    'everynminute':      False,
+    'everynhour':        False,
+    'everyndayofmonth':  False,
+    'sendemail':         False,
+    'comment':           'test scrub job',
+}))
+")
+SCRUB_JOB_RAW=$(rpc "Zfs" "setScrubJob" "$SCRUB_JOB_PARAMS" 2>&1) && {
+    SCRUB_JOB_UUID=$(echo "$SCRUB_JOB_RAW" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    if [ -n "$SCRUB_JOB_UUID" ]; then
+        _pass "setScrubJob — create"
+    else
+        _fail "setScrubJob — create" "UUID not found in response: ${SCRUB_JOB_RAW:0:200}"
+    fi
+} || {
+    _fail "setScrubJob — create" "${SCRUB_JOB_RAW:0:200}"
+    SCRUB_JOB_UUID=""
+}
+
+assert_rpc "getScrubJobList" "Zfs" "getScrubJobList" "$JOB_LIST_PARAMS" "$POOL"
+
+if [ -n "$SCRUB_JOB_UUID" ]; then
+    assert_rpc    "getScrubJob"      "Zfs" "getScrubJob"      "{\"uuid\":\"$SCRUB_JOB_UUID\"}" "$POOL"
+    assert_rpc_bg "runScrubJobBg"    "Zfs" "runScrubJobBg"    "{\"uuid\":\"$SCRUB_JOB_UUID\"}"
+    assert_rpc    "deleteScrubJob"   "Zfs" "deleteScrubJob"   "{\"uuid\":\"$SCRUB_JOB_UUID\"}"
+else
+    _fail "skipping getScrubJob/runScrubJobBg/deleteScrubJob — no UUID" ""
+fi
 
 # ===========================================================================
 section "Volume — thick and thin"
@@ -390,6 +492,13 @@ section "Export and import"
 info "Removing child datasets before export test"
 assert_rpc "deleteObject — fs1/child" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1/child\",\"mp\":\"/$POOL/fs1/child\",\"type\":\"Filesystem\"}"
+
+# The scheduled snapshot job test may have created snapshots on fs1; remove them.
+info "Removing any auto-created snapshots on fs1"
+zfs list -H -t snapshot -o name -r "$POOL/fs1" 2>/dev/null | while IFS= read -r snap; do
+    zfs destroy "$snap" 2>/dev/null || true
+done
+
 assert_rpc "deleteObject — fs1" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1\",\"mp\":\"/$POOL/fs1\",\"type\":\"Filesystem\"}"
 assert_rpc "deleteObject — fs2" "Zfs" "deleteObject" \

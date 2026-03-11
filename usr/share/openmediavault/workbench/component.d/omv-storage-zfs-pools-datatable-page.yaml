@@ -72,6 +72,13 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Capacity")
+        prop: capacity
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: progressBar
+        cellTemplateConfig:
+          text: '{{ capacity }}%'
       - name: _("Fragmentation")
         prop: fragmentation
         flexGrow: 1
@@ -272,56 +279,6 @@ data:
                         method: addObject
                         progressMessage: _("Adding volume ...")
                         successNotification: _("Volume added.")
-          - text: _("Add snapshot")
-            icon: mdi:camera-plus-outline
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: formDialog
-              formDialog:
-                title: _("Add snapshot")
-                fields:
-                  - type: textInput
-                    name: path
-                    label: _("Pool")
-                    value: "{{ _selected[0].path }}"
-                    readonly: true
-                  - type: textInput
-                    name: name
-                    label: _("Name")
-                    value: ""
-                    validators:
-                      required: true
-                      patternType: shareName
-                  - type: hidden
-                    name: type
-                    value: "snapshot"
-                buttons:
-                  submit:
-                    text: _("Add")
-                    execute:
-                      type: request
-                      request:
-                        service: Zfs
-                        method: addObject
-                        progressMessage: _("Adding snapshot ...")
-                        successNotification: _("Snapshot added.")
-          - text: _("Quick snapshot")
-            icon: mdi:camera
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: request
-              request:
-                service: Zfs
-                method: quickSnapshot
-                params:
-                  name: "{{ _selected[0].path }}"
-                task: false
-                progressMessage: _("Creating snapshot ...")
-                successNotification: _("Snapshot created.")
       - type: menu
         icon: mdi:swap-horizontal
         tooltip: _("Import / Export")

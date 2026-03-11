@@ -730,7 +730,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $objects    = [];
-        $properties = self::zfsGetAllPropertiesRaw($params['name']);
+        $properties = ($params['type'] === 'Pool')
+            ? self::zpoolGetAllPropertiesRaw($params['name'])
+            : self::zfsGetAllPropertiesRaw($params['name']);
         foreach ($properties as $propertyk => $propertyv) {
             if ($propertyv['source'] === '-') {
                 continue;
@@ -751,20 +753,28 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.setproperties');
+        $isPool = ($params['type'] === 'Pool');
         foreach ($params['properties'] as $property) {
             if ($property['modified'] !== true) {
                 continue;
             }
-            $cmd = sprintf('zfs set %s=%s %s 2>&1',
-                escapeshellarg($property['property']),
-                escapeshellarg($property['value']),
-                escapeshellarg($params['name']));
-            self::zfsExec($cmd, $out, $res);
-            if ($property['property'] === 'mountpoint') {
-                self::relocateOMVMntEnt($context, $params['name']);
-                \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
-                    'org.openmediavault.conf.system.sharedfolder', $context);
+            if ($isPool) {
+                $cmd = sprintf('zpool set %s=%s %s 2>&1',
+                    escapeshellarg($property['property']),
+                    escapeshellarg($property['value']),
+                    escapeshellarg($params['name']));
+            } else {
+                $cmd = sprintf('zfs set %s=%s %s 2>&1',
+                    escapeshellarg($property['property']),
+                    escapeshellarg($property['value']),
+                    escapeshellarg($params['name']));
+                if ($property['property'] === 'mountpoint') {
+                    self::relocateOMVMntEnt($context, $params['name']);
+                    \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
+                        'org.openmediavault.conf.system.sharedfolder', $context);
+                }
             }
+            self::zfsExec($cmd, $out, $res);
         }
         if ($params['type'] === 'Filesystem') {
             \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
@@ -1244,6 +1254,20 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         return $properties;
     }
 
+    private static function zpoolGetAllPropertiesRaw(string $name): array
+    {
+        $cmd = sprintf('zpool get -H all %s 2>&1', escapeshellarg($name));
+        self::zfsExec($cmd, $out, $res);
+        $properties = [];
+        foreach ($out as $line) {
+            $parts = preg_split('/\t+/', $line);
+            if (count($parts) >= 4) {
+                $properties[$parts[1]] = ['value' => $parts[2], 'source' => $parts[3]];
+            }
+        }
+        return $properties;
+    }
+
     /**
      * Return true if the named ZFS filesystem exists.
      */
@@ -1659,8 +1683,42 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'keystatus'     => $keystatus,
                     'autounlock'    => $autounlock,
                     'hasshares'     => isset($sharedFsnames[$path]),
-                    'fragmentation' => $pz ? $pz['frag']  : 0,
-                    'dedup'         => $pz ? $pz['dedup'] : '1.00x',
+                    'fragmentation' => $pz ? $pz['frag']     : 0,
+                    'dedup'         => $pz ? $pz['dedup']    : '1.00x',
+                    'capacity'      => $pz ? $pz['capacity'] : 0,
+                ];
+                // Also emit the pool root as a Filesystem entry so it appears
+                // on the Datasets tab and its filesystem properties are accessible.
+                $fsUsed  = ($used !== '-') ? (int)$used : 0;
+                $fsAvail = ($available !== '-') ? (int)$available : 0;
+                $objects[] = [
+                    'id'            => 'root/poolfs-' . $path,
+                    'parentid'      => 'root',
+                    'name'          => $path,
+                    'type'          => 'Filesystem',
+                    'icon'          => 'images/filesystem.png',
+                    'path'          => $path,
+                    'pool'          => $path,
+                    'expanded'      => true,
+                    'origin'        => 'n/a',
+                    'size'          => null,
+                    'used'          => $fsUsed,
+                    'usedpercent'   => 0,
+                    'available'     => $fsAvail,
+                    'mountpoint'    => ($mountpoint !== '-') ? $mountpoint : '',
+                    'lastscrub'     => 'n/a',
+                    'state'         => 'n/a',
+                    'status'        => 'n/a',
+                    'scrubstate'    => 'n/a',
+                    'scrubactive'   => false,
+                    'encryption'    => $enc,
+                    'keystatus'     => $keystatus,
+                    'autounlock'    => $autounlock,
+                    'hasshares'     => isset($sharedFsnames[$path]),
+                    'compression'   => ($compression !== '-') ? $compression : 'off',
+                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
+                    'poolroot'      => true,
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1699,6 +1757,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'   => ($compression !== '-') ? $compression : 'off',
                     'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'         => ($refer !== '-') ? (int)$refer : 0,
+                    'poolroot'      => false,
                 ];
             } elseif ($isVolume) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -1789,21 +1848,22 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function zpoolFetchAllSizes(): array
     {
         $result = [];
-        if (!self::zfsTryExec('zpool list -Hp -o name,size,alloc,free,frag,dedup 2>&1', $out)) {
+        if (!self::zfsTryExec('zpool list -Hp -o name,size,alloc,free,frag,dedup,cap 2>&1', $out)) {
             return $result;
         }
         foreach ($out as $line) {
             $parts = preg_split('/\t/', trim($line));
-            if (count($parts) < 6) {
+            if (count($parts) < 7) {
                 continue;
             }
-            [$name, $size, $alloc, $free, $frag, $dedup] = $parts;
+            [$name, $size, $alloc, $free, $frag, $dedup, $cap] = $parts;
             $result[$name] = [
-                'size'  => ($size  !== '-') ? (int)$size  : 0,
-                'alloc' => ($alloc !== '-') ? (int)$alloc : 0,
-                'free'  => ($free  !== '-') ? (int)$free  : 0,
-                'frag'  => ($frag  !== '-') ? (float)$frag : 0,
-                'dedup' => ($dedup !== '-') ? trim($dedup) : '1.00x',
+                'size'     => ($size  !== '-') ? (int)$size  : 0,
+                'alloc'    => ($alloc !== '-') ? (int)$alloc : 0,
+                'free'     => ($free  !== '-') ? (int)$free  : 0,
+                'frag'     => ($frag  !== '-') ? (float)$frag : 0,
+                'dedup'    => ($dedup !== '-') ? trim($dedup) : '1.00x',
+                'capacity' => ($cap   !== '-') ? (int)$cap   : 0,
             ];
         }
         return $result;

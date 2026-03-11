@@ -97,6 +97,12 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Pool root")
+        prop: poolroot
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: true
     actions:
       - type: menu
         icon: mdi:plus
@@ -647,6 +653,9 @@ data:
             - operator: falsy
               arg0:
                 prop: hasshares
+            - operator: falsy
+              arg0:
+                prop: poolroot
         confirmationDialogConfig:
           template: confirmation-critical
           message: _("Are you sure you want to delete?")

@@ -1953,12 +1953,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 ];
             }
         }
-        // Mark objects that have at least one child dataset/volume.
+        // Mark objects that have at least one child dataset, volume, or snapshot.
         $parentPaths = [];
         foreach ($objects as $obj) {
-            $slash = strrpos($obj['path'], '/');
+            $path = $obj['path'];
+            // Child filesystem/volume: parent is everything before the last /.
+            $slash = strrpos($path, '/');
             if ($slash !== false) {
-                $parentPaths[substr($obj['path'], 0, $slash)] = true;
+                $parentPaths[substr($path, 0, $slash)] = true;
+            }
+            // Snapshot: parent is everything before the @.
+            $at = strpos($path, '@');
+            if ($at !== false) {
+                $parentPaths[substr($path, 0, $at)] = true;
             }
         }
         foreach ($objects as &$obj) {
@@ -2128,12 +2135,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Return true if the given pool or dataset has any child datasets or volumes.
+     * Return true if the given pool or dataset has any child datasets, volumes, or snapshots.
      */
     private static function hasChildren(string $name): bool
     {
         self::zfsTryExec(
-            sprintf('zfs list -H -d 1 -t filesystem,volume %s 2>&1', escapeshellarg($name)),
+            sprintf('zfs list -H -d 1 -t filesystem,volume,snapshot %s 2>&1', escapeshellarg($name)),
             $out
         );
         // First line is the object itself; any additional lines are children.

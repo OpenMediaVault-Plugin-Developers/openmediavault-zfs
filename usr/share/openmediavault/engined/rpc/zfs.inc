@@ -161,97 +161,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     public function getArcStats($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        $arcstats = @file('/proc/spl/kstat/zfs/arcstats');
-        if (!$arcstats) {
+        if (!file_exists('/proc/spl/kstat/zfs/arcstats')) {
             return 'ARC statistics unavailable (/proc/spl/kstat/zfs/arcstats not found).';
         }
-        $s = [];
-        foreach ($arcstats as $line) {
-            $parts = preg_split('/\s+/', trim($line));
-            if (count($parts) >= 3 && $parts[0] !== '') {
-                $s[$parts[0]] = (int)$parts[2];
-            }
-        }
-        $g = fn(string $k): int => $s[$k] ?? 0;
-        $fmt = function(int $bytes): string {
-            $units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
-            $i = 0;
-            $v = (float)$bytes;
-            while ($v >= 1024 && $i < count($units) - 1) { $v /= 1024; $i++; }
-            return sprintf('%.2f %s', $v, $units[$i]);
-        };
-        $pct = function(int $hits, int $misses): string {
-            $total = $hits + $misses;
-            return $total > 0 ? sprintf('%.2f%%', ($hits / $total) * 100) : 'N/A';
-        };
-        $lines = [];
-
-        // --- Cache Hit Metrics ---
-        $lines[] = '=== Cache Hit Metrics ===';
-        $lines[] = sprintf('%-32s %s  (%s hits / %s misses)', 'Overall:', $pct($g('hits'), $g('misses')), number_format($g('hits')), number_format($g('misses')));
-        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand data:', $pct($g('demand_data_hits'), $g('demand_data_misses')), number_format($g('demand_data_hits')), number_format($g('demand_data_misses')));
-        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand metadata:', $pct($g('demand_metadata_hits'), $g('demand_metadata_misses')), number_format($g('demand_metadata_hits')), number_format($g('demand_metadata_misses')));
-        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch data:', $pct($g('prefetch_data_hits'), $g('prefetch_data_misses')), number_format($g('prefetch_data_hits')), number_format($g('prefetch_data_misses')));
-        $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch metadata:', $pct($g('prefetch_metadata_hits'), $g('prefetch_metadata_misses')), number_format($g('prefetch_metadata_hits')), number_format($g('prefetch_metadata_misses')));
-        $lines[] = '';
-
-        // --- ARC Size Metrics ---
-        $lines[] = '=== ARC Size Metrics ===';
-        $lines[] = sprintf('%-32s %s', 'Current size:', $fmt($g('size')));
-        $lines[] = sprintf('%-32s %s', 'Target (c):', $fmt($g('c')));
-        $lines[] = sprintf('%-32s %s', 'Minimum (c_min):', $fmt($g('c_min')));
-        $lines[] = sprintf('%-32s %s', 'Maximum (c_max):', $fmt($g('c_max')));
-        $compressed   = $g('compressed_size');
-        $uncompressed = $g('uncompressed_size');
-        $compRatio    = $compressed > 0 ? ($uncompressed / $compressed) : 1.0;
-        $lines[] = sprintf('%-32s %s  (uncompressed: %s, ratio: %.2fx)', 'Compressed size:', $fmt($compressed), $fmt($uncompressed), $compRatio);
-        $lines[] = '';
-
-        // --- ARC List Metrics ---
-        $lines[] = '=== ARC List Metrics ===';
-        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MRU hits:', number_format($g('mru_hits')), number_format($g('mru_ghost_hits')));
-        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MFU hits:', number_format($g('mfu_hits')), number_format($g('mfu_ghost_hits')));
-        $lines[] = sprintf('%-32s %s', 'MRU size:', $fmt($g('mru_size')));
-        $lines[] = sprintf('%-32s %s', 'MFU size:', $fmt($g('mfu_size')));
-        $lines[] = sprintf('%-32s %s', 'Anonymous size:', $fmt($g('anon_size')));
-        $lines[] = sprintf('%-32s %s', 'Header overhead:', $fmt($g('hdr_size')));
-        $lines[] = '';
-
-        // --- Eviction and Memory Pressure ---
-        $lines[] = '=== Eviction and Memory Pressure ===';
-        $lines[] = sprintf('%-32s %s', 'Objects deleted:', number_format($g('deleted')));
-        $lines[] = sprintf('%-32s %s', 'Evictions skipped:', number_format($g('evict_skip')));
-        $lines[] = sprintf('%-32s %s', 'Evict not enough:', number_format($g('evict_not_enough')));
-        $lines[] = sprintf('%-32s %s', 'L2ARC-cached evictions:', number_format($g('evict_l2_cached')));
-        $lines[] = sprintf('%-32s %s', 'L2ARC-eligible evictions:', number_format($g('evict_l2_eligible')));
-        $lines[] = sprintf('%-32s %s', 'L2ARC-ineligible evictions:', number_format($g('evict_l2_ineligible')));
-        $lines[] = sprintf('%-32s %s', 'Memory throttle count:', number_format($g('memory_throttle_count')));
-        $lines[] = sprintf('%-32s %s', 'Direct memory reclaims:', number_format($g('memory_direct_count')));
-        $lines[] = sprintf('%-32s %s', 'Indirect memory reclaims:', number_format($g('memory_indirect_count')));
-        $lines[] = '';
-
-        // --- Metadata vs Data Usage ---
-        $dataSize     = $g('data_size');
-        $metaSize     = $g('metadata_size');
-        $totalCached  = $dataSize + $metaSize;
-        $dataPct      = $totalCached > 0 ? sprintf('%.1f%%', ($dataSize / $totalCached) * 100) : 'N/A';
-        $metaPct      = $totalCached > 0 ? sprintf('%.1f%%', ($metaSize / $totalCached) * 100) : 'N/A';
-        $lines[] = '=== Metadata vs Data Usage ===';
-        $lines[] = sprintf('%-32s %s  (%s of cached)', 'Data:', $fmt($dataSize), $dataPct);
-        $lines[] = sprintf('%-32s %s  (%s of cached)', 'Metadata:', $fmt($metaSize), $metaPct);
-        $lines[] = sprintf('%-32s %s', 'Total cached:', $fmt($totalCached));
-        $lines[] = '';
-
-        // --- L2ARC ---
-        $lines[] = '=== L2ARC ===';
-        if ($g('l2_size') > 0) {
-            $lines[] = sprintf('%-32s %s', 'Size:', $fmt($g('l2_size')));
-            $lines[] = sprintf('%-32s %s', 'Actual size on disk:', $fmt($g('l2_asize')));
-            $lines[] = sprintf('%-32s %s  (%s / %s)', 'Hit ratio:', $pct($g('l2_hits'), $g('l2_misses')), number_format($g('l2_hits')), number_format($g('l2_misses')));
+        if (is_executable('/usr/bin/zarcsummary')) {
+            $cmd = '/usr/bin/zarcsummary 2>&1';
+        } elseif (is_executable('/usr/sbin/arc_summary')) {
+            $cmd = '/usr/sbin/arc_summary 2>&1';
         } else {
-            $lines[] = 'Not configured.';
+            return 'ARC summary tool not found (zarcsummary or arc_summary required).';
         }
-        return implode("\n\r", $lines);
+        self::zfsExec($cmd, $out, $res);
+        return implode("\n\r", $out);
     }
 
     public function getDatasetNames($params, $context)

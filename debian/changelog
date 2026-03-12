@@ -55,7 +55,7 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Log snapshot and scrub job output to /var/log/omv-zfs-snapshot.log and /var/log/omv-zfs-scrub.log
   * Allow nested clone paths on snapshots tab (e.g. pool/parent/clone, not just pool/clone)
   * Mount dataset after loading encryption key so it is immediately accessible
-  * Add other metrics to Arc Stats tab
+  * Replace custom ARC stats with zarcsummary/arc_summary output on ARC Stats tab
   * Add omv-extras.org wiki link to pools tab
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000

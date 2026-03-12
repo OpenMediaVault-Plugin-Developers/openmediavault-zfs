@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/snapshots/diff/:name"
+  title: _("Snapshot Diff")
+  editing: true
+  component: omv-storage-zfs-snapshots-diff-text-page

@@ -44,6 +44,14 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Detach device: detach a mirror member
     - Replace device: replace a pool device with a new one (begins resilver)
     - Attach device: attach a new device as a mirror member (begins resilver)
+  * Add pool maintenance actions to pools tab menu
+    - Clear errors: clears recorded pool errors (zpool clear)
+    - Trim: triggers TRIM on all pool devices (zpool trim)
+    - Upgrade: upgrades pool to latest feature flags (zpool upgrade)
+  * Add vdev management: add cache, log, or spare devices to an existing pool
+  * Add compression and recordsize options to filesystem creation dialogs
+    - Available when creating a regular or encrypted filesystem
+  * Add Diff button to snapshots tab showing changed files since snapshot (zfs diff)
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000
 

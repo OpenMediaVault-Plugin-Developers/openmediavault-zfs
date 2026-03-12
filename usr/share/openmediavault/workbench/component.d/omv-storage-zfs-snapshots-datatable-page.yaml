@@ -51,6 +51,15 @@ data:
           type: url
           url: "/storage/zfs/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
       - type: iconButton
+        icon: mdi:file-compare
+        tooltip: _("Diff")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: url
+          url: "/storage/zfs/snapshots/diff/{{ _selected[0].path | encodeuricomponent }}"
+      - type: iconButton
         tooltip: _("Delete")
         icon: mdi:delete
         enabledConstraints:

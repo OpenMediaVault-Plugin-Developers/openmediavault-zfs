@@ -151,6 +151,19 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.zfs.addvdev",
+    "params": {
+      "type": "object",
+      "properties": {
+        "pool": { "type": "string", "required": true },
+        "vdevtype": { "type": "string", "required": true },
+        "device": { "type": "string", "required": true },
+        "devalias": { "type": "string", "required": true }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.zfs.clonedataset",
     "params": {
       "type": "object",
@@ -385,6 +398,14 @@
         },
         "thinvol": {
           "type": "boolean"
+        },
+        "compression": {
+          "type": "string",
+          "required": false
+        },
+        "recordsize": {
+          "type": "string",
+          "required": false
         }
       }
     }
@@ -413,6 +434,14 @@
         },
         "autounlock": {
           "type": "boolean",
+          "required": false
+        },
+        "compression": {
+          "type": "string",
+          "required": false
+        },
+        "recordsize": {
+          "type": "string",
           "required": false
         }
       }

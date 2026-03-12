@@ -90,6 +90,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getEncryptionStatus');
         $this->registerMethod('setAutoUnlock');
         $this->registerMethod('removeAutoUnlock');
+        $this->registerMethod('clearPool');
+        $this->registerMethod('trimPool');
+        $this->registerMethod('upgradePool');
+        $this->registerMethod('addVdev');
+        $this->registerMethod('getSnapshotDiff');
     }
 
     public function doDiscover($params, $context)
@@ -507,6 +512,60 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::zfsExec($cmd, $out, $res);
     }
 
+    public function clearPool($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool clear %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function trimPool($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool trim %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function upgradePool($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool upgrade %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function addVdev($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.addvdev');
+        $device = $params['device'];
+        if ($params['devalias'] === 'id') {
+            try { $device = self::getDiskId($device); } catch (\Exception $e) {}
+        } elseif ($params['devalias'] === 'path') {
+            try { $device = self::getDiskPath($device); } catch (\Exception $e) {}
+        }
+        $cmd = sprintf('zpool add %s %s %s 2>&1',
+            escapeshellarg($params['pool']),
+            escapeshellarg($params['vdevtype']),
+            escapeshellarg($device));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function getSnapshotDiff($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        if (!self::zfsTryExec(sprintf('zfs diff %s 2>&1', escapeshellarg($params['name'])), $out)) {
+            return sprintf("Unable to get diff for snapshot '%s'.", $params['name']);
+        }
+        if (empty($out)) {
+            return 'No changes since this snapshot was taken.';
+        }
+        return implode("\n\r", $out);
+    }
+
     public function listCompressionTypes($params, $context)
     {
         // Validate the RPC caller context.
@@ -613,8 +672,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 self::addOMVMntEntForDataset($context, $target);
                 break;
             case 'filesystem':
-                $name = $params['path'] . '/' . $params['name'];
-                $cmd = sprintf('zfs create -p %s 2>&1', escapeshellarg($name));
+                $name     = $params['path'] . '/' . $params['name'];
+                $propOpts = '';
+                if (!empty($params['compression'])) {
+                    $propOpts .= ' -o compression=' . escapeshellarg($params['compression']);
+                }
+                if (!empty($params['recordsize'])) {
+                    $propOpts .= ' -o recordsize=' . escapeshellarg($params['recordsize']);
+                }
+                $cmd = sprintf('zfs create -p%s %s 2>&1', $propOpts, escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
                 if (strlen($params['mountpoint']) > 0) {
                     foreach (['mountpoint' => $params['mountpoint'], 'atime' => 'off',
@@ -1148,6 +1214,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $fullPath    = rtrim($params['path'], '/') . '/' . $params['name'];
         $encryptOpts = sprintf('-o encryption=%s -o keyformat=passphrase -o keylocation=prompt',
             escapeshellarg($params['encryptiontype']));
+        if (!empty($params['compression'])) {
+            $encryptOpts .= ' -o compression=' . escapeshellarg($params['compression']);
+        }
+        if (!empty($params['recordsize'])) {
+            $encryptOpts .= ' -o recordsize=' . escapeshellarg($params['recordsize']);
+        }
         $cmd = sprintf('zfs create %s %s 2>&1', $encryptOpts, escapeshellarg($fullPath));
         self::execWithStdin($cmd, $params['key']);
         // Enable auto-unlock if requested: save keyfile and update keylocation.

@@ -1,0 +1,62 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-add-vdev-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: addVdev
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to add this device to the pool?")
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: select
+        name: vdevtype
+        label: _("Device type")
+        value: "cache"
+        store:
+          data:
+            - ["cache", _("Cache (L2ARC)")]
+            - ["log", _("Log (ZIL/SLOG)")]
+            - ["spare", _("Hot spare")]
+      - type: select
+        name: device
+        label: _("Device")
+        valueField: devicefile
+        textField: devicefile
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getEmptyCandidates
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+      - type: select
+        name: devalias
+        label: _("Device alias")
+        value: "id"
+        store:
+          data:
+            - ["id", _("By ID")]
+            - ["path", _("By Path")]
+            - ["dev", _("None")]
+        hint: _("Specifies which device alias should be used.")
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

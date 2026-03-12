@@ -97,6 +97,57 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
+          - text: _("Clear errors")
+            icon: mdi:broom
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: clearPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Clearing pool errors ...")
+                successNotification: _("Pool errors cleared.")
+          - text: _("Trim")
+            icon: mdi:content-cut
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to start a TRIM operation on this pool? This is only meaningful for SSD-backed pools.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: trimPool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Starting TRIM ...")
+                successNotification: _("TRIM started.")
+          - text: _("Upgrade")
+            icon: mdi:arrow-up-bold-circle-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            confirmationDialogConfig:
+              template: confirmation-critical
+              message: _("Are you sure you want to upgrade this pool? This enables new feature flags and cannot be undone. The pool will no longer be accessible by older ZFS versions.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: upgradePool
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Upgrading pool ...")
+                successNotification: _("Pool upgraded.")
       - type: menu
         icon: mdi:plus
         tooltip: _("Add")
@@ -128,6 +179,36 @@ data:
                     label: _("Mountpoint")
                     value: ""
                     hint: _("Optional mountpoint. Default is to use the dataset path.")
+                  - type: select
+                    name: compression
+                    label: _("Compression")
+                    value: ""
+                    store:
+                      data:
+                        - ["", _("Inherit from parent")]
+                        - ["lz4", "lz4 (recommended)"]
+                        - ["zstd", "zstd"]
+                        - ["gzip", "gzip"]
+                        - ["off", "off"]
+                        - ["lzjb", "lzjb"]
+                        - ["zle", "zle"]
+                  - type: select
+                    name: recordsize
+                    label: _("Record size")
+                    value: ""
+                    hint: _("Use default (128K) for general use. Use 4K-16K for databases, 1M for large files/media.")
+                    store:
+                      data:
+                        - ["", _("Default (128K)")]
+                        - ["4K", "4K"]
+                        - ["8K", "8K"]
+                        - ["16K", "16K"]
+                        - ["32K", "32K"]
+                        - ["64K", "64K"]
+                        - ["128K", "128K"]
+                        - ["256K", "256K"]
+                        - ["512K", "512K"]
+                        - ["1M", "1M"]
                   - type: hidden
                     name: type
                     value: "filesystem"
@@ -201,6 +282,36 @@ data:
                     label: _("Auto-unlock at boot")
                     value: false
                     hint: _("Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically on startup.")
+                  - type: select
+                    name: compression
+                    label: _("Compression")
+                    value: ""
+                    store:
+                      data:
+                        - ["", _("Inherit from parent")]
+                        - ["lz4", "lz4 (recommended)"]
+                        - ["zstd", "zstd"]
+                        - ["gzip", "gzip"]
+                        - ["off", "off"]
+                        - ["lzjb", "lzjb"]
+                        - ["zle", "zle"]
+                  - type: select
+                    name: recordsize
+                    label: _("Record size")
+                    value: ""
+                    hint: _("Use default (128K) for general use. Use 4K-16K for databases, 1M for large files/media.")
+                    store:
+                      data:
+                        - ["", _("Default (128K)")]
+                        - ["4K", "4K"]
+                        - ["8K", "8K"]
+                        - ["16K", "16K"]
+                        - ["32K", "32K"]
+                        - ["64K", "64K"]
+                        - ["128K", "128K"]
+                        - ["256K", "256K"]
+                        - ["512K", "512K"]
+                        - ["1M", "1M"]
                 buttons:
                   submit:
                     text: _("Add")
@@ -496,6 +607,14 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/device-attach/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Add cache / log / spare")
+            icon: mdi:plus-circle-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/add-vdev/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:magnify-plus-outline
         tooltip: _("Discover")

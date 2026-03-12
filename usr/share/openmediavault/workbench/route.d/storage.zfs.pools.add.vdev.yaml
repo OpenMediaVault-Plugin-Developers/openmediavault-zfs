@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/add-vdev/:pool"
+  title: _("Add Special Device")
+  editing: true
+  component: omv-storage-zfs-pools-add-vdev-form-page

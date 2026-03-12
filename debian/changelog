@@ -57,6 +57,12 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Mount dataset after loading encryption key so it is immediately accessible
   * Replace custom ARC stats with zarcsummary/arc_summary output on ARC Stats tab
   * Add omv-extras.org wiki link to pools tab
+  * Convert zfs-remote-unlock to Python
+    - Add persistent logging to /var/log/zfs-remote-unlock.log (also logs to stdout/journald)
+    - Replace curl dependency with Python urllib (no external tools required)
+    - Distinct log messages for config parse errors, fetch errors, key-load failures, and mount warnings
+    - Exit with code 1 if any dataset fails to unlock
+    - Add log viewer in Diagnostics → System Logs → Logs (ZFS Remote Unlock)
   * Add ZFS Pool Status dashboard widget
     - Traffic-light coloured grid: green = healthy, orange = >80% capacity, red = degraded/faulted/errors/>90% capacity
     - Tooltip shows pool state, error flag, and capacity percentage

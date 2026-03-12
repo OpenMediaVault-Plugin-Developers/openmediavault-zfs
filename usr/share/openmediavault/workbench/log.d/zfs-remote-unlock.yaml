@@ -1,0 +1,23 @@
+version: "1.0"
+type: log
+data:
+  id: zfs-remote-unlock
+  text: _("ZFS Remote Unlock")
+  columns:
+    - name: _("Date/Time")
+      sortable: true
+      prop: ts
+      flexGrow: 2
+    - name: _("Level")
+      sortable: true
+      prop: level
+      flexGrow: 1
+    - name: _("Message")
+      sortable: false
+      prop: message
+      flexGrow: 5
+  request:
+    service: LogFile
+    method: getList
+    params:
+      id: zfs-remote-unlock

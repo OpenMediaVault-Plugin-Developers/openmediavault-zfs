@@ -1,0 +1,42 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-device-online-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: deviceOnline
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: select
+        name: device
+        label: _("Device")
+        valueField: devicefile
+        textField: label
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getPoolDevices
+              params:
+                name: "{{ _routeParams.pool }}"
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

@@ -103,6 +103,11 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Origin")
+        prop: origin
+        flexGrow: 2
+        sortable: true
+        hidden: true
     actions:
       - type: menu
         icon: mdi:plus
@@ -332,6 +337,115 @@ data:
         execute:
           type: url
           url: "/storage/zfs/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+      - type: menu
+        icon: mdi:database-edit-outline
+        tooltip: _("Dataset")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Rename")
+            icon: mdi:rename-box
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: falsy
+                  arg0:
+                    prop: poolroot
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Rename dataset")
+                fields:
+                  - type: textInput
+                    name: oldpath
+                    label: _("Dataset")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: hidden
+                    name: oldname
+                    value: "{{ _selected[0].name }}"
+                  - type: hidden
+                    name: type
+                    value: "{{ _selected[0].type }}"
+                  - type: textInput
+                    name: newname
+                    label: _("New name")
+                    value: ""
+                    validators:
+                      required: true
+                      patternType: shareName
+                buttons:
+                  submit:
+                    text: _("Rename")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: renameObject
+                        progressMessage: _("Renaming dataset ...")
+                        successNotification: _("Dataset renamed.")
+          - text: _("Clone")
+            icon: mdi:content-copy
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: falsy
+                  arg0:
+                    prop: poolroot
+            execute:
+              type: formDialog
+              formDialog:
+                title: _("Clone dataset")
+                fields:
+                  - type: textInput
+                    name: name
+                    label: _("Source dataset")
+                    value: "{{ _selected[0].path }}"
+                    readonly: true
+                  - type: textInput
+                    name: clonename
+                    label: _("Clone name")
+                    value: ""
+                    hint: _("Name of the new clone, created in the same parent as the source.")
+                    validators:
+                      required: true
+                      patternType: shareName
+                buttons:
+                  submit:
+                    text: _("Clone")
+                    execute:
+                      type: request
+                      request:
+                        service: Zfs
+                        method: cloneDataset
+                        progressMessage: _("Cloning dataset ...")
+                        successNotification: _("Dataset cloned.")
+          - text: _("Promote")
+            icon: mdi:arrow-up-circle-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: origin
+                  arg1: "n/a"
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to promote this dataset? This detaches the clone from its origin snapshot dependency.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: promoteDataset
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Promoting dataset ...")
+                successNotification: _("Dataset promoted.")
       - type: menu
         icon: mdi:lock
         tooltip: _("Encryption")

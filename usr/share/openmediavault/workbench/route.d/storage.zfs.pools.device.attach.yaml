@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/device-attach/:pool"
+  title: _("Device Attach")
+  editing: true
+  component: omv-storage-zfs-pools-device-attach-form-page

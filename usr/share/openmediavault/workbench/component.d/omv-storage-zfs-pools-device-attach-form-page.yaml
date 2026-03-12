@@ -1,0 +1,61 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-device-attach-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: deviceAttach
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to attach this device? The pool will begin resilvering.")
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: select
+        name: olddevice
+        label: _("Existing pool device")
+        valueField: devicefile
+        textField: label
+        hint: _("The new device will be mirrored with this existing device.")
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getPoolDevices
+              params:
+                name: "{{ _routeParams.pool }}"
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+      - type: select
+        name: newdevice
+        label: _("New device to attach")
+        valueField: devicefile
+        textField: devicefile
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getEmptyCandidates
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

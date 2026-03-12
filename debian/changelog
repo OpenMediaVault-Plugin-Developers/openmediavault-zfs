@@ -31,8 +31,21 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Configure pool and schedule
     - Compose-style schedule form
     - Run jobs on demand
+  * Add Pool Events tab showing zpool events log with reload button
+  * Add pool history per-pool via History button on pools tab
+  * Add dataset rename, clone, and promote actions to datasets tab
+    - Rename: renames the leaf component within the same parent
+    - Clone: auto-creates a timestamped snapshot and clones from it
+    - Promote: detaches a clone from its origin snapshot dependency
+    - Promote button only enabled for cloned datasets (origin != n/a)
+  * Add device management menu to pools tab
+    - Offline device: take a pool device offline
+    - Online device: bring an offline device back online
+    - Detach device: detach a mirror member
+    - Replace device: replace a pool device with a new one (begins resilver)
+    - Attach device: attach a new device as a mirror member (begins resilver)
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 07 Mar 2026 03:14:32 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000
 
 openmediavault-zfs (8.0.4) stable; urgency=low
 

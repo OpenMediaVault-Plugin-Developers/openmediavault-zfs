@@ -47,10 +47,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('setProperties');
         $this->registerMethod('getObjectDetails');
         $this->registerMethod('expandPool');
+        $this->registerMethod('getPoolDevices');
+        $this->registerMethod('deviceOffline');
+        $this->registerMethod('deviceOnline');
+        $this->registerMethod('deviceDetach');
+        $this->registerMethod('deviceReplace');
+        $this->registerMethod('deviceAttach');
         $this->registerMethod('scrubPool');
         $this->registerMethod('stopScrub');
         $this->registerMethod('pauseScrub');
         $this->registerMethod('getScrubStatus');
+        $this->registerMethod('renameObject');
+        $this->registerMethod('cloneDataset');
+        $this->registerMethod('promoteDataset');
+        $this->registerMethod('getPoolHistory');
+        $this->registerMethod('getPoolEvents');
         $this->registerMethod('quickSnapshot');
         $this->registerMethod('getEmptyCandidates');
         $this->registerMethod('rollbackSnapshot');
@@ -648,6 +659,56 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::zfsExec($cmd, $out, $res);
     }
 
+    public function renameObject($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.rename');
+        $oldPath = $params['oldpath'];
+        $parts   = explode('/', $oldPath);
+        array_pop($parts);
+        $newPath = implode('/', $parts) . '/' . $params['newname'];
+        $cmd = sprintf('zfs rename %s %s 2>&1', escapeshellarg($oldPath), escapeshellarg($newPath));
+        self::zfsExec($cmd, $out, $res);
+        self::fixOMVMntEnt($context, true, true);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+    }
+
+    public function cloneDataset($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.clonedataset');
+        $source    = $params['name'];
+        $clonename = $params['clonename'];
+        if (preg_match('/[\s]+/', $clonename)) {
+            throw new \OMV\Exception('Spaces are not allowed in clone names');
+        }
+        // Build target path: same parent as source, with clonename as leaf.
+        $parts  = explode('/', $source);
+        array_pop($parts);
+        $target = implode('/', $parts) . '/' . $clonename;
+        // Auto-create a snapshot to clone from.
+        $snapshot = $source . '@clone-' . date('Y-m-d_H-i-s');
+        self::zfsExec(sprintf('zfs snapshot %s 2>&1', escapeshellarg($snapshot)), $out, $res);
+        // Clone from the snapshot.
+        $cmd = sprintf('zfs clone -p %s %s 2>&1', escapeshellarg($snapshot), escapeshellarg($target));
+        self::zfsExec($cmd, $out, $res);
+        self::addOMVMntEntForDataset($context, $target);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+    }
+
+    public function promoteDataset($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zfs promote %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+        self::fixOMVMntEnt($context);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+    }
+
     public function deleteObject($params, $context)
     {
         // Validate the RPC caller context.
@@ -864,6 +925,83 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::zfsExec($cmd, $out, $res);
     }
 
+    public function getPoolDevices($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($params['name']));
+        if (!self::zfsTryExec($cmd, $out)) {
+            return [];
+        }
+        $devices  = [];
+        $inConfig = false;
+        foreach ($out as $line) {
+            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
+                $inConfig = true;
+                continue;
+            }
+            if (!$inConfig) continue;
+            if (trim($line) === '') break;
+            if (preg_match('/^\s+(\/\S+)\s+(\S+)/', $line, $m)) {
+                $devices[] = [
+                    'devicefile' => $m[1],
+                    'state'      => $m[2],
+                    'label'      => $m[1] . '  [' . $m[2] . ']',
+                ];
+            }
+        }
+        return $devices;
+    }
+
+    public function deviceOffline($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.pooldevice');
+        $cmd = sprintf('zpool offline %s %s 2>&1',
+            escapeshellarg($params['pool']), escapeshellarg($params['device']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function deviceOnline($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.pooldevice');
+        $cmd = sprintf('zpool online %s %s 2>&1',
+            escapeshellarg($params['pool']), escapeshellarg($params['device']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function deviceDetach($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.pooldevice');
+        $cmd = sprintf('zpool detach %s %s 2>&1',
+            escapeshellarg($params['pool']), escapeshellarg($params['device']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function deviceReplace($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.pooltwodevices');
+        $cmd = sprintf('zpool replace %s %s %s 2>&1',
+            escapeshellarg($params['pool']),
+            escapeshellarg($params['olddevice']),
+            escapeshellarg($params['newdevice']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function deviceAttach($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.pooltwodevices');
+        $cmd = sprintf('zpool attach %s %s %s 2>&1',
+            escapeshellarg($params['pool']),
+            escapeshellarg($params['olddevice']),
+            escapeshellarg($params['newdevice']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
     public function scrubPool($params, $context)
     {
         // Validate the RPC caller context.
@@ -919,6 +1057,31 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             return sprintf("No scrub information available for pool '%s'.", $params['name']);
         }
         return implode("\n\r", $scrubLines);
+    }
+
+    public function getPoolHistory($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        if (!self::zfsTryExec(sprintf('zpool history %s 2>&1', escapeshellarg($params['name'])), $out)) {
+            return sprintf("Failed to retrieve history for pool '%s'.", $params['name']);
+        }
+        if (empty($out)) {
+            return sprintf("No history available for pool '%s'.", $params['name']);
+        }
+        return implode("\n\r", $out);
+    }
+
+    public function getPoolEvents($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        if (!self::zfsTryExec('zpool events 2>&1', $out)) {
+            return 'ZFS event log unavailable.';
+        }
+        if (empty($out)) {
+            return 'No ZFS events logged.';
+        }
+        return implode("\n\r", $out);
     }
 
     public function getEmptyCandidates($params, $context)

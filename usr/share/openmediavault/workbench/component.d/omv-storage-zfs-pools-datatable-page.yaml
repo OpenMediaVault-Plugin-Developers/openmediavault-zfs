@@ -358,6 +358,15 @@ data:
         execute:
           type: url
           url: "/storage/zfs/details/{{ _selected[0].path | encodeuricomponent }}/{{ _selected[0].type }}"
+      - type: iconButton
+        icon: mdi:history
+        tooltip: _("History")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        execute:
+          type: url
+          url: "/storage/zfs/pools/history/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:progress-wrench
         tooltip: _("Scrub")
@@ -462,6 +471,53 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/scrub-status/{{ _selected[0].path | encodeuricomponent }}"
+      - type: menu
+        icon: mdi:harddisk
+        tooltip: _("Devices")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Offline device")
+            icon: mdi:harddisk-off
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/device-offline/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Online device")
+            icon: mdi:harddisk-plus
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/device-online/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Detach device")
+            icon: mdi:link-off
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/device-detach/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Replace device")
+            icon: mdi:swap-horizontal
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/device-replace/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Attach device")
+            icon: mdi:link-plus
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/device-attach/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:lock
         tooltip: _("Encryption")

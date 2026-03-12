@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/device-offline/:pool"
+  title: _("Device Offline")
+  editing: true
+  component: omv-storage-zfs-pools-device-offline-form-page

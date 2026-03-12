@@ -1,0 +1,13 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-history-text-page
+  type: textPage
+  config:
+    hasReloadButton: true
+    request:
+      service: Zfs
+      get:
+        method: getPoolHistory
+        params:
+          name: "{{ _routeParams.name }}"

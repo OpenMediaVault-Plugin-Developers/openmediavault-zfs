@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/device-detach/:pool"
+  title: _("Device Detach")
+  editing: true
+  component: omv-storage-zfs-pools-device-detach-form-page

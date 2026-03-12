@@ -128,6 +128,46 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.zfs.pooldevice",
+    "params": {
+      "type": "object",
+      "properties": {
+        "pool": { "type": "string", "required": true },
+        "device": { "type": "string", "required": true }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.pooltwodevices",
+    "params": {
+      "type": "object",
+      "properties": {
+        "pool": { "type": "string", "required": true },
+        "olddevice": { "type": "string", "required": true },
+        "newdevice": { "type": "string", "required": true }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.clonedataset",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "clonename": {
+          "type": "string",
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.zfs.expandpool",
     "params": {
       "type": "object",

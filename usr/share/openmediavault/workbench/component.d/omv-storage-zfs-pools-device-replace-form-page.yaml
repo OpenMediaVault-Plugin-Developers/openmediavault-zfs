@@ -1,0 +1,60 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-device-replace-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: deviceReplace
+        confirmationDialogConfig:
+          template: confirmation
+          message: _("Are you sure you want to replace this device? Resilvering will begin immediately.")
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: select
+        name: olddevice
+        label: _("Device to replace")
+        valueField: devicefile
+        textField: label
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getPoolDevices
+              params:
+                name: "{{ _routeParams.pool }}"
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+      - type: select
+        name: newdevice
+        label: _("Replacement device")
+        valueField: devicefile
+        textField: devicefile
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getEmptyCandidates
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

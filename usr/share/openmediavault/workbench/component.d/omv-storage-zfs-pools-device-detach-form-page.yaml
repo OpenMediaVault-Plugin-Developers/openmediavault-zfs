@@ -1,0 +1,45 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-device-detach-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: deviceDetach
+        confirmationDialogConfig:
+          template: confirmation-critical
+          message: _("Are you sure you want to detach this device from the pool?")
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: select
+        name: device
+        label: _("Device to detach")
+        valueField: devicefile
+        textField: label
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getPoolDevices
+              params:
+                name: "{{ _routeParams.pool }}"
+          sorters:
+            dir: asc
+            prop: devicefile
+        validators:
+          required: true
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

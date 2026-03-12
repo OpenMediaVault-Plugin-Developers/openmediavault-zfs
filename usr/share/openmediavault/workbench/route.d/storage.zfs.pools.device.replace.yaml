@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/device-replace/:pool"
+  title: _("Device Replace")
+  editing: true
+  component: omv-storage-zfs-pools-device-replace-form-page

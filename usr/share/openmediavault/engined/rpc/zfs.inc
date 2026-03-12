@@ -872,11 +872,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
 
             case 'Pool':
                 self::zfsExec("zpool status -v $name", $out, $res);
-                $output  = "Pool status (zpool status -v):\n\r\n\r" . implode("\n\r", $out);
-                self::zfsExec("zpool list -v $name", $out, $res);
-                $output .= "\n\r\n\rPool details (zpool list -v):\n\r\n\r" . implode("\n\r", $out);
-                $output .= "\n\r\n\rPool filesystem details (zfs get all):\n\r\n\r";
-                break;
+                return "Pool status (zpool status -v):\n\r\n\r" . implode("\n\r", $out);
 
             default:
                 throw new \OMV\Exception('Incorrect type provided');

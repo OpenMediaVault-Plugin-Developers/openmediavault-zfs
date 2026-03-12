@@ -67,6 +67,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('rollbackSnapshot');
         $this->registerMethod('getStats');
         $this->registerMethod('getPoolHealth');
+        $this->registerMethod('getPoolStatus');
         $this->registerMethod('getArcStats');
         $this->registerMethod('getDatasetNames');
         $this->registerMethod('getPoolNames');
@@ -155,6 +156,24 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
             $result[] = ['name' => $parts[0], 'health' => $parts[1]];
         }
+        return $result;
+    }
+
+    public function getPoolStatus($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $statusMap = self::zpoolFetchAllStatus();
+        $sizeMap   = self::zpoolFetchAllSizes();
+        $result = [];
+        foreach ($statusMap as $name => $info) {
+            $result[] = [
+                'name'     => $name,
+                'state'    => $info['state'],
+                'status'   => $info['status'],
+                'capacity' => (int)($sizeMap[$name]['capacity'] ?? 0),
+            ];
+        }
+        usort($result, fn($a, $b) => strcmp($a['name'], $b['name']));
         return $result;
     }
 

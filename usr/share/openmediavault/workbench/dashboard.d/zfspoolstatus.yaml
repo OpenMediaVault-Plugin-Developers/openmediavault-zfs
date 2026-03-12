@@ -1,0 +1,38 @@
+version: "1.0"
+type: dashboard-widget
+data:
+  id: a3f72c10-9d44-4e81-b8c5-1f2e3d4a5b6c
+  type: grid
+  reloadPeriod: 30000
+  permissions:
+    role:
+      - admin
+  title: _("ZFS Pool Status")
+  description: _("Displays the health of all ZFS pools with traffic-light status. Green = healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click a pool to view details.")
+  # Text used in templates and therefore cannot be automatically extracted
+  # by i18n tools.
+  i18n:
+    - _("ONLINE")
+    - _("DEGRADED")
+    - _("FAULTED")
+    - _("OFFLINE")
+    - _("REMOVED")
+    - _("UNAVAIL")
+    - _("UNKNOWN")
+    - _("OK")
+    - _("Error")
+  grid:
+    item:
+      content: '{{ name }}&#10;{{ capacity }}%'
+      tooltip: '{{ state }}{% if status != "OK" %} | Errors detected{% endif %} | {{ capacity }}% used'
+      url: '/storage/zfs/pools'
+      class: 'omv-cursor-pointer omv-text-center omv-text-nowrap {% if state != "ONLINE" %}omv-background-color-pair-error{% elif status == "Error" %}omv-background-color-pair-error{% elif capacity > 90 %}omv-background-color-pair-error{% elif capacity > 80 %}omv-background-color-pair-warning{% else %}omv-background-color-pair-success{% endif %}'
+    emptyMessage: _("No ZFS pools found.")
+    store:
+      proxy:
+        service: Zfs
+        get:
+          method: getPoolStatus
+      sorters:
+        - prop: name
+          dir: asc

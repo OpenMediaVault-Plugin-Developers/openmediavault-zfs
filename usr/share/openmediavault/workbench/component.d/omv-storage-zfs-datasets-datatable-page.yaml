@@ -118,6 +118,11 @@ data:
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: type
+                  arg1: "Volume"
             execute:
               type: formDialog
               formDialog:
@@ -158,6 +163,11 @@ data:
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: type
+                  arg1: "Volume"
             execute:
               type: formDialog
               formDialog:
@@ -228,6 +238,11 @@ data:
             enabledConstraints:
               minSelected: 1
               maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: type
+                  arg1: "Volume"
             execute:
               type: formDialog
               formDialog:

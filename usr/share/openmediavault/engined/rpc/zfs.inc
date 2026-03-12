@@ -1251,6 +1251,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.loadencryptionkey');
         $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
         self::execWithStdin($cmd, $params['key']);
+        // Mount the dataset now that the key is loaded.
+        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($params['name'])));
+        self::addOMVMntEntForDataset($context, $params['name']);
+        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
+            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
         return ['status' => 'loaded'];
     }
 

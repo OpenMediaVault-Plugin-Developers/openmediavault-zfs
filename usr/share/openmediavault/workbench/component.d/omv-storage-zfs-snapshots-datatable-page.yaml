@@ -107,11 +107,11 @@ data:
                 readonly: true
               - type: textInput
                 name: clonename
-                label: _("Snap clone name")
+                label: _("Clone path (within pool)")
+                hint: _("May include sub-datasets, e.g. secure/clone1")
                 value: ""
                 validators:
                   required: true
-                  patternType: shareName
                   custom:
                     - constraint:
                         operator: ne

@@ -3,6 +3,9 @@
 # Usage: omv-zfs-scrub-job <pool>
 set -euo pipefail
 
+LOGFILE="/var/log/omv-zfs-scrub.log"
+exec > >(tee -a "$LOGFILE") 2>&1
+
 POOL="$1"
 echo "$(date -Iseconds): Starting scrub on pool ${POOL}"
 zpool scrub "${POOL}"

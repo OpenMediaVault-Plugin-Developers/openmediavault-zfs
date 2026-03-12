@@ -52,6 +52,9 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Add compression and recordsize options to filesystem creation dialogs
     - Available when creating a regular or encrypted filesystem
   * Add Diff button to snapshots tab showing changed files since snapshot (zfs diff)
+  * Log snapshot and scrub job output to /var/log/omv-zfs-snapshot.log and /var/log/omv-zfs-scrub.log
+  * Allow nested clone paths on snapshots tab (e.g. pool/parent/clone, not just pool/clone)
+  * Mount dataset after loading encryption key so it is immediately accessible
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000
 

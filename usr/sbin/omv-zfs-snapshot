@@ -3,6 +3,9 @@
 # Usage: omv-zfs-snapshot <dataset> <prefix> <retention>
 set -euo pipefail
 
+LOGFILE="/var/log/omv-zfs-snapshot.log"
+exec > >(tee -a "$LOGFILE") 2>&1
+
 DATASET="$1"
 PREFIX="$2"
 RETENTION="${3:-7}"

@@ -57,6 +57,10 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
   * Mount dataset after loading encryption key so it is immediately accessible
   * Replace custom ARC stats with zarcsummary/arc_summary output on ARC Stats tab
   * Add omv-extras.org wiki link to pools tab
+  * Add ZFS Pool Status dashboard widget
+    - Traffic-light coloured grid: green = healthy, orange = >80% capacity, red = degraded/faulted/errors/>90% capacity
+    - Tooltip shows pool state, error flag, and capacity percentage
+    - Clicking any pool box navigates to the Pools tab
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000
 

@@ -697,3 +697,12 @@ data:
             task: true
             progressMessage: _("Deleting pool ...")
             successNotification: _("Pool deleted.")
+      - type: menu
+        icon: mdi:link
+        tooltip: _("Docs")
+        actions:
+          - text: _("omv-extras.org wiki")
+            icon: mdi:link-box-variant-outline
+            execute:
+              type: url
+              url: '/externalRedirect/https%3A%2F%2Fwiki.omv-extras.org%2Fdoku.php%3Fid%3Domv8%3Aomv8_plugins%3Azfs'

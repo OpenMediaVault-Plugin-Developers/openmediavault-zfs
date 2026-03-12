@@ -185,39 +185,64 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             return $total > 0 ? sprintf('%.2f%%', ($hits / $total) * 100) : 'N/A';
         };
         $lines = [];
-        $lines[] = '=== ARC Size ===';
-        $lines[] = sprintf('%-32s %s', 'Current size:', $fmt($g('size')));
-        $lines[] = sprintf('%-32s %s', 'Target (c):', $fmt($g('c')));
-        $lines[] = sprintf('%-32s %s', 'Minimum (c_min):', $fmt($g('c_min')));
-        $lines[] = sprintf('%-32s %s', 'Maximum (c_max):', $fmt($g('c_max')));
-        $lines[] = '';
-        $lines[] = '=== Hit Ratio ===';
+
+        // --- Cache Hit Metrics ---
+        $lines[] = '=== Cache Hit Metrics ===';
         $lines[] = sprintf('%-32s %s  (%s hits / %s misses)', 'Overall:', $pct($g('hits'), $g('misses')), number_format($g('hits')), number_format($g('misses')));
         $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand data:', $pct($g('demand_data_hits'), $g('demand_data_misses')), number_format($g('demand_data_hits')), number_format($g('demand_data_misses')));
         $lines[] = sprintf('%-32s %s  (%s / %s)', 'Demand metadata:', $pct($g('demand_metadata_hits'), $g('demand_metadata_misses')), number_format($g('demand_metadata_hits')), number_format($g('demand_metadata_misses')));
         $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch data:', $pct($g('prefetch_data_hits'), $g('prefetch_data_misses')), number_format($g('prefetch_data_hits')), number_format($g('prefetch_data_misses')));
         $lines[] = sprintf('%-32s %s  (%s / %s)', 'Prefetch metadata:', $pct($g('prefetch_metadata_hits'), $g('prefetch_metadata_misses')), number_format($g('prefetch_metadata_hits')), number_format($g('prefetch_metadata_misses')));
         $lines[] = '';
-        $lines[] = '=== ARC Lists ===';
-        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MRU hits:', number_format($g('mru_hits')), number_format($g('mru_ghost_hits')));
-        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MFU hits:', number_format($g('mfu_hits')), number_format($g('mfu_ghost_hits')));
-        $lines[] = '';
-        $lines[] = '=== Memory Breakdown ===';
-        $lines[] = sprintf('%-32s %s', 'Data:', $fmt($g('data_size')));
-        $lines[] = sprintf('%-32s %s', 'Metadata:', $fmt($g('metadata_size')));
-        $lines[] = sprintf('%-32s %s', 'Anonymous:', $fmt($g('anon_size')));
-        $lines[] = sprintf('%-32s %s', 'MRU:', $fmt($g('mru_size')));
-        $lines[] = sprintf('%-32s %s', 'MFU:', $fmt($g('mfu_size')));
-        $lines[] = sprintf('%-32s %s', 'Header overhead:', $fmt($g('hdr_size')));
-        $lines[] = '';
+
+        // --- ARC Size Metrics ---
+        $lines[] = '=== ARC Size Metrics ===';
+        $lines[] = sprintf('%-32s %s', 'Current size:', $fmt($g('size')));
+        $lines[] = sprintf('%-32s %s', 'Target (c):', $fmt($g('c')));
+        $lines[] = sprintf('%-32s %s', 'Minimum (c_min):', $fmt($g('c_min')));
+        $lines[] = sprintf('%-32s %s', 'Maximum (c_max):', $fmt($g('c_max')));
         $compressed   = $g('compressed_size');
         $uncompressed = $g('uncompressed_size');
         $compRatio    = $compressed > 0 ? ($uncompressed / $compressed) : 1.0;
-        $lines[] = '=== ARC Compression ===';
-        $lines[] = sprintf('%-32s %s', 'Compressed:', $fmt($compressed));
-        $lines[] = sprintf('%-32s %s', 'Uncompressed:', $fmt($uncompressed));
-        $lines[] = sprintf('%-32s %.2fx', 'Ratio:', $compRatio);
+        $lines[] = sprintf('%-32s %s  (uncompressed: %s, ratio: %.2fx)', 'Compressed size:', $fmt($compressed), $fmt($uncompressed), $compRatio);
         $lines[] = '';
+
+        // --- ARC List Metrics ---
+        $lines[] = '=== ARC List Metrics ===';
+        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MRU hits:', number_format($g('mru_hits')), number_format($g('mru_ghost_hits')));
+        $lines[] = sprintf('%-32s %s  (ghost hits: %s)', 'MFU hits:', number_format($g('mfu_hits')), number_format($g('mfu_ghost_hits')));
+        $lines[] = sprintf('%-32s %s', 'MRU size:', $fmt($g('mru_size')));
+        $lines[] = sprintf('%-32s %s', 'MFU size:', $fmt($g('mfu_size')));
+        $lines[] = sprintf('%-32s %s', 'Anonymous size:', $fmt($g('anon_size')));
+        $lines[] = sprintf('%-32s %s', 'Header overhead:', $fmt($g('hdr_size')));
+        $lines[] = '';
+
+        // --- Eviction and Memory Pressure ---
+        $lines[] = '=== Eviction and Memory Pressure ===';
+        $lines[] = sprintf('%-32s %s', 'Objects deleted:', number_format($g('deleted')));
+        $lines[] = sprintf('%-32s %s', 'Evictions skipped:', number_format($g('evict_skip')));
+        $lines[] = sprintf('%-32s %s', 'Evict not enough:', number_format($g('evict_not_enough')));
+        $lines[] = sprintf('%-32s %s', 'L2ARC-cached evictions:', number_format($g('evict_l2_cached')));
+        $lines[] = sprintf('%-32s %s', 'L2ARC-eligible evictions:', number_format($g('evict_l2_eligible')));
+        $lines[] = sprintf('%-32s %s', 'L2ARC-ineligible evictions:', number_format($g('evict_l2_ineligible')));
+        $lines[] = sprintf('%-32s %s', 'Memory throttle count:', number_format($g('memory_throttle_count')));
+        $lines[] = sprintf('%-32s %s', 'Direct memory reclaims:', number_format($g('memory_direct_count')));
+        $lines[] = sprintf('%-32s %s', 'Indirect memory reclaims:', number_format($g('memory_indirect_count')));
+        $lines[] = '';
+
+        // --- Metadata vs Data Usage ---
+        $dataSize     = $g('data_size');
+        $metaSize     = $g('metadata_size');
+        $totalCached  = $dataSize + $metaSize;
+        $dataPct      = $totalCached > 0 ? sprintf('%.1f%%', ($dataSize / $totalCached) * 100) : 'N/A';
+        $metaPct      = $totalCached > 0 ? sprintf('%.1f%%', ($metaSize / $totalCached) * 100) : 'N/A';
+        $lines[] = '=== Metadata vs Data Usage ===';
+        $lines[] = sprintf('%-32s %s  (%s of cached)', 'Data:', $fmt($dataSize), $dataPct);
+        $lines[] = sprintf('%-32s %s  (%s of cached)', 'Metadata:', $fmt($metaSize), $metaPct);
+        $lines[] = sprintf('%-32s %s', 'Total cached:', $fmt($totalCached));
+        $lines[] = '';
+
+        // --- L2ARC ---
         $lines[] = '=== L2ARC ===';
         if ($g('l2_size') > 0) {
             $lines[] = sprintf('%-32s %s', 'Size:', $fmt($g('l2_size')));

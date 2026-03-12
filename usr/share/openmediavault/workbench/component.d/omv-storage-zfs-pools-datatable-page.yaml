@@ -24,19 +24,38 @@ data:
         flexGrow: 1
         sortable: true
         cellTemplateName: binaryUnit
-      - name: _("Used")
+      - name: _("Alloc")
         prop: usedpercent
         flexGrow: 1
         sortable: true
         cellTemplateName: progressBar
         cellTemplateConfig:
           text: '{{ used | tobytes | binaryunit | notavailable("-") }}'
-      - name: _("Available")
+      - name: _("Free")
         prop: available
         flexGrow: 1
         sortable: true
         cellTemplateName: binaryUnit
-      - name: _("State")
+      - name: _("Frag")
+        prop: fragmentation
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: progressBar
+        cellTemplateConfig:
+          text: '{{ fragmentation }}%'
+      - name: _("Cap")
+        prop: capacity
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: progressBar
+        cellTemplateConfig:
+          text: '{{ capacity }}%'
+      - name: _("Dedup")
+        prop: dedup
+        flexGrow: 1
+        sortable: true
+        hidden: true
+      - name: _("Health")
         prop: state
         flexGrow: 1
         sortable: true
@@ -49,25 +68,6 @@ data:
         flexGrow: 1
         sortable: true
         cellTemplateName: checkIcon
-        hidden: true
-      - name: _("Capacity")
-        prop: capacity
-        flexGrow: 1
-        sortable: true
-        cellTemplateName: progressBar
-        cellTemplateConfig:
-          text: '{{ capacity }}%'
-      - name: _("Fragmentation")
-        prop: fragmentation
-        flexGrow: 1
-        sortable: true
-        cellTemplateName: progressBar
-        cellTemplateConfig:
-          text: '{{ fragmentation }}%'
-      - name: _("Dedup ratio")
-        prop: dedup
-        flexGrow: 1
-        sortable: true
         hidden: true
       - name: _("Scrub state")
         prop: scrubstate

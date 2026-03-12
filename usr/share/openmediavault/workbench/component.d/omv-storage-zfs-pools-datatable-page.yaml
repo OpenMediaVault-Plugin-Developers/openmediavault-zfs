@@ -568,7 +568,7 @@ data:
           maxSelected: 1
         actions:
           - text: _("Offline device")
-            icon: mdi:harddisk-off
+            icon: mdi:harddisk-remove
             enabledConstraints:
               minSelected: 1
               maxSelected: 1

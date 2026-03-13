@@ -1231,9 +1231,22 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
-        // Recursively unmount the dataset and all children first — ZFS refuses to
-        // unload a key while any dataset sharing that encryption root is mounted.
+        // Collect mountpoints before unmounting so we can lazy-unmount any that
+        // remain busy.  zfs unmount -f uses MNT_FORCE which can still fail when a
+        // process holds an open file handle; umount -l (MNT_DETACH) always detaches
+        // the filesystem from the VFS immediately so zfs unload-key can proceed.
+        self::zfsTryExec(sprintf(
+            'zfs list -H -r -t filesystem -o mountpoint %s 2>/dev/null',
+            escapeshellarg($params['name'])
+        ), $mountpoints);
         self::zfsTryExec(sprintf('zfs unmount -f -r %s 2>&1', escapeshellarg($params['name'])));
+        foreach (($mountpoints ?? []) as $mp) {
+            $mp = trim($mp);
+            if ($mp === '' || in_array($mp, ['none', 'legacy', '-'])) {
+                continue;
+            }
+            self::zfsTryExec(sprintf('umount -l %s 2>/dev/null', escapeshellarg($mp)));
+        }
         $cmd = sprintf('zfs unload-key -r %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
         return ['status' => 'unloaded'];

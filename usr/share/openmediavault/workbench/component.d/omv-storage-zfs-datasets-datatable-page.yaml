@@ -687,6 +687,11 @@ data:
                     label: _("Skip certificate verification")
                     value: false
                     hint: _("Allow self-signed or untrusted certificates. Use only on trusted local networks.")
+                  - type: passwordInput
+                    name: decrypt_passphrase
+                    label: _("Decryption passphrase (optional)")
+                    value: ""
+                    hint: _("If set, the remote server must serve an OpenSSL-encrypted key. Generate the encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE")
                 buttons:
                   submit:
                     text: _("Enable auto-unlock")

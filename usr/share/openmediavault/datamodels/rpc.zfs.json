@@ -537,6 +537,27 @@
         "insecure": {
           "type": "boolean",
           "required": false
+        },
+        "decrypt_passphrase": {
+          "type": "string",
+          "required": false
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.encryptremotekey",
+    "params": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "required": true
+        },
+        "passphrase": {
+          "type": "string",
+          "required": true
         }
       }
     }

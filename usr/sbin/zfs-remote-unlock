@@ -31,13 +31,28 @@ log = logging.getLogger()
 
 
 def load_config(path):
-    """Parse a remote-key JSON config file. Returns (dataset, url, insecure) or raises."""
+    """Parse a remote-key JSON config file. Returns (dataset, url, insecure, decrypt_passphrase) or raises."""
     with open(path) as f:
         data = json.load(f)
     dataset = data['dataset']
     url = data['url']
     insecure = bool(data.get('insecure', False))
-    return dataset, url, insecure
+    decrypt_passphrase = data.get('decrypt_passphrase', '') or ''
+    return dataset, url, insecure, decrypt_passphrase
+
+
+def decrypt_key(key_bytes, passphrase):
+    """Decrypt an openssl-aes-256-cbc-pbkdf2-base64 blob using the given passphrase."""
+    result = subprocess.run(
+        ['openssl', 'enc', '-d', '-aes-256-cbc', '-pbkdf2', '-base64',
+         '-pass', 'pass:' + passphrase],
+        input=key_bytes,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        stderr = result.stderr.decode(errors='replace').strip()
+        raise RuntimeError(f'openssl decryption failed: {stderr}')
+    return result.stdout
 
 
 NETWORK_RETRIES = 20
@@ -109,7 +124,7 @@ def main():
     for path in json_files:
         log.debug('Reading config: %s', path)
         try:
-            dataset, url, insecure = load_config(path)
+            dataset, url, insecure, decrypt_passphrase = load_config(path)
         except Exception as e:
             log.error('Failed to parse %s: %s', path, e)
             errors += 1
@@ -126,6 +141,16 @@ def main():
             log.error('Failed to fetch key for %s: %s', dataset, e)
             errors += 1
             continue
+
+        if decrypt_passphrase:
+            log.debug('Decrypting key for %s', dataset)
+            try:
+                key_bytes = decrypt_key(key_bytes, decrypt_passphrase)
+            except Exception as e:
+                key_bytes = b''
+                log.error('Failed to decrypt key for %s: %s', dataset, e)
+                errors += 1
+                continue
 
         log.debug('Key received (%d bytes), loading into %s', len(key_bytes), dataset)
         if zfs_load_key(dataset, key_bytes):

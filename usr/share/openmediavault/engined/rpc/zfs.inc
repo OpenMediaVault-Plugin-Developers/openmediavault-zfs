@@ -90,6 +90,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('changeEncryptionKey');
         $this->registerMethod('getEncryptionStatus');
         $this->registerMethod('setAutoUnlock');
+        $this->registerMethod('encryptRemoteKey');
         $this->registerMethod('removeAutoUnlock');
         $this->registerMethod('clearPool');
         $this->registerMethod('trimPool');
@@ -1285,10 +1286,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (!is_dir($metadir)) {
                 mkdir($metadir, 0700, true);
             }
-            file_put_contents($metafile, json_encode(
-                ['dataset' => $name, 'url' => $remoteurl, 'insecure' => $insecure],
-                JSON_PRETTY_PRINT
-            ));
+            $meta = ['dataset' => $name, 'url' => $remoteurl, 'insecure' => $insecure];
+            $decryptPassphrase = $params['decrypt_passphrase'] ?? '';
+            if (!empty($decryptPassphrase)) {
+                $meta['decrypt_passphrase'] = $decryptPassphrase;
+            }
+            file_put_contents($metafile, json_encode($meta, JSON_PRETTY_PRINT));
             chmod($metafile, 0600);
             // keylocation=prompt — the zfs-remote-unlock service handles key loading at boot.
             self::zfsExec(sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name)), $out, $res);
@@ -1338,6 +1341,32 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::manageRemoteUnlockService();
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => false, 'keylocation' => 'prompt'];
+    }
+
+    public function encryptRemoteKey($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.encryptremotekey');
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $cmd = sprintf(
+            'openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:%s',
+            escapeshellarg($params['passphrase'])
+        );
+        $process = proc_open($cmd, $descriptors, $pipes);
+        if (!is_resource($process)) {
+            throw new \OMV\Exception('Failed to start openssl process.');
+        }
+        fwrite($pipes[0], $params['key']);
+        fclose($pipes[0]);
+        $encrypted = stream_get_contents($pipes[1]);
+        $stderr    = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $rc = proc_close($process);
+        if ($rc !== 0) {
+            throw new \OMV\Exception('openssl enc failed: ' . trim($stderr));
+        }
+        return ['encrypted' => trim($encrypted)];
     }
 
     // -------------------------------------------------------------------------

@@ -1231,10 +1231,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
-        // Unmount the dataset (and children) first — ZFS refuses to unload a key
-        // while the dataset is mounted.
-        self::zfsTryExec(sprintf('zfs unmount -f %s 2>&1', escapeshellarg($params['name'])));
-        $cmd = sprintf('zfs unload-key %s 2>&1', escapeshellarg($params['name']));
+        // Recursively unmount the dataset and all children first — ZFS refuses to
+        // unload a key while any dataset sharing that encryption root is mounted.
+        self::zfsTryExec(sprintf('zfs unmount -f -r %s 2>&1', escapeshellarg($params['name'])));
+        $cmd = sprintf('zfs unload-key -r %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
         return ['status' => 'unloaded'];
     }

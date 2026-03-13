@@ -63,6 +63,11 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Distinct log messages for config parse errors, fetch errors, key-load failures, and mount warnings
     - Exit with code 1 if any dataset fails to unlock
     - Add log viewer in Diagnostics → System Logs → Logs (ZFS Remote Unlock)
+  * Support server-side encrypted remote keys for auto-unlock
+    - Remote server can serve an OpenSSL AES-256-CBC encrypted key blob
+    - Set a decryption passphrase in the remote HTTPS auto-unlock dialog
+    - zfs-remote-unlock decrypts the fetched blob before passing to zfs load-key
+    - Hint in UI shows the openssl command to encrypt a key for the remote server
   * Add ZFS Pool Status dashboard widget
     - Traffic-light coloured grid: green = healthy, orange = >80% capacity, red = degraded/faulted/errors/>90% capacity
     - Tooltip shows pool state, error flag, and capacity percentage

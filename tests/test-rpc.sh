@@ -195,7 +195,7 @@ section "Informational RPCs (no pool required)"
 assert_rpc "getStats"             "Zfs" "getStats"
 assert_rpc "listCompressionTypes" "Zfs" "listCompressionTypes"
 assert_rpc "getEmptyCandidates"   "Zfs" "getEmptyCandidates"
-assert_rpc "getArcStats"          "Zfs" "getArcStats" "{}" "ARC Size"
+assert_rpc "getArcStats"          "Zfs" "getArcStats"  # returns plain text, no JSON pattern
 
 # ===========================================================================
 section "Pool — create"
@@ -237,10 +237,10 @@ assert_rpc "getObjectDetails (Pool)" "Zfs" "getObjectDetails" \
 
 assert_rpc "getProperties (Pool)" "Zfs" "getProperties" \
     "{\"name\":\"$POOL\",\"type\":\"Pool\",\"start\":0,\"limit\":null}" \
-    "compression"
+    "autoexpand"
 
-assert_rpc "setProperties (Pool) — compression=lz4" "Zfs" "setProperties" \
-    "{\"name\":\"$POOL\",\"type\":\"Pool\",\"properties\":[{\"property\":\"compression\",\"value\":\"lz4\",\"modified\":true}]}"
+assert_rpc "setProperties (Pool) — comment" "Zfs" "setProperties" \
+    "{\"name\":\"$POOL\",\"type\":\"Pool\",\"properties\":[{\"property\":\"comment\",\"value\":\"omvzfstest\",\"modified\":true}]}"
 
 assert_rpc "scrubPool" "Zfs" "scrubPool" "{\"name\":\"$POOL\"}"
 
@@ -483,6 +483,78 @@ assert_rpc_bg "doDiscoverBg — addMissing=true with stale entry present: no err
 # Clean up the stale entry.
 omv-rpc -u admin "Zfs" "doDiscover" \
     '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+
+# ===========================================================================
+section "Encryption — unloadEncryptionKey with child dataset mounted"
+# ===========================================================================
+# Regression: unload-key used to fail with "busy" when child datasets sharing
+# the same encryption root were still mounted.  The fix adds -r to both the
+# zfs unmount and zfs unload-key calls.
+
+ENC_DS="$POOL/secure"
+ENC_CHILD="$POOL/secure/child"
+ENC_PASS="OmvZfsTestPass123!"
+
+info "Creating encrypted dataset $ENC_DS"
+# canmount=noauto prevents ZED/systemd from auto-remounting between the
+# force-unmount and unload-key steps, which would cause a spurious "busy" error.
+if printf '%s' "$ENC_PASS" | zfs create \
+        -o encryption=aes-256-gcm \
+        -o keyformat=passphrase \
+        -o keylocation=prompt \
+        -o canmount=noauto \
+        "$ENC_DS" 2>/dev/null; then
+    _pass "encrypted dataset $ENC_DS created"
+else
+    _fail "encrypted dataset $ENC_DS creation failed" ""
+fi
+
+info "Creating child dataset $ENC_CHILD"
+if zfs create -o canmount=noauto "$ENC_CHILD" 2>/dev/null; then
+    _pass "child dataset $ENC_CHILD created"
+else
+    _fail "child dataset $ENC_CHILD creation failed" ""
+fi
+
+# Explicitly mount both so the RPC has something to unmount.
+zfs mount "$ENC_DS"   2>/dev/null || true
+zfs mount "$ENC_CHILD" 2>/dev/null || true
+
+# Confirm both are mounted before the test.
+if mountpoint -q "/$ENC_DS" 2>/dev/null && mountpoint -q "/$ENC_CHILD" 2>/dev/null; then
+    _pass "both datasets mounted before unload"
+else
+    _fail "datasets not mounted as expected before unload" "pre-condition check failed"
+fi
+
+# This is the regression case: previously failed with
+# "Key unload error: '...' is busy" because the child was still mounted.
+assert_rpc "unloadEncryptionKey — parent with child mounted (busy regression)" \
+    "Zfs" "unloadEncryptionKey" "{\"name\":\"$ENC_DS\"}" "unloaded"
+
+KEYSTATUS=$(zfs get -H -o value keystatus "$ENC_DS" 2>/dev/null || echo "unknown")
+if [ "$KEYSTATUS" = "unavailable" ]; then
+    _pass "keystatus=unavailable after unload"
+else
+    _fail "keystatus should be unavailable, got: $KEYSTATUS" ""
+fi
+
+if ! mountpoint -q "/$ENC_CHILD" 2>/dev/null; then
+    _pass "child dataset unmounted after recursive unload"
+else
+    _fail "child dataset still mounted after unload" ""
+fi
+
+if ! mountpoint -q "/$ENC_DS" 2>/dev/null; then
+    _pass "parent dataset unmounted after unload"
+else
+    _fail "parent dataset still mounted after unload" ""
+fi
+
+# Reload key for cleanup (no need to remount — destroy works with key loaded).
+info "Reloading key for cleanup"
+printf '%s' "$ENC_PASS" | zfs load-key "$ENC_DS" 2>/dev/null || true
+zfs destroy -r "$ENC_DS" 2>/dev/null || true
 
 # ===========================================================================
 section "Export and import"

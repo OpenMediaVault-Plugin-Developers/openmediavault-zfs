@@ -24,6 +24,7 @@ fi
 
 DEVICES=("$@")
 POOL="omvzfstest$$"
+STRIPE_POOL=""   # set later if a temporary vdev-removal test pool is created
 
 # ---------------------------------------------------------------------------
 # Colours / counters
@@ -152,6 +153,8 @@ cleanup() {
     section "Cleanup"
     info "Destroying pool $POOL (if it exists)"
     zpool destroy -f "$POOL" 2>/dev/null || true
+    info "Destroying temporary stripe pool ${STRIPE_POOL:-} (if it exists)"
+    [ -n "${STRIPE_POOL:-}" ] && zpool destroy -f "$STRIPE_POOL" 2>/dev/null || true
     info "Clearing device labels"
     for dev in "${DEVICES[@]}"; do
         zpool labelclear -f "$dev" 2>/dev/null || true
@@ -246,6 +249,51 @@ assert_rpc "scrubPool" "Zfs" "scrubPool" "{\"name\":\"$POOL\"}"
 
 assert_rpc "getPoolHealth" "Zfs" "getPoolHealth" "{}" "$POOL"
 assert_rpc "getPoolNames"  "Zfs" "getPoolNames"  "{}" "$POOL"
+
+# ===========================================================================
+section "Device management — pool devices, top-level vdevs, vdev removal"
+# ===========================================================================
+
+assert_rpc "getPoolDevices"       "Zfs" "getPoolDevices"      "{\"name\":\"$POOL\"}"
+assert_rpc "getTopLevelVdevs"     "Zfs" "getTopLevelVdevs"    "{\"name\":\"$POOL\"}"
+
+# Verify getTopLevelVdevs result matches expected removability for the pool type.
+# Raidz vdevs cannot be removed, so an empty list is correct for raidz pools.
+# Mirror and stripe pools must have at least one removable entry.
+VDEV_JSON=$(rpc "Zfs" "getTopLevelVdevs" "{\"name\":\"$POOL\"}" 2>/dev/null || echo "[]")
+VDEV_COUNT=$(echo "$VDEV_JSON" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
+case "$POOLTYPE" in
+    raidz*)
+        if [ "$VDEV_COUNT" -eq 0 ]; then
+            _pass "getTopLevelVdevs — raidz vdevs correctly excluded (not removable)"
+        else
+            _fail "getTopLevelVdevs — raidz vdevs should not appear in removable list" \
+                  "got $VDEV_COUNT entries"
+        fi
+        ;;
+    *)
+        if [ "$VDEV_COUNT" -gt 0 ]; then
+            _pass "getTopLevelVdevs — returned $VDEV_COUNT removable vdev(s) for $POOLTYPE pool"
+        else
+            _fail "getTopLevelVdevs — expected removable vdevs for $POOLTYPE pool, got none" ""
+        fi
+        ;;
+esac
+
+# getVdevRemovalStatus returns a string (no removal in progress on a fresh pool).
+assert_rpc "getVdevRemovalStatus" "Zfs" "getVdevRemovalStatus" "{\"name\":\"$POOL\"}" \
+    "No vdev removal in progress"
+
+# removeVdev — verify the RPC is callable and returns a proper error for an
+# invalid vdev rather than crashing.  A full functional evacuation test requires
+# a multi-vdev stripe pool with a free device, which is not possible here because
+# all supplied devices are consumed by the main pool.
+assert_rpc_fails "removeVdev — invalid vdev name returns error" \
+    "Zfs" "removeVdev" "{\"pool\":\"$POOL\",\"vdev\":\"nonexistent-vdev-$$\"}"
+
+# cancelVdevRemoval — no removal in progress, should return an error.
+assert_rpc_fails "cancelVdevRemoval — no removal active returns error" \
+    "Zfs" "cancelVdevRemoval" "{\"name\":\"$POOL\"}"
 
 # ===========================================================================
 section "Filesystem — add, details, properties"

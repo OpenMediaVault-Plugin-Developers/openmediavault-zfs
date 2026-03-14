@@ -961,8 +961,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (!self::zfsTryExec($cmd, $out)) {
             return [];
         }
-        $devices  = [];
-        $inConfig = false;
+        $devices     = [];
+        $inConfig    = false;
+        $currentVdev = '';
+        $vdevDepth   = -1;
         foreach ($out as $line) {
             if (preg_match('/^\s*NAME\s+STATE/', $line)) {
                 $inConfig = true;
@@ -970,11 +972,31 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
             if (!$inConfig) continue;
             if (trim($line) === '') break;
-            if (preg_match('/^\s+(\/\S+)\s+(\S+)/', $line, $m)) {
+            $trimmed = ltrim($line);
+            $depth   = strlen($line) - strlen($trimmed);
+            // Vdev group line (mirror-N, raidz*-N, replacing-N, spare)
+            if (preg_match('/^(mirror-\d+|raidz\d*-\d+|replacing-\d+|spare)\s/', $trimmed, $vm)) {
+                $currentVdev = $vm[1];
+                $vdevDepth   = $depth;
+                continue;
+            }
+            // Device line (absolute path)
+            if (preg_match('/^(\/\S+)\s+(\S+)/', $trimmed, $m)) {
+                // A device at the same or lesser indent than the vdev line is a
+                // stripe member — it does not belong to that vdev.
+                if ($vdevDepth >= 0 && $depth <= $vdevDepth) {
+                    $currentVdev = '';
+                    $vdevDepth   = -1;
+                }
+                $vdev  = $currentVdev;
+                $label = $vdev
+                    ? $m[1] . '  [' . $vdev . '] [' . $m[2] . ']'
+                    : $m[1] . '  [stripe] [' . $m[2] . ']';
                 $devices[] = [
                     'devicefile' => $m[1],
                     'state'      => $m[2],
-                    'label'      => $m[1] . '  [' . $m[2] . ']',
+                    'vdev'       => $vdev,
+                    'label'      => $label,
                 ];
             }
         }
@@ -1150,8 +1172,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (false !== \OMV\System\Filesystem\Filesystem::hasFileSystem($sd->getDeviceFile())) {
                 continue;
             }
+            // Prefer stable by-id path over kernel device name to avoid
+            // mixed naming in pools when attaching or replacing devices.
+            $devfile = $sd->getDeviceFile();
+            if (file_exists('/dev/disk/by-id/')) {
+                try { $devfile = self::getDiskId($devfile); } catch (\Exception $e) {}
+            }
             $result[] = [
-                'devicefile'   => $sd->getDeviceFile(),
+                'devicefile'   => $devfile,
                 'size'         => $sd->getSize(),
                 'vendor'       => $sd->getVendor(),
                 'serialnumber' => $sd->getSerialNumber(),

@@ -72,8 +72,25 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Traffic-light coloured grid: green = healthy, orange = >80% capacity, red = degraded/faulted/errors/>90% capacity
     - Tooltip shows pool state, error flag, and capacity percentage
     - Clicking any pool box navigates to the Pools tab
+  * Add configurable network timeout to remote HTTPS auto-unlock
+    - New "Network timeout (seconds)" field in the remote auto-unlock dialog (default 60, range 10–600)
+    - Stored in the per-dataset remote-key JSON config; existing configs default to 60s
+    - zfs-remote-unlock derives retry count from the timeout value
+  * Fix device online: strip partition suffix before calling zpool online
+    - zpool online requires the whole-disk path to read label/capacity
+    - Handles both by-id (-part1) and raw (/dev/sdX1) partition suffixes
+  * Fix attach/replace device naming to prefer stable by-id paths
+    - getEmptyCandidates now resolves kernel device names to /dev/disk/by-id/ paths
+    - Prevents mixed naming schemes in pool config
+  * Fix getPoolDevices labels to show vdev membership
+    - Device labels now include the parent vdev (e.g. [mirror-0]) or [stripe]
+    - Makes replace/online/offline dialogs unambiguous on mixed-topology pools
+  * Strengthen attach device warning
+    - Confirmation dialog upgraded to critical template
+    - Added warning banner explaining that attach permanently converts a vdev slot
+      into a mirror and directing stripe expansion to 'Add vdev' instead
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Thu, 12 Mar 2026 00:00:00 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 14 Mar 2026 00:00:00 +0000
 
 openmediavault-zfs (8.0.4) stable; urgency=low
 

@@ -97,6 +97,14 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
+          - text: _("Add cache / log / spare")
+            icon: mdi:plus-circle-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: url
+              url: "/storage/zfs/pools/add-vdev/{{ _selected[0].path | encodeuricomponent }}"
           - text: _("Clear errors")
             icon: mdi:broom
             enabledConstraints:
@@ -607,14 +615,6 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/device-attach/{{ _selected[0].path | encodeuricomponent }}"
-          - text: _("Add cache / log / spare")
-            icon: mdi:plus-circle-outline
-            enabledConstraints:
-              minSelected: 1
-              maxSelected: 1
-            execute:
-              type: url
-              url: "/storage/zfs/pools/add-vdev/{{ _selected[0].path | encodeuricomponent }}"
       - type: menu
         icon: mdi:magnify-plus-outline
         tooltip: _("Discover")

@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/vdev-removal-status/:name"
+  editing: true
+  component: omv-storage-zfs-pools-vdev-removal-status-text-page

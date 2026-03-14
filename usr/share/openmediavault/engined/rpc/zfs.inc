@@ -48,11 +48,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getObjectDetails');
         $this->registerMethod('expandPool');
         $this->registerMethod('getPoolDevices');
+        $this->registerMethod('getTopLevelVdevs');
         $this->registerMethod('deviceOffline');
         $this->registerMethod('deviceOnline');
         $this->registerMethod('deviceDetach');
         $this->registerMethod('deviceReplace');
         $this->registerMethod('deviceAttach');
+        $this->registerMethod('removeVdev');
+        $this->registerMethod('cancelVdevRemoval');
+        $this->registerMethod('getVdevRemovalStatus');
         $this->registerMethod('scrubPool');
         $this->registerMethod('stopScrub');
         $this->registerMethod('pauseScrub');
@@ -1003,6 +1007,121 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         return $devices;
     }
 
+    public function getTopLevelVdevs($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $pool = $params['name'];
+        $cmd  = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        if (!self::zfsTryExec($cmd, $out)) {
+            return [];
+        }
+        $vdevs      = [];
+        $inConfig   = false;
+        $poolDepth  = -1;
+        $topDepth   = -1;
+        $classType  = '';
+        $classDepth = -1;
+        $classMap   = ['cache' => 'cache', 'logs' => 'log', 'spares' => 'spare',
+                       'special' => 'special', 'dedup' => 'dedup'];
+        foreach ($out as $line) {
+            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
+                $inConfig = true;
+                continue;
+            }
+            if (!$inConfig) continue;
+            if (trim($line) === '') break;
+            $trimmed = ltrim($line);
+            $depth   = strlen($line) - strlen($trimmed);
+            $parts   = preg_split('/\s+/', trim($trimmed));
+            $token   = $parts[0];
+            $state   = $parts[1] ?? '';
+            // First line in the config section is the pool name line itself.
+            if ($poolDepth === -1) {
+                $poolDepth = $depth;
+                continue;
+            }
+            // First line after the pool establishes the top-level indent.
+            if ($topDepth === -1) {
+                $topDepth = $depth;
+            }
+            if ($depth === $topDepth) {
+                // Reset class tracking whenever we're back at the top level.
+                $classType  = '';
+                $classDepth = -1;
+                // Class header lines have no state column.
+                if (isset($classMap[$token])) {
+                    $classType  = $classMap[$token];
+                    $classDepth = $depth;
+                    continue;
+                }
+                // Data vdev or stripe device.
+                $type      = self::vdevTypeFromToken($token);
+                $removable = !str_starts_with($type, 'raidz');
+                if ($removable) {
+                    $vdevs[] = [
+                        'vdev'  => $token,
+                        'type'  => $type,
+                        'state' => $state,
+                        'label' => $token . '  [' . $type . '] [' . $state . ']',
+                    ];
+                }
+            } elseif ($classDepth >= 0 && $depth > $classDepth
+                      && str_starts_with($token, '/')) {
+                // Individual device under a cache / log / spare header.
+                $vdevs[] = [
+                    'vdev'  => $token,
+                    'type'  => $classType,
+                    'state' => $state,
+                    'label' => $token . '  [' . $classType . '] [' . $state . ']',
+                ];
+            }
+        }
+        return $vdevs;
+    }
+
+    public function removeVdev($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.poolvdev');
+        $cmd = sprintf('zpool remove %s %s 2>&1',
+            escapeshellarg($params['pool']),
+            escapeshellarg($params['vdev']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function cancelVdevRemoval($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $cmd = sprintf('zpool remove -s %s 2>&1', escapeshellarg($params['name']));
+        self::zfsExec($cmd, $out, $res);
+    }
+
+    public function getVdevRemovalStatus($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        self::zfsExec(sprintf('zpool status %s 2>&1', escapeshellarg($params['name'])), $out, $res);
+        $lines    = [];
+        $inRemove = false;
+        foreach ($out as $line) {
+            if (preg_match('/^\s*remove\s*:/', $line)) {
+                $inRemove = true;
+                $lines[]  = trim($line);
+            } elseif ($inRemove) {
+                if (preg_match('/^\s*\w+\s*:/', $line)) {
+                    break;
+                }
+                $lines[] = trim($line);
+            }
+        }
+        if (empty($lines)) {
+            return sprintf("No vdev removal in progress for pool '%s'.", $params['name']);
+        }
+        return implode("\n\r", $lines);
+    }
+
     public function deviceOffline($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
@@ -1564,6 +1683,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
+     * Classify a top-level vdev token as mirror / raidz1 / raidz2 / raidz3 / stripe.
+     */
+    private static function vdevTypeFromToken(string $token): string
+    {
+        if (preg_match('/^mirror-\d+$/', $token))  return 'mirror';
+        if (preg_match('/^raidz3-\d+$/', $token))  return 'raidz3';
+        if (preg_match('/^raidz2-\d+$/', $token))  return 'raidz2';
+        if (preg_match('/^raidz1?-\d+$/', $token)) return 'raidz1';
+        if (str_starts_with($token, '/'))           return 'stripe';
+        return 'unknown';
+    }
+
+    /**
      * Resolve a /dev/sdX path to its /dev/disk/by-id symlink.
      */
     private static function getDiskId(string $disk): string
@@ -1960,11 +2092,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'usedpercent' => $size > 0 ? ($usedBytes / $size * 100) : 0,
                     'available'   => $availBytes,
                     'mountpoint'  => ($mountpoint !== '-') ? $mountpoint : '',
-                    'lastscrub'   => $ps['lastscrub']   ?? 'Unknown',
-                    'state'       => $ps['state']        ?? 'UNKNOWN',
-                    'status'      => $ps['status']       ?? 'Unknown',
-                    'scrubstate'  => $ps['scrubstate']   ?? 'unknown',
-                    'scrubactive'   => $ps['scrubactive']  ?? false,
+                    'lastscrub'     => $ps['lastscrub']     ?? 'Unknown',
+                    'state'         => $ps['state']         ?? 'UNKNOWN',
+                    'status'        => $ps['status']        ?? 'Unknown',
+                    'scrubstate'    => $ps['scrubstate']    ?? 'unknown',
+                    'scrubactive'   => $ps['scrubactive']   ?? false,
+                    'removalstate'  => $ps['removalstate']  ?? 'none',
+                    'removalactive' => $ps['removalactive'] ?? false,
                     'encryption'    => $enc,
                     'keystatus'     => $keystatus,
                     'autounlock'    => $autounlock,
@@ -2163,9 +2297,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Fetch health and scrub status for all pools in a single zpool status -j
-     * call. Returns an array keyed by pool name with keys: state, status,
-     * scrubstate, scrubactive, lastscrub.
+     * Fetch health, scrub, and vdev-removal status for all pools.
+     * Uses a single `zpool status -j` for structured data plus one
+     * `zpool status` text parse to pick up the remove: section which
+     * is not included in the JSON output.
+     * Returns an array keyed by pool name with keys: state, status,
+     * scrubstate, scrubactive, lastscrub, removalstate, removalactive.
      */
     private static function zpoolFetchAllStatus(): array
     {
@@ -2208,14 +2345,80 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     break;
             }
             $result[$name] = [
-                'state'       => $state,
-                'status'      => $status,
-                'scrubstate'  => $scrubstate,
-                'scrubactive' => in_array($scrubstate, ['running', 'paused']),
-                'lastscrub'   => $lastscrub,
+                'state'         => $state,
+                'status'        => $status,
+                'scrubstate'    => $scrubstate,
+                'scrubactive'   => in_array($scrubstate, ['running', 'paused']),
+                'lastscrub'     => $lastscrub,
+                'removalstate'  => 'none',
+                'removalactive' => false,
             ];
         }
+        // The JSON output does not include removal state, so parse the text
+        // output of `zpool status` to find the remove: section per pool.
+        if (self::zfsTryExec('zpool status 2>&1', $textOut)) {
+            $currentPool  = '';
+            $inRemove     = false;
+            $removeLine   = '';
+            foreach ($textOut as $line) {
+                if (preg_match('/^\s*pool:\s*(\S+)/', $line, $m)) {
+                    // Flush previous pool's removal state before moving on.
+                    if ($currentPool !== '' && isset($result[$currentPool])) {
+                        $result[$currentPool] = array_merge(
+                            $result[$currentPool],
+                            self::parseRemovalLine($removeLine)
+                        );
+                    }
+                    $currentPool = $m[1];
+                    $inRemove    = false;
+                    $removeLine  = '';
+                    continue;
+                }
+                if (preg_match('/^\s*remove\s*:\s*(.*)/', $line, $m)) {
+                    $inRemove   = true;
+                    $removeLine = trim($m[1]);
+                    continue;
+                }
+                // A new labelled section ends the remove block.
+                if ($inRemove && preg_match('/^\s*\w[\w ]*\s*:/', $line)) {
+                    $inRemove = false;
+                }
+                if ($inRemove && $removeLine !== '') {
+                    $removeLine .= ' ' . trim($line);
+                }
+            }
+            // Flush the last pool.
+            if ($currentPool !== '' && isset($result[$currentPool])) {
+                $result[$currentPool] = array_merge(
+                    $result[$currentPool],
+                    self::parseRemovalLine($removeLine)
+                );
+            }
+        }
         return $result;
+    }
+
+    /**
+     * Classify a `remove:` section text into removalstate / removalactive.
+     */
+    private static function parseRemovalLine(string $line): array
+    {
+        $line = trim($line);
+        if ($line === '') {
+            return ['removalstate' => 'none', 'removalactive' => false];
+        }
+        if (stripos($line, 'Evacuating') !== false
+            || stripos($line, 'in progress') !== false) {
+            return ['removalstate' => 'active', 'removalactive' => true];
+        }
+        if (stripos($line, 'Completed') !== false) {
+            return ['removalstate' => 'completed', 'removalactive' => false];
+        }
+        if (stripos($line, 'canceled') !== false) {
+            return ['removalstate' => 'canceled', 'removalactive' => false];
+        }
+        // remove: section exists but doesn't match known patterns.
+        return ['removalstate' => 'active', 'removalactive' => true];
     }
 
     /**

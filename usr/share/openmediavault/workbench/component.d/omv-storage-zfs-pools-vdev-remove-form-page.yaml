@@ -1,0 +1,48 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-pools-vdev-remove-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      post:
+        method: removeVdev
+        confirmationDialogConfig:
+          template: confirmation-critical
+          message: '_("Are you sure? ZFS will evacuate all data off this vdev onto the remaining pool vdevs. This can take a long time on large vdevs. The pool must have enough free space to absorb the data.")'
+    fields:
+      - type: textInput
+        name: pool
+        label: _("Pool")
+        value: "{{ _routeParams.pool }}"
+        readonly: true
+      - type: hint
+        hintType: warning
+        text: '_("Vdev removal evacuates data off the selected vdev to the remaining pool vdevs. Raidz vdevs cannot be removed. Ensure the pool has sufficient free space before proceeding.")'
+      - type: select
+        name: vdev
+        label: _("Vdev to remove")
+        valueField: vdev
+        textField: label
+        store:
+          proxy:
+            service: Zfs
+            get:
+              method: getTopLevelVdevs
+              params:
+                name: "{{ _routeParams.pool }}"
+          sorters:
+            dir: asc
+            prop: vdev
+        validators:
+          required: true
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: "/storage/zfs/pools"
+      - template: cancel
+        execute:
+          type: url
+          url: "/storage/zfs/pools"

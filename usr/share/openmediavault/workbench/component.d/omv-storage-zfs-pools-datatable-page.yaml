@@ -79,6 +79,11 @@ data:
         flexGrow: 2
         sortable: true
         hidden: true
+      - name: _("Removal state")
+        prop: removalstate
+        flexGrow: 1
+        sortable: true
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database
@@ -105,6 +110,53 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/add-vdev/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Remove vdev")
+            icon: mdi:minus-circle-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: falsy
+                  arg0:
+                    prop: removalactive
+            execute:
+              type: url
+              url: "/storage/zfs/pools/vdev-remove/{{ _selected[0].path | encodeuricomponent }}"
+          - text: _("Cancel vdev removal")
+            icon: mdi:cancel
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: truthy
+                  arg0:
+                    prop: removalactive
+            confirmationDialogConfig:
+              template: confirmation
+              message: _("Are you sure you want to cancel the vdev removal? Data evacuation will stop and the vdev will remain in the pool.")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: cancelVdevRemoval
+                params:
+                  name: "{{ _selected[0].path }}"
+                task: false
+                progressMessage: _("Cancelling vdev removal ...")
+                successNotification: _("Vdev removal cancelled.")
+          - text: _("Removal status")
+            icon: mdi:information-outline
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+              constraint:
+                - operator: ne
+                  arg0:
+                    prop: removalstate
+                  arg1: "none"
+            execute:
+              type: url
+              url: "/storage/zfs/pools/vdev-removal-status/{{ _selected[0].path | encodeuricomponent }}"
           - text: _("Clear errors")
             icon: mdi:broom
             enabledConstraints:

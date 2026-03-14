@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/pools/vdev-remove/:pool"
+  title: _("Remove Vdev")
+  editing: true
+  component: omv-storage-zfs-pools-vdev-remove-form-page

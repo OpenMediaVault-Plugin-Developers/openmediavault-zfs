@@ -151,6 +151,17 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.zfs.poolvdev",
+    "params": {
+      "type": "object",
+      "properties": {
+        "pool": { "type": "string", "required": true },
+        "vdev": { "type": "string", "required": true }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.zfs.addvdev",
     "params": {
       "type": "object",

@@ -511,9 +511,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.addvdev');
         $device = $params['device'];
         if ($params['devalias'] === 'id') {
-            try { $device = self::getDiskId($device); } catch (\Exception $e) {}
+            try { $device = self::getDiskId($device); } catch (\Throwable $e) {}
         } elseif ($params['devalias'] === 'path') {
-            try { $device = self::getDiskPath($device); } catch (\Exception $e) {}
+            try { $device = self::getDiskPath($device); } catch (\Throwable $e) {}
         }
         // For log devices, prevent a dangerous stripe. If the pool already has a
         // log device, use 'zpool attach' to form or extend a mirror instead.
@@ -1756,11 +1756,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function getDiskId(string $disk): string
     {
         preg_match('/^\/dev\/(.*)$/', $disk, $id);
+        if (empty($id[1])) {
+            return $disk;
+        }
         $cmd = "ls -la /dev/disk/by-id | grep '" . preg_quote($id[1], "'") . "\$'";
         self::zfsExec($cmd, $out, $res);
         if (!empty($out)) {
             $cols = preg_split('/[\s]+/', $out[0]);
-            return $cols[count($cols) - 3];
+            if (count($cols) >= 3) {
+                return $cols[count($cols) - 3];
+            }
         }
         return $disk;
     }
@@ -1771,11 +1776,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function getDiskPath(string $disk): string
     {
         preg_match('/^\/dev\/(.*)$/', $disk, $id);
+        if (empty($id[1])) {
+            return $disk;
+        }
         $cmd = "ls -la /dev/disk/by-path | grep '" . preg_quote($id[1], "'") . "\$'";
         self::zfsExec($cmd, $out, $res);
         if (!empty($out)) {
             $cols = preg_split('/[\s]+/', $out[0]);
-            return $cols[count($cols) - 3];
+            if (count($cols) >= 3) {
+                return $cols[count($cols) - 3];
+            }
         }
         return $disk;
     }

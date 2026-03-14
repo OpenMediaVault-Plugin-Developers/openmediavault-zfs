@@ -103,6 +103,10 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Remove vdev menu item disabled while a removal is already active
     - Cancel removal menu item enabled only while a removal is active
     - Removal status menu item enabled only when removalstate is not 'none'
+  * Fix log device stripe bug: adding a second log device now creates a mirror
+    instead of a dangerous stripe
+    - Uses 'zpool attach' when a log device already exists, automatically
+      converting a single log to a mirror or extending an existing log mirror
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 14 Mar 2026 00:00:00 +0000
 

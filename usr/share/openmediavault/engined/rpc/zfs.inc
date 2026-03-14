@@ -515,6 +515,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         } elseif ($params['devalias'] === 'path') {
             try { $device = self::getDiskPath($device); } catch (\Exception $e) {}
         }
+        // For log devices, prevent a dangerous stripe. If the pool already has a
+        // log device, use 'zpool attach' to form or extend a mirror instead.
+        if ($params['vdevtype'] === 'log') {
+            $existing = self::findFirstLogDevice($params['pool']);
+            if ($existing !== null) {
+                $cmd = sprintf('zpool attach %s %s %s 2>&1',
+                    escapeshellarg($params['pool']),
+                    escapeshellarg($existing),
+                    escapeshellarg($device));
+                self::zfsExec($cmd, $out, $res);
+                return;
+            }
+        }
         $cmd = sprintf('zpool add %s %s %s 2>&1',
             escapeshellarg($params['pool']),
             escapeshellarg($params['vdevtype']),
@@ -1582,6 +1595,44 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if ($result !== 0) {
             throw new \OMV\Exception('Command failed: ' . trim($stderr ?: $stdout));
         }
+    }
+
+    /**
+     * Return the first absolute device path found under the 'logs' section of
+     * 'zpool status -P <pool>', or null if no log devices exist.
+     * Works for both single log devices and log mirrors (returns one member).
+     */
+    private static function findFirstLogDevice(string $pool): ?string
+    {
+        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        if (!self::zfsTryExec($cmd, $out)) {
+            return null;
+        }
+        $inConfig  = false;
+        $inLogs    = false;
+        $poolDepth = -1;
+        $topDepth  = -1;
+        $logsDepth = -1;
+        foreach ($out as $line) {
+            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
+                $inConfig = true;
+                continue;
+            }
+            if (!$inConfig) continue;
+            if (trim($line) === '') break;
+            $trimmed = ltrim($line);
+            $depth   = strlen($line) - strlen($trimmed);
+            $token   = preg_split('/\s+/', $trimmed)[0];
+            if ($poolDepth === -1) { $poolDepth = $depth; continue; }
+            if ($topDepth  === -1) { $topDepth  = $depth; }
+            if ($depth === $topDepth) {
+                $inLogs    = ($token === 'logs');
+                $logsDepth = $inLogs ? $depth : -1;
+            } elseif ($inLogs && $depth > $logsDepth && str_starts_with($token, '/')) {
+                return $token;
+            }
+        }
+        return null;
     }
 
     /**

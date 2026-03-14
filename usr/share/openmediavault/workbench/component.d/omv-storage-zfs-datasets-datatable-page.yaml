@@ -692,6 +692,14 @@ data:
                     label: _("Decryption passphrase (optional)")
                     value: ""
                     hint: _("If set, the remote server must serve an OpenSSL-encrypted key. Generate the encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE")
+                  - type: numberInput
+                    name: network_timeout
+                    label: _("Network timeout (seconds)")
+                    value: 60
+                    hint: _("How long to wait for network access before giving up. Increase if your network is slow to come up at boot.")
+                    validators:
+                      min: 10
+                      max: 600
                 buttons:
                   submit:
                     text: _("Enable auto-unlock")

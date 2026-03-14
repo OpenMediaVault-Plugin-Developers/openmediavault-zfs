@@ -31,14 +31,16 @@ log = logging.getLogger()
 
 
 def load_config(path):
-    """Parse a remote-key JSON config file. Returns (dataset, url, insecure, decrypt_passphrase) or raises."""
+    """Parse a remote-key JSON config file. Returns (dataset, url, insecure, decrypt_passphrase, network_timeout) or raises."""
     with open(path) as f:
         data = json.load(f)
     dataset = data['dataset']
     url = data['url']
     insecure = bool(data.get('insecure', False))
     decrypt_passphrase = data.get('decrypt_passphrase', '') or ''
-    return dataset, url, insecure, decrypt_passphrase
+    network_timeout = int(data.get('network_timeout', 60))
+    network_timeout = max(10, min(600, network_timeout))
+    return dataset, url, insecure, decrypt_passphrase, network_timeout
 
 
 def decrypt_key(key_bytes, passphrase):
@@ -55,11 +57,10 @@ def decrypt_key(key_bytes, passphrase):
     return result.stdout
 
 
-NETWORK_RETRIES = 20
 NETWORK_RETRY_DELAY = 3  # seconds
 
 
-def fetch_key(url, insecure):
+def fetch_key(url, insecure, network_timeout=60):
     """Fetch the key from the given URL, retrying on network errors. Returns the raw key bytes."""
     ctx = ssl.create_default_context()
     if insecure:
@@ -67,8 +68,9 @@ def fetch_key(url, insecure):
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
     req = urllib.request.Request(url, headers={'User-Agent': 'zfs-remote-unlock/1.0'})
+    retries = max(1, network_timeout // NETWORK_RETRY_DELAY)
     last_exc = None
-    for attempt in range(1, NETWORK_RETRIES + 1):
+    for attempt in range(1, retries + 1):
         try:
             with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
                 return resp.read()
@@ -76,9 +78,9 @@ def fetch_key(url, insecure):
             raise  # HTTP errors (4xx/5xx) are not network problems, don't retry
         except Exception as e:
             last_exc = e
-            if attempt < NETWORK_RETRIES:
+            if attempt < retries:
                 log.warning('Network not ready (attempt %d/%d): %s, retrying in %ds...',
-                            attempt, NETWORK_RETRIES, e, NETWORK_RETRY_DELAY)
+                            attempt, retries, e, NETWORK_RETRY_DELAY)
                 time.sleep(NETWORK_RETRY_DELAY)
     raise last_exc
 
@@ -124,15 +126,15 @@ def main():
     for path in json_files:
         log.debug('Reading config: %s', path)
         try:
-            dataset, url, insecure, decrypt_passphrase = load_config(path)
+            dataset, url, insecure, decrypt_passphrase, network_timeout = load_config(path)
         except Exception as e:
             log.error('Failed to parse %s: %s', path, e)
             errors += 1
             continue
 
-        log.info('Fetching key for %s from %s', dataset, url)
+        log.info('Fetching key for %s from %s (network timeout %ds)', dataset, url, network_timeout)
         try:
-            key_bytes = fetch_key(url, insecure)
+            key_bytes = fetch_key(url, insecure, network_timeout)
         except urllib.error.HTTPError as e:
             log.error('HTTP error fetching key for %s: %s %s', dataset, e.code, e.reason)
             errors += 1

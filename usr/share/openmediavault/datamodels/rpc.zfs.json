@@ -541,6 +541,10 @@
         "decrypt_passphrase": {
           "type": "string",
           "required": false
+        },
+        "network_timeout": {
+          "type": "integer",
+          "required": false
         }
       }
     }

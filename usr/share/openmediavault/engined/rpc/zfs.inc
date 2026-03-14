@@ -1304,6 +1304,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (!empty($decryptPassphrase)) {
                 $meta['decrypt_passphrase'] = $decryptPassphrase;
             }
+            $networkTimeout = intval($params['network_timeout'] ?? 60);
+            if ($networkTimeout < 10) $networkTimeout = 10;
+            if ($networkTimeout > 600) $networkTimeout = 600;
+            $meta['network_timeout'] = $networkTimeout;
             file_put_contents($metafile, json_encode($meta, JSON_PRETTY_PRINT));
             chmod($metafile, 0600);
             // keylocation=prompt — the zfs-remote-unlock service handles key loading at boot.

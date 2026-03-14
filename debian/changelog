@@ -89,6 +89,20 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Confirmation dialog upgraded to critical template
     - Added warning banner explaining that attach permanently converts a vdev slot
       into a mirror and directing stripe expansion to 'Add vdev' instead
+  * Add vdev removal support
+    - New 'Remove vdev' action in the Pool menu: evacuates data off a top-level
+      vdev (mirror, stripe, cache, log, spare) onto the remaining pool vdevs
+    - New 'Cancel vdev removal' action: stops an in-progress evacuation
+    - New 'Removal status' text page: shows the remove: section from zpool status
+      with a reload button to track evacuation progress
+    - Raidz vdevs are excluded from the removable vdev list (ZFS limitation)
+    - Cache, log, and spare devices listed individually under their class headers
+    - Pool listing now includes removalstate (none/active/completed/canceled) and
+      removalactive boolean, parsed from zpool status text output
+    - Hidden 'Removal state' column added to the pools datatable
+    - Remove vdev menu item disabled while a removal is already active
+    - Cancel removal menu item enabled only while a removal is active
+    - Removal status menu item enabled only when removalstate is not 'none'
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 14 Mar 2026 00:00:00 +0000
 

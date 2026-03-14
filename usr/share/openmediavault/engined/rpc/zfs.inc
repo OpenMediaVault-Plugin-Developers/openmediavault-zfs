@@ -994,8 +994,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.zfs.pooldevice');
+        // zpool online requires the whole-disk path to read the label/capacity.
+        // Strip the partition suffix so ZFS can relabel the disk correctly:
+        //   /dev/disk/by-id/foo-part1  -> /dev/disk/by-id/foo  (by-id / by-path)
+        //   /dev/sda1                  -> /dev/sda              (raw device)
+        $device = preg_replace('/-part\d+$/', '', $params['device']);
+        if ($device === $params['device']) {
+            // No -partN suffix was found; try stripping a trailing digit from a
+            // short /dev/sdXN-style path, being careful not to touch by-id paths
+            // whose disk IDs end in digits.
+            $device = preg_replace('#^(/dev/[a-z]+)\d+$#', '$1', $device);
+        }
         $cmd = sprintf('zpool online %s %s 2>&1',
-            escapeshellarg($params['pool']), escapeshellarg($params['device']));
+            escapeshellarg($params['pool']), escapeshellarg($device));
         self::zfsExec($cmd, $out, $res);
     }
 

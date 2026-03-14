@@ -19,7 +19,7 @@ data:
         readonly: true
       - type: hint
         hintType: warning
-        text: _("WARNING: 'Attach' converts the chosen existing device into a 2-way mirror vdev. On a striped pool this permanently alters the pool layout. To add a new stripe member use 'Add vdev' instead.")
+        text: '_("Attach permanently converts the chosen device into a 2-way mirror vdev. On a striped pool this changes the pool layout. To add a new stripe member use Add vdev instead.")'
       - type: select
         name: olddevice
         label: _("Existing pool device")

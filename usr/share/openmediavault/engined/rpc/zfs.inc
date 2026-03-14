@@ -447,10 +447,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 escapeshellarg($params['name'])), $out, $res);
             self::updateZfsListCache($params['name']);
         }
-        // Sync OMV mount entries and apply config.
+        // Sync OMV mount entries and mark config modules dirty.
         self::fixOMVMntEnt($context);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function importPool($params, $context)
@@ -680,8 +679,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             default:
                 throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
         }
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function quickSnapshot($params, $context)
@@ -706,8 +704,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $cmd = sprintf('zfs rename %s %s 2>&1', escapeshellarg($oldPath), escapeshellarg($newPath));
         self::zfsExec($cmd, $out, $res);
         self::fixOMVMntEnt($context, true, true);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function cloneDataset($params, $context)
@@ -730,8 +727,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $cmd = sprintf('zfs clone -p %s %s 2>&1', escapeshellarg($snapshot), escapeshellarg($target));
         self::zfsExec($cmd, $out, $res);
         self::addOMVMntEntForDataset($context, $target);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function promoteDataset($params, $context)
@@ -741,8 +737,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $cmd = sprintf('zfs promote %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
         self::fixOMVMntEnt($context);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function deleteObject($params, $context)
@@ -794,8 +789,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $fstabObj = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mp], $context);
                 if ($fstabObj && $fstabObj['type'] === 'zfs') {
                     \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $fstabObj['uuid']], $context);
-                    \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-                        ['modules' => ['fstab'], 'force' => true], $context);
                 }
                 // Collect devices before destroying so we can clear labels.
                 $devices = self::zpoolGetAllDevices($name, ['INUSE', 'UNAVAIL', 'SPLIT']);
@@ -811,10 +804,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             default:
                 throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
         }
-        // Sync OMV mount entries and apply config.
+        // Sync OMV mount entries and mark config modules dirty.
         self::fixOMVMntEnt($context);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
     public function deleteObjectBg($params, $context)
@@ -876,8 +868,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if ($params['type'] === 'Filesystem') {
             \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
                 'org.openmediavault.storage.zfs.filesystem', $context);
-            \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-                ['modules' => ['collectd', 'monit', 'quota'], 'force' => true], $context);
+            self::dirtyModules(['collectd', 'monit', 'quota']);
         }
     }
 
@@ -1361,8 +1352,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::updateZfsListCache(explode('/', $fullPath)[0]);
         }
         self::addOMVMntEntForDataset($context, $fullPath);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         $status = self::zfsGetEncryptionStatus($fullPath);
         return self::flattenEncryptionStatus($fullPath, $status);
     }
@@ -1378,8 +1368,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Mount the dataset now that the key is loaded.
         self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($params['name'])));
         self::addOMVMntEntForDataset($context, $params['name']);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['collectd', 'fstab', 'monit', 'quota'], 'force' => true], $context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         return ['status' => 'loaded'];
     }
 
@@ -1683,6 +1672,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
+     * Mark one or more OMV config modules dirty so they are applied the next
+     * time the user clicks Apply (or on the next scheduled config flush).
+     * Prefer this over Config::applyChanges for modules whose output is not
+     * required for the current operation to succeed (collectd, fstab, monit,
+     * quota).  Safe to call from both instance and static methods.
+     */
+    private static function dirtyModules(array $modules): void
+    {
+        $mgr = \OMV\Engine\Module\Manager::getInstance();
+        foreach ($modules as $module) {
+            $mgr->setModuleDirty($module);
+        }
+    }
+
+    /**
      * Classify a top-level vdev token as mirror / raidz1 / raidz2 / raidz3 / stripe.
      */
     private static function vdevTypeFromToken(string $token): string
@@ -1820,8 +1824,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             throw new \OMV\Exception(sprintf('No ZFS mntent found for: %s', $mountpoint));
         }
         \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
-        \OMV\Rpc\Rpc::call('Config', 'applyChanges',
-            ['modules' => ['fstab'], 'force' => true], $context);
         if (self::zfsFilesystemExists($name)) {
             self::zfsExec(sprintf('zfs destroy %s 2>&1', escapeshellarg($name)), $out, $res);
         }

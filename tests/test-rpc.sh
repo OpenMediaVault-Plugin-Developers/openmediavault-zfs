@@ -705,6 +705,140 @@ else
 fi
 
 # ===========================================================================
+section "Cron files — omv-salt deploy generates valid entries"
+# ===========================================================================
+# Regression: Jinja2 whitespace bug split the >/dev/null redirect onto its
+# own line, causing cron to log "Error: bad minute" on every reload.
+# This section creates one snapshot job and one scrub job, deploys the cron
+# state, then validates the generated files.
+
+CRON_SNAP_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':             '$OMV_NEW_UUID',
+    'enable':           True,
+    'dataset':          '$POOL',
+    'prefix':           'crontest-',
+    'retention':        3,
+    'execution':        'daily',
+    'minute':           ['0'],
+    'hour':             ['3'],
+    'dayofmonth':       ['*'],
+    'month':            ['*'],
+    'dayofweek':        ['*'],
+    'everynminute':     False,
+    'everynhour':       False,
+    'everyndayofmonth': False,
+    'sendemail':        False,
+    'comment':          'cron regression test',
+}))
+")
+CRON_SCRUB_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':             '$OMV_NEW_UUID',
+    'enable':           True,
+    'pool':             '$POOL',
+    'execution':        'weekly',
+    'minute':           ['0'],
+    'hour':             ['0'],
+    'dayofmonth':       ['*'],
+    'month':            ['*'],
+    'dayofweek':        ['0'],
+    'everynminute':     False,
+    'everynhour':       False,
+    'everyndayofmonth': False,
+    'sendemail':        False,
+    'comment':          'cron scrub regression test',
+}))
+")
+
+CRON_SNAP_UUID=""
+CRON_SCRUB_UUID=""
+
+CRON_SNAP_RAW=$(rpc "Zfs" "setSnapshotJob" "$CRON_SNAP_PARAMS" 2>&1) && {
+    CRON_SNAP_UUID=$(echo "$CRON_SNAP_RAW" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    [ -n "$CRON_SNAP_UUID" ] \
+        && _pass "cron — snapshot job created" \
+        || _fail "cron — snapshot job: UUID missing" "${CRON_SNAP_RAW:0:200}"
+} || _fail "cron — setSnapshotJob failed" "${CRON_SNAP_RAW:0:200}"
+
+CRON_SCRUB_RAW=$(rpc "Zfs" "setScrubJob" "$CRON_SCRUB_PARAMS" 2>&1) && {
+    CRON_SCRUB_UUID=$(echo "$CRON_SCRUB_RAW" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    [ -n "$CRON_SCRUB_UUID" ] \
+        && _pass "cron — scrub job created" \
+        || _fail "cron — scrub job: UUID missing" "${CRON_SCRUB_RAW:0:200}"
+} || _fail "cron — setScrubJob failed" "${CRON_SCRUB_RAW:0:200}"
+
+# Deploy the cron state to write the files.
+if omv-salt deploy run zfscron 2>/dev/null; then
+    _pass "cron — omv-salt deploy run zfscron succeeded"
+else
+    _fail "cron — omv-salt deploy run zfscron failed" ""
+fi
+
+# Validate each generated cron file.
+# check_cron_file <label> <file> <expected-string>
+check_cron_file() {
+    local label=$1 file=$2 needle=$3
+
+    if [ ! -f "$file" ]; then
+        _fail "$label — file not found: $file" ""
+        return
+    fi
+
+    # Orphaned redirect: a line whose first non-whitespace token is '>' or '2>&1'.
+    # This is the classic Jinja2 missing -%} whitespace bug.
+    local orphan
+    orphan=$(grep -nE '^\s*(>|2>&1)' "$file" || true)
+    if [ -z "$orphan" ]; then
+        _pass "$label — no orphaned redirect lines"
+    else
+        _fail "$label — redirect split onto its own line" "$orphan"
+    fi
+
+    # Every active line (not comment / blank / variable assignment) must carry
+    # at least the schedule + user + command on a single line.
+    # @keyword lines need ≥ 3 tokens; 5-field lines need ≥ 7 tokens.
+    local bad
+    bad=$(grep -vE '^\s*(#|$|[A-Z_]+=)' "$file" | while IFS= read -r line; do
+        tokens=$(echo "$line" | awk '{print NF}')
+        if echo "$line" | grep -qE '^\s*@'; then
+            [ "$tokens" -lt 3 ] && echo "  too few tokens: $line"
+        else
+            [ "$tokens" -lt 7 ] && echo "  too few tokens: $line"
+        fi
+    done || true)
+    if [ -z "$bad" ]; then
+        _pass "$label — all active lines have schedule + user + command"
+    else
+        _fail "$label — malformed cron line(s)" "$bad"
+    fi
+
+    # The pool/dataset name must appear in the file.
+    if grep -qF "$needle" "$file"; then
+        _pass "$label — pool/dataset '$needle' present in file"
+    else
+        _fail "$label — pool/dataset '$needle' not found" "$(cat "$file")"
+    fi
+}
+
+SNAP_CRON_FILE=/etc/cron.d/openmediavault-zfs-snapshots
+SCRUB_CRON_FILE=/etc/cron.d/openmediavault-zfs-scrub
+
+check_cron_file "snapshot cron" "$SNAP_CRON_FILE" "$POOL"
+check_cron_file "scrub cron"    "$SCRUB_CRON_FILE" "$POOL"
+
+# Clean up: delete jobs and redeploy to leave cron files empty.
+[ -n "$CRON_SNAP_UUID"  ] && omv-rpc -u admin "Zfs" "deleteSnapshotJob" \
+    "{\"uuid\":\"$CRON_SNAP_UUID\"}"  >/dev/null 2>&1 || true
+[ -n "$CRON_SCRUB_UUID" ] && omv-rpc -u admin "Zfs" "deleteScrubJob" \
+    "{\"uuid\":\"$CRON_SCRUB_UUID\"}" >/dev/null 2>&1 || true
+omv-salt deploy run zfscron >/dev/null 2>&1 || true
+
+# ===========================================================================
 section "Volume — thick and thin"
 # ===========================================================================
 

@@ -10,7 +10,7 @@ data:
         method: deviceAttach
         confirmationDialogConfig:
           template: confirmation-critical
-          message: _("Are you sure? Attaching permanently converts the selected device's vdev slot into a mirror. On a striped pool this changes the pool layout and cannot be undone without a full pool recreation. To expand a stripe, use 'Add vdev' instead.")
+          message: _("Are you sure? On a mirror pool this extends the mirror by one device (N-way → N+1-way). On a striped pool this converts the chosen stripe device into a 2-way mirror, permanently changing the pool layout in a way that cannot be undone without a full pool recreation — use 'Add vdev' instead to expand a stripe.")
     fields:
       - type: textInput
         name: pool
@@ -19,7 +19,7 @@ data:
         readonly: true
       - type: hint
         hintType: warning
-        text: '_("Attach permanently converts the chosen device into a 2-way mirror vdev. On a striped pool this changes the pool layout. To add a new stripe member use Add vdev instead.")'
+        text: '_("On a mirror pool, attach extends the selected mirror vdev by one device (e.g. 2-way → 3-way mirror). On a striped pool it converts the chosen device into a 2-way mirror — this permanently changes the pool layout. To add a new stripe member use Add vdev instead.")'
       - type: select
         name: olddevice
         label: _("Existing pool device")

@@ -171,15 +171,36 @@ trap cleanup EXIT
 # and create a 3-device raidz1 as the main pool.
 # ---------------------------------------------------------------------------
 DEVCOUNT=${#DEVICES[@]}
-EXPAND_DEV=""   # device reserved for RAIDZ expansion test (set when DEVCOUNT==4)
+EXPAND_DEV=""    # device reserved for RAIDZ expansion test
+LOG_DEV_1=""     # first log device  (log mirror test)
+LOG_DEV_2=""     # second log device (log mirror test)
 
+# Device allocation strategy:
+#   1 dev  → basic pool
+#   2 devs → mirror pool
+#   3 devs → raidz1 pool
+#   4 devs → raidz1 (3) + RAIDZ expansion device (1)
+#   5 devs → raidz1 (3) + log mirror devices (2)         [no RAIDZ expansion]
+#   6 devs → raidz1 (3) + RAIDZ expansion (1) + log mirror (2)
+#   7+     → raidz2 pool (all devices, no extra tests)
 if [ "$DEVCOUNT" -eq 4 ]; then
     POOL_DEVICES=("${DEVICES[@]:0:3}")
     EXPAND_DEV="${DEVICES[3]}"
     POOLTYPE="raidz1"
+elif [ "$DEVCOUNT" -eq 5 ]; then
+    POOL_DEVICES=("${DEVICES[@]:0:3}")
+    LOG_DEV_1="${DEVICES[3]}"
+    LOG_DEV_2="${DEVICES[4]}"
+    POOLTYPE="raidz1"
+elif [ "$DEVCOUNT" -eq 6 ]; then
+    POOL_DEVICES=("${DEVICES[@]:0:3}")
+    EXPAND_DEV="${DEVICES[3]}"
+    LOG_DEV_1="${DEVICES[4]}"
+    LOG_DEV_2="${DEVICES[5]}"
+    POOLTYPE="raidz1"
 else
     POOL_DEVICES=("${DEVICES[@]}")
-    if   [ "$DEVCOUNT" -ge 5 ]; then POOLTYPE="raidz2"
+    if   [ "$DEVCOUNT" -ge 7 ]; then POOLTYPE="raidz2"
     elif [ "$DEVCOUNT" -ge 3 ]; then POOLTYPE="raidz1"
     elif [ "$DEVCOUNT" -ge 2 ]; then POOLTYPE="mirror"
     else                              POOLTYPE="basic"
@@ -199,6 +220,7 @@ info "Devices  : ${DEVICES[*]}"
 info "Pool type: $POOLTYPE"
 info "Pool name: $POOL"
 [ -n "$EXPAND_DEV" ] && info "Expansion: $EXPAND_DEV (reserved for RAIDZ expansion test)"
+[ -n "$LOG_DEV_1"  ] && info "Log devs : $LOG_DEV_1  $LOG_DEV_2 (reserved for log mirror test)"
 
 # OMV sentinel UUID used to signal "create new object" to $db->set().
 OMV_NEW_UUID=$(. /etc/default/openmediavault 2>/dev/null; echo "${OMV_CONFIGOBJECT_NEW_UUID:-fa4b1c66-ef79-11e5-87a0-0002b3a176b4}")
@@ -447,6 +469,60 @@ else
     else
         info "Skipping RAIDZ expansion test (pool type is $POOLTYPE, need raidz1)"
     fi
+fi
+
+# ===========================================================================
+section "Log vdev — addVdev creates a mirror (not a stripe)"
+# ===========================================================================
+# Regression: the second 'zpool add ... log dev' call used to fall through
+# to another 'zpool add' (stripe) because findFirstLogDevice matched 'logs'
+# at topDepth instead of poolDepth.  The fix makes the second add use
+# 'zpool attach' so the result is a mirrored log vdev.
+
+if [ -n "$LOG_DEV_1" ] && [ -n "$LOG_DEV_2" ]; then
+    ADDVDEV1_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'pool': '$POOL', 'vdevtype': 'log', 'device': '$LOG_DEV_1', 'devalias': 'dev'}))
+")
+    ADDVDEV2_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'pool': '$POOL', 'vdevtype': 'log', 'device': '$LOG_DEV_2', 'devalias': 'dev'}))
+")
+
+    assert_rpc "addVdev — add first log device" "Zfs" "addVdev" "$ADDVDEV1_PARAMS"
+    assert_rpc "addVdev — add second log device (should attach, not add)" "Zfs" "addVdev" "$ADDVDEV2_PARAMS"
+
+    # Allow ZFS a moment to settle then inspect the pool config.
+    sleep 1
+    LOG_STATUS=$(zpool status -P "$POOL" 2>/dev/null || echo "")
+
+    # Both devices must appear in the pool.
+    LOG1_BASE=$(basename "$LOG_DEV_1")
+    LOG2_BASE=$(basename "$LOG_DEV_2")
+    if echo "$LOG_STATUS" | grep -qE "$LOG_DEV_1|$LOG1_BASE"; then
+        _pass "addVdev — first log device visible in pool"
+    else
+        _fail "addVdev — first log device not found in pool status" \
+              "$(echo "$LOG_STATUS" | grep -A10 'logs' | head -8)"
+    fi
+    if echo "$LOG_STATUS" | grep -qE "$LOG_DEV_2|$LOG2_BASE"; then
+        _pass "addVdev — second log device visible in pool"
+    else
+        _fail "addVdev — second log device not found in pool status" \
+              "$(echo "$LOG_STATUS" | grep -A10 'logs' | head -8)"
+    fi
+
+    # The critical check: a 'mirror-' vdev must appear under the logs section.
+    # A stripe would show the devices directly under 'logs' with no mirror label.
+    LOGS_SECTION=$(echo "$LOG_STATUS" | awk '/^[[:space:]]*logs[[:space:]]*$/{found=1; next} found && /^[[:space:]]*[^[:space:]]/{if ($1 != "errors:") print; else exit} found && /^[[:space:]]+/{print}' )
+    if echo "$LOGS_SECTION" | grep -q "mirror-"; then
+        _pass "addVdev — log devices form a mirror (mirror-X vdev present under logs)"
+    else
+        _fail "addVdev — log devices are a STRIPE, not a mirror (mirror-X missing under logs)" \
+              "logs section: $(echo "$LOG_STATUS" | grep -A5 'logs' | head -6)"
+    fi
+else
+    info "Skipping log mirror test (pass 5 or 6 devices to enable)"
 fi
 
 # ===========================================================================

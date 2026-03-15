@@ -1717,7 +1717,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $inConfig  = false;
         $inLogs    = false;
         $poolDepth = -1;
-        $topDepth  = -1;
         $logsDepth = -1;
         foreach ($out as $line) {
             if (preg_match('/^\s*NAME\s+STATE/', $line)) {
@@ -1730,8 +1729,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $depth   = strlen($line) - strlen($trimmed);
             $token   = preg_split('/\s+/', $trimmed)[0];
             if ($poolDepth === -1) { $poolDepth = $depth; continue; }
-            if ($topDepth  === -1) { $topDepth  = $depth; }
-            if ($depth === $topDepth) {
+            // 'logs' appears at poolDepth (same level as the pool name),
+            // not at the top-vdev level (where mirror-0, raidz1-0 etc. live).
+            if ($depth === $poolDepth) {
                 $inLogs    = ($token === 'logs');
                 $logsDepth = $inLogs ? $depth : -1;
             } elseif ($inLogs && $depth > $logsDepth && str_starts_with($token, '/')) {

@@ -107,8 +107,27 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     instead of a dangerous stripe
     - Uses 'zpool attach' when a log device already exists, automatically
       converting a single log to a mirror or extending an existing log mirror
+  * Fix getDiskId/getDiskPath returning bare symlink name instead of full path
+    - Both functions now prepend /dev/disk/by-id/ and /dev/disk/by-path/
+      respectively, fixing "not a device file" schema validation errors in
+      addPool and expandPool when device alias is 'id' or 'path'
+  * Fix attach device dialog messaging for mirror pools
+    - Confirmation and hint text now correctly describe N-way → N+1-way mirror
+      extension, not just the stripe-to-mirror conversion case
+  * Fix detach device on RAIDZ: return clean error instead of PHP exception
+    - zpool detach is not supported on RAIDZ; the error from zpool (e.g.
+      "only applicable to mirror and replacing vdevs") is now surfaced as a
+      user-friendly message rather than a stack trace
+  * Add RAIDZ expansion support (OpenZFS 2.3+, feature@raidz_expansion)
+    - New getAttachAnchors RPC replaces getPoolDevices in the attach dialog
+    - For RAIDZ pools with feature@raidz_expansion active, the selector shows
+      the vdev name (e.g. raidz1-0 [RAIDZ expansion]) instead of member devices
+    - Issues 'zpool attach <pool> <raidz-vdev> <new-device>' to expand the vdev
+    - Mirror and stripe pools continue to show individual device anchors
+    - Attach dialog hint and confirmation updated to cover all three cases:
+      mirror extend, stripe-to-mirror, and RAIDZ expansion
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sat, 14 Mar 2026 00:00:00 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 15 Mar 2026 00:00:00 +0000
 
 openmediavault-zfs (8.0.4) stable; urgency=low
 

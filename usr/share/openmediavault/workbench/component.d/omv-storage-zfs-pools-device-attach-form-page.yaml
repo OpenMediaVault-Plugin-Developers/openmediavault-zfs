@@ -10,7 +10,7 @@ data:
         method: deviceAttach
         confirmationDialogConfig:
           template: confirmation-critical
-          message: _("Are you sure? On a mirror pool this extends the mirror by one device (N-way → N+1-way). On a striped pool this converts the chosen stripe device into a 2-way mirror, permanently changing the pool layout in a way that cannot be undone without a full pool recreation — use 'Add vdev' instead to expand a stripe.")
+          message: _("Are you sure? For a mirror or stripe pool this attaches the new device to the selected existing device, extending the mirror or converting a stripe device into a 2-way mirror (irreversible without full pool recreation). For a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, permanently increasing its width.")
     fields:
       - type: textInput
         name: pool
@@ -18,19 +18,19 @@ data:
         value: "{{ _routeParams.pool }}"
         readonly: true
       - type: hint
-        hintType: warning
-        text: '_("On a mirror pool, attach extends the selected mirror vdev by one device (e.g. 2-way → 3-way mirror). On a striped pool it converts the chosen device into a 2-way mirror — this permanently changes the pool layout. To add a new stripe member use Add vdev instead.")'
+        hintType: info
+        text: '_("Select the anchor and the new device to attach. Mirror/stripe pools: select an existing member device — the new device will be mirrored with it (e.g. 2-way → 3-way mirror, or stripe → 2-way mirror). RAIDZ pools: select the RAIDZ vdev name (e.g. raidz1-0) to expand it — requires OpenZFS 2.3+ with feature@raidz_expansion active. To add a completely new vdev to any pool use Add vdev instead.")'
       - type: select
         name: olddevice
-        label: _("Existing pool device")
+        label: _("Anchor (existing device or RAIDZ vdev)")
         valueField: devicefile
         textField: label
-        hint: _("The new device will be mirrored with this existing device.")
+        hint: _("Mirror/stripe: choose the existing device to attach to. RAIDZ: choose the vdev name shown as [RAIDZ expansion].")
         store:
           proxy:
             service: Zfs
             get:
-              method: getPoolDevices
+              method: getAttachAnchors
               params:
                 name: "{{ _routeParams.pool }}"
           sorters:

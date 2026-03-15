@@ -48,6 +48,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getObjectDetails');
         $this->registerMethod('expandPool');
         $this->registerMethod('getPoolDevices');
+        $this->registerMethod('getAttachAnchors');
         $this->registerMethod('getTopLevelVdevs');
         $this->registerMethod('deviceOffline');
         $this->registerMethod('deviceOnline');
@@ -1011,6 +1012,90 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         return $devices;
     }
 
+    /**
+     * Return the list of valid attach anchors for a pool:
+     *  - For mirror / stripe pools: the individual device paths (same as getPoolDevices).
+     *  - For RAIDZ vdevs where feature@raidz_expansion is active: the vdev name
+     *    (e.g. "raidz1-0") is returned instead of the member devices, since
+     *    "zpool attach <pool> <raidz-vdev> <new-device>" is how RAIDZ expansion works.
+     *    RAIDZ member devices are omitted from the list when the feature is active so
+     *    the selector only shows meaningful choices.
+     */
+    public function getAttachAnchors($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $pool = $params['name'];
+
+        // Check whether raidz_expansion is active for this pool.
+        $expansionActive = false;
+        $featCmd = sprintf('zpool get -H -o value feature@raidz_expansion %s 2>/dev/null',
+            escapeshellarg($pool));
+        if (self::zfsTryExec($featCmd, $featOut)) {
+            $expansionActive = (trim($featOut[0] ?? '') === 'active');
+        }
+
+        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        if (!self::zfsTryExec($cmd, $out)) {
+            return [];
+        }
+        $anchors        = [];
+        $inConfig       = false;
+        $currentVdev    = '';
+        $vdevDepth      = -1;
+        $raidzVdevSeen  = [];
+        foreach ($out as $line) {
+            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
+                $inConfig = true;
+                continue;
+            }
+            if (!$inConfig) continue;
+            if (trim($line) === '') break;
+            $trimmed = ltrim($line);
+            $depth   = strlen($line) - strlen($trimmed);
+            // Vdev group line (mirror-N, raidzN-N, replacing-N, spare).
+            if (preg_match('/^(mirror-\d+|raidz\d*-\d+|replacing-\d+|spare)\s/', $trimmed, $vm)) {
+                $currentVdev = $vm[1];
+                $vdevDepth   = $depth;
+                // For RAIDZ vdevs with expansion enabled, add the vdev name once.
+                if ($expansionActive && preg_match('/^raidz\d*-\d+$/', $vm[1])
+                    && !isset($raidzVdevSeen[$vm[1]])) {
+                    $raidzVdevSeen[$vm[1]] = true;
+                    $anchors[] = [
+                        'devicefile' => $vm[1],
+                        'state'      => '',
+                        'vdev'       => $vm[1],
+                        'label'      => $vm[1] . '  [RAIDZ expansion]',
+                    ];
+                }
+                continue;
+            }
+            // Device line (absolute path).
+            if (preg_match('/^(\/\S+)\s+(\S+)/', $trimmed, $m)) {
+                if ($vdevDepth >= 0 && $depth <= $vdevDepth) {
+                    $currentVdev = '';
+                    $vdevDepth   = -1;
+                }
+                $vdev = $currentVdev;
+                // Omit individual devices that belong to a RAIDZ vdev when
+                // expansion is active — the vdev name is already in the list.
+                if ($expansionActive && preg_match('/^raidz/', $vdev)) {
+                    continue;
+                }
+                $label = $vdev
+                    ? $m[1] . '  [' . $vdev . '] [' . $m[2] . ']'
+                    : $m[1] . '  [stripe] [' . $m[2] . ']';
+                $anchors[] = [
+                    'devicefile' => $m[1],
+                    'state'      => $m[2],
+                    'vdev'       => $vdev,
+                    'label'      => $label,
+                ];
+            }
+        }
+        return $anchors;
+    }
+
     public function getTopLevelVdevs($params, $context)
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
@@ -1161,7 +1246,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.pooldevice');
         $cmd = sprintf('zpool detach %s %s 2>&1',
             escapeshellarg($params['pool']), escapeshellarg($params['device']));
-        self::zfsExec($cmd, $out, $res);
+        if (!self::zfsTryExec($cmd, $out)) {
+            $msg = !empty($out) ? implode(' ', array_map('trim', $out)) : 'zpool detach failed.';
+            throw new \OMV\Exception($msg);
+        }
     }
 
     public function deviceReplace($params, $context)

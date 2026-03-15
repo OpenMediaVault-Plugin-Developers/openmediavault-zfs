@@ -30,9 +30,9 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 @{{ job.execution }}
 {%- endif -%}
 {{ separator }}root{{ separator }}/usr/sbin/omv-zfs-scrub-job {{ job.pool | quote }}
-{%- if not job.sendemail | to_bool %}
+{%- if not job.sendemail | to_bool -%}
 {{ separator }}>/dev/null 2>&1
-{%- else %}
+{%- else -%}
 {{ separator }}2>&1 | mail -E -s "ZFS Scrub{{ ' - ' ~ job.comment | replace('\n', ' ') if job.comment | length > 0 else '' }}" root >/dev/null 2>&1
 {%- endif %}
 {%- endfor %}

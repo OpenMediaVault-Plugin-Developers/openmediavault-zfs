@@ -1764,7 +1764,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (!empty($out)) {
             $cols = preg_split('/[\s]+/', $out[0]);
             if (count($cols) >= 3) {
-                return $cols[count($cols) - 3];
+                return '/dev/disk/by-id/' . $cols[count($cols) - 3];
             }
         }
         return $disk;
@@ -1784,7 +1784,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (!empty($out)) {
             $cols = preg_split('/[\s]+/', $out[0]);
             if (count($cols) >= 3) {
-                return $cols[count($cols) - 3];
+                return '/dev/disk/by-path/' . $cols[count($cols) - 3];
             }
         }
         return $disk;

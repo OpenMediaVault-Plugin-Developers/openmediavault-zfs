@@ -26,6 +26,16 @@ data:
             - ["cache", _("Cache (L2ARC)")]
             - ["log", _("Log (ZIL/SLOG)")]
             - ["spare", _("Hot spare")]
+      - type: hint
+        hintType: info
+        text: '_("Log (ZIL/SLOG): if no log device exists yet, a single device is added. If one already exists, the new device is automatically mirrored with it using zpool attach (creating or extending a mirror). To create a log mirror from scratch add the first device, then add the second.")'
+        modifiers:
+          - type: visible
+            constraint:
+              operator: eq
+              arg0:
+                prop: vdevtype
+              arg1: "log"
       - type: select
         name: device
         label: _("Device")

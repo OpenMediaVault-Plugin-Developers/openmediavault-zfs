@@ -1044,6 +1044,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $currentVdev    = '';
         $vdevDepth      = -1;
         $raidzVdevSeen  = [];
+        $inClassSection = false;
+        // Class headers that introduce non-data vdev sections (logs, cache, spares, etc.).
+        $classSectionNames = ['logs' => true, 'cache' => true, 'spares' => true,
+                              'special' => true, 'dedup' => true];
         foreach ($out as $line) {
             if (preg_match('/^\s*NAME\s+STATE/', $line)) {
                 $inConfig = true;
@@ -1053,6 +1057,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (trim($line) === '') break;
             $trimmed = ltrim($line);
             $depth   = strlen($line) - strlen($trimmed);
+            // Detect class header lines (logs, cache, spares, special, dedup).
+            // These appear at the same indent level as data vdevs and introduce
+            // special-device sections whose members must not be offered as attach
+            // anchors (zpool attach is only valid for data vdevs / mirrors).
+            $token0 = preg_split('/\s+/', $trimmed)[0];
+            if (isset($classSectionNames[$token0])) {
+                $inClassSection = true;
+                $currentVdev    = '';
+                $vdevDepth      = -1;
+                continue;
+            }
+            if ($inClassSection) continue;
             // Vdev group line (mirror-N, raidzN-N, replacing-N, spare).
             if (preg_match('/^(mirror-\d+|raidz\d*-\d+|replacing-\d+|spare)\s/', $trimmed, $vm)) {
                 $currentVdev = $vm[1];
@@ -1077,9 +1093,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     $vdevDepth   = -1;
                 }
                 $vdev = $currentVdev;
-                // Omit individual devices that belong to a RAIDZ vdev when
-                // expansion is active — the vdev name is already in the list.
-                if ($expansionActive && preg_match('/^raidz/', $vdev)) {
+                // Never offer RAIDZ member devices as anchors — zpool attach is
+                // invalid on RAIDZ members.  When expansion is active the RAIDZ
+                // vdev name entry is already in the list above.
+                if (preg_match('/^raidz/', $vdev)) {
                     continue;
                 }
                 $label = $vdev
@@ -1152,17 +1169,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                         'vdev'  => $token,
                         'type'  => $type,
                         'state' => $state,
-                        'label' => $token . '  [' . $type . '] [' . $state . ']',
+                        'label' => 'Data: ' . $token . '  [' . $type . '] [' . $state . ']',
                     ];
                 }
             } elseif ($classDepth >= 0 && $depth > $classDepth
                       && str_starts_with($token, '/')) {
                 // Individual device under a cache / log / spare header.
+                $prefix = ucfirst($classType) . ': ';
                 $vdevs[] = [
                     'vdev'  => $token,
                     'type'  => $classType,
                     'state' => $state,
-                    'label' => $token . '  [' . $classType . '] [' . $state . ']',
+                    'label' => $prefix . $token . '  [' . $state . ']',
                 ];
             }
         }

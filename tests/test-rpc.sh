@@ -315,16 +315,10 @@ ANCHORS_OUT=$(rpc "Zfs" "getAttachAnchors" "{\"name\":\"$POOL\"}" 2>/dev/null ||
 ANCHOR_COUNT=$(echo "$ANCHORS_OUT" | python3 -c \
     "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
 
-if [ "$ANCHOR_COUNT" -gt 0 ]; then
-    _pass "getAttachAnchors — returned $ANCHOR_COUNT anchor(s)"
-else
-    _fail "getAttachAnchors — expected at least one anchor" ""
-fi
-
 case "$POOLTYPE" in
     raidz*)
-        # For RAIDZ pools: anchors are either vdev names (expansion active) or
-        # member devices (expansion not active). Either way list must be non-empty.
+        # For RAIDZ pools: anchors are the vdev name when raidz_expansion is active,
+        # or empty when expansion is not active (member devices are never valid anchors).
         RAIDZ_ANCHOR=$(echo "$ANCHORS_OUT" | python3 -c "
 import sys, json
 items = json.load(sys.stdin)
@@ -334,11 +328,28 @@ print(vdev)
         if [ -n "$RAIDZ_ANCHOR" ]; then
             _pass "getAttachAnchors — RAIDZ expansion anchor present: $RAIDZ_ANCHOR"
         else
-            _pass "getAttachAnchors — no RAIDZ expansion anchor (feature@raidz_expansion not active; member devices returned instead)"
+            _pass "getAttachAnchors — no RAIDZ expansion anchor (feature@raidz_expansion not active; empty list is correct)"
+        fi
+        # Verify that no RAIDZ member device paths leaked into the anchor list.
+        HAS_MEMBER=$(echo "$ANCHORS_OUT" | python3 -c "
+import sys, json
+items = json.load(sys.stdin)
+print(any(i['devicefile'].startswith('/') for i in items))
+" 2>/dev/null || echo "False")
+        if [ "$HAS_MEMBER" = "False" ]; then
+            _pass "getAttachAnchors — RAIDZ member devices correctly excluded from anchor list"
+        else
+            _fail "getAttachAnchors — RAIDZ member device paths must not appear as anchors" \
+                  "got: ${ANCHORS_OUT:0:200}"
         fi
         ;;
     *)
         # Mirror/stripe pools: anchors should be device paths, not vdev names.
+        if [ "$ANCHOR_COUNT" -gt 0 ]; then
+            _pass "getAttachAnchors — returned $ANCHOR_COUNT anchor(s)"
+        else
+            _fail "getAttachAnchors — expected at least one anchor for $POOLTYPE pool" ""
+        fi
         HAS_DEV=$(echo "$ANCHORS_OUT" | python3 -c "
 import sys, json
 items = json.load(sys.stdin)
@@ -359,13 +370,10 @@ section "deviceDetach on RAIDZ — expect clean error, not exception"
 
 case "$POOLTYPE" in
     raidz*)
-        # Pick the first device from the pool to attempt detach (must fail cleanly).
-        RAIDZ_DEV=$(echo "$ANCHORS_OUT" | python3 -c "
-import sys, json
-items = json.load(sys.stdin)
-dev = next((i['devicefile'] for i in items if i['devicefile'].startswith('/')), '')
-print(dev)
-" 2>/dev/null || echo "")
+        # Pick the first device from the pool status directly (RAIDZ members no longer
+        # appear in getAttachAnchors, so we query zpool status instead).
+        RAIDZ_DEV=$(zpool status -P "$POOL" 2>/dev/null \
+            | awk '/^\s+\//{print $1; exit}')
         if [ -n "$RAIDZ_DEV" ]; then
             assert_rpc_fails "deviceDetach on RAIDZ — clean error (not stack trace)" \
                 "Zfs" "deviceDetach" \

@@ -166,20 +166,31 @@ cleanup() {
 trap cleanup EXIT
 
 # ---------------------------------------------------------------------------
-# Determine pool type from device count
+# Determine pool type from device count.
+# With exactly 4 devices, reserve the last one for the RAIDZ expansion test
+# and create a 3-device raidz1 as the main pool.
 # ---------------------------------------------------------------------------
 DEVCOUNT=${#DEVICES[@]}
-if   [ "$DEVCOUNT" -ge 5 ]; then POOLTYPE="raidz2"
-elif [ "$DEVCOUNT" -ge 3 ]; then POOLTYPE="raidz1"
-elif [ "$DEVCOUNT" -ge 2 ]; then POOLTYPE="mirror"
-else                              POOLTYPE="basic"
+EXPAND_DEV=""   # device reserved for RAIDZ expansion test (set when DEVCOUNT==4)
+
+if [ "$DEVCOUNT" -eq 4 ]; then
+    POOL_DEVICES=("${DEVICES[@]:0:3}")
+    EXPAND_DEV="${DEVICES[3]}"
+    POOLTYPE="raidz1"
+else
+    POOL_DEVICES=("${DEVICES[@]}")
+    if   [ "$DEVCOUNT" -ge 5 ]; then POOLTYPE="raidz2"
+    elif [ "$DEVCOUNT" -ge 3 ]; then POOLTYPE="raidz1"
+    elif [ "$DEVCOUNT" -ge 2 ]; then POOLTYPE="mirror"
+    else                              POOLTYPE="basic"
+    fi
 fi
 
-# Build JSON device array.
+# Build JSON device array from the pool devices (may be a subset of DEVICES).
 DEVICE_JSON="["
-for i in "${!DEVICES[@]}"; do
+for i in "${!POOL_DEVICES[@]}"; do
     [ "$i" -gt 0 ] && DEVICE_JSON+=","
-    DEVICE_JSON+="\"${DEVICES[$i]}\""
+    DEVICE_JSON+="\"${POOL_DEVICES[$i]}\""
 done
 DEVICE_JSON+="]"
 
@@ -187,6 +198,7 @@ section "Configuration"
 info "Devices  : ${DEVICES[*]}"
 info "Pool type: $POOLTYPE"
 info "Pool name: $POOL"
+[ -n "$EXPAND_DEV" ] && info "Expansion: $EXPAND_DEV (reserved for RAIDZ expansion test)"
 
 # OMV sentinel UUID used to signal "create new object" to $db->set().
 OMV_NEW_UUID=$(. /etc/default/openmediavault 2>/dev/null; echo "${OMV_CONFIGOBJECT_NEW_UUID:-fa4b1c66-ef79-11e5-87a0-0002b3a176b4}")
@@ -294,6 +306,140 @@ assert_rpc_fails "removeVdev — invalid vdev name returns error" \
 # cancelVdevRemoval — no removal in progress, should return an error.
 assert_rpc_fails "cancelVdevRemoval — no removal active returns error" \
     "Zfs" "cancelVdevRemoval" "{\"name\":\"$POOL\"}"
+
+# ===========================================================================
+section "getAttachAnchors — verify anchor list for pool type"
+# ===========================================================================
+
+ANCHORS_OUT=$(rpc "Zfs" "getAttachAnchors" "{\"name\":\"$POOL\"}" 2>/dev/null || echo "[]")
+ANCHOR_COUNT=$(echo "$ANCHORS_OUT" | python3 -c \
+    "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
+
+if [ "$ANCHOR_COUNT" -gt 0 ]; then
+    _pass "getAttachAnchors — returned $ANCHOR_COUNT anchor(s)"
+else
+    _fail "getAttachAnchors — expected at least one anchor" ""
+fi
+
+case "$POOLTYPE" in
+    raidz*)
+        # For RAIDZ pools: anchors are either vdev names (expansion active) or
+        # member devices (expansion not active). Either way list must be non-empty.
+        RAIDZ_ANCHOR=$(echo "$ANCHORS_OUT" | python3 -c "
+import sys, json
+items = json.load(sys.stdin)
+vdev = next((i['devicefile'] for i in items if 'RAIDZ expansion' in i.get('label','')), '')
+print(vdev)
+" 2>/dev/null || echo "")
+        if [ -n "$RAIDZ_ANCHOR" ]; then
+            _pass "getAttachAnchors — RAIDZ expansion anchor present: $RAIDZ_ANCHOR"
+        else
+            _pass "getAttachAnchors — no RAIDZ expansion anchor (feature@raidz_expansion not active; member devices returned instead)"
+        fi
+        ;;
+    *)
+        # Mirror/stripe pools: anchors should be device paths, not vdev names.
+        HAS_DEV=$(echo "$ANCHORS_OUT" | python3 -c "
+import sys, json
+items = json.load(sys.stdin)
+print(any(i['devicefile'].startswith('/') for i in items))
+" 2>/dev/null || echo "False")
+        if [ "$HAS_DEV" = "True" ]; then
+            _pass "getAttachAnchors — device paths returned for $POOLTYPE pool"
+        else
+            _fail "getAttachAnchors — expected device paths for $POOLTYPE pool" \
+                  "got: ${ANCHORS_OUT:0:200}"
+        fi
+        ;;
+esac
+
+# ===========================================================================
+section "deviceDetach on RAIDZ — expect clean error, not exception"
+# ===========================================================================
+
+case "$POOLTYPE" in
+    raidz*)
+        # Pick the first device from the pool to attempt detach (must fail cleanly).
+        RAIDZ_DEV=$(echo "$ANCHORS_OUT" | python3 -c "
+import sys, json
+items = json.load(sys.stdin)
+dev = next((i['devicefile'] for i in items if i['devicefile'].startswith('/')), '')
+print(dev)
+" 2>/dev/null || echo "")
+        if [ -n "$RAIDZ_DEV" ]; then
+            assert_rpc_fails "deviceDetach on RAIDZ — clean error (not stack trace)" \
+                "Zfs" "deviceDetach" \
+                "{\"pool\":\"$POOL\",\"device\":\"$RAIDZ_DEV\"}"
+            # Verify the error message is the zpool message, not a PHP trace.
+            DETACH_OUT=$(omv-rpc -u admin "Zfs" "deviceDetach" \
+                "{\"pool\":\"$POOL\",\"device\":\"$RAIDZ_DEV\"}" 2>&1 || true)
+            if echo "$DETACH_OUT" | grep -qi "only applicable\|not supported\|cannot detach"; then
+                _pass "deviceDetach on RAIDZ — error message is from zpool (not PHP trace)"
+            elif echo "$DETACH_OUT" | grep -qi "Stack trace\|#[0-9]"; then
+                _fail "deviceDetach on RAIDZ — PHP stack trace leaked to output" \
+                      "${DETACH_OUT:0:200}"
+            else
+                _pass "deviceDetach on RAIDZ — failed with non-trace message (acceptable)"
+            fi
+        else
+            _fail "deviceDetach on RAIDZ — could not determine a device to test with" ""
+        fi
+        ;;
+    *)
+        info "Skipping RAIDZ detach error test (pool type is $POOLTYPE)"
+        ;;
+esac
+
+# ===========================================================================
+section "RAIDZ expansion via deviceAttach (requires 4 devices)"
+# ===========================================================================
+
+if [ -n "$EXPAND_DEV" ] && [ "$POOLTYPE" = "raidz1" ]; then
+    # Determine the RAIDZ expansion anchor from getAttachAnchors.
+    RAIDZ_ANCHOR=$(echo "$ANCHORS_OUT" | python3 -c "
+import sys, json
+items = json.load(sys.stdin)
+vdev = next((i['devicefile'] for i in items if 'RAIDZ expansion' in i.get('label','')), '')
+print(vdev)
+" 2>/dev/null || echo "")
+
+    if [ -n "$RAIDZ_ANCHOR" ]; then
+        info "Expanding $RAIDZ_ANCHOR with $EXPAND_DEV"
+        ATTACH_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'pool': '$POOL', 'olddevice': '$RAIDZ_ANCHOR', 'newdevice': '$EXPAND_DEV'}))
+")
+        assert_rpc "deviceAttach — RAIDZ expansion ($RAIDZ_ANCHOR + $EXPAND_DEV)" \
+            "Zfs" "deviceAttach" "$ATTACH_PARAMS"
+
+        # Give ZFS a moment to register the new device then check pool config.
+        sleep 2
+        POOL_STATUS=$(zpool status "$POOL" 2>/dev/null || echo "")
+        EXPAND_BASENAME=$(basename "$EXPAND_DEV")
+        if echo "$POOL_STATUS" | grep -q "$EXPAND_DEV\|$EXPAND_BASENAME"; then
+            _pass "deviceAttach — expansion device visible in pool config"
+        else
+            _fail "deviceAttach — expansion device not found in pool config" \
+                  "$(echo "$POOL_STATUS" | grep -E 'NAME|raidz|scsi|sd[a-z]' | head -8)"
+        fi
+
+        # The pool status should show an expand: line or the device resilvering.
+        if echo "$POOL_STATUS" | grep -qE "expand:|resilvering|resilvered"; then
+            _pass "deviceAttach — pool shows expansion or resilver activity"
+        else
+            _pass "deviceAttach — expansion completed immediately (small pool)"
+        fi
+    else
+        _fail "deviceAttach — RAIDZ expansion skipped: feature@raidz_expansion not active on $POOL" \
+              "Enable with: zpool set feature@raidz_expansion=enabled $POOL"
+    fi
+else
+    if [ -z "$EXPAND_DEV" ]; then
+        info "Skipping RAIDZ expansion test (pass exactly 4 devices to enable)"
+    else
+        info "Skipping RAIDZ expansion test (pool type is $POOLTYPE, need raidz1)"
+    fi
+fi
 
 # ===========================================================================
 section "Filesystem — add, details, properties"

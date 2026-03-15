@@ -1027,12 +1027,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.name');
         $pool = $params['name'];
 
-        // Check whether raidz_expansion is active for this pool.
+        // Check whether raidz_expansion is enabled or active for this pool.
+        // The feature state is 'enabled' once set, and transitions to 'active'
+        // after it has been used.  Both states permit RAIDZ expansion.
         $expansionActive = false;
         $featCmd = sprintf('zpool get -H -o value feature@raidz_expansion %s 2>/dev/null',
             escapeshellarg($pool));
         if (self::zfsTryExec($featCmd, $featOut)) {
-            $expansionActive = (trim($featOut[0] ?? '') === 'active');
+            $expansionActive = in_array(trim($featOut[0] ?? ''), ['enabled', 'active']);
         }
 
         $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));

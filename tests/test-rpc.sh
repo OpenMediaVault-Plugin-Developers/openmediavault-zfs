@@ -261,6 +261,16 @@ else
     _fail "addPool — pool $POOL not found after create" ""
 fi
 
+# Enable raidz_expansion if we reserved a device for the expansion test.
+if [ -n "$EXPAND_DEV" ]; then
+    if zpool set feature@raidz_expansion=enabled "$POOL" 2>/dev/null; then
+        _pass "addPool — feature@raidz_expansion enabled for expansion test"
+    else
+        _fail "addPool — could not enable feature@raidz_expansion" \
+              "RAIDZ expansion test will be skipped"
+    fi
+fi
+
 # ===========================================================================
 section "Pool — list, details, properties"
 # ===========================================================================
@@ -339,8 +349,8 @@ ANCHOR_COUNT=$(echo "$ANCHORS_OUT" | python3 -c \
 
 case "$POOLTYPE" in
     raidz*)
-        # For RAIDZ pools: anchors are the vdev name when raidz_expansion is active,
-        # or empty when expansion is not active (member devices are never valid anchors).
+        # For RAIDZ pools: anchors are the vdev name when raidz_expansion is enabled/active,
+        # or empty when expansion is not enabled (member devices are never valid anchors).
         RAIDZ_ANCHOR=$(echo "$ANCHORS_OUT" | python3 -c "
 import sys, json
 items = json.load(sys.stdin)
@@ -349,8 +359,12 @@ print(vdev)
 " 2>/dev/null || echo "")
         if [ -n "$RAIDZ_ANCHOR" ]; then
             _pass "getAttachAnchors — RAIDZ expansion anchor present: $RAIDZ_ANCHOR"
+        elif [ -n "$EXPAND_DEV" ]; then
+            # Feature was explicitly enabled above — anchor must be present.
+            _fail "getAttachAnchors — feature@raidz_expansion is enabled but no anchor returned" \
+                  "raw: ${ANCHORS_OUT:0:200}"
         else
-            _pass "getAttachAnchors — no RAIDZ expansion anchor (feature@raidz_expansion not active; empty list is correct)"
+            _pass "getAttachAnchors — no RAIDZ expansion anchor (feature not enabled; empty list is correct)"
         fi
         # Verify that no RAIDZ member device paths leaked into the anchor list.
         HAS_MEMBER=$(echo "$ANCHORS_OUT" | python3 -c "

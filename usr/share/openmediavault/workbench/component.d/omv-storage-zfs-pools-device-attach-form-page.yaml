@@ -25,7 +25,7 @@ data:
         label: _("Anchor (existing device or RAIDZ vdev)")
         valueField: devicefile
         textField: label
-        hint: _("Mirror/stripe: choose the existing device to attach to. RAIDZ: choose the vdev name shown as [RAIDZ expansion].")
+        hint: '_("Mirror/stripe: choose the existing device to attach to. RAIDZ: choose the vdev name shown as [RAIDZ expansion].")'
         store:
           proxy:
             service: Zfs

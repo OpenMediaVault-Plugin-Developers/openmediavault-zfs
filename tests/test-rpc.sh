@@ -1159,6 +1159,184 @@ printf '%s' "$ENC_PASS" | zfs load-key "$ENC_DS" 2>/dev/null || true
 zfs destroy -r "$ENC_DS" 2>/dev/null || true
 
 # ===========================================================================
+section "Clone & Promote — encrypted dataset edge cases"
+# ===========================================================================
+# Exercises:
+#   - isencryptionroot field correctly reflects encryptionroot in listDatasets
+#   - unloadEncryptionKey/loadEncryptionKey rejected for non-encryptionroot clones
+#   - deleteObject on promoted clone reports the dependent dataset by name
+#   - deleteObject with zfs destroy -r cleans up orphaned snapshots
+
+ENC_SRC="$POOL/enc_src"
+ENC_CLONE="$POOL/enc_clone"
+ENC_CP="OmvZfsCloneTestPass456!"
+
+info "Creating encrypted dataset $ENC_SRC"
+if printf '%s' "$ENC_CP" | zfs create \
+        -o encryption=aes-256-gcm \
+        -o keyformat=passphrase \
+        -o keylocation=prompt \
+        -o canmount=noauto \
+        "$ENC_SRC" 2>/dev/null; then
+    _pass "enc_src — encrypted dataset created"
+    zfs mount "$ENC_SRC" 2>/dev/null || true
+    omv-rpc -u admin "Zfs" "doDiscover" \
+        '{"addMissing":true,"deleteStale":false}' >/dev/null 2>&1 || true
+else
+    _fail "enc_src — encrypted dataset creation failed" ""
+fi
+
+# --- Clone enc_src via the RPC (auto-creates a snapshot) ---
+CLONE_PARAMS=$(python3 -c "import json; print(json.dumps({'name':'$ENC_SRC','clonename':'enc_clone'}))")
+assert_rpc "cloneDataset — clone encrypted dataset" "Zfs" "cloneDataset" "$CLONE_PARAMS"
+zfs mount "$ENC_CLONE" 2>/dev/null || true
+
+# --- isencryptionroot before promote ---
+ENC_CLONE_MP=$(zfs get -H -o value mountpoint "$ENC_CLONE" 2>/dev/null || echo "")
+ENC_SRC_MP=$(zfs get -H -o value mountpoint   "$ENC_SRC"   2>/dev/null || echo "")
+
+DS_LIST=$(omv-rpc -u admin "Zfs" "listDatasets" \
+    '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' 2>/dev/null || echo "[]")
+
+_enc_is_root() {
+    # $1 = path; echos true/false/missing/not_found
+    # listDatasets returns {"data":[...],"total":N} via applyFilter
+    echo "$DS_LIST" | python3 -c "
+import sys, json
+raw = json.load(sys.stdin)
+items = raw['data'] if isinstance(raw, dict) and 'data' in raw else raw
+obj = next((o for o in items if o.get('path') == '$1'), None)
+print(str(obj.get('isencryptionroot', 'missing')).lower() if obj else 'not_found')
+" 2>/dev/null || echo "error"
+}
+
+SRC_IS_ROOT=$(_enc_is_root "$ENC_SRC")
+CLONE_IS_ROOT=$(_enc_is_root "$ENC_CLONE")
+
+if [ "$SRC_IS_ROOT" = "true" ]; then
+    _pass "isencryptionroot — enc_src is true (is the encryption root)"
+else
+    _fail "isencryptionroot — enc_src should be true, got: $SRC_IS_ROOT" ""
+fi
+if [ "$CLONE_IS_ROOT" = "false" ]; then
+    _pass "isencryptionroot — enc_clone is false (inherits enc_src as root)"
+else
+    _fail "isencryptionroot — enc_clone should be false, got: $CLONE_IS_ROOT" ""
+fi
+
+# --- unloadEncryptionKey on non-root clone must be rejected with clear error ---
+UNLOAD_OUT=$(omv-rpc -u admin "Zfs" "unloadEncryptionKey" \
+    "{\"name\":\"$ENC_CLONE\"}" 2>&1) || true
+if echo "$UNLOAD_OUT" | grep -qi "encryption root\|encryptionroot\|independently"; then
+    _pass "unloadEncryptionKey — non-root clone rejected with encryptionroot error"
+else
+    _fail "unloadEncryptionKey — expected encryptionroot rejection for non-root clone" \
+          "${UNLOAD_OUT:0:300}"
+fi
+# Verify enc_src key was NOT unloaded (the guard must fire before any side effects).
+KEYSTATUS_SRC=$(zfs get -H -o value keystatus "$ENC_SRC" 2>/dev/null || echo "unknown")
+if [ "$KEYSTATUS_SRC" = "available" ]; then
+    _pass "unloadEncryptionKey — rejection did not affect enc_src key"
+else
+    _fail "unloadEncryptionKey — enc_src key should still be available, got: $KEYSTATUS_SRC" ""
+fi
+
+# --- loadEncryptionKey on non-root clone must be rejected ---
+# First lock the real encryptionroot, then try to unlock via the clone.
+# The unloadEncryptionKey RPC unmounts all datasets sharing this encryptionroot
+# (including sibling clones) before calling zfs unload-key, so no manual
+# unmount is required here.
+assert_rpc "unloadEncryptionKey — lock the real root (enc_src) before clone-unlock test" \
+    "Zfs" "unloadEncryptionKey" "{\"name\":\"$ENC_SRC\"}" "unloaded"
+
+LOAD_PARAMS=$(python3 -c "import json; print(json.dumps({'name':'$ENC_CLONE','key':'$ENC_CP'}))")
+LOAD_OUT=$(omv-rpc -u admin "Zfs" "loadEncryptionKey" "$LOAD_PARAMS" 2>&1) || true
+if echo "$LOAD_OUT" | grep -qi "encryption root\|encryptionroot\|independently"; then
+    _pass "loadEncryptionKey — non-root clone rejected with encryptionroot error"
+else
+    _fail "loadEncryptionKey — expected encryptionroot rejection for non-root clone" \
+          "${LOAD_OUT:0:300}"
+fi
+
+# Re-unlock enc_src (the real root) to continue.
+RELOAD_PARAMS=$(python3 -c "import json; print(json.dumps({'name':'$ENC_SRC','key':'$ENC_CP'}))")
+assert_rpc "loadEncryptionKey — re-unlock the real root (enc_src)" \
+    "Zfs" "loadEncryptionKey" "$RELOAD_PARAMS" "loaded"
+
+# --- Promote enc_clone; enc_clone becomes the new encryptionroot ---
+assert_rpc "promoteDataset — promote enc_clone" \
+    "Zfs" "promoteDataset" "{\"name\":\"$ENC_CLONE\"}"
+
+sleep 1
+omv-rpc -u admin "Zfs" "doDiscover" \
+    '{"addMissing":true,"deleteStale":false}' >/dev/null 2>&1 || true
+
+DS_LIST=$(omv-rpc -u admin "Zfs" "listDatasets" \
+    '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' 2>/dev/null || echo "[]")
+POST_SRC_IS_ROOT=$(_enc_is_root "$ENC_SRC")
+POST_CLONE_IS_ROOT=$(_enc_is_root "$ENC_CLONE")
+
+if [ "$POST_CLONE_IS_ROOT" = "true" ]; then
+    _pass "isencryptionroot after promote — enc_clone is now the encryption root"
+else
+    _fail "isencryptionroot after promote — enc_clone should be true, got: $POST_CLONE_IS_ROOT" ""
+fi
+if [ "$POST_SRC_IS_ROOT" = "false" ]; then
+    _pass "isencryptionroot after promote — enc_src is no longer the encryption root"
+else
+    _fail "isencryptionroot after promote — enc_src should be false, got: $POST_SRC_IS_ROOT" ""
+fi
+
+# --- deleteObject on promoted enc_clone must fail: its snapshot is enc_src's origin ---
+DEL_CLONE_OUT=$(omv-rpc -u admin "Zfs" "deleteObject" \
+    "{\"name\":\"$ENC_CLONE\",\"mp\":\"$ENC_CLONE_MP\",\"type\":\"Filesystem\"}" 2>&1) || true
+if echo "$DEL_CLONE_OUT" | grep -qi "origin\|dependent\|clone\|delete.*first"; then
+    _pass "deleteObject — promoted clone deletion rejected: snapshot has dependents"
+else
+    _fail "deleteObject — expected dependent-clone error when deleting promoted clone" \
+          "${DEL_CLONE_OUT:0:300}"
+fi
+if echo "$DEL_CLONE_OUT" | sed 's|\\/|/|g' | grep -qF "$ENC_SRC"; then
+    _pass "deleteObject — error names the dependent dataset ($ENC_SRC)"
+else
+    _fail "deleteObject — error should name the dependent ($ENC_SRC)" \
+          "${DEL_CLONE_OUT:0:300}"
+fi
+
+# Verify enc_clone still exists (deletion must have been fully aborted).
+if zfs list -H -o name "$ENC_CLONE" >/dev/null 2>&1; then
+    _pass "deleteObject — enc_clone still exists (delete was aborted)"
+else
+    _fail "deleteObject — enc_clone was destroyed despite having dependents" ""
+fi
+
+# --- Delete enc_src first (now the clone, no snapshot dependents) ---
+assert_rpc "deleteObject — enc_src (now the dependent clone, delete first)" \
+    "Zfs" "deleteObject" \
+    "{\"name\":\"$ENC_SRC\",\"mp\":\"$ENC_SRC_MP\",\"type\":\"Filesystem\"}"
+if ! zfs list -H -o name "$ENC_SRC" >/dev/null 2>&1; then
+    _pass "deleteObject — enc_src destroyed successfully"
+else
+    _fail "deleteObject — enc_src still exists after delete" ""
+fi
+
+# --- Now enc_clone has an orphaned snapshot with no dependents.
+#     deleteObject must succeed, using zfs destroy -r to remove the snapshot too. ---
+assert_rpc "deleteObject — enc_clone (promoted, orphaned snapshot cleaned by -r)" \
+    "Zfs" "deleteObject" \
+    "{\"name\":\"$ENC_CLONE\",\"mp\":\"$ENC_CLONE_MP\",\"type\":\"Filesystem\"}"
+if ! zfs list -H -o name "$ENC_CLONE" >/dev/null 2>&1; then
+    _pass "deleteObject — enc_clone and its orphaned snapshot destroyed"
+else
+    _fail "deleteObject — enc_clone still exists after delete" ""
+fi
+
+unset ENC_SRC ENC_CLONE ENC_CLONE_MP ENC_SRC_MP ENC_CP
+unset CLONE_PARAMS DS_LIST SRC_IS_ROOT CLONE_IS_ROOT
+unset UNLOAD_OUT LOAD_PARAMS LOAD_OUT RELOAD_PARAMS
+unset POST_SRC_IS_ROOT POST_CLONE_IS_ROOT DEL_CLONE_OUT
+
+# ===========================================================================
 section "Export and import"
 # ===========================================================================
 

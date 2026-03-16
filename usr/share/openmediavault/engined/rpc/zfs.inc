@@ -1411,6 +1411,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.loadencryptionkey');
+        // A clone that has not been promoted shares its encryptionroot with the
+        // origin dataset.  ZFS requires you to load the key on the root, not on
+        // the clone, so give a clear error instead of a cryptic ZFS message.
+        $encStatus = self::zfsGetEncryptionStatus($params['name']);
+        $encRoot   = $encStatus['encryptionroot']['value'] ?? $params['name'];
+        if ($encRoot !== '-' && $encRoot !== $params['name']) {
+            throw new \OMV\Exception(
+                "Cannot unlock '%s' independently — its encryption root is '%s'. "
+                . "Unlock '%s' instead; this dataset will become accessible automatically.",
+                $params['name'], $encRoot, $encRoot
+            );
+        }
         $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
         self::execWithStdin($cmd, $params['key']);
         // Mount the dataset now that the key is loaded.
@@ -1426,20 +1438,58 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
         $this->validateMethodParams($params, 'rpc.zfs.unloadencryptionkey');
-        // Collect mountpoints before unmounting so we can lazy-unmount any that
-        // remain busy.  zfs unmount -f uses MNT_FORCE which can still fail when a
-        // process holds an open file handle; umount -l (MNT_DETACH) always detaches
-        // the filesystem from the VFS immediately so zfs unload-key can proceed.
-        self::zfsTryExec(sprintf(
-            'zfs list -H -r -t filesystem -o mountpoint %s 2>/dev/null',
-            escapeshellarg($params['name'])
-        ), $mountpoints);
-        self::zfsTryExec(sprintf('zfs unmount -f -r %s 2>&1', escapeshellarg($params['name'])));
-        foreach (($mountpoints ?? []) as $mp) {
-            $mp = trim($mp);
-            if ($mp === '' || in_array($mp, ['none', 'legacy', '-'])) {
-                continue;
+        // Refuse if this dataset is not its own encryption root.  Unloading the key
+        // on a non-promoted clone would actually lock the shared encryptionroot and
+        // all other datasets that inherit from it — very surprising behaviour.
+        $encStatus = self::zfsGetEncryptionStatus($params['name']);
+        $encRoot   = $encStatus['encryptionroot']['value'] ?? $params['name'];
+        if ($encRoot !== '-' && $encRoot !== $params['name']) {
+            throw new \OMV\Exception(
+                "Cannot lock '%s' independently — its encryption root is '%s'. "
+                . "Lock '%s' instead, which will also lock this dataset.",
+                $params['name'], $encRoot, $encRoot
+            );
+        }
+        // Unmount every dataset that shares this encryption root before unloading
+        // the key.  Clones inherit the encryptionroot from their origin and are
+        // siblings (not children) of the root dataset, so a plain recursive unmount
+        // of the root dataset leaves sibling clones mounted and causes ZFS to report
+        // the key as "busy".  We therefore find all datasets pool-wide that list this
+        // dataset as their encryptionroot and unmount them individually.
+        $poolName = explode('/', $params['name'])[0];
+        $toUnmount = [];
+        if (self::zfsTryExec(sprintf(
+            'zfs get -H -t filesystem,volume -r -o name,value encryptionroot %s 2>/dev/null',
+            escapeshellarg($poolName)
+        ), $encRootLines)) {
+            foreach ($encRootLines as $line) {
+                $parts = explode("\t", trim($line));
+                if (count($parts) === 2 && $parts[1] === $params['name']) {
+                    $toUnmount[] = $parts[0];
+                }
             }
+        }
+        // Fall back to the target dataset itself if the pool scan found nothing.
+        if (empty($toUnmount)) {
+            $toUnmount[] = $params['name'];
+        }
+        // Force-unmount each affected dataset; collect mountpoints for the lazy
+        // umount fallback (needed when a process holds open file handles).
+        $mountpoints = [];
+        foreach ($toUnmount as $ds) {
+            self::zfsTryExec(sprintf(
+                'zfs list -H -t filesystem -o mountpoint %s 2>/dev/null',
+                escapeshellarg($ds)
+            ), $mpLines);
+            foreach (($mpLines ?? []) as $mp) {
+                $mp = trim($mp);
+                if ($mp !== '' && !in_array($mp, ['none', 'legacy', '-'])) {
+                    $mountpoints[] = $mp;
+                }
+            }
+            self::zfsTryExec(sprintf('zfs unmount -f %s 2>&1', escapeshellarg($ds)));
+        }
+        foreach ($mountpoints as $mp) {
             self::zfsTryExec(sprintf('umount -l %s 2>/dev/null', escapeshellarg($mp)));
         }
         $cmd = sprintf('zfs unload-key -r %s 2>&1', escapeshellarg($params['name']));
@@ -2110,7 +2160,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
         if (self::zfsFilesystemExists($name)) {
-            self::zfsExec(sprintf('zfs destroy %s 2>&1', escapeshellarg($name)), $out, $res);
+            // Refuse if any snapshot of this dataset has dependent clones — zfs destroy
+            // would fail cryptically and the caller needs to know what to delete first.
+            $dependents = self::getSnapshotDependentClones($name);
+            if (!empty($dependents)) {
+                throw new \OMV\Exception(
+                    "Cannot delete '%s' — it has snapshots that are the origin of: %s. "
+                    . "Delete those datasets first, or use Promote on one of them to restore "
+                    . "the original clone relationship.",
+                    $name, implode(', ', $dependents)
+                );
+            }
+            // Use -r so any orphaned snapshots are removed along with the dataset.
+            self::zfsExec(sprintf('zfs destroy -r %s 2>&1', escapeshellarg($name)), $out, $res);
         }
     }
 
@@ -2326,7 +2388,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Fetch encryption properties for all datasets in one call.
         $encMap = [];
         self::zfsTryExec(
-            'zfs get -H -p encryption,keystatus,keylocation -t filesystem,volume 2>&1',
+            'zfs get -H -p encryption,encryptionroot,keystatus,keylocation -t filesystem,volume 2>&1',
             $encOut
         );
         foreach ($encOut as $line) {
@@ -2351,10 +2413,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
             $isFilesystem = ($type === 'filesystem' && !$isPool);
             $isVolume     = ($type === 'volume');
-            $enc          = strtoupper($encMap[$path]['encryption'] ?? 'off');
-            $keystatus    = $encMap[$path]['keystatus']   ?? '-';
-            $keylocation  = $encMap[$path]['keylocation'] ?? 'none';
-            $encrypted    = ($enc !== 'OFF');
+            $enc             = strtoupper($encMap[$path]['encryption'] ?? 'off');
+            $encRoot         = $encMap[$path]['encryptionroot'] ?? '-';
+            $keystatus       = $encMap[$path]['keystatus']   ?? '-';
+            $keylocation     = $encMap[$path]['keylocation'] ?? 'none';
+            $encrypted       = ($enc !== 'OFF');
+            $isEncryptionRoot = $encrypted && $encRoot === $path;
             $autounlock   = $encrypted && (
                 (strpos($keylocation, 'file://') === 0 && file_exists(self::getKeyfilePath($path))) ||
                 file_exists(self::getRemoteKeyMetaPath($path))
@@ -2418,14 +2482,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'status'        => 'n/a',
                     'scrubstate'    => 'n/a',
                     'scrubactive'   => false,
-                    'encryption'    => $enc,
-                    'keystatus'     => $keystatus,
-                    'autounlock'    => $autounlock,
-                    'hasshares'     => isset($sharedFsnames[$path]),
-                    'compression'   => ($compression !== '-') ? $compression : 'off',
-                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
-                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
-                    'poolroot'      => true,
+                    'encryption'       => $enc,
+                    'keystatus'        => $keystatus,
+                    'autounlock'       => $autounlock,
+                    'isencryptionroot' => $isEncryptionRoot,
+                    'hasshares'        => isset($sharedFsnames[$path]),
+                    'compression'      => ($compression !== '-') ? $compression : 'off',
+                    'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'            => ($refer !== '-') ? (int)$refer : 0,
+                    'poolroot'         => true,
                 ];
             } elseif ($isFilesystem) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -2457,14 +2522,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'status'      => 'n/a',
                     'scrubstate'  => 'n/a',
                     'scrubactive' => false,
-                    'encryption'    => $enc,
-                    'keystatus'     => $keystatus,
-                    'autounlock'    => $autounlock,
-                    'hasshares'     => isset($sharedFsnames[$path]),
-                    'compression'   => ($compression !== '-') ? $compression : 'off',
-                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
-                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
-                    'poolroot'      => false,
+                    'encryption'       => $enc,
+                    'keystatus'        => $keystatus,
+                    'autounlock'       => $autounlock,
+                    'isencryptionroot' => $isEncryptionRoot,
+                    'hasshares'        => isset($sharedFsnames[$path]),
+                    'compression'      => ($compression !== '-') ? $compression : 'off',
+                    'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'            => ($refer !== '-') ? (int)$refer : 0,
+                    'poolroot'         => false,
                 ];
             } elseif ($isVolume) {
                 preg_match('/(.*)\/(.*)$/', $path, $result);
@@ -2491,13 +2557,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'status'      => 'n/a',
                     'scrubstate'  => 'n/a',
                     'scrubactive' => false,
-                    'encryption'    => $enc,
-                    'keystatus'     => $keystatus,
-                    'autounlock'    => $autounlock,
-                    'hasshares'     => false,
-                    'compression'   => ($compression !== '-') ? $compression : 'off',
-                    'compressratio' => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
-                    'refer'         => ($refer !== '-') ? (int)$refer : 0,
+                    'encryption'       => $enc,
+                    'keystatus'        => $keystatus,
+                    'autounlock'       => $autounlock,
+                    'isencryptionroot' => $isEncryptionRoot,
+                    'hasshares'        => false,
+                    'compression'      => ($compression !== '-') ? $compression : 'off',
+                    'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
+                    'refer'            => ($refer !== '-') ? (int)$refer : 0,
                 ];
             }
         }
@@ -2757,11 +2824,42 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     private static function hasChildren(string $name): bool
     {
         self::zfsTryExec(
-            sprintf('zfs list -H -d 1 -t filesystem,volume,snapshot %s 2>&1', escapeshellarg($name)),
+            sprintf('zfs list -H -d 1 -t filesystem,volume %s 2>&1', escapeshellarg($name)),
             $out
         );
-        // First line is the object itself; any additional lines are children.
+        // First line is the object itself; any additional lines are child datasets.
         return count($out) > 1;
+    }
+
+    /**
+     * Return datasets that are clones of any snapshot owned by $name.
+     * Used to give a specific error when deleting a promoted clone whose
+     * snapshot still has dependents (e.g. the original dataset after promote).
+     *
+     * @return string[]  Clone dataset names, or empty array if none.
+     */
+    private static function getSnapshotDependentClones(string $name): array
+    {
+        $clones = [];
+        if (!self::zfsTryExec(
+            sprintf('zfs list -H -d 1 -t snapshot -o clones %s 2>/dev/null', escapeshellarg($name)),
+            $out
+        )) {
+            return [];
+        }
+        foreach ($out as $line) {
+            $line = trim($line);
+            if ($line === '' || $line === '-') {
+                continue;
+            }
+            foreach (explode(',', $line) as $clone) {
+                $clone = trim($clone);
+                if ($clone !== '') {
+                    $clones[] = $clone;
+                }
+            }
+        }
+        return $clones;
     }
 
     /**

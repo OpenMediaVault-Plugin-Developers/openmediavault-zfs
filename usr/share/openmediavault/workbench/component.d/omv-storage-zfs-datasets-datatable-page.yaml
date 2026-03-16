@@ -103,6 +103,12 @@ data:
         sortable: true
         cellTemplateName: checkIcon
         hidden: true
+      - name: _("Is encryption root")
+        prop: isencryptionroot
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: true
       - name: _("Pool root")
         prop: poolroot
         flexGrow: 1
@@ -552,6 +558,9 @@ data:
                   arg0:
                     prop: keystatus
                   arg1: "available"
+                - operator: truthy
+                  arg0:
+                    prop: isencryptionroot
             execute:
               type: formDialog
               formDialog:
@@ -588,6 +597,9 @@ data:
                   arg0:
                     prop: keystatus
                   arg1: "available"
+                - operator: truthy
+                  arg0:
+                    prop: isencryptionroot
             confirmationDialogConfig:
               template: confirmation
               message: _("Are you sure you want to unload the encryption key? The dataset will become inaccessible until it is unlocked again.")

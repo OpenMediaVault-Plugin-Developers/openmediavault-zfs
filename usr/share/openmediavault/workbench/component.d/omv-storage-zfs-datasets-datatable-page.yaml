@@ -434,6 +434,9 @@ data:
                 - operator: falsy
                   arg0:
                     prop: poolroot
+                - operator: falsy
+                  arg0:
+                    prop: hasshares
             execute:
               type: formDialog
               formDialog:

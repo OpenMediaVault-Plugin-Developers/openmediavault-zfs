@@ -126,6 +126,30 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Mirror and stripe pools continue to show individual device anchors
     - Attach dialog hint and confirmation updated to cover all three cases:
       mirror extend, stripe-to-mirror, and RAIDZ expansion
+  * Fix remove vdev dropdown mis-labelling log/cache vdevs as data
+    - Class headers (logs, cache, spares, special, dedup) appear at poolDepth
+      in zpool status output, not at topDepth; getTopLevelVdevs now checks the
+      correct depth so log mirrors and cache devices are correctly typed
+    - Labels now show the topology type (e.g. Log: mirror-22 [mirror] [ONLINE])
+    - Remove vdev warning and confirmation dialog now distinguish between data
+      vdev removal (data evacuation, space required) and log/cache/spare/special
+      removal (simple detach, no data migration)
+  * Split dataset 'Used' column into value and progress bar columns
+    - 'Used' column shows the byte value (binaryUnit, visible by default)
+    - 'Used (%)' column shows the progress bar (hidden by default, opt-in via
+      column picker)
+  * Improve rename dataset error when dataset is busy
+    - Catches 'dataset is busy' from zfs rename and diagnoses the cause
+    - Identifies linked OMV shared folders by name
+    - Identifies holding processes by name and PID via fuser -m
+    - Reports specific actionable message instead of raw ZFS error
+  * Add special vdev (metadata allocation class) support
+    - 'Special (metadata)' option added to the add vdev type selector
+    - Second addVdev call auto-mirrors using zpool attach (same guard as log)
+      to prevent a non-redundant special vdev that risks pool data loss
+    - Warning hint explains metadata role and data-loss risk of stripe special
+    - findFirstLogDevice and new findFirstSpecialDevice share a common
+      findFirstClassDevice helper to eliminate duplicated parsing logic
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 15 Mar 2026 00:00:00 +0000
 

@@ -171,18 +171,22 @@ trap cleanup EXIT
 # and create a 3-device raidz1 as the main pool.
 # ---------------------------------------------------------------------------
 DEVCOUNT=${#DEVICES[@]}
-EXPAND_DEV=""    # device reserved for RAIDZ expansion test
-LOG_DEV_1=""     # first log device  (log mirror test)
-LOG_DEV_2=""     # second log device (log mirror test)
+EXPAND_DEV=""      # device reserved for RAIDZ expansion test
+LOG_DEV_1=""       # first log device     (log mirror test)
+LOG_DEV_2=""       # second log device    (log mirror test)
+SPECIAL_DEV_1=""   # first special device  (special mirror test)
+SPECIAL_DEV_2=""   # second special device (special mirror test)
 
 # Device allocation strategy:
 #   1 dev  → basic pool
 #   2 devs → mirror pool
 #   3 devs → raidz1 pool
 #   4 devs → raidz1 (3) + RAIDZ expansion device (1)
-#   5 devs → raidz1 (3) + log mirror devices (2)         [no RAIDZ expansion]
+#   5 devs → raidz1 (3) + log mirror (2)                         [no expansion]
 #   6 devs → raidz1 (3) + RAIDZ expansion (1) + log mirror (2)
-#   7+     → raidz2 pool (all devices, no extra tests)
+#   7 devs → raidz1 (3) + log mirror (2) + special mirror (2)    [no expansion]
+#   8 devs → raidz1 (3) + RAIDZ expansion (1) + log mirror (2) + special mirror (2)
+#   9+     → raidz2 pool (all devices, no extra tests)
 if [ "$DEVCOUNT" -eq 4 ]; then
     POOL_DEVICES=("${DEVICES[@]:0:3}")
     EXPAND_DEV="${DEVICES[3]}"
@@ -198,9 +202,24 @@ elif [ "$DEVCOUNT" -eq 6 ]; then
     LOG_DEV_1="${DEVICES[4]}"
     LOG_DEV_2="${DEVICES[5]}"
     POOLTYPE="raidz1"
+elif [ "$DEVCOUNT" -eq 7 ]; then
+    POOL_DEVICES=("${DEVICES[@]:0:3}")
+    LOG_DEV_1="${DEVICES[3]}"
+    LOG_DEV_2="${DEVICES[4]}"
+    SPECIAL_DEV_1="${DEVICES[5]}"
+    SPECIAL_DEV_2="${DEVICES[6]}"
+    POOLTYPE="raidz1"
+elif [ "$DEVCOUNT" -eq 8 ]; then
+    POOL_DEVICES=("${DEVICES[@]:0:3}")
+    EXPAND_DEV="${DEVICES[3]}"
+    LOG_DEV_1="${DEVICES[4]}"
+    LOG_DEV_2="${DEVICES[5]}"
+    SPECIAL_DEV_1="${DEVICES[6]}"
+    SPECIAL_DEV_2="${DEVICES[7]}"
+    POOLTYPE="raidz1"
 else
     POOL_DEVICES=("${DEVICES[@]}")
-    if   [ "$DEVCOUNT" -ge 7 ]; then POOLTYPE="raidz2"
+    if   [ "$DEVCOUNT" -ge 9 ]; then POOLTYPE="raidz2"
     elif [ "$DEVCOUNT" -ge 3 ]; then POOLTYPE="raidz1"
     elif [ "$DEVCOUNT" -ge 2 ]; then POOLTYPE="mirror"
     else                              POOLTYPE="basic"
@@ -219,8 +238,9 @@ section "Configuration"
 info "Devices  : ${DEVICES[*]}"
 info "Pool type: $POOLTYPE"
 info "Pool name: $POOL"
-[ -n "$EXPAND_DEV" ] && info "Expansion: $EXPAND_DEV (reserved for RAIDZ expansion test)"
-[ -n "$LOG_DEV_1"  ] && info "Log devs : $LOG_DEV_1  $LOG_DEV_2 (reserved for log mirror test)"
+[ -n "$EXPAND_DEV"   ] && info "Expansion  : $EXPAND_DEV (reserved for RAIDZ expansion test)"
+[ -n "$LOG_DEV_1"    ] && info "Log devs   : $LOG_DEV_1  $LOG_DEV_2 (reserved for log mirror test)"
+[ -n "$SPECIAL_DEV_1" ] && info "Special devs: $SPECIAL_DEV_1  $SPECIAL_DEV_2 (reserved for special mirror test)"
 
 # OMV sentinel UUID used to signal "create new object" to $db->set().
 OMV_NEW_UUID=$(. /etc/default/openmediavault 2>/dev/null; echo "${OMV_CONFIGOBJECT_NEW_UUID:-fa4b1c66-ef79-11e5-87a0-0002b3a176b4}")
@@ -562,7 +582,73 @@ print(len(bad))
               "result: $TOPLEVEL_JSON"
     fi
 else
-    info "Skipping log mirror test (pass 5 or 6 devices to enable)"
+    info "Skipping log mirror test (pass 5 or 6 or 7 or 8 devices to enable)"
+fi
+
+# ===========================================================================
+section "Special vdev — addVdev creates a mirror (not a stripe)"
+# ===========================================================================
+# A non-redundant special vdev risks pool data loss on device failure, so the
+# second addVdev call must use 'zpool attach' (mirror) rather than 'zpool add'
+# (stripe).  Mirrors are recognised by a 'mirror-' token under the 'special'
+# section in zpool status.
+
+if [ -n "$SPECIAL_DEV_1" ] && [ -n "$SPECIAL_DEV_2" ]; then
+    ADDSPECIAL1_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'pool': '$POOL', 'vdevtype': 'special', 'device': '$SPECIAL_DEV_1', 'devalias': 'dev'}))
+")
+    ADDSPECIAL2_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'pool': '$POOL', 'vdevtype': 'special', 'device': '$SPECIAL_DEV_2', 'devalias': 'dev'}))
+")
+
+    assert_rpc "addVdev — add first special device" "Zfs" "addVdev" "$ADDSPECIAL1_PARAMS"
+    assert_rpc "addVdev — add second special device (should attach, not add)" "Zfs" "addVdev" "$ADDSPECIAL2_PARAMS"
+
+    sleep 1
+    SPECIAL_STATUS=$(zpool status -P "$POOL" 2>/dev/null || echo "")
+
+    SPEC1_BASE=$(basename "$SPECIAL_DEV_1")
+    SPEC2_BASE=$(basename "$SPECIAL_DEV_2")
+    if echo "$SPECIAL_STATUS" | grep -qE "$SPECIAL_DEV_1|$SPEC1_BASE"; then
+        _pass "addVdev — first special device visible in pool"
+    else
+        _fail "addVdev — first special device not found in pool status" \
+              "$(echo "$SPECIAL_STATUS" | grep -A10 'special' | head -8)"
+    fi
+    if echo "$SPECIAL_STATUS" | grep -qE "$SPECIAL_DEV_2|$SPEC2_BASE"; then
+        _pass "addVdev — second special device visible in pool"
+    else
+        _fail "addVdev — second special device not found in pool status" \
+              "$(echo "$SPECIAL_STATUS" | grep -A10 'special' | head -8)"
+    fi
+
+    # Critical check: a mirror-N vdev must appear under the special section.
+    SPECIAL_SECTION=$(echo "$SPECIAL_STATUS" | awk \
+        '/^[[:space:]]*special[[:space:]]*$/{found=1; next}
+         found && /^[[:space:]]*[^[:space:]]/{if ($1 != "errors:") print; else exit}
+         found && /^[[:space:]]+/{print}')
+    if echo "$SPECIAL_SECTION" | grep -q "mirror-"; then
+        _pass "addVdev — special devices form a mirror (mirror-N vdev present under special)"
+    else
+        _fail "addVdev — special devices are a STRIPE, not a mirror (mirror-N missing under special)" \
+              "special section: $(echo "$SPECIAL_STATUS" | grep -A5 'special' | head -6)"
+    fi
+
+    # getTopLevelVdevs must label the special mirror as type 'special', not 'data'.
+    TOPLEVEL_JSON=$(rpc "Zfs" "getTopLevelVdevs" "{\"name\":\"$POOL\"}" 2>/dev/null || echo "[]")
+    SPECIAL_TYPE_COUNT=$(echo "$TOPLEVEL_JSON" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(sum(1 for v in d if v.get('type')=='special'))" \
+        2>/dev/null || echo 0)
+    if [ "$SPECIAL_TYPE_COUNT" -gt 0 ]; then
+        _pass "getTopLevelVdevs — special mirror correctly labelled as type 'special'"
+    else
+        _fail "getTopLevelVdevs — special mirror not found or mis-labelled" \
+              "result: $TOPLEVEL_JSON"
+    fi
+else
+    info "Skipping special mirror test (pass 7 or 8 devices to enable)"
 fi
 
 # ===========================================================================

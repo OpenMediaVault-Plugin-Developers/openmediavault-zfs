@@ -102,7 +102,7 @@ data:
             execute:
               type: url
               url: "/storage/zfs/pools/expand/{{ _selected[0].name }}"
-          - text: _("Add cache / log / spare")
+          - text: _("Add cache / log / spare / special")
             icon: mdi:plus-circle-outline
             enabledConstraints:
               minSelected: 1

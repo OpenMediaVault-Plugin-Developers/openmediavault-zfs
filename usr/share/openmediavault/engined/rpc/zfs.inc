@@ -516,10 +516,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         } elseif ($params['devalias'] === 'path') {
             try { $device = self::getDiskPath($device); } catch (\Throwable $e) {}
         }
-        // For log devices, prevent a dangerous stripe. If the pool already has a
-        // log device, use 'zpool attach' to form or extend a mirror instead.
-        if ($params['vdevtype'] === 'log') {
-            $existing = self::findFirstLogDevice($params['pool']);
+        // For log and special devices, prevent a dangerous stripe by
+        // auto-mirroring: if one already exists, attach the new device instead.
+        // A non-redundant special vdev risks pool corruption on device failure.
+        $mirrorGuard = ['log' => 'findFirstLogDevice', 'special' => 'findFirstSpecialDevice'];
+        if (isset($mirrorGuard[$params['vdevtype']])) {
+            $finder   = $mirrorGuard[$params['vdevtype']];
+            $existing = self::$finder($params['pool']);
             if ($existing !== null) {
                 $cmd = sprintf('zpool attach %s %s %s 2>&1',
                     escapeshellarg($params['pool']),
@@ -529,7 +532,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 return;
             }
         }
-        $cmd = sprintf('zpool add %s %s %s 2>&1',
+        // ZFS rejects a single-disk special vdev on a redundant pool (raidz,
+        // mirror) without -f because the redundancy levels are mismatched.
+        // The user has already acknowledged the risk via the UI warning, and
+        // the mirror guard above will attach a second device as a mirror, so
+        // -f is appropriate here.
+        $force = ($params['vdevtype'] === 'special') ? '-f ' : '';
+        $cmd = sprintf('zpool add %s%s %s %s 2>&1',
+            $force,
             escapeshellarg($params['pool']),
             escapeshellarg($params['vdevtype']),
             escapeshellarg($device));
@@ -1720,14 +1730,34 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      */
     private static function findFirstLogDevice(string $pool): ?string
     {
+        return self::findFirstClassDevice($pool, 'logs');
+    }
+
+    /**
+     * Return the first absolute device path found under the 'special' section
+     * of 'zpool status -P <pool>', or null if no special devices exist.
+     * Works for both single devices and mirrored special vdevs.
+     */
+    private static function findFirstSpecialDevice(string $pool): ?string
+    {
+        return self::findFirstClassDevice($pool, 'special');
+    }
+
+    /**
+     * Shared implementation for findFirstLogDevice / findFirstSpecialDevice.
+     * Scans 'zpool status -P' output and returns the first absolute device
+     * path found under the named class section header, or null if none exists.
+     */
+    private static function findFirstClassDevice(string $pool, string $section): ?string
+    {
         $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
         if (!self::zfsTryExec($cmd, $out)) {
             return null;
         }
-        $inConfig  = false;
-        $inLogs    = false;
-        $poolDepth = -1;
-        $logsDepth = -1;
+        $inConfig    = false;
+        $inSection   = false;
+        $poolDepth   = -1;
+        $sectionDepth = -1;
         foreach ($out as $line) {
             if (preg_match('/^\s*NAME\s+STATE/', $line)) {
                 $inConfig = true;
@@ -1739,12 +1769,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $depth   = strlen($line) - strlen($trimmed);
             $token   = preg_split('/\s+/', $trimmed)[0];
             if ($poolDepth === -1) { $poolDepth = $depth; continue; }
-            // 'logs' appears at poolDepth (same level as the pool name),
-            // not at the top-vdev level (where mirror-0, raidz1-0 etc. live).
+            // Class headers (logs, special, cache …) appear at poolDepth —
+            // the same indent level as the pool name itself.
             if ($depth === $poolDepth) {
-                $inLogs    = ($token === 'logs');
-                $logsDepth = $inLogs ? $depth : -1;
-            } elseif ($inLogs && $depth > $logsDepth && str_starts_with($token, '/')) {
+                $inSection    = ($token === $section);
+                $sectionDepth = $inSection ? $depth : -1;
+            } elseif ($inSection && $depth > $sectionDepth && str_starts_with($token, '/')) {
                 return $token;
             }
         }

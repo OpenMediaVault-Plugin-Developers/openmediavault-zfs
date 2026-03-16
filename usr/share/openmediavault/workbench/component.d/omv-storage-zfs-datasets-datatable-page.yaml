@@ -35,9 +35,15 @@ data:
         cellTemplateName: binaryUnit
         hidden: true
       - name: _("Used")
+        prop: used
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: binaryUnit
+      - name: _("Used (%)")
         prop: usedpercent
         flexGrow: 1
         sortable: true
+        hidden: true
         cellTemplateName: progressBar
         cellTemplateConfig:
           text: '{{ used | tobytes | binaryunit | notavailable("-") }}'

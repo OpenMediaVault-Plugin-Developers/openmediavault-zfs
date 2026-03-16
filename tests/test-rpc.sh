@@ -638,6 +638,70 @@ assert_rpc "deleteObject — snapshot fs1@snap2" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1@snap2\",\"mp\":\"\",\"type\":\"Snapshot\"}"
 
 # ===========================================================================
+section "Rename dataset — success and busy-error diagnostics"
+# ===========================================================================
+
+assert_rpc "addObject — filesystem for rename tests" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_rename_test\",\"mountpoint\":\"\"}"
+
+# --- Success: rename and verify the ZFS name changed ---
+assert_rpc "renameObject — rename fs_rename_test to fs_rename_ok" "Zfs" "renameObject" \
+    "{\"oldpath\":\"$POOL/fs_rename_test\",\"oldname\":\"fs_rename_test\",\"type\":\"Filesystem\",\"newname\":\"fs_rename_ok\"}"
+
+if zfs list -H -o name "$POOL/fs_rename_ok" >/dev/null 2>&1; then
+    _pass "renameObject — new name fs_rename_ok is visible in ZFS"
+else
+    _fail "renameObject — new name not visible in ZFS after rename" ""
+fi
+if ! zfs list -H -o name "$POOL/fs_rename_test" >/dev/null 2>&1; then
+    _pass "renameObject — old name fs_rename_test is gone"
+else
+    _fail "renameObject — old name still present in ZFS after rename" ""
+fi
+
+# --- Busy: hold the mountpoint open and verify the error identifies the cause ---
+# A background sleep process with its CWD inside the mountpoint keeps ZFS from
+# unmounting the dataset, causing 'zfs rename' to fail with "dataset is busy".
+# The improved renameObject should surface the process name in the error message.
+RENAME_OK_MP=$(zfs get -H -o value mountpoint "$POOL/fs_rename_ok" 2>/dev/null || echo "")
+if [ -n "$RENAME_OK_MP" ] && [ "$RENAME_OK_MP" != "-" ] && [ "$RENAME_OK_MP" != "none" ]; then
+    (cd "$RENAME_OK_MP" && exec sleep 30) &
+    BUSY_PID=$!
+    sleep 1   # Give the process time to establish its CWD in the mountpoint.
+
+    BUSY_OUT=$(omv-rpc -u admin "Zfs" "renameObject" \
+        "{\"oldpath\":\"$POOL/fs_rename_ok\",\"oldname\":\"fs_rename_ok\",\"type\":\"Filesystem\",\"newname\":\"fs_rename_busy_target\"}" \
+        2>&1) || true
+
+    kill "$BUSY_PID" 2>/dev/null || true
+    wait "$BUSY_PID" 2>/dev/null || true
+
+    if echo "$BUSY_OUT" | grep -qi "busy"; then
+        _pass "renameObject busy — error message mentions 'busy'"
+    else
+        _fail "renameObject busy — 'busy' not found in error message" "${BUSY_OUT:0:300}"
+    fi
+    if echo "$BUSY_OUT" | grep -qi "sleep"; then
+        _pass "renameObject busy — error identifies the holding process (sleep)"
+    else
+        _fail "renameObject busy — holding process not named in error message" "${BUSY_OUT:0:300}"
+    fi
+else
+    info "Skipping busy-rename test (mountpoint not available: '$RENAME_OK_MP')"
+fi
+
+# Clean up — delete whichever name the dataset ended up with after the tests.
+for _rn_ds in "$POOL/fs_rename_ok" "$POOL/fs_rename_busy_target" "$POOL/fs_rename_test"; do
+    if zfs list -H -o name "$_rn_ds" >/dev/null 2>&1; then
+        _rn_mp=$(zfs get -H -o value mountpoint "$_rn_ds" 2>/dev/null || echo "")
+        assert_rpc "deleteObject — rename test cleanup" "Zfs" "deleteObject" \
+            "{\"name\":\"$_rn_ds\",\"mp\":\"$_rn_mp\",\"type\":\"Filesystem\"}"
+        break
+    fi
+done
+unset _rn_ds _rn_mp
+
+# ===========================================================================
 section "Scheduled Snapshot Jobs — CRUD and run"
 # ===========================================================================
 

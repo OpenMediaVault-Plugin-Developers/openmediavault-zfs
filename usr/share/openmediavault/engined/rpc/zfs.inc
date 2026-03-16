@@ -716,7 +716,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         array_pop($parts);
         $newPath = implode('/', $parts) . '/' . $params['newname'];
         $cmd = sprintf('zfs rename %s %s 2>&1', escapeshellarg($oldPath), escapeshellarg($newPath));
-        self::zfsExec($cmd, $out, $res);
+        try {
+            self::zfsExec($cmd, $out, $res);
+        } catch (\Exception $e) {
+            if (stripos($e->getMessage(), 'busy') !== false) {
+                throw new \OMV\Exception(
+                    self::buildBusyRenameError($context, $oldPath)
+                );
+            }
+            throw $e;
+        }
         self::fixOMVMntEnt($context, true, true);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
@@ -1947,6 +1956,109 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
         }
         return false;
+    }
+
+    /**
+     * Return the names of all OMV shared folders linked to the fstab entry for
+     * $mountpoint, or an empty array if none.
+     */
+    private static function getLinkedSharedFolderNames($context, string $mountpoint): array
+    {
+        try {
+            $object = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mountpoint], $context);
+            if (!$object) {
+                return [];
+            }
+            $uuid   = $object['uuid'];
+            $shares = \OMV\Rpc\Rpc::call('ShareMgmt', 'enumerateSharedFolders', [], $context);
+            $names  = [];
+            foreach ($shares as $share) {
+                if ($share['mntentref'] === $uuid) {
+                    $names[] = $share['name'];
+                }
+            }
+            return $names;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Return a list of "procname (PID N)" strings for all processes currently
+     * holding the given mountpoint open, via fuser -m.
+     */
+    private static function getMountBusyProcesses(string $mountpoint): array
+    {
+        $output = [];
+        @exec('fuser -m ' . escapeshellarg($mountpoint) . ' 2>&1', $output);
+        $pids = [];
+        foreach ($output as $line) {
+            foreach (preg_split('/\s+/', $line) as $tok) {
+                // PIDs may carry a trailing access-type letter (e, r, f, c, m, s).
+                if (preg_match('/^(\d+)[a-z]*$/', $tok, $m)) {
+                    $pid = (int)$m[1];
+                    if ($pid > 1) {
+                        $pids[] = $pid;
+                    }
+                }
+            }
+        }
+        $procs = [];
+        foreach (array_unique($pids) as $pid) {
+            $comm = @file_get_contents("/proc/{$pid}/comm");
+            if ($comm !== false) {
+                $procs[] = trim($comm) . ' (PID ' . $pid . ')';
+            }
+        }
+        return $procs;
+    }
+
+    /**
+     * Build a human-readable error message when 'zfs rename' fails because the
+     * dataset is busy.  Identifies linked shared folders and holding processes.
+     */
+    private static function buildBusyRenameError($context, string $dataset): string
+    {
+        // Resolve the dataset's mountpoint.
+        $mountpoint = null;
+        if (self::zfsTryExec(
+            sprintf('zfs get -H -o value mountpoint %s 2>&1', escapeshellarg($dataset)),
+            $mpOut
+        )) {
+            $mp = trim(implode('', $mpOut));
+            if (!in_array($mp, ['-', 'none', 'legacy', ''], true)) {
+                $mountpoint = $mp;
+            }
+        }
+
+        $reasons = [];
+        if ($mountpoint !== null) {
+            $shares = self::getLinkedSharedFolderNames($context, $mountpoint);
+            if (!empty($shares)) {
+                $quoted   = array_map(fn($n) => '"' . $n . '"', $shares);
+                $reasons[] = 'it is linked to shared folder(s) ' . implode(', ', $quoted)
+                           . ' — disable the service shares or remove the shared folder(s) before renaming';
+            }
+            $procs = self::getMountBusyProcesses($mountpoint);
+            if (!empty($procs)) {
+                $reasons[] = 'it is in use by process(es): ' . implode(', ', $procs)
+                           . ' — stop them and retry';
+            }
+        }
+
+        if (empty($reasons)) {
+            return sprintf(
+                'Cannot rename "%s": the dataset is busy. '
+                . 'Ensure no processes are accessing its mountpoint and no '
+                . 'services are sharing it, then try again.',
+                $dataset
+            );
+        }
+        return sprintf(
+            'Cannot rename "%s": the dataset is busy because %s.',
+            $dataset,
+            implode('; and ', $reasons)
+        );
     }
 
     /**

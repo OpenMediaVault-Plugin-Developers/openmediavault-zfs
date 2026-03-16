@@ -985,48 +985,26 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.zfs.name');
-        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($params['name']));
+        $pool = $params['name'];
+        $cmd  = sprintf('zpool status -j %s 2>&1', escapeshellarg($pool));
         if (!self::zfsTryExec($cmd, $out)) {
             return [];
         }
-        $devices     = [];
-        $inConfig    = false;
-        $currentVdev = '';
-        $vdevDepth   = -1;
-        foreach ($out as $line) {
-            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
-                $inConfig = true;
-                continue;
-            }
-            if (!$inConfig) continue;
-            if (trim($line) === '') break;
-            $trimmed = ltrim($line);
-            $depth   = strlen($line) - strlen($trimmed);
-            // Vdev group line (mirror-N, raidz*-N, replacing-N, spare)
-            if (preg_match('/^(mirror-\d+|raidz\d*-\d+|replacing-\d+|spare)\s/', $trimmed, $vm)) {
-                $currentVdev = $vm[1];
-                $vdevDepth   = $depth;
-                continue;
-            }
-            // Device line (absolute path)
-            if (preg_match('/^(\/\S+)\s+(\S+)/', $trimmed, $m)) {
-                // A device at the same or lesser indent than the vdev line is a
-                // stripe member — it does not belong to that vdev.
-                if ($vdevDepth >= 0 && $depth <= $vdevDepth) {
-                    $currentVdev = '';
-                    $vdevDepth   = -1;
-                }
-                $vdev  = $currentVdev;
-                $label = $vdev
-                    ? $m[1] . '  [' . $vdev . '] [' . $m[2] . ']'
-                    : $m[1] . '  [stripe] [' . $m[2] . ']';
-                $devices[] = [
-                    'devicefile' => $m[1],
-                    'state'      => $m[2],
-                    'vdev'       => $vdev,
-                    'label'      => $label,
-                ];
-            }
+        $json    = json_decode(implode('', $out), true);
+        $poolObj = $json['pools'][$pool] ?? null;
+        if ($poolObj === null) {
+            return [];
+        }
+        $devices  = [];
+        $sections = array_merge(
+            array_values($poolObj['vdevs'][$pool]['vdevs'] ?? []),
+            array_values($poolObj['logs']    ?? []),
+            array_values($poolObj['l2cache'] ?? []),
+            array_values($poolObj['special'] ?? []),
+            array_values($poolObj['spares']  ?? [])
+        );
+        foreach ($sections as $vdev) {
+            self::collectDevicesRecursive($vdev, '', $devices);
         }
         return $devices;
     }
@@ -1056,80 +1034,35 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $expansionActive = in_array(trim($featOut[0] ?? ''), ['enabled', 'active']);
         }
 
-        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        $cmd = sprintf('zpool status -j %s 2>&1', escapeshellarg($pool));
         if (!self::zfsTryExec($cmd, $out)) {
             return [];
         }
-        $anchors        = [];
-        $inConfig       = false;
-        $currentVdev    = '';
-        $vdevDepth      = -1;
-        $raidzVdevSeen  = [];
-        $inClassSection = false;
-        // Class headers that introduce non-data vdev sections (logs, cache, spares, etc.).
-        $classSectionNames = ['logs' => true, 'cache' => true, 'spares' => true,
-                              'special' => true, 'dedup' => true];
-        foreach ($out as $line) {
-            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
-                $inConfig = true;
-                continue;
-            }
-            if (!$inConfig) continue;
-            if (trim($line) === '') break;
-            $trimmed = ltrim($line);
-            $depth   = strlen($line) - strlen($trimmed);
-            // Detect class header lines (logs, cache, spares, special, dedup).
-            // These appear at the same indent level as data vdevs and introduce
-            // special-device sections whose members must not be offered as attach
-            // anchors (zpool attach is only valid for data vdevs / mirrors).
-            $token0 = preg_split('/\s+/', $trimmed)[0];
-            if (isset($classSectionNames[$token0])) {
-                $inClassSection = true;
-                $currentVdev    = '';
-                $vdevDepth      = -1;
-                continue;
-            }
-            if ($inClassSection) continue;
-            // Vdev group line (mirror-N, raidzN-N, replacing-N, spare).
-            if (preg_match('/^(mirror-\d+|raidz\d*-\d+|replacing-\d+|spare)\s/', $trimmed, $vm)) {
-                $currentVdev = $vm[1];
-                $vdevDepth   = $depth;
-                // For RAIDZ vdevs with expansion enabled, add the vdev name once.
-                if ($expansionActive && preg_match('/^raidz\d*-\d+$/', $vm[1])
-                    && !isset($raidzVdevSeen[$vm[1]])) {
-                    $raidzVdevSeen[$vm[1]] = true;
+        $json    = json_decode(implode('', $out), true);
+        $poolObj = $json['pools'][$pool] ?? null;
+        if ($poolObj === null) {
+            return [];
+        }
+        $anchors = [];
+        // Only data vdevs are valid attach anchors (not log/cache/spare/special).
+        // zpool attach is only meaningful for mirrors and stripe devices.
+        foreach ($poolObj['vdevs'][$pool]['vdevs'] ?? [] as $vdev) {
+            $name = $vdev['name'] ?? '';
+            $type = self::vdevTypeFromJson($vdev['vdev_type'] ?? '', $name);
+            if (str_starts_with($type, 'raidz')) {
+                // For RAIDZ vdevs with expansion enabled, add the vdev name as anchor.
+                if ($expansionActive) {
                     $anchors[] = [
-                        'devicefile' => $vm[1],
+                        'devicefile' => $name,
                         'state'      => '',
-                        'vdev'       => $vm[1],
-                        'label'      => $vm[1] . '  [RAIDZ expansion]',
+                        'vdev'       => $name,
+                        'label'      => $name . '  [RAIDZ expansion]',
                     ];
                 }
+                // Never add RAIDZ member devices — zpool attach is invalid on them.
                 continue;
             }
-            // Device line (absolute path).
-            if (preg_match('/^(\/\S+)\s+(\S+)/', $trimmed, $m)) {
-                if ($vdevDepth >= 0 && $depth <= $vdevDepth) {
-                    $currentVdev = '';
-                    $vdevDepth   = -1;
-                }
-                $vdev = $currentVdev;
-                // Never offer RAIDZ member devices as anchors — zpool attach is
-                // invalid on RAIDZ members.  When expansion is active the RAIDZ
-                // vdev name entry is already in the list above.
-                if (preg_match('/^raidz/', $vdev)) {
-                    continue;
-                }
-                $label = $vdev
-                    ? $m[1] . '  [' . $vdev . '] [' . $m[2] . ']'
-                    : $m[1] . '  [stripe] [' . $m[2] . ']';
-                $anchors[] = [
-                    'devicefile' => $m[1],
-                    'state'      => $m[2],
-                    'vdev'       => $vdev,
-                    'label'      => $label,
-                ];
-            }
+            self::collectDevicesRecursive($vdev, '', $anchors);
         }
         return $anchors;
     }
@@ -1139,70 +1072,46 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $this->validateMethodParams($params, 'rpc.zfs.name');
         $pool = $params['name'];
-        $cmd  = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        $cmd  = sprintf('zpool status -j %s 2>&1', escapeshellarg($pool));
         if (!self::zfsTryExec($cmd, $out)) {
             return [];
         }
-        $vdevs     = [];
-        $inConfig  = false;
-        $poolDepth = -1;
-        $topDepth  = -1;
-        $classType = '';
-        $classMap  = ['cache' => 'cache', 'logs' => 'log', 'spares' => 'spare',
-                      'special' => 'special', 'dedup' => 'dedup'];
-        foreach ($out as $line) {
-            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
-                $inConfig = true;
+        $json    = json_decode(implode('', $out), true);
+        $poolObj = $json['pools'][$pool] ?? null;
+        if ($poolObj === null) {
+            return [];
+        }
+        $vdevs = [];
+        // Data vdevs — raidz vdevs are not removable via zpool remove.
+        foreach ($poolObj['vdevs'][$pool]['vdevs'] ?? [] as $vdev) {
+            $name  = $vdev['name'] ?? '';
+            $state = strtoupper($vdev['state'] ?? 'UNKNOWN');
+            $type  = self::vdevTypeFromJson($vdev['vdev_type'] ?? '', $name);
+            if (str_starts_with($type, 'raidz')) {
                 continue;
             }
-            if (!$inConfig) continue;
-            if (trim($line) === '') break;
-            $trimmed = ltrim($line);
-            $depth   = strlen($line) - strlen($trimmed);
-            $parts   = preg_split('/\s+/', trim($trimmed));
-            $token   = $parts[0];
-            $state   = $parts[1] ?? '';
-            // First line in the config section is the pool name line itself.
-            if ($poolDepth === -1) {
-                $poolDepth = $depth;
-                continue;
+            $vdevs[] = [
+                'vdev'  => $name,
+                'type'  => $type,
+                'state' => $state,
+                'label' => 'Data: ' . $name . '  [' . $type . '] [' . $state . ']',
+            ];
+        }
+        // Class vdevs (logs, l2cache, special, spares).
+        $classMap = ['logs' => 'log', 'l2cache' => 'cache', 'special' => 'special',
+                     'spares' => 'spare', 'dedup' => 'dedup'];
+        foreach ($classMap as $section => $classType) {
+            foreach ($poolObj[$section] ?? [] as $vdev) {
+                $name  = $vdev['name'] ?? '';
+                $state = strtoupper($vdev['state'] ?? 'UNKNOWN');
+                $type  = self::vdevTypeFromJson($vdev['vdev_type'] ?? '', $name);
+                $vdevs[] = [
+                    'vdev'  => $name,
+                    'type'  => $classType,
+                    'state' => $state,
+                    'label' => ucfirst($classType) . ': ' . $name . '  [' . $type . '] [' . $state . ']',
+                ];
             }
-            // First line after the pool establishes the top-level vdev indent.
-            if ($topDepth === -1) {
-                $topDepth = $depth;
-            }
-            // Class headers (logs, cache, spares, special, dedup) appear at
-            // poolDepth — the same level as the pool name, not at topDepth.
-            if ($depth === $poolDepth) {
-                $classType = $classMap[$token] ?? '';
-                continue;
-            }
-            // Top-level vdevs: data vdevs and vdevs under class headers both
-            // appear at topDepth.  Use classType to distinguish them.
-            if ($depth === $topDepth) {
-                $type      = self::vdevTypeFromToken($token);
-                $removable = !str_starts_with($type, 'raidz');
-                if (!$removable) continue;
-                if ($classType === '') {
-                    // Data vdev (mirror, stripe, etc.)
-                    $vdevs[] = [
-                        'vdev'  => $token,
-                        'type'  => $type,
-                        'state' => $state,
-                        'label' => 'Data: ' . $token . '  [' . $type . '] [' . $state . ']',
-                    ];
-                } else {
-                    // Vdev under a class header (log mirror, cache device, etc.)
-                    $prefix = ucfirst($classType) . ': ';
-                    $vdevs[] = [
-                        'vdev'  => $token,
-                        'type'  => $classType,
-                        'state' => $state,
-                        'label' => $prefix . $token . '  [' . $type . '] [' . $state . ']',
-                    ];
-                }
-            }
-            // Member devices (depth > topDepth) are skipped.
         }
         return $vdevs;
     }
@@ -1724,9 +1633,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Return the first absolute device path found under the 'logs' section of
-     * 'zpool status -P <pool>', or null if no log devices exist.
-     * Works for both single log devices and log mirrors (returns one member).
+     * Return the first absolute device path found under the 'logs' section,
+     * or null if no log devices exist.
      */
     private static function findFirstLogDevice(string $pool): ?string
     {
@@ -1734,9 +1642,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Return the first absolute device path found under the 'special' section
-     * of 'zpool status -P <pool>', or null if no special devices exist.
-     * Works for both single devices and mirrored special vdevs.
+     * Return the first absolute device path found under the 'special' section,
+     * or null if no special devices exist.
      */
     private static function findFirstSpecialDevice(string $pool): ?string
     {
@@ -1744,38 +1651,43 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Shared implementation for findFirstLogDevice / findFirstSpecialDevice.
-     * Scans 'zpool status -P' output and returns the first absolute device
-     * path found under the named class section header, or null if none exists.
+     * Return the first absolute device path under a named class section
+     * ('logs', 'special', 'l2cache', 'spares') using zpool status -j.
+     *
+     * The JSON output from 'zpool status -j' exposes class vdevs as top-level
+     * keys on the pool object (e.g. $pool['logs'], $pool['special']) rather
+     * than nesting them inside the main 'vdevs' tree.  The section key names
+     * in JSON match the text-output section headers exactly for 'logs' and
+     * 'special'; cache uses 'l2cache'.
      */
     private static function findFirstClassDevice(string $pool, string $section): ?string
     {
-        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($pool));
+        $cmd = sprintf('zpool status -j %s 2>&1', escapeshellarg($pool));
         if (!self::zfsTryExec($cmd, $out)) {
             return null;
         }
-        $inConfig    = false;
-        $inSection   = false;
-        $poolDepth   = -1;
-        $sectionDepth = -1;
-        foreach ($out as $line) {
-            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
-                $inConfig = true;
-                continue;
+        $json = json_decode(implode('', $out), true);
+        foreach ($json['pools'][$pool][$section] ?? [] as $vdev) {
+            $path = self::firstVdevPath($vdev);
+            if ($path !== null) {
+                return $path;
             }
-            if (!$inConfig) continue;
-            if (trim($line) === '') break;
-            $trimmed = ltrim($line);
-            $depth   = strlen($line) - strlen($trimmed);
-            $token   = preg_split('/\s+/', $trimmed)[0];
-            if ($poolDepth === -1) { $poolDepth = $depth; continue; }
-            // Class headers (logs, special, cache …) appear at poolDepth —
-            // the same indent level as the pool name itself.
-            if ($depth === $poolDepth) {
-                $inSection    = ($token === $section);
-                $sectionDepth = $inSection ? $depth : -1;
-            } elseif ($inSection && $depth > $sectionDepth && str_starts_with($token, '/')) {
-                return $token;
+        }
+        return null;
+    }
+
+    /**
+     * Recursively return the first 'path' found in a vdev tree, or null.
+     */
+    private static function firstVdevPath(array $vdev): ?string
+    {
+        if (!empty($vdev['path'])) {
+            return $vdev['path'];
+        }
+        foreach ($vdev['vdevs'] ?? [] as $child) {
+            $path = self::firstVdevPath($child);
+            if ($path !== null) {
+                return $path;
             }
         }
         return null;
@@ -1798,32 +1710,28 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Get all physical device paths from a pool via zpool status -P,
+     * Get all physical device paths from a pool via zpool status -j,
      * excluding devices with states in $excludeStates (e.g. ['INUSE','UNAVAIL','SPLIT']).
      */
     public static function zpoolGetAllDevices(string $poolName, array $excludeStates = []): array
     {
-        $cmd = sprintf('zpool status -P %s 2>&1', escapeshellarg($poolName));
+        $cmd = sprintf('zpool status -j %s 2>&1', escapeshellarg($poolName));
         self::zfsExec($cmd, $out, $res);
+        $json    = json_decode(implode('', $out), true);
+        $poolObj = $json['pools'][$poolName] ?? null;
+        if ($poolObj === null) {
+            return [];
+        }
         $devices  = [];
-        $inConfig = false;
-        foreach ($out as $line) {
-            if (preg_match('/^\s*NAME\s+STATE/', $line)) {
-                $inConfig = true;
-                continue;
-            }
-            if (!$inConfig) {
-                continue;
-            }
-            if (trim($line) === '') {
-                break;
-            }
-            // Lines with absolute device paths start with / after leading whitespace.
-            if (preg_match('/^\s+(\/\S+)\s+(\S+)/', $line, $m)) {
-                if (!in_array($m[2], $excludeStates)) {
-                    $devices[] = $m[1];
-                }
-            }
+        $sections = array_merge(
+            array_values($poolObj['vdevs'][$poolName]['vdevs'] ?? []),
+            array_values($poolObj['logs']    ?? []),
+            array_values($poolObj['l2cache'] ?? []),
+            array_values($poolObj['special'] ?? []),
+            array_values($poolObj['spares']  ?? [])
+        );
+        foreach ($sections as $vdev) {
+            self::collectLeafPaths($vdev, $excludeStates, $devices);
         }
         return $devices;
     }
@@ -1894,6 +1802,73 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (preg_match('/^raidz1?-\d+$/', $token)) return 'raidz1';
         if (str_starts_with($token, '/'))           return 'stripe';
         return 'unknown';
+    }
+
+    /**
+     * Convert a JSON vdev_type + name to a canonical vdev type string.
+     * Uses the vdev name to distinguish raidz levels when vdev_type is generic 'raidz'.
+     */
+    private static function vdevTypeFromJson(string $vdevType, string $name): string
+    {
+        if ($vdevType === 'mirror') return 'mirror';
+        if ($vdevType === 'disk')   return 'stripe';
+        if (str_starts_with($vdevType, 'raidz') || str_starts_with($name, 'raidz')) {
+            if (str_contains($name, 'raidz3')) return 'raidz3';
+            if (str_contains($name, 'raidz2')) return 'raidz2';
+            return 'raidz1';
+        }
+        return 'unknown';
+    }
+
+    /**
+     * Recursively collect device records from a vdev tree.
+     * Used by getPoolDevices and getAttachAnchors.
+     *
+     * @param array  $vdev       The vdev node from zpool status -j JSON.
+     * @param string $groupName  Parent vdev name ('' for top-level stripe disks).
+     * @param array  &$out       Accumulator for device records.
+     */
+    private static function collectDevicesRecursive(array $vdev, string $groupName, array &$out): void
+    {
+        if (!empty($vdev['path'])) {
+            $state = strtoupper($vdev['state'] ?? 'UNKNOWN');
+            $label = $groupName
+                ? $vdev['path'] . '  [' . $groupName . '] [' . $state . ']'
+                : $vdev['path'] . '  [stripe] [' . $state . ']';
+            $out[] = [
+                'devicefile' => $vdev['path'],
+                'state'      => $state,
+                'vdev'       => $groupName,
+                'label'      => $label,
+            ];
+            return;
+        }
+        $name = $vdev['name'] ?? $groupName;
+        foreach ($vdev['vdevs'] ?? [] as $child) {
+            self::collectDevicesRecursive($child, $name ?: $groupName, $out);
+        }
+    }
+
+    /**
+     * Recursively collect leaf device paths from a vdev tree.
+     * Used by zpoolGetAllDevices.
+     *
+     * @param array    $vdev           The vdev node from zpool status -j JSON.
+     * @param string[] $excludeStates  Uppercase state strings to skip (e.g. 'UNAVAIL').
+     * @param string[] &$out           Accumulator for device paths.
+     */
+    private static function collectLeafPaths(array $vdev, array $excludeStates, array &$out): void
+    {
+        if (!empty($vdev['path'])) {
+            $state = strtoupper($vdev['state'] ?? '');
+            if (empty($excludeStates) || !in_array($state, $excludeStates)) {
+                $out[] = $vdev['path'];
+            }
+            return;
+        }
+        foreach ($vdev['vdevs'] ?? [] as $child) {
+            self::collectLeafPaths($child, $excludeStates, $out);
+        }
     }
 
     /**

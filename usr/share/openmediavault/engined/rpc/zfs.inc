@@ -1124,14 +1124,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (!self::zfsTryExec($cmd, $out)) {
             return [];
         }
-        $vdevs      = [];
-        $inConfig   = false;
-        $poolDepth  = -1;
-        $topDepth   = -1;
-        $classType  = '';
-        $classDepth = -1;
-        $classMap   = ['cache' => 'cache', 'logs' => 'log', 'spares' => 'spare',
-                       'special' => 'special', 'dedup' => 'dedup'];
+        $vdevs     = [];
+        $inConfig  = false;
+        $poolDepth = -1;
+        $topDepth  = -1;
+        $classType = '';
+        $classMap  = ['cache' => 'cache', 'logs' => 'log', 'spares' => 'spare',
+                      'special' => 'special', 'dedup' => 'dedup'];
         foreach ($out as $line) {
             if (preg_match('/^\s*NAME\s+STATE/', $line)) {
                 $inConfig = true;
@@ -1149,42 +1148,42 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $poolDepth = $depth;
                 continue;
             }
-            // First line after the pool establishes the top-level indent.
+            // First line after the pool establishes the top-level vdev indent.
             if ($topDepth === -1) {
                 $topDepth = $depth;
             }
+            // Class headers (logs, cache, spares, special, dedup) appear at
+            // poolDepth — the same level as the pool name, not at topDepth.
+            if ($depth === $poolDepth) {
+                $classType = $classMap[$token] ?? '';
+                continue;
+            }
+            // Top-level vdevs: data vdevs and vdevs under class headers both
+            // appear at topDepth.  Use classType to distinguish them.
             if ($depth === $topDepth) {
-                // Reset class tracking whenever we're back at the top level.
-                $classType  = '';
-                $classDepth = -1;
-                // Class header lines have no state column.
-                if (isset($classMap[$token])) {
-                    $classType  = $classMap[$token];
-                    $classDepth = $depth;
-                    continue;
-                }
-                // Data vdev or stripe device.
                 $type      = self::vdevTypeFromToken($token);
                 $removable = !str_starts_with($type, 'raidz');
-                if ($removable) {
+                if (!$removable) continue;
+                if ($classType === '') {
+                    // Data vdev (mirror, stripe, etc.)
                     $vdevs[] = [
                         'vdev'  => $token,
                         'type'  => $type,
                         'state' => $state,
                         'label' => 'Data: ' . $token . '  [' . $type . '] [' . $state . ']',
                     ];
+                } else {
+                    // Vdev under a class header (log mirror, cache device, etc.)
+                    $prefix = ucfirst($classType) . ': ';
+                    $vdevs[] = [
+                        'vdev'  => $token,
+                        'type'  => $classType,
+                        'state' => $state,
+                        'label' => $prefix . $token . '  [' . $type . '] [' . $state . ']',
+                    ];
                 }
-            } elseif ($classDepth >= 0 && $depth > $classDepth
-                      && str_starts_with($token, '/')) {
-                // Individual device under a cache / log / spare header.
-                $prefix = ucfirst($classType) . ': ';
-                $vdevs[] = [
-                    'vdev'  => $token,
-                    'type'  => $classType,
-                    'state' => $state,
-                    'label' => $prefix . $token . '  [' . $state . ']',
-                ];
             }
+            // Member devices (depth > topDepth) are skipped.
         }
         return $vdevs;
     }

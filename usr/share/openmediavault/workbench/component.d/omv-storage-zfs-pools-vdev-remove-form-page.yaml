@@ -10,7 +10,7 @@ data:
         method: removeVdev
         confirmationDialogConfig:
           template: confirmation-critical
-          message: '_("Are you sure? ZFS will evacuate all data off this vdev onto the remaining pool vdevs. This can take a long time on large vdevs. The pool must have enough free space to absorb the data.")'
+          message: '_("Are you sure? For data vdevs (mirror, stripe), ZFS will evacuate all data to the remaining pool vdevs — this can take a long time and requires sufficient free space. For log, cache, spare, or special vdevs, the device is simply detached without data migration.")'
     fields:
       - type: textInput
         name: pool
@@ -19,7 +19,7 @@ data:
         readonly: true
       - type: hint
         hintType: warning
-        text: '_("Vdev removal evacuates data off the selected vdev to the remaining pool vdevs. Raidz vdevs cannot be removed. Ensure the pool has sufficient free space before proceeding.")'
+        text: '_("For data vdevs (mirror, stripe), removal evacuates all data to the remaining pool vdevs — ensure the pool has sufficient free space. For log, cache, spare, or special vdevs, the device is simply detached and no data migration occurs. Raidz vdevs cannot be removed.")'
       - type: select
         name: vdev
         label: _("Vdev to remove")

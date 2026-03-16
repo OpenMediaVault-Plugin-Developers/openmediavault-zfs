@@ -535,6 +535,32 @@ print(json.dumps({'pool': '$POOL', 'vdevtype': 'log', 'device': '$LOG_DEV_2', 'd
         _fail "addVdev — log devices are a STRIPE, not a mirror (mirror-X missing under logs)" \
               "logs section: $(echo "$LOG_STATUS" | grep -A5 'logs' | head -6)"
     fi
+
+    # Regression: getTopLevelVdevs must label the log mirror as type 'log', not 'data'.
+    # Bug: class headers (logs, cache) appear at poolDepth, not topDepth, so they were
+    # missed and the mirror vdev under 'logs' was incorrectly labelled as a data vdev.
+    TOPLEVEL_JSON=$(rpc "Zfs" "getTopLevelVdevs" "{\"name\":\"$POOL\"}" 2>/dev/null || echo "[]")
+    LOG_TYPE_COUNT=$(echo "$TOPLEVEL_JSON" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(sum(1 for v in d if v.get('type')=='log'))" \
+        2>/dev/null || echo 0)
+    DATA_MISLABELED=$(echo "$TOPLEVEL_JSON" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+bad = [v for v in d if v.get('type') in ('mirror','stripe','unknown') and 'Log:' in v.get('label','')]
+print(len(bad))
+" 2>/dev/null || echo 0)
+    if [ "$LOG_TYPE_COUNT" -gt 0 ]; then
+        _pass "getTopLevelVdevs — log mirror correctly labelled as type 'log' ($LOG_TYPE_COUNT entry)"
+    else
+        _fail "getTopLevelVdevs — log mirror not found or mis-labelled as data" \
+              "result: $TOPLEVEL_JSON"
+    fi
+    if [ "$DATA_MISLABELED" -eq 0 ]; then
+        _pass "getTopLevelVdevs — no log/cache vdevs mis-labelled as data type"
+    else
+        _fail "getTopLevelVdevs — $DATA_MISLABELED log/cache vdev(s) mis-labelled as data" \
+              "result: $TOPLEVEL_JSON"
+    fi
 else
     info "Skipping log mirror test (pass 5 or 6 devices to enable)"
 fi

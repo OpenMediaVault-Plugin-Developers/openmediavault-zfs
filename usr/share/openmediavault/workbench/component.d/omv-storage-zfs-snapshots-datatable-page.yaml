@@ -69,21 +69,75 @@ data:
         icon: mdi:delete
         enabledConstraints:
           minSelected: 1
-          maxSelected: 1
         confirmationDialogConfig:
           template: confirmation
-          message: _("Are you sure you want to delete to this snapshot?")
+          message: _("Are you sure you want to delete the selected snapshot(s)?")
         execute:
           type: request
           request:
             service: Zfs
             method: deleteObjectBg
             params:
-              name: "{{ _selected[0].path }}"
-              type: "{{ _selected[0].type }}"
+              name: "{{ path }}"
+              type: "{{ type }}"
             task: true
             progressMessage: _("Deleting snapshot ...")
             successNotification: _("Snapshot deleted.")
+      - type: menu
+        icon: mdi:delete-sweep
+        tooltip: _("Bulk Delete")
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        actions:
+          - text: _("Delete this and all earlier snapshots")
+            icon: mdi:chevron-triple-left
+            confirmationDialogConfig:
+              template: confirmation-danger
+              message: _("Are you sure you want to delete this snapshot and all earlier snapshots on the same dataset?")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: deleteSnapshotRangeBg
+                params:
+                  name: "{{ _selected[0].path }}"
+                  mode: "earlier"
+                task: true
+                progressMessage: _("Deleting snapshots ...")
+                successNotification: _("Snapshots deleted.")
+          - text: _("Delete this and all later snapshots")
+            icon: mdi:chevron-triple-right
+            confirmationDialogConfig:
+              template: confirmation-danger
+              message: _("Are you sure you want to delete this snapshot and all later snapshots on the same dataset?")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: deleteSnapshotRangeBg
+                params:
+                  name: "{{ _selected[0].path }}"
+                  mode: "later"
+                task: true
+                progressMessage: _("Deleting snapshots ...")
+                successNotification: _("Snapshots deleted.")
+          - text: _("Delete all snapshots on parent dataset")
+            icon: mdi:delete-forever
+            confirmationDialogConfig:
+              template: confirmation-critical
+              message: _("Are you sure you want to delete ALL snapshots on the parent dataset '{{ _selected[0].parent }}'?")
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: deleteSnapshotRangeBg
+                params:
+                  name: "{{ _selected[0].path }}"
+                  mode: "all"
+                task: true
+                progressMessage: _("Deleting all snapshots ...")
+                successNotification: _("All snapshots deleted.")
       - type: iconButton
         tooltip: _("Clone")
         icon: mdi:content-copy

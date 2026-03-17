@@ -355,6 +355,24 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.zfs.deletesnapshotrange",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["earlier", "later", "all"],
+          "required": true
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.zfs.deleteobject",
     "params": {
       "type": "object",

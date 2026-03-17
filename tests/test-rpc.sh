@@ -730,6 +730,62 @@ assert_rpc "deleteObject — snapshot fs1@snap1" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1@snap1\",\"mp\":\"\",\"type\":\"Snapshot\"}"
 
 # ===========================================================================
+section "Snapshot — bulk delete (deleteSnapshotRange)"
+# ===========================================================================
+
+# Create snapshots snap-a, snap-b, snap-c for range deletion tests.
+assert_rpc "addObject — snapshot fs1@snap-a" "Zfs" "addObject" \
+    "{\"type\":\"snapshot\",\"path\":\"$POOL/fs1\",\"name\":\"snap-a\"}"
+assert_rpc "addObject — snapshot fs1@snap-b" "Zfs" "addObject" \
+    "{\"type\":\"snapshot\",\"path\":\"$POOL/fs1\",\"name\":\"snap-b\"}"
+assert_rpc "addObject — snapshot fs1@snap-c" "Zfs" "addObject" \
+    "{\"type\":\"snapshot\",\"path\":\"$POOL/fs1\",\"name\":\"snap-c\"}"
+
+# "earlier" mode: delete snap-b and all earlier (snap-a, snap-b); snap-c survives.
+assert_rpc "deleteSnapshotRange — earlier (snap-b and all earlier)" "Zfs" "deleteSnapshotRange" \
+    "{\"name\":\"$POOL/fs1@snap-b\",\"mode\":\"earlier\"}"
+if ! zfs list -H -t snapshot -o name "$POOL/fs1@snap-c" >/dev/null 2>&1; then
+    _fail "deleteSnapshotRange earlier — snap-c should still exist" ""
+else
+    _pass "deleteSnapshotRange earlier — snap-c survived as expected"
+fi
+if zfs list -H -t snapshot -o name "$POOL/fs1@snap-a" >/dev/null 2>&1; then
+    _fail "deleteSnapshotRange earlier — snap-a should have been deleted" ""
+else
+    _pass "deleteSnapshotRange earlier — snap-a was deleted as expected"
+fi
+
+# Create new snapshots for "later" and "all" tests.
+assert_rpc "addObject — snapshot fs1@snap-d" "Zfs" "addObject" \
+    "{\"type\":\"snapshot\",\"path\":\"$POOL/fs1\",\"name\":\"snap-d\"}"
+assert_rpc "addObject — snapshot fs1@snap-e" "Zfs" "addObject" \
+    "{\"type\":\"snapshot\",\"path\":\"$POOL/fs1\",\"name\":\"snap-e\"}"
+
+# "later" mode: delete snap-d and all later (snap-d, snap-e); snap-c survives.
+assert_rpc "deleteSnapshotRange — later (snap-d and all later)" "Zfs" "deleteSnapshotRange" \
+    "{\"name\":\"$POOL/fs1@snap-d\",\"mode\":\"later\"}"
+if ! zfs list -H -t snapshot -o name "$POOL/fs1@snap-c" >/dev/null 2>&1; then
+    _fail "deleteSnapshotRange later — snap-c should still exist" ""
+else
+    _pass "deleteSnapshotRange later — snap-c survived as expected"
+fi
+if zfs list -H -t snapshot -o name "$POOL/fs1@snap-e" >/dev/null 2>&1; then
+    _fail "deleteSnapshotRange later — snap-e should have been deleted" ""
+else
+    _pass "deleteSnapshotRange later — snap-e was deleted as expected"
+fi
+
+# "all" mode: delete all remaining snapshots on fs1.
+assert_rpc "deleteSnapshotRange — all snapshots on fs1" "Zfs" "deleteSnapshotRange" \
+    "{\"name\":\"$POOL/fs1@snap-c\",\"mode\":\"all\"}"
+REMAINING=$(zfs list -H -t snapshot -o name 2>/dev/null | grep "^$POOL/fs1@" || true)
+if [ -n "$REMAINING" ]; then
+    _fail "deleteSnapshotRange all — snapshots still exist: $REMAINING" ""
+else
+    _pass "deleteSnapshotRange all — all snapshots removed as expected"
+fi
+
+# ===========================================================================
 section "Clone — create and delete"
 # ===========================================================================
 

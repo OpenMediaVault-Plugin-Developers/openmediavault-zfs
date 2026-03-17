@@ -43,6 +43,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('addObject');
         $this->registerMethod('deleteObject');
         $this->registerMethod('deleteObjectBg');
+        $this->registerMethod('deleteSnapshotRange');
+        $this->registerMethod('deleteSnapshotRangeBg');
         $this->registerMethod('getProperties');
         $this->registerMethod('setProperties');
         $this->registerMethod('getObjectDetails');
@@ -845,6 +847,47 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     public function deleteObjectBg($params, $context)
     {
         return $this->callMethodBg('deleteObject', $params, $context);
+    }
+
+    public function deleteSnapshotRange($params, $context)
+    {
+        // Validate the RPC caller context.
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        // Validate the parameters of the RPC service method.
+        $this->validateMethodParams($params, 'rpc.zfs.deletesnapshotrange');
+        $name = $params['name'];
+        $mode = $params['mode'];
+        // Extract parent dataset and snapshot name from path (e.g. pool/data@snap1).
+        if (!preg_match('/^(.+)@(.+)$/', $name, $m)) {
+            throw new \OMV\Exception('Invalid snapshot path: %s', $name);
+        }
+        $parent = $m[1];
+        $snap   = $m[2];
+        switch ($mode) {
+            case 'earlier':
+                // Destroy the named snapshot and all earlier snapshots.
+                $destroyArg = $parent . '@%' . $snap;
+                break;
+            case 'later':
+                // Destroy the named snapshot and all later snapshots.
+                $destroyArg = $parent . '@' . $snap . '%';
+                break;
+            case 'all':
+                // Destroy all snapshots on the parent dataset.
+                $destroyArg = $parent . '@%';
+                break;
+            default:
+                throw new \OMV\Exception('Invalid mode: %s', $mode);
+        }
+        $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($destroyArg));
+        self::zfsExec($cmd, $out, $res);
+        self::fixOMVMntEnt($context);
+        self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
+    }
+
+    public function deleteSnapshotRangeBg($params, $context)
+    {
+        return $this->callMethodBg('deleteSnapshotRange', $params, $context);
     }
 
     public function getProperties($params, $context)

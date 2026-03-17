@@ -384,6 +384,11 @@ data:
                     validators:
                       required: true
                       patternType: shareName
+                  - type: checkbox
+                    name: recursive
+                    label: _("Recursive")
+                    hint: _("Snapshot this dataset and all its children.")
+                    value: false
                   - type: hidden
                     name: type
                     value: "snapshot"
@@ -409,9 +414,26 @@ data:
                 method: quickSnapshot
                 params:
                   name: "{{ _selected[0].path }}"
+                  recursive: false
                 task: false
                 progressMessage: _("Creating snapshot ...")
                 successNotification: _("Snapshot created.")
+          - text: _("Quick recursive snapshot")
+            icon: mdi:camera-burst
+            enabledConstraints:
+              minSelected: 1
+              maxSelected: 1
+            execute:
+              type: request
+              request:
+                service: Zfs
+                method: quickSnapshot
+                params:
+                  name: "{{ _selected[0].path }}"
+                  recursive: true
+                task: false
+                progressMessage: _("Creating recursive snapshot ...")
+                successNotification: _("Recursive snapshot created.")
       - type: iconButton
         icon: mdi:desktop-classic
         tooltip: _("Properties")

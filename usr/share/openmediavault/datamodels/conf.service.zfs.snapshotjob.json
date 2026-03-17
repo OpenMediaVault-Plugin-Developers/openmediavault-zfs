@@ -12,6 +12,7 @@
     "dataset": { "type": "string" },
     "prefix": { "type": "string" },
     "retention": { "type": "integer" },
+    "recursive": { "type": "boolean" },
     "execution": { "type": "string" },
     "minute": { "type": "string" },
     "hour": { "type": "string" },

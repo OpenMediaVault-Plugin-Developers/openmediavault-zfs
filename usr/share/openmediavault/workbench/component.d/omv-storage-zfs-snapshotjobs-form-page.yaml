@@ -49,6 +49,11 @@ data:
         validators:
           required: true
           min: 1
+      - type: checkbox
+        name: recursive
+        label: _("Recursive")
+        hint: _("Snapshot the dataset and all its children. Retention pruning counts generations at the parent level and destroys each expired generation across all children.")
+        value: false
       - type: divider
         title: _("Schedule")
       - type: select

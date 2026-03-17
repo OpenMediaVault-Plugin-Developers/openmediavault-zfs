@@ -83,6 +83,27 @@ data:
             task: true
             progressMessage: _("Deleting snapshot ...")
             successNotification: _("Snapshot deleted.")
+      - type: iconButton
+        tooltip: _("Delete recursively")
+        icon: mdi:delete-variant
+        enabledConstraints:
+          minSelected: 1
+          maxSelected: 1
+        confirmationDialogConfig:
+          template: confirmation-danger
+          message: _("Are you sure you want to delete '{{ _selected[0].path }}' from this dataset and all child datasets?")
+        execute:
+          type: request
+          request:
+            service: Zfs
+            method: deleteObjectBg
+            params:
+              name: "{{ _selected[0].path }}"
+              type: "{{ _selected[0].type }}"
+              recursive: true
+            task: true
+            progressMessage: _("Deleting snapshot recursively ...")
+            successNotification: _("Snapshot deleted recursively.")
       - type: menu
         icon: mdi:delete-sweep
         tooltip: _("Bulk Delete")

@@ -294,10 +294,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.snapshotjob', $params['uuid']);
         $j = $obj->getAssoc();
-        $cmd = sprintf('/usr/sbin/omv-zfs-snapshot %s %s %d 2>&1',
+        $cmd = sprintf('/usr/sbin/omv-zfs-snapshot %s %s %d %d 2>&1',
             escapeshellarg($j['dataset']),
             escapeshellarg($j['prefix']),
-            (int)$j['retention']);
+            (int)$j['retention'],
+            !empty($j['recursive']) ? 1 : 0);
         exec($cmd, $out, $res);
         if ($res !== 0) {
             throw new \OMV\Exception('Snapshot job failed: ' . implode("\n", $out));
@@ -690,8 +691,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 self::addOMVMntEntForDataset($context, $name);
                 break;
             case 'snapshot':
-                $name = $params['path'] . '@' . $params['name'];
-                $cmd = sprintf('zfs snapshot %s 2>&1', escapeshellarg($name));
+                $name      = $params['path'] . '@' . $params['name'];
+                $recursive = !empty($params['recursive']) ? '-r ' : '';
+                $cmd = sprintf('zfs snapshot %s%s 2>&1', $recursive, escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
                 break;
             case 'volume':
@@ -713,9 +715,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         // Validate the parameters of the RPC service method.
-        $this->validateMethodParams($params, 'rpc.zfs.name');
+        $this->validateMethodParams($params, 'rpc.zfs.quicksnapshot');
         $snapshotName = $params['name'] . '@' . date('Y-m-d_H-i-s');
-        $cmd = sprintf('zfs snapshot %s 2>&1', escapeshellarg($snapshotName));
+        $recursive    = !empty($params['recursive']) ? '-r ' : '';
+        $cmd = sprintf('zfs snapshot %s%s 2>&1', $recursive, escapeshellarg($snapshotName));
         self::zfsExec($cmd, $out, $res);
     }
 
@@ -799,7 +802,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'org.openmediavault.storage.zfs.filesystem', $context);
                 break;
             case 'Snapshot':
-                $cmd = sprintf('zfs destroy %s 2>&1', escapeshellarg($name));
+                $recursive = !empty($params['recursive']) ? '-r ' : '';
+                $cmd = sprintf('zfs destroy %s%s 2>&1', $recursive, escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
                 break;
             case 'Volume':

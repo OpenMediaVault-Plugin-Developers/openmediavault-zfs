@@ -30,6 +30,11 @@ data:
         prop: retention
         flexGrow: 1
         sortable: true
+      - name: _("Recursive")
+        prop: recursive
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
       - name: _("Scheduling")
         prop: ""
         flexGrow: 2

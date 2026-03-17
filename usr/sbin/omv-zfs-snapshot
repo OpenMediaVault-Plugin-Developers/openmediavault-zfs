@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create a ZFS snapshot and prune old ones by retention count.
-# Usage: omv-zfs-snapshot <dataset> <prefix> <retention>
+# Usage: omv-zfs-snapshot <dataset> <prefix> <retention> [recursive]
 set -euo pipefail
 
 LOGFILE="/var/log/omv-zfs-snapshot.log"
@@ -9,12 +9,20 @@ exec > >(tee -a "$LOGFILE") 2>&1
 DATASET="$1"
 PREFIX="$2"
 RETENTION="${3:-7}"
+RECURSIVE="${4:-0}"
 SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
 
-echo "$(date -Iseconds): Creating snapshot ${DATASET}@${SNAPNAME}"
-zfs snapshot "${DATASET}@${SNAPNAME}"
+if [ "${RECURSIVE}" = "1" ]; then
+    echo "$(date -Iseconds): Creating recursive snapshot ${DATASET}@${SNAPNAME}"
+    zfs snapshot -r "${DATASET}@${SNAPNAME}"
+else
+    echo "$(date -Iseconds): Creating snapshot ${DATASET}@${SNAPNAME}"
+    zfs snapshot "${DATASET}@${SNAPNAME}"
+fi
 
-# List snapshots matching our prefix, oldest first
+# List snapshots matching our prefix on the parent dataset only, oldest first.
+# For recursive jobs the child snapshots share the same name, so counting
+# only the parent gives the correct number of generations.
 SNAPS=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" 2>/dev/null \
     | grep "^${DATASET}@${PREFIX}-" || true)
 
@@ -24,8 +32,13 @@ if [ "${COUNT}" -gt "${RETENTION}" ]; then
     TO_DELETE=$(printf '%s\n' "${SNAPS}" | head -n $(( COUNT - RETENTION )))
     while IFS= read -r snap; do
         [ -n "${snap}" ] || continue
-        echo "$(date -Iseconds): Pruning old snapshot ${snap}"
-        zfs destroy "${snap}"
+        if [ "${RECURSIVE}" = "1" ]; then
+            echo "$(date -Iseconds): Pruning old recursive snapshot ${snap}"
+            zfs destroy -r "${snap}"
+        else
+            echo "$(date -Iseconds): Pruning old snapshot ${snap}"
+            zfs destroy "${snap}"
+        fi
     done <<< "${TO_DELETE}"
 fi
 

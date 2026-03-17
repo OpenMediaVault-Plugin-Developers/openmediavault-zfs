@@ -355,6 +355,22 @@
   },
   {
     "type": "rpc",
+    "id": "rpc.zfs.quicksnapshot",
+    "params": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "recursive": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
     "id": "rpc.zfs.deletesnapshotrange",
     "params": {
       "type": "object",
@@ -391,6 +407,9 @@
         },
         "mp": {
           "type": "string"
+        },
+        "recursive": {
+          "type": "boolean"
         }
       }
     }
@@ -622,6 +641,7 @@
         "dataset": { "type": "string", "required": true },
         "prefix": { "type": "string", "required": true },
         "retention": { "type": "integer", "minimum": 1, "required": true },
+        "recursive": { "type": "boolean" },
         "execution": {
           "type": "string",
           "enum": ["exactly","hourly","daily","weekly","monthly","yearly","reboot"],

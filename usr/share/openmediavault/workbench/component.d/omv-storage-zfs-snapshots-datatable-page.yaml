@@ -40,6 +40,11 @@ data:
         prop: type
         flexGrow: 1
         sortable: true
+      - name: _("Encryption")
+        prop: encryption
+        flexGrow: 1
+        sortable: true
+        hidden: true
     actions:
       - type: iconButton
         icon: mdi:information-outline
@@ -85,6 +90,11 @@ data:
         enabledConstraints:
           minSelected: 1
           maxSelected: 1
+          constraint:
+            - operator: eq
+              arg0:
+                prop: encryption
+              arg1: "OFF"
         execute:
           type: formDialog
           formDialog:

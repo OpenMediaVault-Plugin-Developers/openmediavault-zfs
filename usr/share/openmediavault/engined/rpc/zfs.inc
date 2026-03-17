@@ -1425,8 +1425,34 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
         self::execWithStdin($cmd, $params['key']);
-        // Mount the dataset now that the key is loaded.
-        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($params['name'])));
+        // Mount the encryption root and all hierarchical children that inherit
+        // this key.  Using -R on the encryption root (not the pool root) avoids
+        // an "already mounted" failure for the pool root dataset that would cause
+        // zfsTryExec to return before any children are attempted.
+        // Note: OpenZFS uses -R (uppercase) for recursive mount; -r is invalid.
+        self::zfsTryExec(sprintf('zfs mount -R %s 2>&1', escapeshellarg($params['name'])));
+        // Also mount sibling clones: datasets that share this encryptionroot but
+        // live outside the encryption root's subtree (e.g. a clone that has not
+        // been promoted sits at a different path in the pool hierarchy).
+        $poolName = explode('/', $params['name'])[0];
+        if (self::zfsTryExec(
+            sprintf('zfs get -H -r -t filesystem,volume -o name,value encryptionroot %s 2>/dev/null',
+                escapeshellarg($poolName)),
+            $encRootLines
+        )) {
+            foreach ($encRootLines as $line) {
+                $parts = explode("\t", trim($line));
+                if (count($parts) !== 2 || $parts[1] !== $params['name']) {
+                    continue;
+                }
+                $ds = $parts[0];
+                // Skip datasets already covered by the -r mount above.
+                if ($ds === $params['name'] || strpos($ds, $params['name'] . '/') === 0) {
+                    continue;
+                }
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
+            }
+        }
         self::addOMVMntEntForDataset($context, $params['name']);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         return ['status' => 'loaded'];
@@ -2154,11 +2180,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      */
     private static function deleteOMVMntEnt($context, string $name, string $mountpoint): void
     {
+        // A dataset may legitimately have no mntent entry (e.g. a promoted clone,
+        // a dataset created via CLI, or one imported from another system).  Skip
+        // the FsTab deletion gracefully rather than blocking the destroy operation.
         $object = \OMV\Rpc\Rpc::call('FsTab', 'getByDir', ['dir' => $mountpoint], $context);
-        if (!$object || $object['type'] !== 'zfs' || $object['dir'] !== $mountpoint) {
-            throw new \OMV\Exception(sprintf('No ZFS mntent found for: %s', $mountpoint));
+        if ($object && $object['type'] === 'zfs' && $object['dir'] === $mountpoint) {
+            \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
         }
-        \OMV\Rpc\Rpc::call('FsTab', 'delete', ['uuid' => $object['uuid']], $context);
         if (self::zfsFilesystemExists($name)) {
             // Refuse if any snapshot of this dataset has dependent clones — zfs destroy
             // would fail cryptically and the caller needs to know what to delete first.
@@ -2400,16 +2428,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         // One zfs list call returns all the data we need for sizing/type/origin.
         $cmd = 'zfs list -H -p -t filesystem,volume '
-             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation,quota,compression,compressratio,refer 2>&1';
+             . '-o name,type,used,available,mountpoint,origin,volsize,logicalused,refreservation,quota,compression,compressratio,refer,mounted 2>&1';
         self::zfsExec($cmd, $out, $res);
         foreach ($out as $line) {
             $parts = preg_split('/\t/', $line);
-            if (count($parts) < 13) {
+            if (count($parts) < 14) {
                 continue;
             }
             [$path, $type, $used, $available, $mountpoint,
              $origin, $volsize, $logicalused, $refreservation, $quota,
-             $compression, $compressratio, $refer] = $parts;
+             $compression, $compressratio, $refer, $mounted] = $parts;
             $isPool       = ($type === 'filesystem' && strpos($path, '/') === false);
             $isFilesystem = ($type === 'filesystem' && !$isPool);
             $isVolume     = ($type === 'volume');
@@ -2490,6 +2518,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'      => ($compression !== '-') ? $compression : 'off',
                     'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'            => ($refer !== '-') ? (int)$refer : 0,
+                    'mounted'          => (trim($mounted) === 'yes'),
                     'poolroot'         => true,
                 ];
             } elseif ($isFilesystem) {
@@ -2530,6 +2559,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'      => ($compression !== '-') ? $compression : 'off',
                     'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'            => ($refer !== '-') ? (int)$refer : 0,
+                    'mounted'          => (trim($mounted) === 'yes'),
                     'poolroot'         => false,
                 ];
             } elseif ($isVolume) {
@@ -2565,6 +2595,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'      => ($compression !== '-') ? $compression : 'off',
                     'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'            => ($refer !== '-') ? (int)$refer : 0,
+                    'mounted'          => false,
                 ];
             }
         }
@@ -2597,26 +2628,27 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $prefix  = 'root/pool-';
         $objects = [];
-        $cmd     = 'zfs list -H -p -t snapshot -o name,used,refer 2>&1';
+        $cmd     = 'zfs list -H -p -t snapshot -o name,used,refer,encryption 2>&1';
         self::zfsExec($cmd, $out, $res);
         foreach ($out as $line) {
             $parts = preg_split('/\t/', $line);
-            if (count($parts) < 3) {
+            if (count($parts) < 4) {
                 continue;
             }
-            [$path, $used, $refer] = $parts;
+            [$path, $used, $refer, $enc] = $parts;
             if (!preg_match('/(.*)\@(.*)$/', $path, $result) || count($result) < 3) {
                 continue;
             }
             $objects[] = [
-                'id'     => $prefix . $path,
-                'parent' => $result[1],
-                'name'   => $result[2],
-                'type'   => 'Snapshot',
-                'icon'   => 'images/zfs_snap.png',
-                'path'   => $path,
-                'used'   => (int)$used,
-                'refer'  => (int)$refer,
+                'id'         => $prefix . $path,
+                'parent'     => $result[1],
+                'name'       => $result[2],
+                'type'       => 'Snapshot',
+                'icon'       => 'images/zfs_snap.png',
+                'path'       => $path,
+                'used'       => (int)$used,
+                'refer'      => (int)$refer,
+                'encryption' => strtoupper(trim($enc)),
             ];
         }
         return $objects;

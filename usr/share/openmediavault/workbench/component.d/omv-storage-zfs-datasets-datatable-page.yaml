@@ -61,6 +61,12 @@ data:
         prop: mountpoint
         flexGrow: 2
         sortable: true
+      - name: _("Mounted")
+        prop: mounted
+        flexGrow: 1
+        sortable: true
+        cellTemplateName: checkIcon
+        hidden: true
       - name: _("Path")
         prop: path
         flexGrow: 2
@@ -485,6 +491,10 @@ data:
                 - operator: falsy
                   arg0:
                     prop: poolroot
+                - operator: eq
+                  arg0:
+                    prop: encryption
+                  arg1: "OFF"
             execute:
               type: formDialog
               formDialog:
@@ -523,6 +533,10 @@ data:
                   arg0:
                     prop: origin
                   arg1: "n/a"
+                - operator: eq
+                  arg0:
+                    prop: encryption
+                  arg1: "OFF"
             confirmationDialogConfig:
               template: confirmation
               message: _("Are you sure you want to promote this dataset? This detaches the clone from its origin snapshot dependency.")

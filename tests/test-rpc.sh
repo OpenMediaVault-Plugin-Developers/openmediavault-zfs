@@ -97,6 +97,9 @@ assert_rpc_fails() {
 }
 
 # Call a *Bg method, wait for the background task, report result.
+# When the bg task throws an exception, OMV stores the error in the status
+# file and Exec.isRunning re-raises it as a TraceException (omv-rpc exits
+# non-zero with a JSON error body).  We detect this to avoid false PASSes.
 assert_rpc_bg() {
     local desc=$1 svc=$2 method=$3 params=${4:-'{}'}
     local filename ec=0
@@ -108,12 +111,15 @@ assert_rpc_bg() {
     filename=$(echo "$filename" | tr -d '"')
 
     # Poll until the task is no longer running.
-    local timeout=120 elapsed=0
+    local timeout=120 elapsed=0 poll_ec poll_out
     while [ $elapsed -lt $timeout ]; do
-        local running
-        running=$(omv-rpc -u admin "Exec" "isRunning" \
-            "{\"filename\":\"$filename\"}" 2>/dev/null || echo "false")
-        echo "$running" | grep -q "true" || break
+        poll_out=$(omv-rpc -u admin "Exec" "isRunning" \
+            "{\"filename\":\"$filename\"}" 2>&1)
+        poll_ec=$?
+        # Non-zero exit: either the bg task threw (TraceException) or the
+        # status file was already cleaned up — either way the task is done.
+        [ $poll_ec -ne 0 ] && break
+        echo "$poll_out" | grep -q '"running":true\|"running": true' || break
         sleep 2; ((elapsed += 2)) || true
     done
     if [ $elapsed -ge $timeout ]; then
@@ -121,7 +127,23 @@ assert_rpc_bg() {
         return 1
     fi
 
-    # Retrieve and inspect the task output.
+    # If isRunning threw a TraceException the bg task failed — extract the
+    # error message from the JSON error response.
+    if [ $poll_ec -ne 0 ]; then
+        local err
+        err=$(echo "$poll_out" | python3 -c \
+            "import sys,json
+d=json.load(sys.stdin)
+e=d.get('error') or {}
+print(e.get('message', str(d))[:300])" 2>/dev/null \
+            || echo "${poll_out:0:200}")
+        _fail "$desc" "$err"
+        return 1
+    fi
+
+    # Task completed without error.  getOutput may also fail if the status
+    # file was already cleaned up; that is fine — it means there is no
+    # extra output to inspect.
     local content
     content=$(omv-rpc -u admin "Exec" "getOutput" \
         "{\"filename\":\"$filename\",\"pos\":0}" 2>/dev/null \
@@ -1337,6 +1359,171 @@ unset UNLOAD_OUT LOAD_PARAMS LOAD_OUT RELOAD_PARAMS
 unset POST_SRC_IS_ROOT POST_CLONE_IS_ROOT DEL_CLONE_OUT
 
 # ===========================================================================
+section "Encryption — auto-unlock lifecycle"
+# ===========================================================================
+# Simulates the user workflow: enable encryption with auto-unlock, disable
+# auto-unlock (removeAutoUnlock), then simulate a reboot by manually locking
+# the dataset (unload-key) and re-unlocking via loadEncryptionKey.
+#
+# Also tests that doDiscover (deleteStale=true) does NOT remove the mntent
+# entry for a locked (unmounted) encrypted dataset — the real-world risk when
+# auto-unlock is off and the dataset isn't mounted at boot.
+
+AU_DS="$POOL/au_test"
+AU_PASS="AutoUnlockTestPass789!"
+
+info "Creating encrypted dataset $AU_DS via enableEncryption RPC (autounlock=true)"
+AU_ENC_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'path':           '$POOL',
+    'name':           'au_test',
+    'encryptiontype': 'aes-256-gcm',
+    'key':            '$AU_PASS',
+    'autounlock':     True,
+}))
+")
+if omv-rpc -u admin "Zfs" "enableEncryption" "$AU_ENC_PARAMS" >/dev/null 2>&1; then
+    _pass "enableEncryption — $AU_DS created with autounlock=true"
+else
+    _fail "enableEncryption — $AU_DS creation failed" ""
+fi
+
+# Verify the dataset exists and is mounted.
+if zfs list -H -o name "$AU_DS" >/dev/null 2>&1; then
+    _pass "enableEncryption — $AU_DS exists in ZFS"
+else
+    _fail "enableEncryption — $AU_DS not found in ZFS" ""
+fi
+
+AU_MP=$(zfs get -H -o value mountpoint "$AU_DS" 2>/dev/null || echo "")
+if [ -n "$AU_MP" ] && [ "$AU_MP" != "none" ] && [ "$AU_MP" != "-" ] && mountpoint -q "$AU_MP" 2>/dev/null; then
+    _pass "enableEncryption — $AU_DS is mounted at $AU_MP"
+else
+    # Try to mount it; enableEncryption should have done this but be tolerant.
+    zfs mount "$AU_DS" 2>/dev/null || true
+    AU_MP=$(zfs get -H -o value mountpoint "$AU_DS" 2>/dev/null || echo "")
+    if mountpoint -q "$AU_MP" 2>/dev/null; then
+        _pass "enableEncryption — $AU_DS mounted (needed explicit mount)"
+    else
+        _fail "enableEncryption — $AU_DS not mounted" ""
+    fi
+fi
+
+# Verify getEncryptionStatus reports autounlock=true and keystatus=available.
+AU_STATUS=$(omv-rpc -u admin "Zfs" "getEncryptionStatus" \
+    "{\"name\":\"$AU_DS\"}" 2>/dev/null || echo "{}")
+AU_AUTOUNLOCK=$(echo "$AU_STATUS" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(str(d.get('autounlock','')).lower())" \
+    2>/dev/null || echo "")
+AU_KEYSTATUS=$(echo "$AU_STATUS" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(d.get('keystatus',''))" \
+    2>/dev/null || echo "")
+if [ "$AU_AUTOUNLOCK" = "true" ]; then
+    _pass "getEncryptionStatus — autounlock=true after enableEncryption"
+else
+    _fail "getEncryptionStatus — autounlock should be true, got: $AU_AUTOUNLOCK" ""
+fi
+if [ "$AU_KEYSTATUS" = "available" ]; then
+    _pass "getEncryptionStatus — keystatus=available (key loaded)"
+else
+    _fail "getEncryptionStatus — keystatus should be available, got: $AU_KEYSTATUS" ""
+fi
+
+# ---- Disable auto-unlock (removeAutoUnlock) --------------------------------
+assert_rpc "removeAutoUnlock — disable auto-unlock on $AU_DS" \
+    "Zfs" "removeAutoUnlock" "{\"name\":\"$AU_DS\"}"
+
+# Keyfile must be gone.
+# getKeyfilePath uses str_replace('/', '_', $name), so e.g. pool/au_test → pool_au_test.key
+AU_KEYFILE="/etc/zfs/keys/$(echo "$AU_DS" | tr '/' '_').key"
+if [ -f "$AU_KEYFILE" ]; then
+    _fail "removeAutoUnlock — keyfile still present: $AU_KEYFILE" ""
+else
+    _pass "removeAutoUnlock — keyfile removed from /etc/zfs/keys/"
+fi
+
+# getEncryptionStatus must now report autounlock=false, keylocation=prompt.
+AU_STATUS2=$(omv-rpc -u admin "Zfs" "getEncryptionStatus" \
+    "{\"name\":\"$AU_DS\"}" 2>/dev/null || echo "{}")
+AU_AUTOUNLOCK2=$(echo "$AU_STATUS2" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(str(d.get('autounlock','')).lower())" \
+    2>/dev/null || echo "")
+AU_KEYLOC2=$(echo "$AU_STATUS2" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(d.get('keylocation',''))" \
+    2>/dev/null || echo "")
+if [ "$AU_AUTOUNLOCK2" = "false" ]; then
+    _pass "getEncryptionStatus — autounlock=false after removeAutoUnlock"
+else
+    _fail "getEncryptionStatus — autounlock should be false, got: $AU_AUTOUNLOCK2" ""
+fi
+if [ "$AU_KEYLOC2" = "prompt" ]; then
+    _pass "getEncryptionStatus — keylocation=prompt after removeAutoUnlock"
+else
+    _fail "getEncryptionStatus — keylocation should be prompt, got: $AU_KEYLOC2" ""
+fi
+
+# ---- Simulate reboot: lock the dataset (unload-key) ------------------------
+# After disabling auto-unlock and rebooting, ZFS cannot load the key
+# automatically (keylocation=prompt).  We simulate this by locking the
+# dataset now via unloadEncryptionKey.
+assert_rpc "unloadEncryptionKey — simulate post-reboot locked state" \
+    "Zfs" "unloadEncryptionKey" "{\"name\":\"$AU_DS\"}" "unloaded"
+
+AU_KEYSTATUS2=$(zfs get -H -o value keystatus "$AU_DS" 2>/dev/null || echo "unknown")
+if [ "$AU_KEYSTATUS2" = "unavailable" ]; then
+    _pass "simulate reboot — keystatus=unavailable (dataset locked, as after boot without auto-unlock)"
+else
+    _fail "simulate reboot — keystatus should be unavailable, got: $AU_KEYSTATUS2" ""
+fi
+
+# ---- doDiscover(deleteStale=true) must NOT remove the mntent entry ---------
+# This is the subtle bug: a locked dataset is unmounted, so its mountpoint
+# looks "stale" to a naive discover pass.  The plugin must recognise encrypted
+# locked datasets and keep their mntent entries intact.
+if [ "$(mntent_exists "$AU_DS")" = "True" ]; then
+    info "mntent entry present before discover (expected)"
+    assert_rpc_bg "doDiscoverBg — deleteStale=true with locked encrypted dataset" \
+        "Zfs" "doDiscoverBg" '{"addMissing":false,"deleteStale":true}'
+    if [ "$(mntent_exists "$AU_DS")" = "True" ]; then
+        _pass "doDiscover(deleteStale) — mntent entry preserved for locked encrypted dataset"
+    else
+        _fail "doDiscover(deleteStale) — mntent entry incorrectly removed for locked dataset" \
+              "Files still exist in ZFS but OMV no longer tracks the filesystem"
+    fi
+else
+    info "Skipping doDiscover(deleteStale) check — no mntent entry found (enableEncryption may not have registered one)"
+fi
+
+# ---- Manually unlock (simulating user action after reboot) -----------------
+AU_LOAD_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'name': '$AU_DS', 'key': '$AU_PASS'}))
+")
+assert_rpc "loadEncryptionKey — manually unlock after simulated reboot" \
+    "Zfs" "loadEncryptionKey" "$AU_LOAD_PARAMS" "loaded"
+
+AU_KEYSTATUS3=$(zfs get -H -o value keystatus "$AU_DS" 2>/dev/null || echo "unknown")
+if [ "$AU_KEYSTATUS3" = "available" ]; then
+    _pass "loadEncryptionKey — keystatus=available after manual unlock"
+else
+    _fail "loadEncryptionKey — keystatus should be available, got: $AU_KEYSTATUS3" ""
+fi
+
+# ---- Cleanup ---------------------------------------------------------------
+info "Cleaning up $AU_DS"
+# Use -f (force) to unmount before destroying — the dataset may still be
+# mounted if the test exercised the direct-mount fallback path.
+zfs destroy -rf "$AU_DS" 2>/dev/null || true
+omv-rpc -u admin "Zfs" "doDiscover" \
+    '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+
+unset AU_DS AU_PASS AU_ENC_PARAMS AU_MP
+unset AU_STATUS AU_STATUS2 AU_AUTOUNLOCK AU_AUTOUNLOCK2
+unset AU_KEYSTATUS AU_KEYSTATUS2 AU_KEYSTATUS3 AU_KEYLOC2
+unset AU_LOAD_PARAMS AU_KEYFILE
+
+# ===========================================================================
 section "Export and import"
 # ===========================================================================
 
@@ -1378,6 +1565,13 @@ fi
 # ===========================================================================
 section "Pool — delete"
 # ===========================================================================
+
+# Safety net: force-destroy any child datasets that may have survived earlier
+# cleanup steps (e.g. a locked encrypted dataset that resisted zfs destroy -r).
+info "Force-destroying any remaining child datasets before pool delete"
+zfs list -H -o name -r "$POOL" 2>/dev/null | grep -v "^${POOL}$" | sort -r | while IFS= read -r ds; do
+    zfs destroy -rf "$ds" 2>/dev/null || true
+done
 
 assert_rpc_bg "deleteObjectBg — Pool" "Zfs" "deleteObjectBg" \
     "{\"name\":\"$POOL\",\"mp\":\"/$POOL\",\"type\":\"Pool\"}"

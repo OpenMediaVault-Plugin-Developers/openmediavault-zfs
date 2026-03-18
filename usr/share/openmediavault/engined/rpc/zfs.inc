@@ -1463,34 +1463,61 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
         self::execWithStdin($cmd, $params['key']);
-        // Mount every dataset that shares this encryption root.  We scan the
-        // pool and mount each dataset individually rather than using
-        // 'zfs mount -R' because -R recurses into sub-encryption-roots whose
-        // keys are unavailable, making the command exit non-zero and leaving
-        // ALL datasets unmounted (the error is swallowed by zfsTryExec).
+        // Find every filesystem sharing this encryption root.  Filesystems only —
+        // zvols have no mountpoint so zfs mount on them is invalid.
+        // We scan individually rather than using 'zfs mount -R' because -R
+        // recurses into sub-encryption-roots whose keys are unavailable, making
+        // the command exit non-zero and leaving ALL datasets unmounted.
         // Individual mounts cover both hierarchical children (which inherit
         // this key) and sibling clones (which share the encryptionroot but
         // live at a different path in the pool hierarchy).
-        // Register the OMV mntent entry BEFORE mounting.  Setting the ZFS
-        // user property omvzfsplugin:uuid on a mounted encrypted dataset can
-        // clear ZFS's internal mounted-state tracking on some kernel versions,
-        // leaving the dataset unreachable until explicitly re-mounted.  By
-        // updating the entry while the dataset is still unmounted (key loaded,
-        // not yet mounted) we avoid triggering that condition.
-        self::addOMVMntEntForDataset($context, $params['name']);
         $poolName = explode('/', $params['name'])[0];
+        $toMount  = [];
         if (self::zfsTryExec(
-            sprintf('zfs get -H -r -t filesystem,volume -o name,value encryptionroot %s 2>/dev/null',
+            sprintf('zfs get -H -r -t filesystem -o name,value encryptionroot %s 2>/dev/null',
                 escapeshellarg($poolName)),
             $encRootLines
         )) {
             foreach ($encRootLines as $line) {
                 $parts = explode("\t", trim($line));
-                if (count($parts) !== 2 || $parts[1] !== $params['name']) {
-                    continue;
+                if (count($parts) === 2 && $parts[1] === $params['name']) {
+                    $toMount[] = $parts[0];
                 }
-                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($parts[0])));
             }
+        }
+        // Fall back to the root dataset if the pool scan found nothing.
+        if (empty($toMount)) {
+            $toMount[] = $params['name'];
+        }
+        // Sort shallowest paths first so parents are always mounted before children.
+        sort($toMount);
+        // Mount each dataset and verify it actually came up.
+        $mountErrors = [];
+        foreach ($toMount as $ds) {
+            self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
+            $mounted = '';
+            if (self::zfsTryExec(
+                sprintf('zfs get -H -o value mounted %s 2>/dev/null', escapeshellarg($ds)),
+                $mountedOut
+            )) {
+                $mounted = trim($mountedOut[0] ?? '');
+            }
+            if ($mounted !== 'yes') {
+                $mountErrors[] = $ds;
+            }
+        }
+        if (!empty($mountErrors)) {
+            throw new \OMV\Exception(
+                'Key loaded but failed to mount: %s',
+                implode(', ', $mountErrors)
+            );
+        }
+        // Update OMV mntent entries for all mounted datasets.  Done after
+        // mounting so that setMntentProperty's zfs set runs while the dataset
+        // is already up; setMntentProperty re-mounts afterward to recover from
+        // the kernel bug that clears mounted-state tracking on property writes.
+        foreach ($toMount as $ds) {
+            self::addOMVMntEntForDataset($context, $ds);
         }
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         return ['status' => 'loaded'];

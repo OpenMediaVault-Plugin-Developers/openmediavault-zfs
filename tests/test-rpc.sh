@@ -1582,6 +1582,17 @@ else
     _fail "loadEncryptionKey — $AU_DS not mounted after unlock (CASE 1 regression)" \
           "keystatus=$AU_KEYSTATUS3 but mounted=$AU_MOUNTED3"
 fi
+# Child datasets sharing the encryptionroot must also remount.
+# Regression: old code only called addOMVMntEntForDataset on the root dataset,
+# and the mount loop swallowed errors, so children could stay unmounted while
+# loadEncryptionKey still returned success.
+AU_CHILD_MOUNTED3=$(zfs get -H -o value mounted "$AU_CHILD" 2>/dev/null || echo "no")
+if [ "$AU_CHILD_MOUNTED3" = "yes" ]; then
+    _pass "loadEncryptionKey — $AU_CHILD (child) is mounted after unlock"
+else
+    _fail "loadEncryptionKey — $AU_CHILD (child) not mounted after unlock" \
+          "loadEncryptionKey must remount all datasets sharing the encryptionroot; got mounted=$AU_CHILD_MOUNTED3"
+fi
 
 # ---- Cleanup ---------------------------------------------------------------
 info "Cleaning up $AU_DS"
@@ -1592,9 +1603,10 @@ omv-rpc -u admin "Zfs" "doDiscover" \
     '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
 
 unset AU_DS AU_PASS AU_ENC_PARAMS AU_MP
+unset AU_CHILD AU_CHILD_MOUNTED AU_CHILD_MOUNTED3
 unset AU_STATUS AU_STATUS2 AU_AUTOUNLOCK AU_AUTOUNLOCK2
 unset AU_KEYSTATUS AU_KEYSTATUS2 AU_KEYSTATUS3 AU_KEYLOC2
-unset AU_LOAD_PARAMS AU_KEYFILE
+unset AU_MOUNTED3 AU_LOAD_PARAMS AU_KEYFILE
 
 # ===========================================================================
 section "Encryption — loadEncryptionKey with sub-encryption-root in hierarchy (CASE 1)"

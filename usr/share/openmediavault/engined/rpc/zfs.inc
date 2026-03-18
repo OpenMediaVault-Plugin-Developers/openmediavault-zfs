@@ -2465,16 +2465,26 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 ? $oldUuidProp['value']
                 : null;
             $newUuid = $dataset['uuid'];
-            if ($oldUuid && $oldUuid !== $newUuid) {
-                $matchingSfs = array_filter($sfObjects, function ($sf) use ($mountpoint) {
-                    return isset($sf['mntent']['dir'])
-                        && rtrim($sf['mntent']['dir'], '/') === rtrim($mountpoint, '/');
-                });
-                if (!empty($matchingSfs)) {
-                    self::fixOMVSharedFolders($oldUuid, $newUuid, array_values($matchingSfs), $context);
+            if ($oldUuid !== $newUuid) {
+                // UUID mismatch (or not yet set): fix any shared-folder references
+                // that point at the old UUID, then write the correct UUID to ZFS.
+                // We intentionally skip setMntentProperty when the UUID is already
+                // correct: every call triggers 'zfs set omvzfsplugin:uuid=...' which,
+                // on some kernel versions (e.g. PVE 6.17/OpenZFS), clears ZFS's
+                // internal mounted-state tracking for encrypted datasets.  Avoiding
+                // unnecessary writes eliminates that race for the common case where
+                // doDiscoverBg is just re-confirming existing entries.
+                if ($oldUuid) {
+                    $matchingSfs = array_filter($sfObjects, function ($sf) use ($mountpoint) {
+                        return isset($sf['mntent']['dir'])
+                            && rtrim($sf['mntent']['dir'], '/') === rtrim($mountpoint, '/');
+                    });
+                    if (!empty($matchingSfs)) {
+                        self::fixOMVSharedFolders($oldUuid, $newUuid, array_values($matchingSfs), $context);
+                    }
                 }
+                self::setMntentProperty($newUuid, $fsname);
             }
-            self::setMntentProperty($newUuid, $fsname);
         }
     }
 

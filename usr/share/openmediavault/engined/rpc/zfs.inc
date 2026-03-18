@@ -402,13 +402,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (strlen($params['mountpoint']) > 0) {
             $opts .= sprintf('-m %s ', escapeshellarg($params['mountpoint']));
         }
-        // Add encryption options if requested.
-        $encrypt = !empty($params['encrypt']);
-        if ($encrypt) {
-            $enctype = $params['encryptiontype'] ?? 'aes-256-gcm';
-            $opts .= sprintf('-O encryption=%s -O keyformat=passphrase -O keylocation=prompt ',
-                escapeshellarg($enctype));
-        }
         // Resolve device aliases.
         $disks = $params['devices'];
         if ($params['devalias'] === 'path' && file_exists('/dev/disk/by-path/')) {
@@ -420,40 +413,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $disks = array_map(['self', 'getDiskId'], $disks);
             } catch (\Exception $e) {}
         }
-        // Create the pool, piping the passphrase via stdin if encryption is enabled.
+        // Create the pool.
         $cmd = sprintf('zpool create %s%s %s 2>&1',
             $opts,
             escapeshellarg($params['name']),
             self::buildVdevString($params['pooltype'], $disks));
-        if ($encrypt) {
-            self::execWithStdin($cmd, $params['key']);
-            // zpool create may not auto-mount the encrypted root dataset when
-            // run from a daemon process; mount it explicitly so that child
-            // datasets created immediately afterwards are also mounted.
-            self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($params['name'])));
-        } else {
-            self::zfsExec($cmd, $out, $res);
-        }
+        self::zfsExec($cmd, $out, $res);
         // Set compression if requested.
         if ($params['compress']) {
             $cmd = sprintf('zfs set compression=%s %s 2>&1',
                 escapeshellarg($params['compresstype']),
                 escapeshellarg($params['name']));
             self::zfsExec($cmd, $out, $res);
-        }
-        // Enable auto-unlock if requested: save keyfile and update keylocation.
-        if ($encrypt && !empty($params['autounlock'])) {
-            $keyfile = self::getKeyfilePath($params['name']);
-            $keydir  = dirname($keyfile);
-            if (!is_dir($keydir)) {
-                mkdir($keydir, 0700, true);
-            }
-            file_put_contents($keyfile, $params['key']);
-            chmod($keyfile, 0600);
-            self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
-                escapeshellarg('file://' . $keyfile),
-                escapeshellarg($params['name'])), $out, $res);
-            self::updateZfsListCache($params['name']);
         }
         // Sync OMV mount entries and mark config modules dirty.
         self::fixOMVMntEnt($context);

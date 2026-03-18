@@ -47,22 +47,6 @@
         "ashiftval": {
           "type": "integer",
           "required": true
-        },
-        "encrypt": {
-          "type": "boolean",
-          "required": false
-        },
-        "encryptiontype": {
-          "type": "string",
-          "required": false
-        },
-        "key": {
-          "type": "string",
-          "required": false
-        },
-        "autounlock": {
-          "type": "boolean",
-          "required": false
         }
       }
     }

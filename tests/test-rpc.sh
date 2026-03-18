@@ -168,6 +168,17 @@ print(any(e.get('fsname') == '$1' for e in entries))
 " 2>/dev/null || echo "False"
 }
 
+# Return the dir field of the OMV FsTab entry for the given fsname, or empty string.
+mntent_dir() {
+    omv-rpc -u admin "FsTab" "enumerateEntries" '{}' 2>/dev/null \
+        | python3 -c "
+import sys, json
+entries = json.load(sys.stdin)
+match = next((e for e in entries if e.get('fsname') == '$1'), None)
+print(match['dir'] if match else '')
+" 2>/dev/null || echo ""
+}
+
 # ---------------------------------------------------------------------------
 # Cleanup — always runs on exit
 # ---------------------------------------------------------------------------
@@ -1716,6 +1727,168 @@ if [ -n "$EH_DS" ]; then
 fi
 unset EH_DS EH_CHILD EH_SUB EH_PASS1 EH_PASS2 EH_LOAD_PARAMS
 unset EH_KS EH_MOUNTED EH_CHILD_MOUNTED EH_SUB_MOUNTED
+
+# ===========================================================================
+section "Encryption — loadEncryptionKey with non-mountable datasets"
+# ===========================================================================
+# Regression: before the fix, loadEncryptionKey scanned ALL filesystems sharing
+# the encryptionroot and required every one to reach mounted=yes.  Datasets with
+# canmount=off or mountpoint=none legitimately share an encryptionroot but
+# cannot be mounted, so the RPC falsely threw "failed to mount" even though the
+# key loaded and the mountable datasets came up fine.
+#
+# Layout:
+#   $POOL/enc_nonmount         — encroot=self
+#   $POOL/enc_nonmount/normal  — inherits key, standard mountpoint (must mount)
+#   $POOL/enc_nonmount/canoff  — inherits key, canmount=off (must NOT cause failure)
+#   $POOL/enc_nonmount/nomp    — inherits key, mountpoint=none (must NOT cause failure)
+
+NM_DS="$POOL/enc_nonmount"
+NM_PASS="NonMountPass111!"
+NM_NORMAL="$NM_DS/normal"
+NM_CANOFF="$NM_DS/canoff"
+NM_NOMP="$NM_DS/nomp"
+
+info "Creating root encrypted dataset $NM_DS"
+if printf '%s' "$NM_PASS" | zfs create \
+        -o encryption=aes-256-gcm \
+        -o keyformat=passphrase \
+        -o keylocation=prompt \
+        "$NM_DS" 2>/dev/null; then
+    _pass "enc_nonmount — root dataset created"
+    zfs create              "$NM_NORMAL" 2>/dev/null \
+        && _pass "enc_nonmount — normal child created" \
+        || _fail "enc_nonmount — normal child creation failed" ""
+    zfs create -o canmount=off   "$NM_CANOFF" 2>/dev/null \
+        && _pass "enc_nonmount — canmount=off child created" \
+        || _fail "enc_nonmount — canmount=off child creation failed" ""
+    zfs create -o mountpoint=none "$NM_NOMP"  2>/dev/null \
+        && _pass "enc_nonmount — mountpoint=none child created" \
+        || _fail "enc_nonmount — mountpoint=none child creation failed" ""
+
+    # Lock all datasets sharing this encryptionroot.
+    zfs unmount -f "$NM_NORMAL" 2>/dev/null || true
+    zfs unmount -f "$NM_DS"     2>/dev/null || true
+    zfs unload-key -r "$NM_DS"  2>/dev/null || true
+
+    NM_KS=$(zfs get -H -o value keystatus "$NM_DS" 2>/dev/null || echo "unknown")
+    if [ "$NM_KS" = "unavailable" ]; then
+        _pass "enc_nonmount — dataset locked (keystatus=unavailable)"
+    else
+        _fail "enc_nonmount — expected locked dataset, got keystatus=$NM_KS" ""
+    fi
+
+    # Unlock via RPC.  Must succeed despite canmount=off and mountpoint=none children.
+    NM_LOAD_PARAMS=$(python3 -c "import json; print(json.dumps({'name': '$NM_DS', 'key': '$NM_PASS'}))")
+    assert_rpc "loadEncryptionKey — non-mountable datasets must not cause false failure" \
+        "Zfs" "loadEncryptionKey" "$NM_LOAD_PARAMS" "loaded"
+
+    # Normal child must be mounted.
+    NM_NORMAL_MOUNTED=$(zfs get -H -o value mounted "$NM_NORMAL" 2>/dev/null || echo "no")
+    if [ "$NM_NORMAL_MOUNTED" = "yes" ]; then
+        _pass "loadEncryptionKey — normal child mounted after unlock"
+    else
+        _fail "loadEncryptionKey — normal child not mounted after unlock" \
+              "got mounted=$NM_NORMAL_MOUNTED"
+    fi
+
+    # canmount=off child must remain unmounted (by design, not a failure).
+    NM_CANOFF_MOUNTED=$(zfs get -H -o value mounted "$NM_CANOFF" 2>/dev/null || echo "no")
+    if [ "$NM_CANOFF_MOUNTED" = "no" ]; then
+        _pass "loadEncryptionKey — canmount=off child correctly not mounted"
+    else
+        _fail "loadEncryptionKey — canmount=off child should not be mounted" \
+              "got mounted=$NM_CANOFF_MOUNTED"
+    fi
+
+    # mountpoint=none child must remain unmounted (by design, not a failure).
+    NM_NOMP_MOUNTED=$(zfs get -H -o value mounted "$NM_NOMP" 2>/dev/null || echo "no")
+    if [ "$NM_NOMP_MOUNTED" = "no" ]; then
+        _pass "loadEncryptionKey — mountpoint=none child correctly not mounted"
+    else
+        _fail "loadEncryptionKey — mountpoint=none child should not be mounted" \
+              "got mounted=$NM_NOMP_MOUNTED"
+    fi
+else
+    _fail "enc_nonmount — root dataset creation failed" ""
+fi
+
+zfs destroy -rf "$NM_DS" 2>/dev/null || true
+omv-rpc -u admin "Zfs" "doDiscover" \
+    '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+unset NM_DS NM_PASS NM_NORMAL NM_CANOFF NM_NOMP NM_LOAD_PARAMS
+unset NM_KS NM_NORMAL_MOUNTED NM_CANOFF_MOUNTED NM_NOMP_MOUNTED
+
+# ===========================================================================
+section "Encryption — addOMVMntEntForDataset repairs stale dir"
+# ===========================================================================
+# Regression: before the fix, if an OMV mntent entry already existed for a
+# dataset, addOMVMntEntForDataset returned immediately without checking whether
+# the stored dir matched the current ZFS mountpoint.  After a CLI mountpoint
+# change the entry would remain stale indefinitely.
+#
+# This test changes the mountpoint via CLI (bypassing OMV), then triggers
+# addOMVMntEntForDataset via loadEncryptionKey and verifies the dir is repaired.
+
+SD_DS="$POOL/stale_dir_test"
+SD_PASS="StaleDirPass222!"
+SD_NEW_MP="/${POOL}_sd_new"
+
+SD_ENC_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'path':           '$POOL',
+    'name':           'stale_dir_test',
+    'encryptiontype': 'aes-256-gcm',
+    'key':            '$SD_PASS',
+    'autounlock':     False,
+}))
+")
+if omv-rpc -u admin "Zfs" "enableEncryption" "$SD_ENC_PARAMS" >/dev/null 2>&1; then
+    _pass "stale_dir — $SD_DS created via enableEncryption"
+else
+    _fail "stale_dir — $SD_DS creation failed" ""
+fi
+
+if zfs list -H -o name "$SD_DS" >/dev/null 2>&1; then
+    SD_ORIG_MP=$(zfs get -H -o value mountpoint "$SD_DS" 2>/dev/null || echo "")
+
+    # Verify the mntent entry was registered with the correct original mountpoint.
+    SD_OMV_DIR=$(mntent_dir "$SD_DS")
+    if [ "$SD_OMV_DIR" = "$SD_ORIG_MP" ]; then
+        _pass "stale_dir — initial OMV dir matches ZFS mountpoint ($SD_ORIG_MP)"
+    else
+        _fail "stale_dir — initial OMV dir mismatch: OMV='$SD_OMV_DIR' ZFS='$SD_ORIG_MP'" ""
+    fi
+
+    # Change the mountpoint via CLI, bypassing OMV — this creates a stale entry.
+    zfs unmount "$SD_DS"                        2>/dev/null || true
+    zfs set "mountpoint=$SD_NEW_MP" "$SD_DS"    2>/dev/null || true
+    zfs mount "$SD_DS"                          2>/dev/null || true
+
+    # Lock the dataset so loadEncryptionKey has something to do.
+    zfs unmount -f "$SD_DS"    2>/dev/null || true
+    zfs unload-key  "$SD_DS"   2>/dev/null || true
+
+    # Unlock via RPC — calls addOMVMntEntForDataset, which must repair the dir.
+    SD_LOAD_PARAMS=$(python3 -c "import json; print(json.dumps({'name': '$SD_DS', 'key': '$SD_PASS'}))")
+    assert_rpc "stale_dir — loadEncryptionKey triggers addOMVMntEntForDataset" \
+        "Zfs" "loadEncryptionKey" "$SD_LOAD_PARAMS" "loaded"
+
+    SD_OMV_DIR2=$(mntent_dir "$SD_DS")
+    if [ "$SD_OMV_DIR2" = "$SD_NEW_MP" ]; then
+        _pass "stale_dir — OMV dir updated to new mountpoint ($SD_NEW_MP)"
+    else
+        _fail "stale_dir — OMV dir not updated: expected '$SD_NEW_MP', got '$SD_OMV_DIR2'" ""
+    fi
+fi
+
+zfs destroy -rf "$SD_DS" 2>/dev/null || true
+rmdir "$SD_NEW_MP" 2>/dev/null || true
+omv-rpc -u admin "Zfs" "doDiscover" \
+    '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+unset SD_DS SD_PASS SD_NEW_MP SD_ENC_PARAMS SD_ORIG_MP
+unset SD_OMV_DIR SD_OMV_DIR2 SD_LOAD_PARAMS
 
 # ===========================================================================
 section "Export and import"

@@ -1474,22 +1474,36 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $poolName = explode('/', $params['name'])[0];
         $toMount  = [];
         if (self::zfsTryExec(
-            sprintf('zfs get -H -r -t filesystem -o name,value encryptionroot %s 2>/dev/null',
+            sprintf('zfs get -H -r -t filesystem -o name,property,value encryptionroot,mountpoint,canmount %s 2>/dev/null',
                 escapeshellarg($poolName)),
-            $encRootLines
+            $propLines
         )) {
-            foreach ($encRootLines as $line) {
+            $props = [];
+            foreach ($propLines as $line) {
                 $parts = explode("\t", trim($line));
-                if (count($parts) === 2 && $parts[1] === $params['name']) {
-                    $toMount[] = $parts[0];
+                if (count($parts) === 3) {
+                    $props[$parts[0]][$parts[1]] = $parts[2];
                 }
+            }
+            foreach ($props as $ds => $p) {
+                if (($p['encryptionroot'] ?? '') !== $params['name']) {
+                    continue;
+                }
+                // Skip datasets that cannot be mounted: zfs mount will never
+                // bring these up, so requiring mounted=yes would falsely fail.
+                $mp = $p['mountpoint'] ?? '';
+                if (in_array($mp, ['none', 'legacy', '-']) || ($p['canmount'] ?? 'on') === 'off') {
+                    continue;
+                }
+                $toMount[] = $ds;
             }
         }
         // Fall back to the root dataset if the pool scan found nothing.
         if (empty($toMount)) {
             $toMount[] = $params['name'];
         }
-        // Sort shallowest paths first so parents are always mounted before children.
+        // Lexical sort is sufficient for parent-before-child ordering: a parent
+        // path is always a prefix of its children, so it sorts first.
         sort($toMount);
         // Mount each dataset and verify it actually came up.
         $mountErrors = [];
@@ -2078,20 +2092,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     /**
      * Write the OMV mntent UUID into a ZFS dataset user property.
      */
-    private static function setMntentProperty(string $uuid, string $fsname): void
+    private static function setMntentProperty(string $uuid, string $fsname): bool
     {
         if (!self::isPoolImported(self::getPoolFromFsname($fsname))) {
-            return;
+            return false;
         }
         $cmd = sprintf('zfs set omvzfsplugin:uuid=%s %s 2>&1',
             escapeshellarg($uuid), escapeshellarg($fsname));
-        self::zfsTryExec($cmd);
+        $propOk = self::zfsTryExec($cmd);
         // On some kernel versions (e.g. PVE 6.17/OpenZFS), setting a user
         // property on a mounted encrypted dataset clears ZFS's internal
         // mounted-state tracking without actually unmounting the filesystem.
         // Re-mounting is a no-op if already properly tracked, and safely
         // re-establishes tracking if it was cleared.
-        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($fsname)));
+        $mountOk = self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($fsname)));
+        return $propOk && $mountOk;
     }
 
     /**
@@ -2341,10 +2356,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (in_array($mountpoint, ['-', 'none', 'legacy', '/'])) {
             return;
         }
-        // Skip if an mntent entry already exists for this dataset.
+        // Update or skip if an mntent entry already exists for this dataset.
         $entries = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
         foreach ($entries as $entry) {
             if (isset($entry['fsname']) && $entry['fsname'] === $fsname) {
+                if ($entry['dir'] !== $mountpoint) {
+                    $db = \OMV\Config\Database::getInstance();
+                    $config = $db->get('conf.system.filesystem.mountpoint', $entry['uuid']);
+                    $config->set('dir', $mountpoint);
+                    $db->set($config, true);
+                }
                 self::setMntentProperty($entry['uuid'], $fsname);
                 return;
             }
@@ -2379,13 +2400,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Build list of mountable ZFS datasets from the system.
         $current = [];
         try {
-            self::zfsExec('zfs list -H -o name,mountpoint', $out, $res);
+            self::zfsExec('zfs list -H -p -o name,mountpoint', $out, $res);
             foreach ($out as $line) {
                 $line = trim($line);
                 if ($line === '') {
                     continue;
                 }
-                $parts = preg_split('/\s+/', $line, 2);
+                $parts = explode("\t", $line, 2);
                 if (count($parts) !== 2) {
                     continue;
                 }

@@ -915,18 +915,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     escapeshellarg($property['property']),
                     escapeshellarg($property['value']),
                     escapeshellarg($params['name']));
+                self::zfsExec($cmd, $out, $res);
             } else {
                 $cmd = sprintf('zfs set %s=%s %s 2>&1',
                     escapeshellarg($property['property']),
                     escapeshellarg($property['value']),
                     escapeshellarg($params['name']));
+                self::zfsExec($cmd, $out, $res);
                 if ($property['property'] === 'mountpoint') {
                     self::relocateOMVMntEnt($context, $params['name']);
                     \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
                         'org.openmediavault.conf.system.sharedfolder', $context);
                 }
             }
-            self::zfsExec($cmd, $out, $res);
         }
         if ($params['type'] === 'Filesystem') {
             \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
@@ -2272,8 +2273,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $mountpoint = $parts[2] ?? '';
             $object     = \OMV\Rpc\Rpc::call('FsTab', 'getByFsName', ['fsname' => $child], $context);
             if ($object) {
-                $object['dir'] = $mountpoint;
-                $config        = $db->get('conf.system.filesystem.mountpoint', $object['uuid']);
+                $config = $db->get('conf.system.filesystem.mountpoint', $object['uuid']);
+                $config->set('dir', $mountpoint);
                 $db->set($config, true);
             }
         }

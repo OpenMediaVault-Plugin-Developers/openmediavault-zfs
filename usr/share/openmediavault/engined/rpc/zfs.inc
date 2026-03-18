@@ -427,6 +427,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::buildVdevString($params['pooltype'], $disks));
         if ($encrypt) {
             self::execWithStdin($cmd, $params['key']);
+            // zpool create may not auto-mount the encrypted root dataset when
+            // run from a daemon process; mount it explicitly so that child
+            // datasets created immediately afterwards are also mounted.
+            self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($params['name'])));
         } else {
             self::zfsExec($cmd, $out, $res);
         }
@@ -678,6 +682,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 }
                 $cmd = sprintf('zfs create -p%s %s 2>&1', $propOpts, escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
+                // Encrypted parent pools may not auto-mount new child datasets
+                // when zfs create is called from a daemon process; mount
+                // explicitly.  This is a no-op if the dataset is already mounted.
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($name)));
                 if (strlen($params['mountpoint']) > 0) {
                     foreach (['mountpoint' => $params['mountpoint'], 'atime' => 'off',
                               'acltype' => 'posix', 'xattr' => 'sa'] as $k => $v) {
@@ -689,6 +697,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
                     'org.openmediavault.storage.zfs.filesystem', $context);
                 self::addOMVMntEntForDataset($context, $name);
+                // Re-mount after addOMVMntEntForDataset: setting omvzfsplugin:uuid on a
+                // mounted encrypted dataset can clear ZFS's mounted-state tracking on
+                // some kernel versions.  This call is a no-op if already mounted.
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($name)));
                 break;
             case 'snapshot':
                 $name      = $params['path'] . '@' . $params['name'];
@@ -1432,6 +1444,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = sprintf('zfs create %s %s 2>&1', $encryptOpts, escapeshellarg($fullPath));
         self::execWithStdin($cmd, $params['key']);
+        // zfs create for an encrypted dataset may not auto-mount when run from
+        // a daemon process; mount explicitly so the dataset is immediately usable.
+        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($fullPath)));
         // Enable auto-unlock if requested: save keyfile and update keylocation.
         if (!empty($params['autounlock'])) {
             $keyfile = self::getKeyfilePath($fullPath);
@@ -1447,6 +1462,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::updateZfsListCache(explode('/', $fullPath)[0]);
         }
         self::addOMVMntEntForDataset($context, $fullPath);
+        // Re-mount after addOMVMntEntForDataset: setting omvzfsplugin:uuid on a
+        // mounted encrypted dataset can clear ZFS's mounted-state tracking on
+        // some kernel versions.  This call is a no-op if already mounted.
+        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($fullPath)));
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         $status = self::zfsGetEncryptionStatus($fullPath);
         return self::flattenEncryptionStatus($fullPath, $status);
@@ -1472,15 +1491,21 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = 'zfs load-key ' . escapeshellarg($params['name']);
         self::execWithStdin($cmd, $params['key']);
-        // Mount the encryption root and all hierarchical children that inherit
-        // this key.  Using -R on the encryption root (not the pool root) avoids
-        // an "already mounted" failure for the pool root dataset that would cause
-        // zfsTryExec to return before any children are attempted.
-        // Note: OpenZFS uses -R (uppercase) for recursive mount; -r is invalid.
-        self::zfsTryExec(sprintf('zfs mount -R %s 2>&1', escapeshellarg($params['name'])));
-        // Also mount sibling clones: datasets that share this encryptionroot but
-        // live outside the encryption root's subtree (e.g. a clone that has not
-        // been promoted sits at a different path in the pool hierarchy).
+        // Mount every dataset that shares this encryption root.  We scan the
+        // pool and mount each dataset individually rather than using
+        // 'zfs mount -R' because -R recurses into sub-encryption-roots whose
+        // keys are unavailable, making the command exit non-zero and leaving
+        // ALL datasets unmounted (the error is swallowed by zfsTryExec).
+        // Individual mounts cover both hierarchical children (which inherit
+        // this key) and sibling clones (which share the encryptionroot but
+        // live at a different path in the pool hierarchy).
+        // Register the OMV mntent entry BEFORE mounting.  Setting the ZFS
+        // user property omvzfsplugin:uuid on a mounted encrypted dataset can
+        // clear ZFS's internal mounted-state tracking on some kernel versions,
+        // leaving the dataset unreachable until explicitly re-mounted.  By
+        // updating the entry while the dataset is still unmounted (key loaded,
+        // not yet mounted) we avoid triggering that condition.
+        self::addOMVMntEntForDataset($context, $params['name']);
         $poolName = explode('/', $params['name'])[0];
         if (self::zfsTryExec(
             sprintf('zfs get -H -r -t filesystem,volume -o name,value encryptionroot %s 2>/dev/null',
@@ -1492,15 +1517,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 if (count($parts) !== 2 || $parts[1] !== $params['name']) {
                     continue;
                 }
-                $ds = $parts[0];
-                // Skip datasets already covered by the -r mount above.
-                if ($ds === $params['name'] || strpos($ds, $params['name'] . '/') === 0) {
-                    continue;
-                }
-                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($parts[0])));
             }
         }
-        self::addOMVMntEntForDataset($context, $params['name']);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         return ['status' => 'loaded'];
     }
@@ -1546,6 +1565,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         if (empty($toUnmount)) {
             $toUnmount[] = $params['name'];
         }
+        // Unmount deepest paths first so that child datasets are always
+        // unmounted before their parents.  ZFS refuses to unmount a parent
+        // while a mounted child is still present; reversing the list
+        // (which is in hierarchical/alphabetical order from zfs get -r)
+        // guarantees children come first.
+        rsort($toUnmount);
         // Force-unmount each affected dataset; collect mountpoints for the lazy
         // umount fallback (needed when a process holds open file handles).
         $mountpoints = [];
@@ -2062,6 +2087,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $cmd = sprintf('zfs set omvzfsplugin:uuid=%s %s 2>&1',
             escapeshellarg($uuid), escapeshellarg($fsname));
         self::zfsTryExec($cmd);
+        // On some kernel versions (e.g. PVE 6.17/OpenZFS), setting a user
+        // property on a mounted encrypted dataset clears ZFS's internal
+        // mounted-state tracking without actually unmounting the filesystem.
+        // Re-mounting is a no-op if already properly tracked, and safely
+        // re-establishes tracking if it was cleared.
+        self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($fsname)));
     }
 
     /**

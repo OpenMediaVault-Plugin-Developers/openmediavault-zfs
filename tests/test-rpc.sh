@@ -1454,16 +1454,25 @@ fi
 
 AU_MP=$(zfs get -H -o value mountpoint "$AU_DS" 2>/dev/null || echo "")
 if [ -n "$AU_MP" ] && [ "$AU_MP" != "none" ] && [ "$AU_MP" != "-" ] && mountpoint -q "$AU_MP" 2>/dev/null; then
-    _pass "enableEncryption — $AU_DS is mounted at $AU_MP"
+    _pass "enableEncryption — $AU_DS is mounted at $AU_MP (CASE 2 regression)"
 else
-    # Try to mount it; enableEncryption should have done this but be tolerant.
-    zfs mount "$AU_DS" 2>/dev/null || true
-    AU_MP=$(zfs get -H -o value mountpoint "$AU_DS" 2>/dev/null || echo "")
-    if mountpoint -q "$AU_MP" 2>/dev/null; then
-        _pass "enableEncryption — $AU_DS mounted (needed explicit mount)"
-    else
-        _fail "enableEncryption — $AU_DS not mounted" ""
-    fi
+    _fail "enableEncryption — $AU_DS not mounted after RPC (CASE 2 regression)" \
+          "enableEncryption must mount the new dataset; got mounted=$(zfs get -H -o value mounted "$AU_DS" 2>/dev/null)"
+fi
+
+# --- CASE 2 regression: addObject child filesystem on encrypted parent -------
+# Creating a filesystem whose parent is an encrypted dataset must also result
+# in the new dataset being mounted immediately, not just created.
+AU_CHILD="$POOL/au_test/subfs"
+assert_rpc "addObject — filesystem child of encrypted dataset (CASE 2)" \
+    "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL/au_test\",\"name\":\"subfs\",\"mountpoint\":\"\",\"compression\":\"\",\"recordsize\":\"\"}"
+AU_CHILD_MOUNTED=$(zfs get -H -o value mounted "$AU_CHILD" 2>/dev/null || echo "no")
+if [ "$AU_CHILD_MOUNTED" = "yes" ]; then
+    _pass "addObject — child of encrypted dataset mounted (CASE 2 regression)"
+else
+    _fail "addObject — child of encrypted dataset not mounted (CASE 2 regression)" \
+          "Expected mounted=yes after addObject, got: $AU_CHILD_MOUNTED"
 fi
 
 # Verify getEncryptionStatus reports autounlock=true and keystatus=available.
@@ -1565,6 +1574,14 @@ if [ "$AU_KEYSTATUS3" = "available" ]; then
 else
     _fail "loadEncryptionKey — keystatus should be available, got: $AU_KEYSTATUS3" ""
 fi
+# The dataset must also be mounted, not just unlocked (CASE 1 regression).
+AU_MOUNTED3=$(zfs get -H -o value mounted "$AU_DS" 2>/dev/null || echo "no")
+if [ "$AU_MOUNTED3" = "yes" ]; then
+    _pass "loadEncryptionKey — $AU_DS is mounted after unlock (CASE 1 regression)"
+else
+    _fail "loadEncryptionKey — $AU_DS not mounted after unlock (CASE 1 regression)" \
+          "keystatus=$AU_KEYSTATUS3 but mounted=$AU_MOUNTED3"
+fi
 
 # ---- Cleanup ---------------------------------------------------------------
 info "Cleaning up $AU_DS"
@@ -1578,6 +1595,195 @@ unset AU_DS AU_PASS AU_ENC_PARAMS AU_MP
 unset AU_STATUS AU_STATUS2 AU_AUTOUNLOCK AU_AUTOUNLOCK2
 unset AU_KEYSTATUS AU_KEYSTATUS2 AU_KEYSTATUS3 AU_KEYLOC2
 unset AU_LOAD_PARAMS AU_KEYFILE
+
+# ===========================================================================
+section "Encryption — loadEncryptionKey with sub-encryption-root in hierarchy (CASE 1)"
+# ===========================================================================
+# Regression test for the bug where zfs mount -R failed when the hierarchy
+# contained a child dataset that is its own encryption root (unavailable key).
+# The failure caused ALL datasets — including those that could be mounted — to
+# remain unmounted, because zfsTryExec swallowed the error and the sibling loop
+# skipped all children assuming -R had handled them.
+#
+# Layout:
+#   $POOL/enc_hier          — encroot=self (PASS1)
+#   $POOL/enc_hier/inherit  — inherits enc_hier key (should mount with enc_hier)
+#   $POOL/enc_hier/sub_enc  — own encroot (PASS2, different key, stays locked)
+
+EH_DS="$POOL/enc_hier"
+EH_CHILD="$POOL/enc_hier/inherit"
+EH_SUB="$POOL/enc_hier/sub_enc"
+EH_PASS1="HierPass111!"
+EH_PASS2="SubEncPass222!"
+
+info "Creating $EH_DS (own encroot, pass1)"
+if zfs create \
+        -o encryption=aes-256-gcm \
+        -o keyformat=passphrase \
+        -o keylocation=prompt \
+        -o canmount=noauto \
+        "$EH_DS" <<< "$EH_PASS1" 2>/dev/null; then
+    _pass "enc_hier — $EH_DS created"
+    zfs mount "$EH_DS" 2>/dev/null || true
+else
+    _fail "enc_hier — $EH_DS creation failed (skipping section)" ""
+    EH_DS=""
+fi
+
+if [ -n "$EH_DS" ]; then
+    info "Creating $EH_CHILD (inherits enc_hier key)"
+    if zfs create -o canmount=noauto "$EH_CHILD" 2>/dev/null; then
+        _pass "enc_hier — $EH_CHILD created"
+        zfs mount "$EH_CHILD" 2>/dev/null || true
+    else
+        _fail "enc_hier — $EH_CHILD creation failed" ""
+    fi
+
+    info "Creating $EH_SUB (own encroot, pass2 — different key)"
+    if zfs create \
+            -o encryption=aes-256-gcm \
+            -o keyformat=passphrase \
+            -o keylocation=prompt \
+            -o canmount=noauto \
+            "$EH_SUB" <<< "$EH_PASS2" 2>/dev/null; then
+        _pass "enc_hier — $EH_SUB created (separate encroot)"
+    else
+        _fail "enc_hier — $EH_SUB creation failed" ""
+    fi
+
+    # Lock enc_hier (and its inherit child).  sub_enc has its own key — also
+    # unload that so both enc roots start unavailable.
+    zfs unmount "$EH_CHILD" 2>/dev/null || true
+    zfs unmount "$EH_DS"    2>/dev/null || true
+    zfs unmount "$EH_SUB"   2>/dev/null || true
+    zfs unload-key "$EH_SUB" 2>/dev/null || true
+    zfs unload-key "$EH_DS"  2>/dev/null || true
+
+    EH_KS=$(zfs get -H -o value keystatus "$EH_DS" 2>/dev/null || echo "unknown")
+    if [ "$EH_KS" = "unavailable" ]; then
+        _pass "enc_hier — $EH_DS locked (pre-condition)"
+    else
+        _fail "enc_hier — expected $EH_DS locked, got keystatus=$EH_KS" ""
+    fi
+
+    # Call loadEncryptionKey for enc_hier only (not sub_enc).
+    EH_LOAD_PARAMS=$(python3 -c "import json; print(json.dumps({'name': '$EH_DS', 'key': '$EH_PASS1'}))")
+    assert_rpc "loadEncryptionKey — enc_hier (hierarchy with sub-encroot, CASE 1)" \
+        "Zfs" "loadEncryptionKey" "$EH_LOAD_PARAMS" "loaded"
+
+    # enc_hier and its inherit child must be mounted.
+    EH_MOUNTED=$(zfs get -H -o value mounted "$EH_DS" 2>/dev/null || echo "no")
+    if [ "$EH_MOUNTED" = "yes" ]; then
+        _pass "loadEncryptionKey — enc_hier root mounted after unlock (CASE 1 regression)"
+    else
+        _fail "loadEncryptionKey — enc_hier root NOT mounted (CASE 1 regression)" \
+              "zfs mount -R failed silently on sub-encroot; expected mounted=yes"
+    fi
+
+    EH_CHILD_MOUNTED=$(zfs get -H -o value mounted "$EH_CHILD" 2>/dev/null || echo "no")
+    if [ "$EH_CHILD_MOUNTED" = "yes" ]; then
+        _pass "loadEncryptionKey — enc_hier/inherit mounted after unlock (CASE 1 regression)"
+    else
+        _fail "loadEncryptionKey — enc_hier/inherit NOT mounted (CASE 1 regression)" \
+              "child inheriting key should be mounted; got mounted=$EH_CHILD_MOUNTED"
+    fi
+
+    # sub_enc must remain unmounted — its key was not loaded.
+    EH_SUB_MOUNTED=$(zfs get -H -o value mounted "$EH_SUB" 2>/dev/null || echo "no")
+    if [ "$EH_SUB_MOUNTED" = "no" ]; then
+        _pass "loadEncryptionKey — enc_hier/sub_enc correctly NOT mounted (own key not loaded)"
+    else
+        _fail "loadEncryptionKey — enc_hier/sub_enc should not be mounted (own key not loaded)" \
+              "got mounted=$EH_SUB_MOUNTED"
+    fi
+
+    # Cleanup
+    zfs unload-key -r "$EH_DS" 2>/dev/null || true
+    zfs unload-key    "$EH_SUB" 2>/dev/null || true
+    zfs destroy -rf "$EH_DS" 2>/dev/null || true
+fi
+unset EH_DS EH_CHILD EH_SUB EH_PASS1 EH_PASS2 EH_LOAD_PARAMS
+unset EH_KS EH_MOUNTED EH_CHILD_MOUNTED EH_SUB_MOUNTED
+
+# ===========================================================================
+section "Encryption — addPool with encryption (CASE 2)"
+# ===========================================================================
+# Regression test: after zpool create with encryption, the pool root dataset
+# and subsequently-created child filesystems must be mounted immediately.
+# Uses a sparse file as the vdev so no extra block device is required.
+
+ENC_POOL="omvzfstestenc$$"
+ENC_POOL_PASS="EncPoolPass333!"
+ENC_POOL_FILE=$(mktemp)
+ENC_POOL_CHILD="${ENC_POOL}/docs"
+truncate -s 256M "$ENC_POOL_FILE"
+# The addPool schema validates devices with "format": "devicefile", so a plain
+# file path is rejected.  Attach a loop device to get a real /dev/loopN path.
+ENC_POOL_VDEV=$(losetup -f --show "$ENC_POOL_FILE" 2>/dev/null || echo "")
+
+if [ -z "$ENC_POOL_VDEV" ]; then
+    _fail "addPool (CASE 2) — could not set up loop device (skipping encrypted pool test)" ""
+else
+ENC_POOL_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'pooltype':     'basic',
+    'force':        True,
+    'mountpoint':   '',
+    'name':         '$ENC_POOL',
+    'devices':      ['$ENC_POOL_VDEV'],
+    'devalias':     'dev',
+    'ashift':       False,
+    'ashiftval':    0,
+    'compress':     False,
+    'compresstype': 'lz4',
+    'encrypt':      True,
+    'encryptiontype': 'aes-256-gcm',
+    'key':          '$ENC_POOL_PASS',
+    'autounlock':   False,
+}))
+")
+if omv-rpc -u admin "Zfs" "addPool" "$ENC_POOL_PARAMS" >/dev/null 2>&1; then
+    _pass "addPool — encrypted pool $ENC_POOL created (CASE 2)"
+
+    # Pool root must be mounted immediately after creation.
+    ENC_POOL_MOUNTED=$(zfs get -H -o value mounted "$ENC_POOL" 2>/dev/null || echo "no")
+    if [ "$ENC_POOL_MOUNTED" = "yes" ]; then
+        _pass "addPool — encrypted pool root $ENC_POOL mounted after create (CASE 2 regression)"
+    else
+        _fail "addPool — encrypted pool root $ENC_POOL NOT mounted after create (CASE 2 regression)" \
+              "got mounted=$ENC_POOL_MOUNTED"
+    fi
+
+    # Create a child filesystem via addObject; it must also be mounted.
+    if omv-rpc -u admin "Zfs" "addObject" \
+            "{\"type\":\"filesystem\",\"path\":\"$ENC_POOL\",\"name\":\"docs\",\"mountpoint\":\"\",\"compression\":\"\",\"recordsize\":\"\"}" \
+            >/dev/null 2>&1; then
+        _pass "addObject — child filesystem $ENC_POOL_CHILD created on encrypted pool (CASE 2)"
+
+        ENC_CHILD_MOUNTED=$(zfs get -H -o value mounted "$ENC_POOL_CHILD" 2>/dev/null || echo "no")
+        if [ "$ENC_CHILD_MOUNTED" = "yes" ]; then
+            _pass "addObject — $ENC_POOL_CHILD mounted on encrypted pool (CASE 2 regression)"
+        else
+            _fail "addObject — $ENC_POOL_CHILD NOT mounted on encrypted pool (CASE 2 regression)" \
+                  "got mounted=$ENC_CHILD_MOUNTED"
+        fi
+    else
+        _fail "addObject — child filesystem creation on encrypted pool failed" ""
+    fi
+
+    # Cleanup
+    zpool destroy -f "$ENC_POOL" 2>/dev/null || true
+    omv-rpc -u admin "Zfs" "doDiscover" \
+        '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+else
+    _fail "addPool — encrypted pool $ENC_POOL creation failed (CASE 2)" ""
+fi
+losetup -d "$ENC_POOL_VDEV" 2>/dev/null || true
+fi  # end loop-device guard
+rm -f "$ENC_POOL_FILE"
+unset ENC_POOL ENC_POOL_PASS ENC_POOL_FILE ENC_POOL_VDEV ENC_POOL_CHILD ENC_POOL_PARAMS
+unset ENC_POOL_MOUNTED ENC_CHILD_MOUNTED
 
 # ===========================================================================
 section "Export and import"

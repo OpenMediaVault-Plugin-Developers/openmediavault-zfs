@@ -16,20 +16,8 @@ case "$1" in
             omv-confdbadm migrate "conf.service.zfs" "${2}"
         fi
 
-        # add zfs-zed notfication
-        xpath="/config/system/notification/notifications"
-        if ! omv_config_exists "${xpath}/notification[id='zfs']"; then
-            object="<uuid>$(omv_uuid)</uuid>"
-            object="${object}<id>zfs</id>"
-            object="${object}<enable>0</enable>"
-            omv_config_add_node_data "${xpath}" "notification" "${object}"
-        fi
-        omv-salt deploy run --no-color --quiet zfszed zfscron || :
-        omv_module_set_dirty zfs
-
-        # load zfs kernel module
-        modprobe --quiet zfs || :
-        echo "zfs" > /etc/modules-load.d/zfs.conf
+        # run saltstack
+        omv-salt deploy run --no-color --quiet zfs zfszed zfscron || :
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

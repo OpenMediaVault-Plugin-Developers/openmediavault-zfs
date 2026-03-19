@@ -49,6 +49,7 @@
   {% set provider_remove = provider_pve %}
 {% endif %}
 
+{% if not salt['environ.get']('DPKG_MAINTSCRIPT_PACKAGE', '') %}
 zfs_provider_install_selected:
   pkg.installed:
     - name: {{ provider_wanted }}
@@ -127,3 +128,19 @@ zfs_provider_arm64_missing_headers:
         Install the matching Armbian headers for this kernel, then click Apply again.
 {% endif %}
 {% endif %}
+{% endif %}
+
+zfs_modules_load_conf:
+  file.managed:
+    - name: /etc/modules-load.d/zfs.conf
+    - contents: "zfs\n"
+    - mode: '0644'
+    - user: root
+    - group: root
+
+zfs_kmod_load:
+  cmd.run:
+    - name: modprobe --quiet zfs
+    - unless: lsmod | grep -q '^zfs '
+    - require:
+      - file: zfs_modules_load_conf

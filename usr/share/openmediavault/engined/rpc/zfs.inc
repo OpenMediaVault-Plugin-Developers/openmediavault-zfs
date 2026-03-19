@@ -829,6 +829,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Sync OMV mount entries and mark config modules dirty.
         self::fixOMVMntEnt($context);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
+        // Keep zfs-list.cache consistent so zfs-mount-generator doesn't
+        // generate stale systemd units for destroyed datasets/pools.
+        if ($params['type'] === 'Pool') {
+            @unlink('/etc/zfs/zfs-list.cache/' . $name);
+        } elseif ($params['type'] === 'Filesystem') {
+            self::updateZfsListCache(explode('/', $name)[0]);
+        }
     }
 
     public function deleteObjectBg($params, $context)

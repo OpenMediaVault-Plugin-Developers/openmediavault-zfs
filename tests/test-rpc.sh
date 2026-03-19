@@ -1891,6 +1891,76 @@ unset SD_DS SD_PASS SD_NEW_MP SD_ENC_PARAMS SD_ORIG_MP
 unset SD_OMV_DIR SD_OMV_DIR2 SD_LOAD_PARAMS
 
 # ===========================================================================
+section "Filesystem deletion — zfs-list.cache and systemd unit cleanup"
+# ===========================================================================
+# Verifies that deleteObject:
+#   1. Removes the deleted dataset from /etc/zfs/zfs-list.cache/<pool>
+#   2. Stops and clears the zfs-load-key@ service for the dataset
+#
+# Uses an encrypted auto-unlock dataset so the cache has a keylocation=file://
+# entry and zfs-mount-generator generates the corresponding service unit.
+
+ZLC_CACHE="/etc/zfs/zfs-list.cache/$POOL"
+ZLC_DS="$POOL/zlc_test"
+ZLC_PASS="ZlcTestPass321!"
+
+info "Creating encrypted dataset $ZLC_DS with auto-unlock"
+ZLC_ENC_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'path':           '$POOL',
+    'name':           'zlc_test',
+    'encryptiontype': 'aes-256-gcm',
+    'key':            '$ZLC_PASS',
+    'autounlock':     True,
+}))
+")
+if omv-rpc -u admin "Zfs" "enableEncryption" "$ZLC_ENC_PARAMS" >/dev/null 2>&1; then
+    _pass "zlc_test — encrypted dataset created with auto-unlock"
+else
+    _fail "zlc_test — encrypted dataset creation failed" ""
+fi
+
+if [ -f "$ZLC_CACHE" ] && grep -q "^${ZLC_DS}	" "$ZLC_CACHE"; then
+    _pass "zfs-list.cache — $ZLC_DS present in cache after creation"
+else
+    _fail "zfs-list.cache — $ZLC_DS not found in cache after creation" \
+        "$(head -5 "$ZLC_CACHE" 2>/dev/null)"
+fi
+
+# Reload so zfs-mount-generator picks up the new cache entry and generates
+# the zfs-load-key@ unit, giving deleteObject something concrete to stop.
+systemctl daemon-reload 2>/dev/null || true
+
+ZLC_INSTANCE=$(systemd-escape -p "$ZLC_DS" 2>/dev/null || echo "")
+ZLC_UNIT="zfs-load-key@${ZLC_INSTANCE}.service"
+
+assert_rpc "deleteObject — zlc_test (encrypted with auto-unlock)" \
+    "Zfs" "deleteObject" \
+    "{\"name\":\"$ZLC_DS\",\"mp\":\"/$ZLC_DS\",\"type\":\"Filesystem\"}"
+
+if [ ! -f "$ZLC_CACHE" ] || ! grep -q "^${ZLC_DS}	" "$ZLC_CACHE"; then
+    _pass "zfs-list.cache — $ZLC_DS removed from cache after deleteObject"
+else
+    _fail "zfs-list.cache — $ZLC_DS still present in cache after deleteObject" ""
+fi
+
+if [ -n "$ZLC_INSTANCE" ]; then
+    ZLC_SVC_STATE=$(systemctl is-active "$ZLC_UNIT" 2>/dev/null || echo "inactive")
+    if [ "$ZLC_SVC_STATE" != "active" ]; then
+        _pass "systemd — $ZLC_UNIT not active after deleteObject ($ZLC_SVC_STATE)"
+    else
+        _fail "systemd — $ZLC_UNIT still active after deleteObject" \
+            "expected inactive/dead, got: $ZLC_SVC_STATE"
+    fi
+else
+    info "skipping service state check — systemd-escape produced no output"
+fi
+
+zfs destroy -rf "$ZLC_DS" 2>/dev/null || true
+unset ZLC_DS ZLC_PASS ZLC_ENC_PARAMS ZLC_CACHE ZLC_INSTANCE ZLC_UNIT ZLC_SVC_STATE
+
+# ===========================================================================
 section "Export and import"
 # ===========================================================================
 
@@ -1898,6 +1968,12 @@ section "Export and import"
 info "Removing child datasets before export test"
 assert_rpc "deleteObject — fs1/child" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1/child\",\"mp\":\"/$POOL/fs1/child\",\"type\":\"Filesystem\"}"
+
+if ! grep -q "^${POOL}/fs1/child	" "/etc/zfs/zfs-list.cache/$POOL" 2>/dev/null; then
+    _pass "zfs-list.cache — fs1/child removed from cache after deleteObject"
+else
+    _fail "zfs-list.cache — fs1/child still present in cache after deleteObject" ""
+fi
 
 # The scheduled snapshot job test may have created snapshots on fs1; remove them.
 info "Removing any auto-created snapshots on fs1"
@@ -1907,8 +1983,21 @@ done
 
 assert_rpc "deleteObject — fs1" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs1\",\"mp\":\"/$POOL/fs1\",\"type\":\"Filesystem\"}"
+
+if ! grep -q "^${POOL}/fs1	" "/etc/zfs/zfs-list.cache/$POOL" 2>/dev/null; then
+    _pass "zfs-list.cache — fs1 removed from cache after deleteObject"
+else
+    _fail "zfs-list.cache — fs1 still present in cache after deleteObject" ""
+fi
+
 assert_rpc "deleteObject — fs2" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/fs2\",\"mp\":\"/${POOL}_fs2\",\"type\":\"Filesystem\"}"
+
+if ! grep -q "^${POOL}/fs2	" "/etc/zfs/zfs-list.cache/$POOL" 2>/dev/null; then
+    _pass "zfs-list.cache — fs2 removed from cache after deleteObject"
+else
+    _fail "zfs-list.cache — fs2 still present in cache after deleteObject" ""
+fi
 
 assert_rpc "exportPool" "Zfs" "exportPool" "{\"name\":\"$POOL\"}"
 
@@ -1947,6 +2036,12 @@ if ! zpool list "$POOL" &>/dev/null; then
     _pass "Pool $POOL destroyed"
 else
     _fail "Pool $POOL still exists after deleteObjectBg" ""
+fi
+
+if [ ! -f "/etc/zfs/zfs-list.cache/$POOL" ]; then
+    _pass "zfs-list.cache — cache file removed after pool deletion"
+else
+    _fail "zfs-list.cache — cache file still present after pool deletion" ""
 fi
 
 # ===========================================================================

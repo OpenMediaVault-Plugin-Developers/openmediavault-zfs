@@ -835,7 +835,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             @unlink('/etc/zfs/zfs-list.cache/' . $name);
         } elseif ($params['type'] === 'Filesystem') {
             self::updateZfsListCache(explode('/', $name)[0]);
+            // Stop the zfs-load-key@ unit for the deleted dataset so it doesn't
+            // linger in the current systemd session.
+            $instanceOut = [];
+            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
+            $instance = trim(implode('', $instanceOut));
+            if ($instance !== '') {
+                self::zfsTryExec(sprintf('systemctl stop %s 2>/dev/null',
+                    escapeshellarg('zfs-load-key@' . $instance . '.service')));
+            }
         }
+        // Reload systemd so zfs-mount-generator re-runs and drops generated
+        // unit files for the deleted dataset/pool from /run/systemd/generator/.
+        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
     }
 
     public function deleteObjectBg($params, $context)

@@ -6,27 +6,32 @@ set -e
 . /usr/share/openmediavault/scripts/helper-functions
 
 case "$1" in
-    configure)
-        # Activate package triggers
-        dpkg-trigger update-workbench
+  configure)
+    # Activate package triggers
+    dpkg-trigger update-workbench
 
-        # Initialize configuration database.
-        omv-confdbadm create "conf.service.zfs"
-        if [ -n "$2" ]; then
-            omv-confdbadm migrate "conf.service.zfs" "${2}"
-        fi
+    # Initialize configuration database.
+    omv-confdbadm create "conf.service.zfs"
+    if [ -n "$2" ]; then
+      omv-confdbadm migrate "conf.service.zfs" "${2}"
+    fi
 
-        # run saltstack
-        omv-salt deploy run --no-color --quiet zfs zfszed zfscron || :
-    ;;
+    # run saltstack
+    omv-salt deploy run --no-color --quiet zfs zfszed zfscron || :
 
-    abort-upgrade|abort-remove|abort-deconfigure)
-    ;;
+    # Mark zfs module dirty if the zfs kernel module is not loaded
+    if ! lsmod | grep -q "^zfs "; then
+      omv_module_set_dirty zfs
+    fi
+  ;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+  abort-upgrade|abort-remove|abort-deconfigure)
+  ;;
+
+  *)
+    echo "postinst called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
 esac
 
 #DEBHELPER#

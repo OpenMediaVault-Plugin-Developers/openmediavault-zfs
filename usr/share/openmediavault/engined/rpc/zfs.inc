@@ -1505,33 +1505,115 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Lexical sort is sufficient for parent-before-child ordering: a parent
         // path is always a prefix of its children, so it sorts first.
         sort($toMount);
-        // Mount each dataset and verify it actually came up.
+        // Before mounting, ensure the systemd zfs-load-key@ service unit for
+        // each dataset is in the 'active' state.  The systemd zfs-mount-generator
+        // creates a .mount unit for every ZFS dataset with BindsTo pointing at
+        // the corresponding zfs-load-key@ service.  If that service is in the
+        // 'failed' state (as it will be after a reboot where no passphrase was
+        // entered), systemd detects the dataset appearing in /proc/mounts,
+        // activates the mount unit, then immediately deactivates it (~2ms) because
+        // its BindsTo dependency is failed — effectively unmounting the dataset
+        // right after zfs mount succeeds.
+        //
+        // The load-key service ExecStart checks keystatus and exits 0 immediately
+        // if the key is already loaded (not "unavailable"), and RemainAfterExit=yes
+        // keeps the service 'active' once it exits 0.  So:
+        //   1. systemctl reset-failed <unit>  — clears the failed state
+        //   2. systemctl start <unit>         — exits 0 immediately (key is loaded),
+        //                                       transitions service to 'active'
+        // With the service active, the BindsTo is satisfied and the mount unit
+        // stays up permanently.
+        foreach ($toMount as $ds) {
+            $instanceOut = [];
+            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($ds)), $instanceOut);
+            $instance = trim(implode('', $instanceOut));
+            if ($instance !== '') {
+                $loadKeyUnit = sprintf('zfs-load-key@%s.service', $instance);
+                self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
+                self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
+            }
+        }
+        // Mount first, register OMV entries after.  Calling
+        // addOMVMntEntForDataset (which writes the omvzfsplugin:uuid user
+        // property via zfs set) on an encrypted dataset before it is mounted
+        // triggers a ZFS kernel-module bug on OpenZFS 2.4.x-pve1: the property
+        // write puts the module's internal mount-state tracking into an
+        // inconsistent "already mounted" ghost state, causing the subsequent
+        // zfs mount to silently succeed while the dataset never appears in
+        // /proc/mounts.  Mounting first avoids the ghost state; the user
+        // property is written after the mounts are verified.  The property
+        // write may then clear ZFS's mounted tracking (zfs get mounted → "no"),
+        // but the dataset remains accessible and the UI shows the correct
+        // mounted status by checking /proc/mounts directly as a fallback.
+        //
+        // Verify every dataset is actually mounted by checking /proc/mounts
+        // directly.  zfs get mounted reads ZFS's internal tracking, which can
+        // be out of sync with the real kernel mount state (e.g. after a failed
+        // boot-time mount attempt left the tracking half-initialised).
+        // Read /proc/mounts fresh on each call so post-recovery state is correct.
+        $isProcMounted = static function (string $dataset): bool {
+            $lines  = @file('/proc/mounts', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+            $prefix = $dataset . ' ';
+            foreach ($lines as $line) {
+                if (strncmp($line, $prefix, strlen($prefix)) === 0) {
+                    return true;
+                }
+            }
+            return false;
+        };
         $mountErrors = [];
         foreach ($toMount as $ds) {
-            self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
-            $mounted = '';
-            if (self::zfsTryExec(
-                sprintf('zfs get -H -o value mounted %s 2>/dev/null', escapeshellarg($ds)),
-                $mountedOut
-            )) {
-                $mounted = trim($mountedOut[0] ?? '');
+            $mountOut = [];
+            self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)), $mountOut);
+            if ($isProcMounted($ds)) {
+                continue;
             }
-            if ($mounted !== 'yes') {
-                $mountErrors[] = $ds;
+            // Not in /proc/mounts.  If ZFS reports "already mounted" its
+            // internal tracking is stale — typically left by a failed
+            // boot-time mount attempt that partially initialised the tracking
+            // but never completed the OS-level mount.  Clear both the ZFS
+            // tracking and any ghost kernel state at the mountpoint, then retry.
+            if (stripos(implode(' ', $mountOut), 'already mounted') !== false) {
+                $mp = trim($props[$ds]['mountpoint'] ?? '');
+                // Force-unmount via ZFS first, then clean up any lingering
+                // kernel mount at the same path.
+                self::zfsTryExec(sprintf('zfs unmount -f %s 2>&1', escapeshellarg($ds)));
+                if ($mp !== '') {
+                    self::zfsTryExec(sprintf('umount -lf %s 2>/dev/null', escapeshellarg($mp)));
+                }
+                $mountOut = [];
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)), $mountOut);
+                if ($isProcMounted($ds)) {
+                    continue;
+                }
             }
+            $detail = trim(implode(' ', $mountOut));
+            $pool   = explode('/', $ds)[0];
+            $mountErrors[] = $detail !== ''
+                ? sprintf('%s: %s', $ds, $detail)
+                : sprintf(
+                    '%s: zfs mount reported success but the dataset is not mounted. '
+                    . 'The ZFS kernel module has stale mount state from the last reboot '
+                    . '(known OpenZFS 2.4.x-pve1 bug). '
+                    . 'To recover: run "zpool export -f %s && zpool import %s" '
+                    . 'in a shell, then load the key again.',
+                    $ds, $pool, $pool
+                );
         }
         if (!empty($mountErrors)) {
             throw new \OMV\Exception(
                 'Key loaded but failed to mount: %s',
-                implode(', ', $mountErrors)
+                implode('; ', $mountErrors)
             );
         }
-        // Update OMV mntent entries for all mounted datasets.  Done after
-        // mounting so that setMntentProperty's zfs set runs while the dataset
-        // is already up; setMntentProperty re-mounts afterward to recover from
-        // the kernel bug that clears mounted-state tracking on property writes.
+        // All datasets are mounted and verified via /proc/mounts.  Register OMV
+        // mntent entries but skip the omvzfsplugin:uuid property write.  On
+        // OpenZFS 2.4.x-pve1, writing any user property on a mounted encrypted
+        // dataset physically unmounts it, leaving it inaccessible.  The property
+        // is written by doDiscoverBg when the UUID is absent or mismatched; that
+        // path is safe because it runs asynchronously after this call returns.
         foreach ($toMount as $ds) {
-            self::addOMVMntEntForDataset($context, $ds);
+            self::addOMVMntEntForDataset($context, $ds, false);
         }
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
         return ['status' => 'loaded'];
@@ -1605,6 +1687,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = sprintf('zfs unload-key -r %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
+        // The datasets are now unmounted and the key is unavailable — safe to
+        // write omvzfsplugin:uuid.  On OpenZFS 2.4.x-pve1 this call is unsafe
+        // on mounted/key-loaded encrypted datasets (physically unmounts them),
+        // so we defer the write to here where the dataset is locked.
+        sort($toUnmount);
+        foreach ($toUnmount as $ds) {
+            self::addOMVMntEntForDataset($context, $ds);
+        }
         return ['status' => 'unloaded'];
     }
 
@@ -2345,7 +2435,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      * Add any missing ZFS datasets to the OMV fstab database and fix
      * shared folder UUID references when mntent UUIDs have changed.
      */
-    private static function addOMVMntEntForDataset($context, string $fsname): void
+    private static function addOMVMntEntForDataset($context, string $fsname, bool $setProperty = true): void
     {
         // Get the actual mountpoint from ZFS.
         $cmd = sprintf('zfs get -H -o value mountpoint %s 2>&1', escapeshellarg($fsname));
@@ -2366,7 +2456,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     $config->set('dir', $mountpoint);
                     $db->set($config, true);
                 }
-                self::setMntentProperty($entry['uuid'], $fsname);
+                if ($setProperty) {
+                    self::setMntentProperty($entry['uuid'], $fsname);
+                }
                 return;
             }
         }
@@ -2380,7 +2472,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             'freq'   => 0,
             'passno' => 0,
         ], $context);
-        self::setMntentProperty($uuid, $fsname);
+        if ($setProperty) {
+            self::setMntentProperty($uuid, $fsname);
+        }
     }
 
     private static function fixOMVMntEnt($context, bool $addMissing = true, bool $deleteStale = false): void
@@ -2466,8 +2560,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             if (!self::isPoolImported($pool)) {
                 continue;
             }
-            // Read mountpoint and stored UUID from the ZFS dataset in one call.
-            $cmd = sprintf('zfs get -H -p mountpoint,omvzfsplugin:uuid %s 2>&1',
+            // Read mountpoint, stored UUID, and keystatus from the ZFS dataset.
+            $cmd = sprintf('zfs get -H -p mountpoint,omvzfsplugin:uuid,keystatus %s 2>&1',
                 escapeshellarg($fsname));
             self::zfsExec($cmd, $o, $r);
             $props = [];
@@ -2490,10 +2584,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 // that point at the old UUID, then write the correct UUID to ZFS.
                 // We intentionally skip setMntentProperty when the UUID is already
                 // correct: every call triggers 'zfs set omvzfsplugin:uuid=...' which,
-                // on some kernel versions (e.g. PVE 6.17/OpenZFS), clears ZFS's
-                // internal mounted-state tracking for encrypted datasets.  Avoiding
-                // unnecessary writes eliminates that race for the common case where
-                // doDiscoverBg is just re-confirming existing entries.
+                // on some kernel versions (e.g. PVE 6.17/OpenZFS), physically unmounts
+                // a mounted encrypted dataset or puts an unmounted one into a ghost
+                // mount state.  We also skip it when the encryption key is loaded
+                // (keystatus=available) for the same reason — the write is only safe
+                // when the dataset is locked (keystatus=unavailable or not encrypted).
+                // The UUID is written by unloadEncryptionKey after locking, ensuring
+                // it is always current for the next pool import.
+                $keystatus = $props['keystatus']['value'] ?? '-';
                 if ($oldUuid) {
                     $matchingSfs = array_filter($sfObjects, function ($sf) use ($mountpoint) {
                         return isset($sf['mntent']['dir'])
@@ -2503,7 +2601,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                         self::fixOMVSharedFolders($oldUuid, $newUuid, array_values($matchingSfs), $context);
                     }
                 }
-                self::setMntentProperty($newUuid, $fsname);
+                if ($keystatus !== 'available') {
+                    self::setMntentProperty($newUuid, $fsname);
+                }
             }
         }
     }
@@ -2533,6 +2633,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 continue;
             }
             $encMap[$parts[0]][$parts[1]] = $parts[2];
+        }
+        // Build a set of ZFS dataset names that are actually mounted in the
+        // kernel via /proc/mounts.  On OpenZFS 2.4.x-pve1, writing a ZFS user
+        // property (omvzfsplugin:uuid) on a mounted encrypted dataset clears
+        // the module's internal mounted-state tracking, so zfs list reports
+        // mounted=no even though the dataset is fully accessible.  Using
+        // /proc/mounts as the authoritative source avoids this false display.
+        $procMountedSet = [];
+        foreach (@file('/proc/mounts', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $mline) {
+            $mparts = explode(' ', $mline);
+            if (count($mparts) >= 3 && $mparts[2] === 'zfs') {
+                $procMountedSet[$mparts[0]] = true;
+            }
         }
         // One zfs list call returns all the data we need for sizing/type/origin.
         $cmd = 'zfs list -H -p -t filesystem,volume '
@@ -2626,7 +2739,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'      => ($compression !== '-') ? $compression : 'off',
                     'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'            => ($refer !== '-') ? (int)$refer : 0,
-                    'mounted'          => (trim($mounted) === 'yes'),
+                    'mounted'          => (trim($mounted) === 'yes') || isset($procMountedSet[$path]),
                     'poolroot'         => true,
                 ];
             } elseif ($isFilesystem) {
@@ -2667,7 +2780,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'compression'      => ($compression !== '-') ? $compression : 'off',
                     'compressratio'    => ($compressratio !== '-') ? trim($compressratio) : '1.00x',
                     'refer'            => ($refer !== '-') ? (int)$refer : 0,
-                    'mounted'          => (trim($mounted) === 'yes'),
+                    'mounted'          => (trim($mounted) === 'yes') || isset($procMountedSet[$path]),
                     'poolroot'         => false,
                 ];
             } elseif ($isVolume) {

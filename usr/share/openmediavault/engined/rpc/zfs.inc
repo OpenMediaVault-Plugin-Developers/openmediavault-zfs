@@ -835,14 +835,28 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             @unlink('/etc/zfs/zfs-list.cache/' . $name);
         } elseif ($params['type'] === 'Filesystem') {
             self::updateZfsListCache(explode('/', $name)[0]);
-            // Stop the zfs-load-key@ unit for the deleted dataset so it doesn't
-            // linger in the current systemd session.
+            // Clean up encryption artifacts so stale keyfiles and remote-key metadata
+            // do not accumulate for deleted datasets and cause manageRemoteUnlockService()
+            // to incorrectly report that remote unlock is still active.
+            $keyfile = self::getKeyfilePath($name);
+            if (file_exists($keyfile)) {
+                @unlink($keyfile);
+            }
+            $metafile = self::getRemoteKeyMetaPath($name);
+            if (file_exists($metafile)) {
+                @unlink($metafile);
+                self::manageRemoteUnlockService();
+            }
+            // Unmask and stop the zfs-load-key@ unit for the deleted dataset.
+            // Without unmasking, a stale /dev/null symlink from removeAutoUnlock
+            // remains in /etc/systemd/system/ as an orphaned artifact.
             $instanceOut = [];
             exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
             $instance = trim(implode('', $instanceOut));
             if ($instance !== '') {
-                self::zfsTryExec(sprintf('systemctl stop %s 2>/dev/null',
-                    escapeshellarg('zfs-load-key@' . $instance . '.service')));
+                $loadKeyUnit = 'zfs-load-key@' . $instance . '.service';
+                self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
+                self::zfsTryExec(sprintf('systemctl stop %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
             }
         }
         // Reload systemd so zfs-mount-generator re-runs and drops generated
@@ -1542,12 +1556,26 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         //                                       transitions service to 'active'
         // With the service active, the BindsTo is satisfied and the mount unit
         // stays up permanently.
+        $maskedLoadKeyUnits = [];
         foreach ($toMount as $ds) {
             $instanceOut = [];
             exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($ds)), $instanceOut);
             $instance = trim(implode('', $instanceOut));
             if ($instance !== '') {
                 $loadKeyUnit = sprintf('zfs-load-key@%s.service', $instance);
+                // A masked load-key unit cannot start, which causes the associated
+                // .mount unit to fail its dependency check and fall into a failed
+                // state.  Child datasets whose .mount unit has Requires=parent.mount
+                // are then immediately unmounted by systemd right after zfs mount
+                // succeeds.  Temporarily unmask so the service can start (it exits 0
+                // immediately since the key is now loaded); we re-mask after all
+                // mounts are verified so the removeAutoUnlock setting is preserved.
+                $maskFile = '/etc/systemd/system/' . $loadKeyUnit;
+                if (is_link($maskFile) && readlink($maskFile) === '/dev/null') {
+                    self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
+                        escapeshellarg($loadKeyUnit)));
+                    $maskedLoadKeyUnits[] = $loadKeyUnit;
+                }
                 self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
                 self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
             }
@@ -1624,6 +1652,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 'Key loaded but failed to mount: %s',
                 implode('; ', $mountErrors)
             );
+        }
+        // Re-mask load-key units that were temporarily unmasked above.  The service
+        // remains active (RemainAfterExit=yes) so the .mount BindsTo dependency stays
+        // satisfied; the mask only prevents the unit from auto-starting at next boot.
+        foreach ($maskedLoadKeyUnits as $unit) {
+            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null', escapeshellarg($unit)));
         }
         // All datasets are mounted and verified via /proc/mounts.  Register OMV
         // mntent entries but skip the omvzfsplugin:uuid property write.  On
@@ -1799,6 +1833,16 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 escapeshellarg('file://' . $keyfile), escapeshellarg($name)), $out, $res);
             self::manageRemoteUnlockService();
         }
+        // Unmask the zfs-load-key@ unit for this dataset in case it was masked
+        // by a prior removeAutoUnlock call, so auto-unlock takes effect at boot.
+        $instanceOut = [];
+        exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
+        $instance = trim(implode('', $instanceOut));
+        if ($instance !== '') {
+            self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
+                escapeshellarg('zfs-load-key@' . $instance . '.service')));
+        }
+        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => true];
     }
@@ -1821,6 +1865,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             unlink($metafile);
         }
         self::manageRemoteUnlockService();
+        // Mask the zfs-load-key@ unit for this dataset so it does not prompt
+        // for a passphrase at boot (causing a hang) now that auto-unlock is
+        // disabled.  systemctl mask creates a /dev/null symlink in
+        // /etc/systemd/system/ which takes precedence over the generator's
+        // output in /run/systemd/generator/ at next boot.
+        $instanceOut = [];
+        exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
+        $instance = trim(implode('', $instanceOut));
+        if ($instance !== '') {
+            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null',
+                escapeshellarg('zfs-load-key@' . $instance . '.service')));
+        }
+        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => false, 'keylocation' => 'prompt'];
     }
@@ -3153,15 +3210,42 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     }
 
     /**
-     * Enable/disable the zfs-remote-unlock systemd service depending on
-     * whether any remote-key metadata files currently exist.
+     * Enable/disable the zfs-remote-unlock systemd service and its ordering
+     * drop-in depending on whether any remote-key metadata files currently exist.
+     *
+     * The drop-in at /etc/systemd/system/zfs-load-key@.service.d/wait-for-remote-unlock.conf
+     * is managed dynamically so that zfs-load-key@ instances only pull in
+     * zfs-remote-unlock.service when remote unlock is actually configured.
+     * Without this, the drop-in would cause every zfs-load-key@ instance to
+     * Wants/After zfs-remote-unlock.service even after remote unlock is disabled,
+     * resulting in the service being invoked on every boot.
      */
     private static function manageRemoteUnlockService(): void
     {
-        $metaDir   = '/etc/zfs/remote-keys';
-        $hasRemote = is_dir($metaDir) && !empty(glob($metaDir . '/*.json'));
-        self::zfsTryExec('systemctl ' . ($hasRemote ? 'enable' : 'disable')
-            . ' --now zfs-remote-unlock.service 2>&1');
+        $metaDir    = '/etc/zfs/remote-keys';
+        $hasRemote  = is_dir($metaDir) && !empty(glob($metaDir . '/*.json'));
+        $dropinDir  = '/etc/systemd/system/zfs-load-key@.service.d';
+        $dropinFile = $dropinDir . '/wait-for-remote-unlock.conf';
+        if ($hasRemote) {
+            // Ensure the ordering drop-in exists so zfs-load-key@ instances
+            // wait for zfs-remote-unlock.service to load remote keys first.
+            // Use shell commands rather than PHP file functions: open_basedir
+            // restrictions in the OMV engined PHP context block direct access
+            // to /etc/systemd/system/, but subprocess commands are not affected.
+            self::zfsTryExec(sprintf('mkdir -p %s 2>/dev/null', escapeshellarg($dropinDir)));
+            self::zfsTryExec(sprintf(
+                'test -f %s || printf "%%s\n%%s\n%%s\n" "[Unit]" '
+                . '"After=zfs-remote-unlock.service" '
+                . '"Wants=zfs-remote-unlock.service" > %s 2>/dev/null',
+                escapeshellarg($dropinFile),
+                escapeshellarg($dropinFile)));
+            self::zfsTryExec('systemctl enable --now zfs-remote-unlock.service 2>&1');
+        } else {
+            // Remove the ordering drop-in so zfs-load-key@ instances no longer
+            // pull in zfs-remote-unlock.service when remote unlock is not configured.
+            self::zfsTryExec(sprintf('rm -f %s 2>/dev/null', escapeshellarg($dropinFile)));
+            self::zfsTryExec('systemctl disable --now zfs-remote-unlock.service 2>&1');
+        }
     }
 
     /**

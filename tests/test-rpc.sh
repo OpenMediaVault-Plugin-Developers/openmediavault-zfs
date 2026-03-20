@@ -1539,6 +1539,43 @@ else
     _fail "getEncryptionStatus — keylocation should be prompt, got: $AU_KEYLOC2" ""
 fi
 
+# ---- removeAutoUnlock must mask the zfs-load-key@ unit ---------------------
+# The mask (/dev/null symlink in /etc/systemd/system/) prevents zfs-mount-generator
+# from prompting for a passphrase at boot when auto-unlock is disabled.
+AU_INSTANCE=$(systemd-escape -p "$AU_DS" 2>/dev/null || echo "")
+AU_MASK_FILE="/etc/systemd/system/zfs-load-key@${AU_INSTANCE}.service"
+if [ -n "$AU_INSTANCE" ]; then
+    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
+        _pass "removeAutoUnlock — zfs-load-key@${AU_INSTANCE}.service masked (/dev/null symlink)"
+    else
+        _fail "removeAutoUnlock — zfs-load-key@${AU_INSTANCE}.service not masked" \
+              "expected $AU_MASK_FILE -> /dev/null; $(ls -la "$AU_MASK_FILE" 2>/dev/null || echo 'file not found')"
+    fi
+fi
+
+# ---- wait-for-remote-unlock.conf drop-in state must match active remote keys ---
+# The drop-in is managed dynamically: present when any dataset has remote unlock
+# configured, absent when none do.  Other datasets on the system may legitimately
+# have remote unlock active, so we check the actual json count rather than assuming
+# the test environment is clean.
+AU_DROPIN="/etc/systemd/system/zfs-load-key@.service.d/wait-for-remote-unlock.conf"
+AU_REMOTE_KEY_COUNT=$(ls /etc/zfs/remote-keys/*.json 2>/dev/null | wc -l)
+if [ "$AU_REMOTE_KEY_COUNT" -eq 0 ]; then
+    if [ ! -f "$AU_DROPIN" ]; then
+        _pass "manageRemoteUnlockService — drop-in absent (no remote keys configured)"
+    else
+        _fail "manageRemoteUnlockService — drop-in present but no remote keys exist" \
+              "drop-in should only exist when at least one dataset has remote unlock active"
+    fi
+else
+    if [ -f "$AU_DROPIN" ]; then
+        _pass "manageRemoteUnlockService — drop-in present ($AU_REMOTE_KEY_COUNT other remote key(s) configured)"
+    else
+        _fail "manageRemoteUnlockService — drop-in absent despite $AU_REMOTE_KEY_COUNT remote key(s) existing" \
+              "drop-in should be present when any dataset has remote unlock active"
+    fi
+fi
+
 # ---- Simulate reboot: lock the dataset (unload-key) ------------------------
 # After disabling auto-unlock and rebooting, ZFS cannot load the key
 # automatically (keylocation=prompt).  We simulate this by locking the
@@ -1552,6 +1589,42 @@ if [ "$AU_KEYSTATUS2" = "unavailable" ]; then
 else
     _fail "simulate reboot — keystatus should be unavailable, got: $AU_KEYSTATUS2" ""
 fi
+
+# ---- setAutoUnlock must unmask the unit (tested while dataset is locked) ----
+# The round-trip is done here — after unloadEncryptionKey while datasets are
+# unmounted — so that the daemon-reload inside setAutoUnlock/removeAutoUnlock
+# does not interfere with the mount tracking of live filesystems.
+AU_SET_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'name': '$AU_DS', 'keyloctype': 'local', 'key': '$AU_PASS'}))
+")
+assert_rpc "setAutoUnlock — re-enable local auto-unlock on $AU_DS (dataset locked)" \
+    "Zfs" "setAutoUnlock" "$AU_SET_PARAMS"
+
+if [ -n "$AU_INSTANCE" ]; then
+    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
+        _fail "setAutoUnlock — zfs-load-key@${AU_INSTANCE}.service still masked after re-enable" ""
+    else
+        _pass "setAutoUnlock — zfs-load-key@${AU_INSTANCE}.service unmasked after re-enable"
+    fi
+fi
+if [ -f "$AU_KEYFILE" ]; then
+    _pass "setAutoUnlock — keyfile re-created at $AU_KEYFILE"
+else
+    _fail "setAutoUnlock — keyfile not found at $AU_KEYFILE after re-enable" ""
+fi
+
+# Disable auto-unlock again (re-masks the unit) before the manual-unlock test.
+assert_rpc "removeAutoUnlock — disable again before manual-unlock test" \
+    "Zfs" "removeAutoUnlock" "{\"name\":\"$AU_DS\"}"
+if [ -n "$AU_INSTANCE" ]; then
+    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
+        _pass "removeAutoUnlock (2nd) — zfs-load-key@${AU_INSTANCE}.service re-masked"
+    else
+        _fail "removeAutoUnlock (2nd) — zfs-load-key@${AU_INSTANCE}.service not masked" ""
+    fi
+fi
+
 
 # ---- doDiscover(deleteStale=true) must NOT remove the mntent entry ---------
 # This is the subtle bug: a locked dataset is unmounted, so its mountpoint
@@ -2043,6 +2116,17 @@ if [ ! -f "/etc/zfs/zfs-list.cache/$POOL" ]; then
 else
     _fail "zfs-list.cache — cache file still present after pool deletion" ""
 fi
+
+# ===========================================================================
+section "Orphan cleanup"
+# ===========================================================================
+
+# Remove stale zfs-list.cache files left by previous test runs whose pools
+# have since been destroyed.
+find /etc/zfs/zfs-list.cache/ -type f -name "omvzfs*" -ls -delete 2>/dev/null || true
+
+# Remove stale keyfiles left by previous test runs.
+find /etc/zfs/keys/ -name "omvzfstest_*.key" -ls -delete 2>/dev/null || true
 
 # ===========================================================================
 section "Summary"

@@ -7,6 +7,24 @@ set -e
 
 remove_action() {
     dpkg-trigger update-workbench
+
+    # Disable and stop the remote-unlock service (its unit file has already been
+    # removed by dpkg, but it may still be enabled/running).
+    systemctl disable --now zfs-remote-unlock.service 2>/dev/null || true
+
+    # Remove any per-dataset zfs-load-key@ masks created by removeAutoUnlock
+    # (symlinks to /dev/null in /etc/systemd/system/).
+    for f in /etc/systemd/system/zfs-load-key@*.service; do
+        [ -L "$f" ] && [ "$(readlink "$f")" = "/dev/null" ] && rm -f "$f" || true
+    done
+
+    # Remove the drop-in directory if it's empty (the drop-in file itself is
+    # managed dynamically and may or may not be present).
+    rm -f /etc/systemd/system/zfs-load-key@.service.d/wait-for-remote-unlock.conf
+    rmdir --ignore-fail-on-non-empty \
+        /etc/systemd/system/zfs-load-key@.service.d 2>/dev/null || true
+
+    systemctl daemon-reload 2>/dev/null || true
 }
 
 case "$1" in
@@ -15,6 +33,9 @@ case "$1" in
     echo "Deleting Configuration"
     omv_config_delete "/config/services/zfs"
     rm -f /etc/modules-load.d/zfs.conf
+    # Remove auto-unlock keyfiles, remote-key metadata, and log created at runtime.
+    rm -rf /etc/zfs/keys /etc/zfs/remote-keys
+    rm -f /var/log/zfs-remote-unlock.log
   ;;
 
   remove)

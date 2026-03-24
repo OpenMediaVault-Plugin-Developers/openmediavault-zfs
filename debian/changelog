@@ -150,8 +150,38 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Warning hint explains metadata role and data-loss risk of stripe special
     - findFirstLogDevice and new findFirstSpecialDevice share a common
       findFirstClassDevice helper to eliminate duplicated parsing logic
+  * Add ZFS replication jobs
+    - Schedule local or remote (SSH) ZFS send/receive replication
+    - Snapshot source dataset with configurable prefix before each send
+    - Incremental sends: finds last common snapshot between source and
+      destination and sends only the delta; falls back to full send if
+      destination is missing the base snapshot
+    - Remote replication uses OMV SSH certificate infrastructure
+      (System → Certificates → SSH); select key pair from dropdown
+    - SSH options: host, port, user, certificate; fields hidden/required
+      based on type selection
+    - Raw send option (zfs send -w) for encrypted datasets
+    - Recursive send/receive option
+    - Source snapshot pruning: configurable retention count (0 = keep all)
+    - Bookmark-based replication: after each successful send, creates a ZFS
+      bookmark as the incremental base so source snapshots can be pruned to
+      a count of 1 while incremental replication continues uninterrupted
+    - Compose-style schedule (hourly/daily/weekly/monthly/yearly/exactly)
+    - Email on completion or on error only (same pattern as scrub jobs)
+    - Run jobs on demand via datatable Run button
+    - Output logged to /var/log/omv-zfs-replicate.log
+  * Add time-based retention for scheduled snapshot jobs
+    - New "Unit" selector alongside the existing "Keep" count field
+    - Units: snapshots (count, default), days, weeks, months, years
+    - Count mode: existing behaviour, keeps the N most recent snapshots
+    - Time mode: deletes snapshots older than N × unit by comparing the
+      timestamp embedded in the snapshot name (YYYYMMDD-HHMMSS)
+  * Add "Send email on error only" option to scheduled snapshot jobs
+    - Mirrors the existing emailonerror feature on scrub and replication jobs
+    - Snapshot script refactored to use tmpfile + EXIT trap pattern so the
+      email is only sent (or suppressed) after the full job completes
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 15 Mar 2026 00:00:00 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 24 Mar 2026 00:00:00 +0000
 
 openmediavault-zfs (8.0.4) stable; urgency=low
 

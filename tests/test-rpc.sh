@@ -970,6 +970,192 @@ else
 fi
 
 # ===========================================================================
+section "Replication Jobs — CRUD and local run"
+# ===========================================================================
+# Create a dedicated source dataset.  The destination is NOT pre-created;
+# zfs receive creates it on first send.
+assert_rpc "addObject — replication source dataset" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"replsrc\"}"
+
+assert_rpc "getSshCertificates" "Zfs" "getSshCertificates"
+
+REPL_JOB_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':              '$OMV_NEW_UUID',
+    'enable':            True,
+    'dataset':           '$POOL/replsrc',
+    'prefix':            'test-repl',
+    'recursive':         False,
+    'raw':               False,
+    'type':              'local',
+    'dest':              '$POOL/repldst',
+    'remotehost':        '',
+    'sshcertificateref': '',
+    'sshuser':           'root',
+    'sshport':           22,
+    'execution':         'daily',
+    'minute':            ['0'],
+    'hour':              ['2'],
+    'dayofmonth':        ['*'],
+    'month':             ['*'],
+    'dayofweek':         ['*'],
+    'everynminute':      False,
+    'everynhour':        False,
+    'everyndayofmonth':  False,
+    'sendemail':         False,
+    'emailonerror':      False,
+    'comment':           'test replication job',
+}))
+")
+REPL_JOB_RAW=$(rpc "Zfs" "setReplicationJob" "$REPL_JOB_PARAMS" 2>&1) && {
+    REPL_JOB_UUID=$(echo "$REPL_JOB_RAW" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    if [ -n "$REPL_JOB_UUID" ]; then
+        _pass "setReplicationJob — create"
+    else
+        _fail "setReplicationJob — create" "UUID not found in response: ${REPL_JOB_RAW:0:200}"
+    fi
+} || {
+    _fail "setReplicationJob — create" "${REPL_JOB_RAW:0:200}"
+    REPL_JOB_UUID=""
+}
+
+assert_rpc "getReplicationJobList" "Zfs" "getReplicationJobList" \
+    "$JOB_LIST_PARAMS" "replsrc"
+
+if [ -n "$REPL_JOB_UUID" ]; then
+    assert_rpc "getReplicationJob" "Zfs" "getReplicationJob" \
+        "{\"uuid\":\"$REPL_JOB_UUID\"}" "test-repl"
+
+    # First run — full send (destination does not yet exist).
+    assert_rpc_bg "runReplicationJobBg (full send)" "Zfs" "runReplicationJobBg" \
+        "{\"uuid\":\"$REPL_JOB_UUID\"}"
+
+    if zfs list -H -t snapshot -o name -r "$POOL/replsrc" \
+            2>/dev/null | grep -q "@test-repl-"; then
+        _pass "runReplicationJobBg — snapshot created on source"
+    else
+        _fail "runReplicationJobBg — no snapshot found on source" ""
+    fi
+
+    if zfs list "$POOL/repldst" &>/dev/null; then
+        _pass "runReplicationJobBg — destination dataset created"
+    else
+        _fail "runReplicationJobBg — destination dataset missing after full send" ""
+    fi
+
+    # Second run — incremental send.
+    assert_rpc_bg "runReplicationJobBg (incremental)" "Zfs" "runReplicationJobBg" \
+        "{\"uuid\":\"$REPL_JOB_UUID\"}"
+
+    REPL_SNAP_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/replsrc" \
+        2>/dev/null | grep -c "@test-repl-" || true)
+    if [ "$REPL_SNAP_COUNT" -ge 2 ]; then
+        _pass "runReplicationJobBg (incremental) — ≥2 snapshots on source"
+    else
+        _fail "runReplicationJobBg (incremental) — expected ≥2 snapshots, found $REPL_SNAP_COUNT" ""
+    fi
+
+    assert_rpc "deleteReplicationJob" "Zfs" "deleteReplicationJob" \
+        "{\"uuid\":\"$REPL_JOB_UUID\"}"
+else
+    _fail "skipping getReplicationJob/runReplicationJobBg/deleteReplicationJob — no UUID" ""
+fi
+
+# ===========================================================================
+section "omv-zfs-replicate script — local send"
+# ===========================================================================
+# Direct script invocations; keeps the RPC replication datasets untouched.
+
+zfs create "$POOL/scripsrc" 2>/dev/null || true
+
+# Full send: destination does not exist — zfs receive must create it.
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/scripsrc" "stest" "$POOL/scripdst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — full send succeeded"
+    if zfs list "$POOL/scripdst" &>/dev/null; then
+        _pass "omv-zfs-replicate — destination dataset created by full send"
+    else
+        _fail "omv-zfs-replicate — destination dataset missing after full send" ""
+    fi
+    if zfs list -H -t snapshot -o name -r "$POOL/scripsrc" \
+            2>/dev/null | grep -q "@stest-"; then
+        _pass "omv-zfs-replicate — snapshot created on source"
+    else
+        _fail "omv-zfs-replicate — no snapshot found on source after full send" ""
+    fi
+else
+    _fail "omv-zfs-replicate — full send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# Incremental send: source already has one snapshot; destination must receive
+# the next one without a full resend.  Sleep ensures a different timestamp so
+# the new snapshot name doesn't collide with the one just created above.
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/scripsrc" "stest" "$POOL/scripdst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — incremental send succeeded"
+    SCRI_SNAP_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/scripsrc" \
+        2>/dev/null | grep -c "@stest-" || true)
+    if [ "$SCRI_SNAP_COUNT" -ge 2 ]; then
+        _pass "omv-zfs-replicate — incremental: ≥2 snapshots on source"
+    else
+        _fail "omv-zfs-replicate — incremental: expected ≥2 snapshots, found $SCRI_SNAP_COUNT" ""
+    fi
+else
+    _fail "omv-zfs-replicate — incremental send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# -e onerror: on a successful run no email should be attempted and the script
+# must exit 0.  Sleep ensures a new timestamp; same prefix/dest so the script
+# does an incremental send (no conflict with existing destination snapshots).
+sleep 1
+TMP_BEFORE=$(find /tmp -maxdepth 1 -name "tmp.*" 2>/dev/null | wc -l || echo 0)
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/scripsrc" "stest" "$POOL/scripdst" \
+        "local" "" "" "root" 22 0 0 \
+        -e onerror -c "unit test" >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — -e onerror: exits 0 on success"
+else
+    _fail "omv-zfs-replicate — -e onerror: unexpected failure on success path" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+TMP_AFTER=$(find /tmp -maxdepth 1 -name "tmp.*" 2>/dev/null | wc -l || echo 0)
+if [ "$TMP_AFTER" -le "$TMP_BEFORE" ]; then
+    _pass "omv-zfs-replicate — -e onerror: no tmp file leaked after success"
+else
+    _fail "omv-zfs-replicate — -e onerror: tmp file leaked after successful run" ""
+fi
+
+# -e always: should also exit 0 on success.
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/scripsrc" "stest" "$POOL/scripdst" \
+        "local" "" "" "root" 22 0 0 \
+        -e always -c "unit test" >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — -e always: exits 0 on success"
+else
+    _fail "omv-zfs-replicate — -e always: unexpected failure" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# Invalid source dataset must cause a non-zero exit.
+if ! /usr/sbin/omv-zfs-replicate \
+        "$POOL/does-not-exist" "stest" "$POOL/scripdst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — exits non-zero on invalid source dataset"
+else
+    _fail "omv-zfs-replicate — should have failed on nonexistent source" ""
+fi
+
+# Script datasets are children of $POOL and will be destroyed with the pool.
+
+# ===========================================================================
 section "Cron files — omv-salt deploy generates valid entries"
 # ===========================================================================
 # Regression: Jinja2 whitespace bug split the >/dev/null redirect onto its
@@ -1018,8 +1204,39 @@ print(json.dumps({
 }))
 ")
 
+CRON_REPL_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':             '$OMV_NEW_UUID',
+    'enable':           True,
+    'dataset':          '$POOL',
+    'prefix':           'cronrepl',
+    'recursive':        False,
+    'raw':              False,
+    'type':             'local',
+    'dest':             '${POOL}/cronrepldst',
+    'remotehost':       '',
+    'sshcertificateref': '',
+    'sshuser':          'root',
+    'sshport':          22,
+    'execution':        'daily',
+    'minute':           ['0'],
+    'hour':             ['4'],
+    'dayofmonth':       ['*'],
+    'month':            ['*'],
+    'dayofweek':        ['*'],
+    'everynminute':     False,
+    'everynhour':       False,
+    'everyndayofmonth': False,
+    'sendemail':        False,
+    'emailonerror':     False,
+    'comment':          'cron replication regression test',
+}))
+")
+
 CRON_SNAP_UUID=""
 CRON_SCRUB_UUID=""
+CRON_REPL_UUID=""
 
 CRON_SNAP_RAW=$(rpc "Zfs" "setSnapshotJob" "$CRON_SNAP_PARAMS" 2>&1) && {
     CRON_SNAP_UUID=$(echo "$CRON_SNAP_RAW" | python3 -c \
@@ -1036,6 +1253,14 @@ CRON_SCRUB_RAW=$(rpc "Zfs" "setScrubJob" "$CRON_SCRUB_PARAMS" 2>&1) && {
         && _pass "cron — scrub job created" \
         || _fail "cron — scrub job: UUID missing" "${CRON_SCRUB_RAW:0:200}"
 } || _fail "cron — setScrubJob failed" "${CRON_SCRUB_RAW:0:200}"
+
+CRON_REPL_RAW=$(rpc "Zfs" "setReplicationJob" "$CRON_REPL_PARAMS" 2>&1) && {
+    CRON_REPL_UUID=$(echo "$CRON_REPL_RAW" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    [ -n "$CRON_REPL_UUID" ] \
+        && _pass "cron — replication job created" \
+        || _fail "cron — replication job: UUID missing" "${CRON_REPL_RAW:0:200}"
+} || _fail "cron — setReplicationJob failed" "${CRON_REPL_RAW:0:200}"
 
 # Deploy the cron state to write the files.
 if omv-salt deploy run zfscron 2>/dev/null; then
@@ -1092,15 +1317,19 @@ check_cron_file() {
 
 SNAP_CRON_FILE=/etc/cron.d/openmediavault-zfs-snapshots
 SCRUB_CRON_FILE=/etc/cron.d/openmediavault-zfs-scrub
+REPL_CRON_FILE=/etc/cron.d/openmediavault-zfs-replication
 
-check_cron_file "snapshot cron" "$SNAP_CRON_FILE" "$POOL"
-check_cron_file "scrub cron"    "$SCRUB_CRON_FILE" "$POOL"
+check_cron_file "snapshot cron"    "$SNAP_CRON_FILE"  "$POOL"
+check_cron_file "scrub cron"       "$SCRUB_CRON_FILE" "$POOL"
+check_cron_file "replication cron" "$REPL_CRON_FILE"  "$POOL"
 
 # Clean up: delete jobs and redeploy to leave cron files empty.
 [ -n "$CRON_SNAP_UUID"  ] && omv-rpc -u admin "Zfs" "deleteSnapshotJob" \
     "{\"uuid\":\"$CRON_SNAP_UUID\"}"  >/dev/null 2>&1 || true
 [ -n "$CRON_SCRUB_UUID" ] && omv-rpc -u admin "Zfs" "deleteScrubJob" \
     "{\"uuid\":\"$CRON_SCRUB_UUID\"}" >/dev/null 2>&1 || true
+[ -n "$CRON_REPL_UUID"  ] && omv-rpc -u admin "Zfs" "deleteReplicationJob" \
+    "{\"uuid\":\"$CRON_REPL_UUID\"}"  >/dev/null 2>&1 || true
 omv-salt deploy run zfscron >/dev/null 2>&1 || true
 
 # ===========================================================================

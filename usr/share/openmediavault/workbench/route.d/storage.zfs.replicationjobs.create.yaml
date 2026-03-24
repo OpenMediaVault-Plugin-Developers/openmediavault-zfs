@@ -1,0 +1,7 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/replicationjobs/create"
+  title: _("Create")
+  notificationTitle: _("Created replication job.")
+  component: omv-storage-zfs-replicationjobs-form-page

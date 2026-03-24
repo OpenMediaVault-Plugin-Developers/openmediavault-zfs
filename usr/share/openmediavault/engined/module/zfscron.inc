@@ -35,5 +35,9 @@ class ZfsCron extends \OMV\Engine\Module\ServiceAbstract
             OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
             "org.openmediavault.conf.service.zfs.scrubjob",
             [$this, "setDirty"]);
+        $dispatcher->addListener(
+            OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY | OMV_NOTIFY_DELETE,
+            "org.openmediavault.conf.service.zfs.replicationjob",
+            [$this, "setDirty"]);
     }
 }

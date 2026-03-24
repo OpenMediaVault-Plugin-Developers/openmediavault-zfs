@@ -23,6 +23,10 @@
   'conf.service.zfs.scrubjob',
   {'operator': 'stringNotEquals', 'arg0': 'uuid', 'arg1': ''}) | default([]) %}
 
+{% set replication_jobs = salt['omv_conf.get_by_filter'](
+  'conf.service.zfs.replicationjob',
+  {'operator': 'stringNotEquals', 'arg0': 'uuid', 'arg1': ''}) | default([]) %}
+
 configure_zfs_snapshot_cron:
   file.managed:
     - name: "/etc/cron.d/openmediavault-zfs-snapshots"
@@ -43,6 +47,18 @@ configure_zfs_scrub_cron:
     - template: jinja
     - context:
         jobs: {{ scrub_jobs | json }}
+    - user: root
+    - group: root
+    - mode: 644
+
+configure_zfs_replication_cron:
+  file.managed:
+    - name: "/etc/cron.d/openmediavault-zfs-replication"
+    - source:
+      - salt://{{ tpldir }}/files/etc_cron.d_omv-zfs-replication.j2
+    - template: jinja
+    - context:
+        jobs: {{ replication_jobs | json }}
     - user: root
     - group: root
     - mode: 644

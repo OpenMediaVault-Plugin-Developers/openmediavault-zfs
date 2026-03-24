@@ -116,8 +116,14 @@
     "params": {
       "type": "object",
       "properties": {
-        "pool": { "type": "string", "required": true },
-        "device": { "type": "string", "required": true }
+        "pool": {
+          "type": "string",
+          "required": true
+        },
+        "device": {
+          "type": "string",
+          "required": true
+        }
       }
     }
   },
@@ -127,9 +133,18 @@
     "params": {
       "type": "object",
       "properties": {
-        "pool": { "type": "string", "required": true },
-        "olddevice": { "type": "string", "required": true },
-        "newdevice": { "type": "string", "required": true }
+        "pool": {
+          "type": "string",
+          "required": true
+        },
+        "olddevice": {
+          "type": "string",
+          "required": true
+        },
+        "newdevice": {
+          "type": "string",
+          "required": true
+        }
       }
     }
   },
@@ -139,8 +154,14 @@
     "params": {
       "type": "object",
       "properties": {
-        "pool": { "type": "string", "required": true },
-        "vdev": { "type": "string", "required": true }
+        "pool": {
+          "type": "string",
+          "required": true
+        },
+        "vdev": {
+          "type": "string",
+          "required": true
+        }
       }
     }
   },
@@ -150,10 +171,22 @@
     "params": {
       "type": "object",
       "properties": {
-        "pool": { "type": "string", "required": true },
-        "vdevtype": { "type": "string", "required": true },
-        "device": { "type": "string", "required": true },
-        "devalias": { "type": "string", "required": true }
+        "pool": {
+          "type": "string",
+          "required": true
+        },
+        "vdevtype": {
+          "type": "string",
+          "required": true
+        },
+        "device": {
+          "type": "string",
+          "required": true
+        },
+        "devalias": {
+          "type": "string",
+          "required": true
+        }
       }
     }
   },
@@ -365,7 +398,11 @@
         },
         "mode": {
           "type": "string",
-          "enum": ["earlier", "later", "all"],
+          "enum": [
+            "earlier",
+            "later",
+            "all"
+          ],
           "required": true
         }
       }
@@ -555,7 +592,10 @@
         },
         "keyloctype": {
           "type": "string",
-          "enum": ["local", "remote"],
+          "enum": [
+            "local",
+            "remote"
+          ],
           "required": true
         },
         "key": {
@@ -621,26 +661,200 @@
           "type": "string",
           "required": true
         },
-        "enable": { "type": "boolean", "required": true },
-        "dataset": { "type": "string", "required": true },
-        "prefix": { "type": "string", "required": true },
-        "retention": { "type": "integer", "minimum": 1, "required": true },
-        "recursive": { "type": "boolean" },
-        "execution": {
-          "type": "string",
-          "enum": ["exactly","hourly","daily","weekly","monthly","yearly","reboot"],
+        "enable": {
+          "type": "boolean",
           "required": true
         },
-        "minute": { "type": "array", "items": { "type": "string" } },
-        "hour": { "type": "array", "items": { "type": "string" } },
-        "dayofmonth": { "type": "array", "items": { "type": "string" } },
-        "month": { "type": "array", "items": { "type": "string" } },
-        "dayofweek": { "type": "array", "items": { "type": "string" } },
-        "everynminute": { "type": "boolean" },
-        "everynhour": { "type": "boolean" },
-        "everyndayofmonth": { "type": "boolean" },
-        "sendemail": { "type": "boolean" },
-        "comment": { "type": "string" }
+        "dataset": {
+          "type": "string",
+          "required": true
+        },
+        "prefix": {
+          "type": "string",
+          "required": true
+        },
+        "retention": {
+          "type": "integer",
+          "minimum": 1,
+          "required": true
+        },
+        "recursive": {
+          "type": "boolean"
+        },
+        "execution": {
+          "type": "string",
+          "enum": [
+            "exactly",
+            "hourly",
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly",
+            "reboot"
+          ],
+          "required": true
+        },
+        "minute": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hour": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofmonth": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "month": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofweek": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "everynminute": {
+          "type": "boolean"
+        },
+        "everynhour": {
+          "type": "boolean"
+        },
+        "everyndayofmonth": {
+          "type": "boolean"
+        },
+        "sendemail": {
+          "type": "boolean"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "type": "rpc",
+    "id": "rpc.zfs.setreplicationjob",
+    "params": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "required": true
+        },
+        "enable": {
+          "type": "boolean",
+          "required": true
+        },
+        "dataset": {
+          "type": "string",
+          "required": true
+        },
+        "recursive": {
+          "type": "boolean"
+        },
+        "raw": {
+          "type": "boolean"
+        },
+        "prefix": {
+          "type": "string",
+          "required": true
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "local",
+            "remote"
+          ],
+          "required": true
+        },
+        "dest": {
+          "type": "string",
+          "required": true
+        },
+        "remotehost": {
+          "type": "string"
+        },
+        "sshcertificateref": {
+          "type": "string"
+        },
+        "sshuser": {
+          "type": "string"
+        },
+        "sshport": {
+          "type": "integer"
+        },
+        "execution": {
+          "type": "string",
+          "enum": [
+            "exactly",
+            "hourly",
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly",
+            "reboot"
+          ],
+          "required": true
+        },
+        "minute": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hour": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofmonth": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "month": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofweek": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "everynminute": {
+          "type": "boolean"
+        },
+        "everynhour": {
+          "type": "boolean"
+        },
+        "everyndayofmonth": {
+          "type": "boolean"
+        },
+        "sendemail": {
+          "type": "boolean"
+        },
+        "emailonerror": {
+          "type": "boolean"
+        },
+        "comment": {
+          "type": "string"
+        }
       }
     }
   },
@@ -654,23 +868,72 @@
           "type": "string",
           "required": true
         },
-        "enable": { "type": "boolean", "required": true },
-        "pool": { "type": "string", "required": true },
-        "execution": {
-          "type": "string",
-          "enum": ["exactly","hourly","daily","weekly","monthly","yearly","reboot"],
+        "enable": {
+          "type": "boolean",
           "required": true
         },
-        "minute": { "type": "array", "items": { "type": "string" } },
-        "hour": { "type": "array", "items": { "type": "string" } },
-        "dayofmonth": { "type": "array", "items": { "type": "string" } },
-        "month": { "type": "array", "items": { "type": "string" } },
-        "dayofweek": { "type": "array", "items": { "type": "string" } },
-        "everynminute": { "type": "boolean" },
-        "everynhour": { "type": "boolean" },
-        "everyndayofmonth": { "type": "boolean" },
-        "sendemail": { "type": "boolean" },
-        "comment": { "type": "string" }
+        "pool": {
+          "type": "string",
+          "required": true
+        },
+        "execution": {
+          "type": "string",
+          "enum": [
+            "exactly",
+            "hourly",
+            "daily",
+            "weekly",
+            "monthly",
+            "yearly",
+            "reboot"
+          ],
+          "required": true
+        },
+        "minute": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hour": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofmonth": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "month": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dayofweek": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "everynminute": {
+          "type": "boolean"
+        },
+        "everynhour": {
+          "type": "boolean"
+        },
+        "everyndayofmonth": {
+          "type": "boolean"
+        },
+        "sendemail": {
+          "type": "boolean"
+        },
+        "comment": {
+          "type": "string"
+        }
       }
     }
   }

@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.replicationjobs"
+  text: _("Replication Jobs")
+  position: 50
+  icon: mdi:transfer
+  url: "/storage/zfs/replicationjobs"

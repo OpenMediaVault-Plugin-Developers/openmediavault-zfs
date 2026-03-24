@@ -1,0 +1,8 @@
+version: "1.0"
+type: route
+data:
+  url: "/storage/zfs/replicationjobs/edit/:uuid"
+  title: _("Edit")
+  editing: true
+  notificationTitle: _("Updated replication job.")
+  component: omv-storage-zfs-replicationjobs-form-page

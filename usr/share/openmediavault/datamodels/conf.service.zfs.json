@@ -162,6 +162,125 @@
           }
         }
       }
+    },
+    "replicationjobs": {
+      "type": "object",
+      "properties": {
+        "job": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uuid": {
+                "type": "string",
+                "format": "uuidv4"
+              },
+              "enable": {
+                "type": "boolean"
+              },
+              "dataset": {
+                "type": "string"
+              },
+              "recursive": {
+                "type": "boolean",
+                "default": false
+              },
+              "raw": {
+                "type": "boolean",
+                "default": false
+              },
+              "prefix": {
+                "type": "string",
+                "default": "replicate"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "local",
+                  "remote"
+                ],
+                "default": "local"
+              },
+              "dest": {
+                "type": "string",
+                "default": ""
+              },
+              "remotehost": {
+                "type": "string",
+                "default": ""
+              },
+              "sshcertificateref": {
+                "type": "string",
+                "default": ""
+              },
+              "sshuser": {
+                "type": "string",
+                "default": "root"
+              },
+              "sshport": {
+                "type": "integer",
+                "default": 22
+              },
+              "execution": {
+                "type": "string",
+                "enum": [
+                  "exactly",
+                  "hourly",
+                  "daily",
+                  "weekly",
+                  "monthly",
+                  "yearly",
+                  "reboot"
+                ],
+                "default": "daily"
+              },
+              "minute": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynminute": {
+                "type": "boolean",
+                "default": false
+              },
+              "hour": {
+                "type": "string",
+                "default": "0"
+              },
+              "everynhour": {
+                "type": "boolean",
+                "default": false
+              },
+              "dayofmonth": {
+                "type": "string",
+                "default": "*"
+              },
+              "everyndayofmonth": {
+                "type": "boolean",
+                "default": false
+              },
+              "month": {
+                "type": "string",
+                "default": "*"
+              },
+              "dayofweek": {
+                "type": "string",
+                "default": "*"
+              },
+              "sendemail": {
+                "type": "boolean",
+                "default": false
+              },
+              "emailonerror": {
+                "type": "boolean",
+                "default": false
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

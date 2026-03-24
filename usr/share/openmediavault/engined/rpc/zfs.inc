@@ -104,6 +104,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('upgradePool');
         $this->registerMethod('addVdev');
         $this->registerMethod('getSnapshotDiff');
+        $this->registerMethod('getSshCertificates');
+        $this->registerMethod('getReplicationJobList');
+        $this->registerMethod('getReplicationJob');
+        $this->registerMethod('setReplicationJob');
+        $this->registerMethod('deleteReplicationJob');
+        $this->registerMethod('runReplicationJob');
+        $this->registerMethod('runReplicationJobBg');
     }
 
     public function doDiscover($params, $context)
@@ -3299,6 +3306,112 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
         }
         return $status;
+    }
+
+    // -------------------------------------------------------------------------
+    // Replication scheduling
+    // -------------------------------------------------------------------------
+
+    public function getSshCertificates($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->get('conf.system.certificate.ssh');
+        $result = [];
+        foreach ($objects as $obj) {
+            $assoc = $obj->getAssoc();
+            $label = !empty($assoc['comment']) ? $assoc['comment'] : $assoc['uuid'];
+            $result[] = [$assoc['uuid'], $label];
+        }
+        return $result;
+    }
+
+    public function getReplicationJobList($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.getlist');
+        $db = \OMV\Config\Database::getInstance();
+        $objects = $db->get('conf.service.zfs.replicationjob');
+        $result = array_map(fn($o) => $o->getAssoc(), $objects);
+        return $this->applyFilter($result, $params['start'],
+            $params['limit'], $params['sortfield'], $params['sortdir']);
+    }
+
+    public function getReplicationJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.replicationjob', $params['uuid']);
+        $result = $obj->getAssoc();
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            $result[$f] = array_map('trim', explode(',', $result[$f]));
+        }
+        return $result;
+    }
+
+    public function setReplicationJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.setreplicationjob');
+        foreach (['minute', 'hour', 'dayofmonth', 'month', 'dayofweek'] as $f) {
+            if (is_array($params[$f])) {
+                $params[$f] = implode(',', $params[$f]);
+            }
+        }
+        // Clear remote fields when type is local.
+        if (($params['type'] ?? 'local') === 'local') {
+            $params['remotehost']       = '';
+            $params['sshcertificateref'] = '';
+            $params['sshuser']          = 'root';
+            $params['sshport']          = 22;
+        }
+        $db = \OMV\Config\Database::getInstance();
+        $obj = new \OMV\Config\ConfigObject('conf.service.zfs.replicationjob');
+        $obj->setAssoc($params);
+        $db->set($obj);
+        return $obj->getAssoc();
+    }
+
+    public function deleteReplicationJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.replicationjob', $params['uuid']);
+        $db->delete($obj);
+    }
+
+    public function runReplicationJob($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.common.objectuuid');
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.replicationjob', $params['uuid']);
+        $j = $obj->getAssoc();
+        $cmd = sprintf(
+            '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d 2>&1',
+            escapeshellarg($j['dataset']),
+            escapeshellarg($j['prefix']),
+            escapeshellarg($j['dest']),
+            escapeshellarg($j['type']),
+            escapeshellarg($j['remotehost'] ?? ''),
+            escapeshellarg($j['sshcertificateref'] ?? ''),
+            escapeshellarg($j['sshuser'] ?? 'root'),
+            (int)($j['sshport'] ?? 22),
+            !empty($j['recursive']) ? 1 : 0,
+            !empty($j['raw']) ? 1 : 0
+        );
+        exec($cmd, $out, $res);
+        if ($res !== 0) {
+            throw new \OMV\Exception('Replication job failed: ' . implode("\n", $out));
+        }
+        return implode("\n", $out);
+    }
+
+    public function runReplicationJobBg($params, $context)
+    {
+        return $this->callMethodBg('runReplicationJob', $params, $context);
     }
 
     /**

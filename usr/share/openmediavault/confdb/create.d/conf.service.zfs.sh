@@ -33,6 +33,10 @@ if ! omv_config_exists "/config/services/zfs/scrubjobs"; then
     omv_config_add_node "/config/services/zfs" "scrubjobs"
 fi
 
+if ! omv_config_exists "/config/services/zfs/replicationjobs"; then
+    omv_config_add_node "/config/services/zfs" "replicationjobs"
+fi
+
 # add zfs-zed notfication
 xpath="/config/system/notification/notifications"
 if ! omv_config_exists "${xpath}/notification[id='zfs']"; then

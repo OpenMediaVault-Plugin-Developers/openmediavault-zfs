@@ -1,0 +1,107 @@
+{
+  "type": "config",
+  "id": "conf.service.zfs.replicationjob",
+  "queryinfo": {
+    "xpath": "//services/zfs/replicationjobs/job",
+    "iterable": true,
+    "idproperty": "uuid"
+  },
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "format": "uuidv4"
+    },
+    "enable": {
+      "type": "boolean"
+    },
+    "dataset": {
+      "type": "string"
+    },
+    "recursive": {
+      "type": "boolean"
+    },
+    "raw": {
+      "type": "boolean"
+    },
+    "prefix": {
+      "type": "string",
+      "default": "replicate"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "local",
+        "remote"
+      ],
+      "default": "local"
+    },
+    "dest": {
+      "type": "string",
+      "default": ""
+    },
+    "remotehost": {
+      "type": "string",
+      "default": ""
+    },
+    "sshcertificateref": {
+      "type": "string",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uuidv4"
+        },
+        {
+          "type": "string",
+          "maxLength": 0
+        }
+      ],
+      "default": ""
+    },
+    "sshuser": {
+      "type": "string",
+      "default": "root"
+    },
+    "sshport": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "default": 22
+    },
+    "execution": {
+      "type": "string"
+    },
+    "minute": {
+      "type": "string"
+    },
+    "hour": {
+      "type": "string"
+    },
+    "dayofmonth": {
+      "type": "string"
+    },
+    "month": {
+      "type": "string"
+    },
+    "dayofweek": {
+      "type": "string"
+    },
+    "everynminute": {
+      "type": "boolean"
+    },
+    "everynhour": {
+      "type": "boolean"
+    },
+    "everyndayofmonth": {
+      "type": "boolean"
+    },
+    "sendemail": {
+      "type": "boolean"
+    },
+    "emailonerror": {
+      "type": "boolean"
+    },
+    "comment": {
+      "type": "string"
+    }
+  }
+}

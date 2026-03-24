@@ -33,6 +33,10 @@
                 "type": "integer",
                 "default": 7
               },
+              "retentionunit": {
+                "type": "string",
+                "default": "count"
+              },
               "execution": {
                 "type": "string",
                 "enum": [
@@ -80,6 +84,10 @@
               },
               "sendemail": {
                 "type": "boolean"
+              },
+              "emailonerror": {
+                "type": "boolean",
+                "default": false
               },
               "comment": {
                 "type": "string"
@@ -186,6 +194,14 @@
                 "default": false
               },
               "raw": {
+                "type": "boolean",
+                "default": false
+              },
+              "retention": {
+                "type": "integer",
+                "default": 0
+              },
+              "usebookmarks": {
                 "type": "boolean",
                 "default": false
               },

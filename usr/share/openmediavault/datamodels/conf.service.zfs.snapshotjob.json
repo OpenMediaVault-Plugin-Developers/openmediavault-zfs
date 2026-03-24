@@ -23,6 +23,10 @@
     "retention": {
       "type": "integer"
     },
+    "retentionunit": {
+      "type": "string",
+      "default": "count"
+    },
     "recursive": {
       "type": "boolean"
     },
@@ -54,6 +58,9 @@
       "type": "boolean"
     },
     "sendemail": {
+      "type": "boolean"
+    },
+    "emailonerror": {
       "type": "boolean"
     },
     "comment": {

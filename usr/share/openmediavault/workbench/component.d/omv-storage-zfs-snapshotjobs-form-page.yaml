@@ -41,14 +41,27 @@ data:
           pattern:
             pattern: "^[a-zA-Z0-9_\\-]+$"
             errorData: _("Only alphanumeric characters, hyphens, and underscores are allowed.")
-      - type: numberInput
-        name: retention
-        label: _("Keep (count)")
-        value: 7
-        hint: _("Number of snapshots to keep. Oldest snapshots beyond this count are destroyed automatically.")
-        validators:
-          required: true
-          min: 1
+      - type: container
+        fields:
+          - type: numberInput
+            name: retention
+            label: _("Keep")
+            value: 7
+            validators:
+              required: true
+              min: 1
+          - type: select
+            name: retentionunit
+            label: _("Unit")
+            value: "count"
+            hint: _("'Snapshots' keeps the N most recent; time units delete snapshots older than N days/weeks/months/years.")
+            store:
+              data:
+                - ["count", _("snapshots")]
+                - ["days", _("days")]
+                - ["weeks", _("weeks")]
+                - ["months", _("months")]
+                - ["years", _("years")]
       - type: checkbox
         name: recursive
         label: _("Recursive")
@@ -426,6 +439,17 @@ data:
         label: _("Send output via email")
         value: false
         hint: _("Send the command output via email on completion.")
+      - type: checkbox
+        name: emailonerror
+        label: _("Send email on error only")
+        value: false
+        hint: _("Only send an email if the job exits with an error.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: falsy
+              arg0:
+                prop: sendemail
       - type: textInput
         name: comment
         label: _("Comment")

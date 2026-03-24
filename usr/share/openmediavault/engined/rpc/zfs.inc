@@ -301,11 +301,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.snapshotjob', $params['uuid']);
         $j = $obj->getAssoc();
-        $cmd = sprintf('/usr/sbin/omv-zfs-snapshot %s %s %d %d 2>&1',
+        $retentionUnit = $j['retentionunit'] ?? 'count';
+        $unitFlag = ($retentionUnit !== 'count') ? sprintf(' -u %s', escapeshellarg($retentionUnit)) : '';
+        $cmd = sprintf('/usr/sbin/omv-zfs-snapshot %s %s %d %d%s 2>&1',
             escapeshellarg($j['dataset']),
             escapeshellarg($j['prefix']),
             (int)$j['retention'],
-            !empty($j['recursive']) ? 1 : 0);
+            !empty($j['recursive']) ? 1 : 0,
+            $unitFlag);
         exec($cmd, $out, $res);
         if ($res !== 0) {
             throw new \OMV\Exception('Snapshot job failed: ' . implode("\n", $out));
@@ -3389,8 +3392,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.replicationjob', $params['uuid']);
         $j = $obj->getAssoc();
+        $retention     = (int)($j['retention'] ?? 0);
+        $bookmarksFlag = !empty($j['usebookmarks']) ? ' --bookmarks' : '';
         $cmd = sprintf(
-            '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d 2>&1',
+            '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d -r %d%s 2>&1',
             escapeshellarg($j['dataset']),
             escapeshellarg($j['prefix']),
             escapeshellarg($j['dest']),
@@ -3400,7 +3405,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             escapeshellarg($j['sshuser'] ?? 'root'),
             (int)($j['sshport'] ?? 22),
             !empty($j['recursive']) ? 1 : 0,
-            !empty($j['raw']) ? 1 : 0
+            !empty($j['raw']) ? 1 : 0,
+            $retention,
+            $bookmarksFlag
         );
         exec($cmd, $out, $res);
         if ($res !== 0) {

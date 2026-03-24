@@ -2,20 +2,23 @@
 # ZFS replication: snapshot source and send to destination (local or remote via SSH).
 # Usage: omv-zfs-replicate <dataset> <prefix> <dest> <type> <remotehost>
 #                          <certref> <sshuser> <sshport> <recursive> <raw>
+#                          [-r retention] [--bookmarks]
 #                          [-e always|onerror] [-c comment]
 #
-#   dataset    - source ZFS dataset (e.g. tank/data)
-#   prefix     - snapshot name prefix (e.g. replicate)
-#   dest       - destination dataset path (e.g. backup/data)
-#   type       - "local" or "remote"
-#   remotehost - remote hostname/IP (ignored when type=local)
-#   certref    - OMV SSH certificate UUID (ignored when type=local, empty = default key)
-#   sshuser    - SSH user on remote (ignored when type=local)
-#   sshport    - SSH port on remote (ignored when type=local)
-#   recursive  - 1 to snapshot/send recursively, 0 otherwise
-#   raw        - 1 to use zfs send -w (raw/encrypted), 0 otherwise
-#   -e         - email mode: "always" or "onerror"
-#   -c         - email subject comment
+#   dataset      - source ZFS dataset (e.g. tank/data)
+#   prefix       - snapshot name prefix (e.g. replicate)
+#   dest         - destination dataset path (e.g. backup/data)
+#   type         - "local" or "remote"
+#   remotehost   - remote hostname/IP (ignored when type=local)
+#   certref      - OMV SSH certificate UUID (ignored when type=local, empty = default key)
+#   sshuser      - SSH user on remote (ignored when type=local)
+#   sshport      - SSH port on remote (ignored when type=local)
+#   recursive    - 1 to snapshot/send recursively, 0 otherwise
+#   raw          - 1 to use zfs send -w (raw/encrypted), 0 otherwise
+#   -r N         - keep N replication snapshots on source (0 = keep all)
+#   --bookmarks  - use ZFS bookmarks as incremental base; allows aggressive source pruning
+#   -e           - email mode: "always" or "onerror"
+#   -c           - email subject comment
 
 set -euo pipefail
 
@@ -33,14 +36,18 @@ RECURSIVE="${9:-0}"
 RAW="${10:-0}"
 shift 10 || true
 
-# Parse optional email flags
+# Parse optional flags
 email_mode=""
 email_comment=""
+RETENTION=0
+USEBOOKMARKS=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -e) email_mode="$2";    shift 2 ;;
-        -c) email_comment="$2"; shift 2 ;;
-        *)  shift ;;
+        -r)           RETENTION="$2";  shift 2 ;;
+        --bookmarks)  USEBOOKMARKS=1;  shift   ;;
+        -e)           email_mode="$2"; shift 2 ;;
+        -c)           email_comment="$2"; shift 2 ;;
+        *)            shift ;;
     esac
 done
 
@@ -110,33 +117,92 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Determine send strategy: incremental from last common snap, or full
+# Determine send strategy: bookmark-based incremental, snapshot-based, or full
 # ---------------------------------------------------------------------------
 SEND_FLAGS=""
 [ "${RAW}"       = "1" ] && SEND_FLAGS="${SEND_FLAGS} -w"
 [ "${RECURSIVE}" = "1" ] && SEND_FLAGS="${SEND_FLAGS} -R"
 
-# Find the previous prefix snapshot on source (the one just before the new one).
-PREV_SNAP=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
-    | grep "^${DATASET}@${PREFIX}-" \
-    | grep -v "^${NEW_SNAP}$" \
-    | tail -1 || true)
+_incremental_send() {
+    local base="$1"
+    echo "$(date -Iseconds): Incremental send ${base} -> ${NEW_SNAP} to ${DEST}"
+    zfs send ${SEND_FLAGS} -i "${base}" "${NEW_SNAP}" \
+        | dest_exec zfs receive -F "${DEST}"
+}
 
-if [ -n "${PREV_SNAP}" ]; then
-    PREV_SNAPNAME="${PREV_SNAP##*@}"
-    # Check whether the destination already has that snapshot.
-    if dest_exec zfs list -H -t snapshot "${DEST}@${PREV_SNAPNAME}" \
-            >/dev/null 2>&1; then
-        echo "$(date -Iseconds): Incremental send ${PREV_SNAP} -> ${NEW_SNAP} to ${DEST}"
-        zfs send ${SEND_FLAGS} -i "${PREV_SNAP}" "${NEW_SNAP}" \
-            | dest_exec zfs receive -F "${DEST}"
-        echo "$(date -Iseconds): Replication completed successfully."
-        exit 0
-    else
-        echo "$(date -Iseconds): Destination missing base snapshot ${PREV_SNAPNAME}, falling back to full send."
+sent=0
+
+# Try bookmark-based incremental (preferred when --bookmarks is set).
+if [ "${USEBOOKMARKS}" = "1" ]; then
+    PREV_BK=$(zfs list -H -t bookmark -o name -r "${DATASET}" \
+        | grep "^${DATASET}#${PREFIX}-" | tail -1 || true)
+    if [ -n "${PREV_BK}" ]; then
+        PREV_SNAPNAME="${PREV_BK##*#}"
+        if dest_exec zfs list -H -t snapshot "${DEST}@${PREV_SNAPNAME}" \
+                >/dev/null 2>&1; then
+            _incremental_send "${PREV_BK}"
+            sent=1
+        else
+            echo "$(date -Iseconds): Destination missing base snapshot ${PREV_SNAPNAME}, trying snapshot-based incremental."
+        fi
     fi
 fi
 
-echo "$(date -Iseconds): Full send ${NEW_SNAP} -> ${DEST}"
-zfs send ${SEND_FLAGS} "${NEW_SNAP}" | dest_exec zfs receive -F "${DEST}"
+# Try snapshot-based incremental.
+if [ "${sent}" = "0" ]; then
+    PREV_SNAP=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
+        | grep "^${DATASET}@${PREFIX}-" \
+        | grep -v "^${NEW_SNAP}$" \
+        | tail -1 || true)
+    if [ -n "${PREV_SNAP}" ]; then
+        PREV_SNAPNAME="${PREV_SNAP##*@}"
+        if dest_exec zfs list -H -t snapshot "${DEST}@${PREV_SNAPNAME}" \
+                >/dev/null 2>&1; then
+            _incremental_send "${PREV_SNAP}"
+            sent=1
+        else
+            echo "$(date -Iseconds): Destination missing base snapshot ${PREV_SNAPNAME}, falling back to full send."
+        fi
+    fi
+fi
+
+# Full send if no incremental base was found.
+if [ "${sent}" = "0" ]; then
+    echo "$(date -Iseconds): Full send ${NEW_SNAP} -> ${DEST}"
+    zfs send ${SEND_FLAGS} "${NEW_SNAP}" | dest_exec zfs receive -F "${DEST}"
+fi
+
+# ---------------------------------------------------------------------------
+# Post-send: source snapshot pruning
+# ---------------------------------------------------------------------------
+if [ "${RETENTION}" -gt 0 ]; then
+    ALL_SNAPS=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
+        | grep "^${DATASET}@${PREFIX}-" || true)
+    SNAP_COUNT=$(printf '%s\n' "${ALL_SNAPS}" | grep -c . || true)
+    if [ "${SNAP_COUNT}" -gt "${RETENTION}" ]; then
+        TO_PRUNE=$(printf '%s\n' "${ALL_SNAPS}" | head -n $(( SNAP_COUNT - RETENTION )))
+        while IFS= read -r snap; do
+            [ -n "${snap}" ] || continue
+            echo "$(date -Iseconds): Pruning old source snapshot ${snap}"
+            [ "${RECURSIVE}" = "1" ] && zfs destroy -r "${snap}" || zfs destroy "${snap}"
+        done <<< "${TO_PRUNE}"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# Post-send: bookmark management
+# ---------------------------------------------------------------------------
+if [ "${USEBOOKMARKS}" = "1" ]; then
+    echo "$(date -Iseconds): Creating bookmark ${DATASET}#${SNAPNAME}"
+    zfs bookmark "${NEW_SNAP}" "${DATASET}#${SNAPNAME}"
+    OLD_BKS=$(zfs list -H -t bookmark -o name -r "${DATASET}" \
+        | grep "^${DATASET}#${PREFIX}-" \
+        | grep -v "^${DATASET}#${SNAPNAME}$" || true)
+    while IFS= read -r bk; do
+        [ -n "${bk}" ] || continue
+        echo "$(date -Iseconds): Removing old bookmark ${bk}"
+        zfs destroy "${bk}"
+    done <<< "${OLD_BKS}"
+fi
+
 echo "$(date -Iseconds): Replication completed successfully."

@@ -678,6 +678,10 @@
           "minimum": 1,
           "required": true
         },
+        "retentionunit": {
+          "type": "string",
+          "enum": ["count", "days", "weeks", "months", "years"]
+        },
         "recursive": {
           "type": "boolean"
         },
@@ -736,6 +740,9 @@
         "sendemail": {
           "type": "boolean"
         },
+        "emailonerror": {
+          "type": "boolean"
+        },
         "comment": {
           "type": "string"
         }
@@ -764,6 +771,13 @@
           "type": "boolean"
         },
         "raw": {
+          "type": "boolean"
+        },
+        "retention": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "usebookmarks": {
           "type": "boolean"
         },
         "prefix": {

@@ -29,7 +29,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 {%- else -%}
 @{{ job.execution }}
 {%- endif -%}
-{{ separator }}root{{ separator }}/usr/sbin/omv-zfs-replicate {{ job.dataset | quote }} {{ job.prefix | quote }} {{ job.dest | quote }} {{ job.type | quote }} {{ job.remotehost | default('') | quote }} {{ job.sshcertificateref | default('') | quote }} {{ job.sshuser | default('root') | quote }} {{ job.sshport | default(22) }} {{ '1' if job.recursive | to_bool else '0' }} {{ '1' if job.raw | to_bool else '0' -}}
+{{ separator }}root{{ separator }}/usr/sbin/omv-zfs-replicate {{ job.dataset | quote }} {{ job.prefix | quote }} {{ job.dest | quote }} {{ job.type | quote }} {{ job.remotehost | default('') | quote }} {{ job.sshcertificateref | default('') | quote }} {{ job.sshuser | default('root') | quote }} {{ job.sshport | default(22) }} {{ '1' if job.recursive | to_bool else '0' }} {{ '1' if job.raw | to_bool else '0' }} -r {{ job.retention | default(0) -}}
+{%- if job.usebookmarks | to_bool %} --bookmarks{% endif -%}
 {%- if job.sendemail | to_bool %} -e {{ 'onerror' if job.emailonerror | to_bool else 'always' }}{% if job.comment | length > 0 %} -c "{{ job.comment | replace('\n', ' ') }}"{% endif %}{% endif -%}
 {{ separator }}>/dev/null 2>&1
 {%- endfor %}

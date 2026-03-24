@@ -1,15 +1,55 @@
 #!/bin/bash
-# Create a ZFS snapshot and prune old ones by retention count.
-# Usage: omv-zfs-snapshot <dataset> <prefix> <retention> [recursive]
+# Create a ZFS snapshot and prune old ones.
+# Usage: omv-zfs-snapshot <dataset> <prefix> <retention> [recursive=0]
+#                         [-u count|days|weeks|months|years]
+#                         [-e always|onerror] [-c comment]
 set -euo pipefail
 
 LOGFILE="/var/log/omv-zfs-snapshot.log"
-exec > >(tee -a "$LOGFILE") 2>&1
 
 DATASET="$1"
 PREFIX="$2"
 RETENTION="${3:-7}"
 RECURSIVE="${4:-0}"
+shift 4 || true
+
+# Parse optional flags
+email_mode=""
+email_comment=""
+retention_unit="count"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -u) retention_unit="$2"; shift 2 ;;
+        -e) email_mode="$2";     shift 2 ;;
+        -c) email_comment="$2";  shift 2 ;;
+        *)  shift ;;
+    esac
+done
+
+# Output capture + email on exit
+tmpfile=""
+if [ -n "${email_mode}" ]; then
+    tmpfile=$(mktemp)
+    exec > "${tmpfile}" 2>&1
+else
+    exec > >(tee -a "${LOGFILE}") 2>&1
+fi
+
+_send_email() {
+    local rc="$1"
+    if [ -f "${tmpfile:-}" ]; then
+        cat "${tmpfile}" >> "${LOGFILE}"
+    fi
+    if [ -n "${email_mode}" ] && [ -f "${tmpfile:-}" ]; then
+        if [ "${email_mode}" = "always" ] || \
+           { [ "${email_mode}" = "onerror" ] && [ "${rc}" -ne 0 ]; }; then
+            mail -E -s "ZFS Snapshot${email_comment:+ - ${email_comment}}" \
+                 -a "From: Cron Daemon <root>" root < "${tmpfile}" >/dev/null 2>&1
+        fi
+        rm -f "${tmpfile}"
+    fi
+}
+trap '_send_email $?' EXIT
 SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
 
 if [ "${RECURSIVE}" = "1" ]; then
@@ -21,25 +61,44 @@ else
 fi
 
 # List snapshots matching our prefix on the parent dataset only, oldest first.
-# For recursive jobs the child snapshots share the same name, so counting
-# only the parent gives the correct number of generations.
+# For recursive jobs child snapshots share the same name; counting only the
+# parent gives the correct number of generations.
 SNAPS=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" 2>/dev/null \
     | grep "^${DATASET}@${PREFIX}-" || true)
 
-COUNT=$(printf '%s\n' "${SNAPS}" | grep -c . || true)
+_destroy_snap() {
+    local snap="$1"
+    if [ "${RECURSIVE}" = "1" ]; then
+        echo "$(date -Iseconds): Pruning old recursive snapshot ${snap}"
+        zfs destroy -r "${snap}"
+    else
+        echo "$(date -Iseconds): Pruning old snapshot ${snap}"
+        zfs destroy "${snap}"
+    fi
+}
 
-if [ "${COUNT}" -gt "${RETENTION}" ]; then
-    TO_DELETE=$(printf '%s\n' "${SNAPS}" | head -n $(( COUNT - RETENTION )))
-    while IFS= read -r snap; do
-        [ -n "${snap}" ] || continue
-        if [ "${RECURSIVE}" = "1" ]; then
-            echo "$(date -Iseconds): Pruning old recursive snapshot ${snap}"
-            zfs destroy -r "${snap}"
-        else
-            echo "$(date -Iseconds): Pruning old snapshot ${snap}"
-            zfs destroy "${snap}"
-        fi
-    done <<< "${TO_DELETE}"
+if [ "${retention_unit}" = "count" ]; then
+    COUNT=$(printf '%s\n' "${SNAPS}" | grep -c . || true)
+    if [ "${COUNT}" -gt "${RETENTION}" ]; then
+        TO_DELETE=$(printf '%s\n' "${SNAPS}" | head -n $(( COUNT - RETENTION )))
+        while IFS= read -r snap; do
+            [ -n "${snap}" ] || continue
+            _destroy_snap "${snap}"
+        done <<< "${TO_DELETE}"
+    fi
+else
+    # Time-based: delete snapshots whose name timestamp is older than the cutoff.
+    # Snapshot names are prefix-YYYYMMDD-HHMMSS, so lexicographic < means older.
+    cutoff_ts=$(date -d "now - ${RETENTION} ${retention_unit}" "+%Y%m%d-%H%M%S" 2>/dev/null || echo "")
+    if [ -n "${cutoff_ts}" ]; then
+        while IFS= read -r snap; do
+            [ -n "${snap}" ] || continue
+            snap_ts="${snap##*@${PREFIX}-}"
+            if [[ "${snap_ts}" < "${cutoff_ts}" ]]; then
+                _destroy_snap "${snap}"
+            fi
+        done <<< "${SNAPS}"
+    fi
 fi
 
 echo "$(date -Iseconds): Done. ${DATASET} has $(printf '%s\n' "${SNAPS}" | grep -c . || true) snapshot(s) matching prefix '${PREFIX}'."

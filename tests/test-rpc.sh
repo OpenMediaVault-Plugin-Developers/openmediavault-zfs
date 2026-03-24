@@ -888,6 +888,7 @@ print(json.dumps({
     'dataset':           '$POOL/fs1',
     'prefix':            'test-snap-',
     'retention':         5,
+    'retentionunit':     'count',
     'execution':         'daily',
     'minute':            ['0'],
     'hour':              ['2'],
@@ -898,6 +899,7 @@ print(json.dumps({
     'everynhour':        False,
     'everyndayofmonth':  False,
     'sendemail':         False,
+    'emailonerror':      False,
     'comment':           'test snapshot job',
 }))
 ")
@@ -988,6 +990,8 @@ print(json.dumps({
     'prefix':            'test-repl',
     'recursive':         False,
     'raw':               False,
+    'retention':         0,
+    'usebookmarks':      False,
     'type':              'local',
     'dest':              '$POOL/repldst',
     'remotehost':        '',
@@ -1153,7 +1157,139 @@ else
     _fail "omv-zfs-replicate — should have failed on nonexistent source" ""
 fi
 
+# ---------------------------------------------------------------------------
+# Retention pruning (-r N): source snapshots should be capped after each send.
+# Use a fresh source/dest pair so the snapshot count is predictable.
+# ---------------------------------------------------------------------------
+zfs create "$POOL/prunesrc" 2>/dev/null || true
+
+for _i in 1 2 3; do
+    [ "$_i" -gt 1 ] && sleep 1
+    /usr/sbin/omv-zfs-replicate \
+        "$POOL/prunesrc" "prune" "$POOL/prunedst" \
+        "local" "" "" "root" 22 0 0 -r 2 >/dev/null 2>&1 \
+        || true
+done
+
+PRUNE_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/prunesrc" \
+    2>/dev/null | grep -c "@prune-" || true)
+if [ "$PRUNE_COUNT" -le 2 ]; then
+    _pass "omv-zfs-replicate — -r 2: source has ≤2 snapshots after 3 sends"
+else
+    _fail "omv-zfs-replicate — -r 2: expected ≤2 source snapshots, found $PRUNE_COUNT" ""
+fi
+
+# ---------------------------------------------------------------------------
+# Bookmark-based replication (--bookmarks): verify bookmark is created and
+# used as the incremental base for subsequent sends.
+# ---------------------------------------------------------------------------
+zfs create "$POOL/bksrc" 2>/dev/null || true
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/bksrc" "bktest" "$POOL/bkdst" \
+        "local" "" "" "root" 22 0 0 --bookmarks >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --bookmarks: first send succeeded"
+else
+    _fail "omv-zfs-replicate — --bookmarks: first send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+if zfs list -H -t bookmark -o name -r "$POOL/bksrc" \
+        2>/dev/null | grep -q "#bktest-"; then
+    _pass "omv-zfs-replicate — --bookmarks: bookmark created after first send"
+else
+    _fail "omv-zfs-replicate — --bookmarks: no bookmark found after first send" ""
+fi
+
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/bksrc" "bktest" "$POOL/bkdst" \
+        "local" "" "" "root" 22 0 0 --bookmarks >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --bookmarks: second send (bookmark-based incremental) succeeded"
+else
+    _fail "omv-zfs-replicate — --bookmarks: second send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+BK_COUNT=$(zfs list -H -t bookmark -o name -r "$POOL/bksrc" \
+    2>/dev/null | grep -c "#bktest-" || true)
+if [ "$BK_COUNT" -eq 1 ]; then
+    _pass "omv-zfs-replicate — --bookmarks: old bookmark replaced (1 bookmark after 2 sends)"
+else
+    _fail "omv-zfs-replicate — --bookmarks: expected 1 bookmark, found $BK_COUNT" ""
+fi
+
+# With retention=1 and bookmarks the source keeps exactly 1 snapshot but can
+# still send incrementally (the bookmark provides the base).
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/bksrc" "bktest" "$POOL/bkdst" \
+        "local" "" "" "root" 22 0 0 -r 1 --bookmarks >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — -r 1 --bookmarks: third send succeeded"
+    BK_SNAP_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/bksrc" \
+        2>/dev/null | grep -c "@bktest-" || true)
+    if [ "$BK_SNAP_COUNT" -le 1 ]; then
+        _pass "omv-zfs-replicate — -r 1 --bookmarks: source keeps ≤1 snapshot"
+    else
+        _fail "omv-zfs-replicate — -r 1 --bookmarks: expected ≤1 source snapshot, found $BK_SNAP_COUNT" ""
+    fi
+else
+    _fail "omv-zfs-replicate — -r 1 --bookmarks: third send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
 # Script datasets are children of $POOL and will be destroyed with the pool.
+
+# ===========================================================================
+section "omv-zfs-snapshot script — time-based retention"
+# ===========================================================================
+# Verify that -u days pruning works by manufacturing a snapshot whose name
+# contains a 30-days-old timestamp (the script compares names lexicographically
+# so this is enough to trigger the pruning path without waiting).
+
+zfs create "$POOL/snaptsrc" 2>/dev/null || true
+
+OLD_TS=$(date -d "30 days ago" +%Y%m%d-%H%M%S)
+zfs snapshot "$POOL/snaptsrc@tstest-${OLD_TS}" 2>/dev/null || true
+
+# Run with 7-day retention — the 30-day-old snapshot should be pruned.
+if /usr/sbin/omv-zfs-snapshot \
+        "$POOL/snaptsrc" "tstest" 7 0 -u days >/dev/null 2>&1; then
+    _pass "omv-zfs-snapshot — -u days: script exits 0"
+else
+    _fail "omv-zfs-snapshot — -u days: script exited non-zero" \
+          "$(tail -5 /var/log/omv-zfs-snapshot.log 2>/dev/null)"
+fi
+
+# The artificially old snapshot should have been pruned.
+if ! zfs list -H -t snapshot "$POOL/snaptsrc@tstest-${OLD_TS}" &>/dev/null; then
+    _pass "omv-zfs-snapshot — -u days: old snapshot pruned correctly"
+else
+    _fail "omv-zfs-snapshot — -u days: 30-day-old snapshot was not pruned" ""
+fi
+
+# A snapshot created by this run (today) must NOT be pruned.
+TSTEST_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/snaptsrc" \
+    2>/dev/null | grep -c "@tstest-" || true)
+if [ "$TSTEST_COUNT" -ge 1 ]; then
+    _pass "omv-zfs-snapshot — -u days: recent snapshot retained"
+else
+    _fail "omv-zfs-snapshot — -u days: all snapshots were pruned (recent one should survive)" ""
+fi
+
+# Verify count-based retention still works correctly on the same dataset.
+sleep 1
+/usr/sbin/omv-zfs-snapshot "$POOL/snaptsrc" "tstest" 7 0 >/dev/null 2>&1 || true
+sleep 1
+/usr/sbin/omv-zfs-snapshot "$POOL/snaptsrc" "tstest" 1 0 >/dev/null 2>&1 || true
+
+TSTEST_FINAL=$(zfs list -H -t snapshot -o name -r "$POOL/snaptsrc" \
+    2>/dev/null | grep -c "@tstest-" || true)
+if [ "$TSTEST_FINAL" -le 1 ]; then
+    _pass "omv-zfs-snapshot — count mode: retention=1 caps to ≤1 snapshot"
+else
+    _fail "omv-zfs-snapshot — count mode: expected ≤1 snapshot, found $TSTEST_FINAL" ""
+fi
 
 # ===========================================================================
 section "Cron files — omv-salt deploy generates valid entries"
@@ -1171,6 +1307,7 @@ print(json.dumps({
     'dataset':          '$POOL',
     'prefix':           'crontest-',
     'retention':        3,
+    'retentionunit':    'count',
     'execution':        'daily',
     'minute':           ['0'],
     'hour':             ['3'],
@@ -1181,6 +1318,7 @@ print(json.dumps({
     'everynhour':       False,
     'everyndayofmonth': False,
     'sendemail':        False,
+    'emailonerror':     False,
     'comment':          'cron regression test',
 }))
 ")
@@ -1213,6 +1351,8 @@ print(json.dumps({
     'prefix':           'cronrepl',
     'recursive':        False,
     'raw':              False,
+    'retention':        0,
+    'usebookmarks':     False,
     'type':             'local',
     'dest':             '${POOL}/cronrepldst',
     'remotehost':       '',

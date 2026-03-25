@@ -103,6 +103,11 @@ dest_exec() {
     fi
 }
 
+run() {
+    echo "$(date -Iseconds): + $*"
+    "$@"
+}
+
 # ---------------------------------------------------------------------------
 # Log the full command for troubleshooting
 # ---------------------------------------------------------------------------
@@ -116,10 +121,10 @@ NEW_SNAP="${DATASET}@${SNAPNAME}"
 
 if [ "${RECURSIVE}" = "1" ]; then
     echo "$(date -Iseconds): Creating recursive snapshot ${NEW_SNAP}"
-    zfs snapshot -r "${NEW_SNAP}"
+    run zfs snapshot -r "${NEW_SNAP}"
 else
     echo "$(date -Iseconds): Creating snapshot ${NEW_SNAP}"
-    zfs snapshot "${NEW_SNAP}"
+    run zfs snapshot "${NEW_SNAP}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -132,6 +137,7 @@ SEND_FLAGS=""
 _incremental_send() {
     local base="$1"
     echo "$(date -Iseconds): Incremental send ${base} -> ${NEW_SNAP} to ${DEST}"
+    echo "$(date -Iseconds): + zfs send${SEND_FLAGS:+ ${SEND_FLAGS}} -i ${base} ${NEW_SNAP} | zfs receive -F ${DEST}"
     zfs send ${SEND_FLAGS} -i "${base}" "${NEW_SNAP}" \
         | dest_exec zfs receive -F "${DEST}"
 }
@@ -175,6 +181,7 @@ fi
 # Full send if no incremental base was found.
 if [ "${sent}" = "0" ]; then
     echo "$(date -Iseconds): Full send ${NEW_SNAP} -> ${DEST}"
+    echo "$(date -Iseconds): + zfs send${SEND_FLAGS:+ ${SEND_FLAGS}} ${NEW_SNAP} | zfs receive -F ${DEST}"
     zfs send ${SEND_FLAGS} "${NEW_SNAP}" | dest_exec zfs receive -F "${DEST}"
 fi
 
@@ -190,7 +197,7 @@ if [ "${RETENTION}" -gt 0 ]; then
         while IFS= read -r snap; do
             [ -n "${snap}" ] || continue
             echo "$(date -Iseconds): Pruning old source snapshot ${snap}"
-            [ "${RECURSIVE}" = "1" ] && zfs destroy -r "${snap}" || zfs destroy "${snap}"
+            [ "${RECURSIVE}" = "1" ] && run zfs destroy -r "${snap}" || run zfs destroy "${snap}"
         done <<< "${TO_PRUNE}"
     fi
 fi
@@ -200,14 +207,14 @@ fi
 # ---------------------------------------------------------------------------
 if [ "${USEBOOKMARKS}" = "1" ]; then
     echo "$(date -Iseconds): Creating bookmark ${DATASET}#${SNAPNAME}"
-    zfs bookmark "${NEW_SNAP}" "${DATASET}#${SNAPNAME}"
+    run zfs bookmark "${NEW_SNAP}" "${DATASET}#${SNAPNAME}"
     OLD_BKS=$(zfs list -H -t bookmark -o name -r "${DATASET}" \
         | grep "^${DATASET}#${PREFIX}-" \
         | grep -v "^${DATASET}#${SNAPNAME}$" || true)
     while IFS= read -r bk; do
         [ -n "${bk}" ] || continue
         echo "$(date -Iseconds): Removing old bookmark ${bk}"
-        zfs destroy "${bk}"
+        run zfs destroy "${bk}"
     done <<< "${OLD_BKS}"
 fi
 

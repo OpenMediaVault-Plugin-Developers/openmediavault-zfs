@@ -23,6 +23,7 @@
 set -euo pipefail
 
 LOGFILE="/var/log/omv-zfs-replicate.log"
+FULL_COMMAND="$0 $*"
 
 DATASET="${1:?dataset required}"
 PREFIX="${2:?prefix required}"
@@ -101,6 +102,11 @@ dest_exec() {
         "$@"
     fi
 }
+
+# ---------------------------------------------------------------------------
+# Log the full command for troubleshooting
+# ---------------------------------------------------------------------------
+echo "$(date -Iseconds): Command: ${FULL_COMMAND}"
 
 # ---------------------------------------------------------------------------
 # Create new snapshot on source

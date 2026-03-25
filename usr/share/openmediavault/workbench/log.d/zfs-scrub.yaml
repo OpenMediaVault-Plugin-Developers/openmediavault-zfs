@@ -1,0 +1,19 @@
+version: "1.0"
+type: log
+data:
+  id: omv-zfs-scrub
+  text: _("ZFS Scrub")
+  columns:
+    - name: _("Date/Time")
+      sortable: true
+      prop: ts
+      flexGrow: 2
+    - name: _("Message")
+      sortable: false
+      prop: message
+      flexGrow: 6
+  request:
+    service: LogFile
+    method: getList
+    params:
+      id: omv-zfs-scrub

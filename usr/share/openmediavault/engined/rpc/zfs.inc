@@ -3392,10 +3392,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.replicationjob', $params['uuid']);
         $j = $obj->getAssoc();
-        $retention     = (int)($j['retention'] ?? 0);
-        $bookmarksFlag = !empty($j['usebookmarks']) ? ' --bookmarks' : '';
+        $retention      = (int)($j['retention'] ?? 0);
+        $nosnapshot     = !empty($j['nosnapshot']);
+        $nosnapshotFlag = $nosnapshot ? ' --no-snapshot' : '';
+        $bookmarksFlag  = (!$nosnapshot && !empty($j['usebookmarks'])) ? ' --bookmarks' : '';
         $cmd = sprintf(
-            '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d -r %d%s 2>&1',
+            '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d -r %d%s%s 2>&1',
             escapeshellarg($j['dataset']),
             escapeshellarg($j['prefix']),
             escapeshellarg($j['dest']),
@@ -3407,6 +3409,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             !empty($j['recursive']) ? 1 : 0,
             !empty($j['raw']) ? 1 : 0,
             $retention,
+            $nosnapshotFlag,
             $bookmarksFlag
         );
         exec($cmd, $out, $res);

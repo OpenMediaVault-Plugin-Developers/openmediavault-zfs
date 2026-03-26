@@ -1130,6 +1130,103 @@ else
     _fail "skipping getReplicationJob/runReplicationJobBg/deleteReplicationJob — no UUID" ""
 fi
 
+# ---------------------------------------------------------------------------
+# Regression test: replication job with nosnapshot=true must pass --no-snapshot
+# to omv-zfs-replicate.  Bug: nosnapshot was missing from the RPC schema so it
+# was stripped before being saved, and runReplicationJob never appended the flag.
+# ---------------------------------------------------------------------------
+info "Creating source dataset $POOL/nssrc for nosnapshot replication test"
+zfs create "$POOL/nssrc" 2>/dev/null || true
+
+# Seed a snapshot as a standalone snapshot job would.
+NS_SNAP="auto-$(date +%Y%m%d-%H%M%S)"
+zfs snapshot "$POOL/nssrc@${NS_SNAP}"
+
+NS_REPL_JOB_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':              '$OMV_NEW_UUID',
+    'enable':            True,
+    'dataset':           '$POOL/nssrc',
+    'prefix':            'auto',
+    'recursive':         False,
+    'raw':               False,
+    'retention':         0,
+    'nosnapshot':        True,
+    'usebookmarks':      False,
+    'type':              'local',
+    'dest':              '$POOL/nsdst',
+    'remotehost':        '',
+    'sshcertificateref': '',
+    'sshuser':           'root',
+    'sshport':           22,
+    'execution':         'daily',
+    'minute':            ['0'],
+    'hour':              ['3'],
+    'dayofmonth':        ['*'],
+    'month':             ['*'],
+    'dayofweek':         ['*'],
+    'everynminute':      False,
+    'everynhour':        False,
+    'everyndayofmonth':  False,
+    'sendemail':         False,
+    'emailonerror':      False,
+    'comment':           'nosnapshot regression test',
+}))
+")
+NS_REPL_JOB_RAW=$(rpc "Zfs" "setReplicationJob" "$NS_REPL_JOB_PARAMS" 2>&1) && {
+    NS_REPL_JOB_UUID=$(echo "$NS_REPL_JOB_RAW" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    if [ -n "$NS_REPL_JOB_UUID" ]; then
+        _pass "setReplicationJob — create nosnapshot"
+    else
+        _fail "setReplicationJob — create nosnapshot" "UUID not found in response: ${NS_REPL_JOB_RAW:0:200}"
+    fi
+} || {
+    _fail "setReplicationJob — create nosnapshot" "${NS_REPL_JOB_RAW:0:200}"
+    NS_REPL_JOB_UUID=""
+}
+
+# Verify nosnapshot was persisted (was stripped before the schema fix).
+if [ -n "$NS_REPL_JOB_UUID" ]; then
+    NS_SAVED=$(rpc "Zfs" "getReplicationJob" "{\"uuid\":\"$NS_REPL_JOB_UUID\"}" 2>/dev/null \
+        | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('nosnapshot','MISSING'))" 2>/dev/null || echo "MISSING")
+    if [ "$NS_SAVED" = "True" ] || [ "$NS_SAVED" = "true" ]; then
+        _pass "setReplicationJob — nosnapshot persisted in config"
+    else
+        _fail "setReplicationJob — nosnapshot not persisted (got: $NS_SAVED); field was likely stripped by RPC schema" ""
+    fi
+
+    NS_SNAP_COUNT_BEFORE=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" 2>/dev/null | wc -l || echo 0)
+
+    assert_rpc_bg "runReplicationJobBg — nosnapshot" "Zfs" "runReplicationJobBg" \
+        "{\"uuid\":\"$NS_REPL_JOB_UUID\"}"
+
+    # No new snapshot should have been created on the source.
+    NS_SNAP_COUNT_AFTER=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" 2>/dev/null | wc -l || echo 0)
+    if [ "$NS_SNAP_COUNT_AFTER" -le "$NS_SNAP_COUNT_BEFORE" ]; then
+        _pass "runReplicationJobBg — nosnapshot: no new snapshot created on source"
+    else
+        _fail "runReplicationJobBg — nosnapshot: new snapshot was created (before=$NS_SNAP_COUNT_BEFORE after=$NS_SNAP_COUNT_AFTER); --no-snapshot flag was not passed" ""
+    fi
+
+    # Destination must have received the data.
+    if zfs list "$POOL/nsdst" &>/dev/null; then
+        _pass "runReplicationJobBg — nosnapshot: destination dataset created"
+    else
+        _fail "runReplicationJobBg — nosnapshot: destination dataset missing after send" ""
+    fi
+
+    assert_rpc "deleteReplicationJob — nosnapshot" "Zfs" "deleteReplicationJob" \
+        "{\"uuid\":\"$NS_REPL_JOB_UUID\"}"
+else
+    _fail "skipping nosnapshot replication job run — no UUID" ""
+fi
+
+info "Removing nosnapshot test datasets"
+zfs destroy -r "$POOL/nssrc" 2>/dev/null || true
+zfs destroy -r "$POOL/nsdst" 2>/dev/null || true
+
 # ===========================================================================
 section "omv-zfs-replicate script — local send"
 # ===========================================================================

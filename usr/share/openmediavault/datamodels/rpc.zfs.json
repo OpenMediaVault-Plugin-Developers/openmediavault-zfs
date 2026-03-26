@@ -777,6 +777,9 @@
           "type": "integer",
           "minimum": 0
         },
+        "nosnapshot": {
+          "type": "boolean"
+        },
         "usebookmarks": {
           "type": "boolean"
         },

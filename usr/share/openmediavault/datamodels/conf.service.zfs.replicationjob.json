@@ -28,6 +28,10 @@
       "minimum": 0,
       "default": 0
     },
+    "nosnapshot": {
+      "type": "boolean",
+      "default": false
+    },
     "usebookmarks": {
       "type": "boolean",
       "default": false

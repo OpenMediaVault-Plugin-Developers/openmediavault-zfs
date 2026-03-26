@@ -51,18 +51,35 @@ data:
         label: _("Raw send")
         hint: _("Use zfs send -w to send encrypted data without decrypting. Requires encryption on the source dataset.")
         value: false
+      - type: checkbox
+        name: nosnapshot
+        label: _("Use existing snapshots")
+        value: false
+        hint: _("Do not create a new snapshot. Instead, replicate the most recent existing snapshot matching the prefix. Use this when a separate snapshot job already manages snapshots for this dataset — this is the recommended approach when replicating to multiple destinations or at different frequencies, as it avoids conflicts between replication chains.")
       - type: numberInput
         name: retention
         label: _("Keep snapshots on source")
         value: 0
-        hint: _("Number of replication snapshots to keep on the source after each successful send. 0 = keep all.")
+        hint: _("Number of replication snapshots to keep on the source after each successful send. 0 = keep all. Source pruning can break incremental chains if multiple replication jobs share the same dataset and prefix — prefer 0 and manage retention with a dedicated snapshot job instead. Ignored when 'Use existing snapshots' is enabled.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: truthy
+              arg0:
+                prop: nosnapshot
         validators:
           min: 0
       - type: checkbox
         name: usebookmarks
         label: _("Use ZFS bookmarks")
         value: false
-        hint: _("After each successful send, create a ZFS bookmark as the incremental base. Allows pruning source snapshots to 1 while maintaining incremental replication.")
+        hint: _("After each successful send, create a ZFS bookmark as the incremental base. Allows pruning source snapshots to 1 while maintaining incremental replication. Not needed when 'Use existing snapshots' is enabled.")
+        modifiers:
+          - type: disabled
+            constraint:
+              operator: truthy
+              arg0:
+                prop: nosnapshot
       - type: divider
         title: _("Destination")
       - type: select

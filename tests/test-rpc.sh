@@ -1241,6 +1241,152 @@ fi
 # Script datasets are children of $POOL and will be destroyed with the pool.
 
 # ===========================================================================
+section "omv-zfs-replicate — --no-snapshot mode"
+# ===========================================================================
+# Tests for the "use existing snapshots" mode: replication should pick up the
+# most recent snapshot matching the prefix instead of creating a new one.
+# ---------------------------------------------------------------------------
+zfs create "$POOL/nssrc" 2>/dev/null || true
+
+# 1. No matching snapshot yet — must exit non-zero with a clear error.
+if ! /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc" "nstest" "$POOL/nsdst" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot: exits non-zero when no snapshot exists"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: expected failure with no source snapshot, got success" ""
+fi
+
+# 2. Create a snapshot as a standalone snapshot job would (no replication involvement).
+zfs snapshot "$POOL/nssrc@nstest-$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+NS_SNAP_BEFORE=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" \
+    2>/dev/null | grep -c "@nstest-" || true)
+
+# First --no-snapshot run: full send to a new destination.
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc" "nstest" "$POOL/nsdst" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot: first send (full) succeeded"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: first send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+if zfs list "$POOL/nsdst" &>/dev/null; then
+    _pass "omv-zfs-replicate — --no-snapshot: destination dataset created"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: destination dataset missing after full send" ""
+fi
+
+# 3. Source snapshot count must NOT have increased (replication created nothing).
+NS_SNAP_AFTER=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" \
+    2>/dev/null | grep -c "@nstest-" || true)
+if [ "$NS_SNAP_AFTER" -eq "$NS_SNAP_BEFORE" ]; then
+    _pass "omv-zfs-replicate — --no-snapshot: no new snapshot created on source"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: source snapshot count changed (before=$NS_SNAP_BEFORE after=$NS_SNAP_AFTER)" ""
+fi
+
+# 4. Running again immediately: destination already has the snapshot → exit 0, nothing sent.
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc" "nstest" "$POOL/nsdst" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot: exits 0 when destination is already up to date"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: expected success when destination is up to date" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+NS_SNAP_REPEAT=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" \
+    2>/dev/null | grep -c "@nstest-" || true)
+if [ "$NS_SNAP_REPEAT" -eq "$NS_SNAP_BEFORE" ]; then
+    _pass "omv-zfs-replicate — --no-snapshot: no snapshot created on repeat run"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: source snapshot count changed on repeat run (expected=$NS_SNAP_BEFORE found=$NS_SNAP_REPEAT)" ""
+fi
+
+# 5. Incremental send: add a new snapshot (as a snapshot job would), then replicate.
+sleep 1
+zfs snapshot "$POOL/nssrc@nstest-$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc" "nstest" "$POOL/nsdst" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot: incremental send succeeded"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: incremental send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+NS_DST_SNAP_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/nsdst" \
+    2>/dev/null | grep -c "@nstest-" || true)
+if [ "$NS_DST_SNAP_COUNT" -ge 2 ]; then
+    _pass "omv-zfs-replicate — --no-snapshot: ≥2 snapshots replicated to destination"
+else
+    _fail "omv-zfs-replicate — --no-snapshot: expected ≥2 dst snapshots after incremental, found $NS_DST_SNAP_COUNT" ""
+fi
+
+# 6. -r (retention) flag is ignored in --no-snapshot mode: source snapshots must not be pruned.
+NS_SNAP_PRE_PRUNE=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" \
+    2>/dev/null | grep -c "@nstest-" || true)
+sleep 1
+zfs snapshot "$POOL/nssrc@nstest-$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc" "nstest" "$POOL/nsdst" \
+        "local" "" "" "root" 22 0 0 -r 1 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot -r 1: send succeeded"
+    NS_SNAP_POST_PRUNE=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc" \
+        2>/dev/null | grep -c "@nstest-" || true)
+    # -r 1 should be ignored; source should still have its original count + 1 new
+    if [ "$NS_SNAP_POST_PRUNE" -gt "$NS_SNAP_PRE_PRUNE" ]; then
+        _pass "omv-zfs-replicate — --no-snapshot -r 1: source snapshots NOT pruned (retention ignored)"
+    else
+        _fail "omv-zfs-replicate — --no-snapshot -r 1: source snapshots were pruned despite --no-snapshot" ""
+    fi
+else
+    _fail "omv-zfs-replicate — --no-snapshot -r 1: send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# 7. Two replication jobs sharing the same source prefix and --no-snapshot do not
+#    conflict: both replicate independently to separate destinations.
+zfs create "$POOL/nssrc2" 2>/dev/null || true
+zfs snapshot "$POOL/nssrc2@nstest2-$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc2" "nstest2" "$POOL/nsdst2a" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot multi-dest: first destination send succeeded"
+else
+    _fail "omv-zfs-replicate — --no-snapshot multi-dest: first destination send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/nssrc2" "nstest2" "$POOL/nsdst2b" \
+        "local" "" "" "root" 22 0 0 --no-snapshot >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --no-snapshot multi-dest: second destination send succeeded"
+else
+    _fail "omv-zfs-replicate — --no-snapshot multi-dest: second destination send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+NS2_SRC_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/nssrc2" \
+    2>/dev/null | grep -c "@nstest2-" || true)
+if [ "$NS2_SRC_COUNT" -eq 1 ]; then
+    _pass "omv-zfs-replicate — --no-snapshot multi-dest: exactly 1 source snapshot (no extras created)"
+else
+    _fail "omv-zfs-replicate — --no-snapshot multi-dest: expected 1 source snapshot, found $NS2_SRC_COUNT" ""
+fi
+
+if zfs list "$POOL/nsdst2a" &>/dev/null && zfs list "$POOL/nsdst2b" &>/dev/null; then
+    _pass "omv-zfs-replicate — --no-snapshot multi-dest: both destination datasets exist"
+else
+    _fail "omv-zfs-replicate — --no-snapshot multi-dest: one or both destination datasets missing" ""
+fi
+
+# ===========================================================================
 section "omv-zfs-snapshot script — time-based retention"
 # ===========================================================================
 # Verify that -u days pruning works by manufacturing a snapshot whose name

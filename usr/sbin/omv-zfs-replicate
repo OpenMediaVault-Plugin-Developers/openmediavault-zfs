@@ -2,23 +2,25 @@
 # ZFS replication: snapshot source and send to destination (local or remote via SSH).
 # Usage: omv-zfs-replicate <dataset> <prefix> <dest> <type> <remotehost>
 #                          <certref> <sshuser> <sshport> <recursive> <raw>
-#                          [-r retention] [--bookmarks]
+#                          [-r retention] [--bookmarks] [--no-snapshot]
 #                          [-e always|onerror] [-c comment]
 #
-#   dataset      - source ZFS dataset (e.g. tank/data)
-#   prefix       - snapshot name prefix (e.g. replicate)
-#   dest         - destination dataset path (e.g. backup/data)
-#   type         - "local" or "remote"
-#   remotehost   - remote hostname/IP (ignored when type=local)
-#   certref      - OMV SSH certificate UUID (ignored when type=local, empty = default key)
-#   sshuser      - SSH user on remote (ignored when type=local)
-#   sshport      - SSH port on remote (ignored when type=local)
-#   recursive    - 1 to snapshot/send recursively, 0 otherwise
-#   raw          - 1 to use zfs send -w (raw/encrypted), 0 otherwise
-#   -r N         - keep N replication snapshots on source (0 = keep all)
-#   --bookmarks  - use ZFS bookmarks as incremental base; allows aggressive source pruning
-#   -e           - email mode: "always" or "onerror"
-#   -c           - email subject comment
+#   dataset       - source ZFS dataset (e.g. tank/data)
+#   prefix        - snapshot name prefix (e.g. replicate)
+#   dest          - destination dataset path (e.g. backup/data)
+#   type          - "local" or "remote"
+#   remotehost    - remote hostname/IP (ignored when type=local)
+#   certref       - OMV SSH certificate UUID (ignored when type=local, empty = default key)
+#   sshuser       - SSH user on remote (ignored when type=local)
+#   sshport       - SSH port on remote (ignored when type=local)
+#   recursive     - 1 to snapshot/send recursively, 0 otherwise
+#   raw           - 1 to use zfs send -w (raw/encrypted), 0 otherwise
+#   -r N          - keep N replication snapshots on source (0 = keep all); ignored with --no-snapshot
+#   --bookmarks   - use ZFS bookmarks as incremental base; allows aggressive source pruning
+#   --no-snapshot - do not create a new snapshot; replicate the most recent existing snapshot
+#                   matching the prefix. Use when a separate snapshot job manages the snapshots.
+#   -e            - email mode: "always" or "onerror"
+#   -c            - email subject comment
 
 set -euo pipefail
 
@@ -42,13 +44,15 @@ email_mode=""
 email_comment=""
 RETENTION=0
 USEBOOKMARKS=0
+NOSNAPSHOT=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -r)           RETENTION="$2";  shift 2 ;;
-        --bookmarks)  USEBOOKMARKS=1;  shift   ;;
-        -e)           email_mode="$2"; shift 2 ;;
-        -c)           email_comment="$2"; shift 2 ;;
-        *)            shift ;;
+        -r)            RETENTION="$2";  shift 2 ;;
+        --bookmarks)   USEBOOKMARKS=1;  shift   ;;
+        --no-snapshot) NOSNAPSHOT=1;    shift   ;;
+        -e)            email_mode="$2"; shift 2 ;;
+        -c)            email_comment="$2"; shift 2 ;;
+        *)             shift ;;
     esac
 done
 
@@ -114,17 +118,31 @@ run() {
 echo "$(date -Iseconds): Command: ${FULL_COMMAND}"
 
 # ---------------------------------------------------------------------------
-# Create new snapshot on source
+# Create new snapshot on source, or use the most recent existing one
 # ---------------------------------------------------------------------------
-SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
-NEW_SNAP="${DATASET}@${SNAPNAME}"
-
-if [ "${RECURSIVE}" = "1" ]; then
-    echo "$(date -Iseconds): Creating recursive snapshot ${NEW_SNAP}"
-    run zfs snapshot -r "${NEW_SNAP}"
+if [ "${NOSNAPSHOT}" = "1" ]; then
+    NEW_SNAP=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
+        | grep "^${DATASET}@${PREFIX}-" | tail -1 || true)
+    if [ -z "${NEW_SNAP}" ]; then
+        echo "$(date -Iseconds): ERROR: No snapshots found matching ${DATASET}@${PREFIX}-*. Cannot replicate."
+        exit 1
+    fi
+    SNAPNAME="${NEW_SNAP##*@}"
+    echo "$(date -Iseconds): Using existing snapshot ${NEW_SNAP} (--no-snapshot mode)"
+    if dest_exec zfs list -H -t snapshot "${DEST}@${SNAPNAME}" >/dev/null 2>&1; then
+        echo "$(date -Iseconds): Destination already has ${SNAPNAME}, replication is up to date."
+        exit 0
+    fi
 else
-    echo "$(date -Iseconds): Creating snapshot ${NEW_SNAP}"
-    run zfs snapshot "${NEW_SNAP}"
+    SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
+    NEW_SNAP="${DATASET}@${SNAPNAME}"
+    if [ "${RECURSIVE}" = "1" ]; then
+        echo "$(date -Iseconds): Creating recursive snapshot ${NEW_SNAP}"
+        run zfs snapshot -r "${NEW_SNAP}"
+    else
+        echo "$(date -Iseconds): Creating snapshot ${NEW_SNAP}"
+        run zfs snapshot "${NEW_SNAP}"
+    fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -186,9 +204,9 @@ if [ "${sent}" = "0" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Post-send: source snapshot pruning
+# Post-send: source snapshot pruning (skipped in --no-snapshot mode)
 # ---------------------------------------------------------------------------
-if [ "${RETENTION}" -gt 0 ]; then
+if [ "${RETENTION}" -gt 0 ] && [ "${NOSNAPSHOT}" = "0" ]; then
     ALL_SNAPS=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
         | grep "^${DATASET}@${PREFIX}-" || true)
     SNAP_COUNT=$(printf '%s\n' "${ALL_SNAPS}" | grep -c . || true)

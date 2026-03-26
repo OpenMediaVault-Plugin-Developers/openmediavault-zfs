@@ -170,6 +170,17 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Email on completion or on error only (same pattern as scrub jobs)
     - Run jobs on demand via datatable Run button
     - Output logged to /var/log/omv-zfs-replicate.log
+  * Add "Use existing snapshots" mode to replication jobs
+    - New option to skip snapshot creation and instead replicate the most
+      recent existing snapshot matching the prefix
+    - Enables a clean separation: a snapshot job manages creation and
+      retention; replication jobs just replicate without touching snapshots
+    - Solves incremental chain conflicts when multiple replication jobs share
+      the same source dataset (e.g. hourly local + daily remote)
+    - Destination already up-to-date is detected and logged gracefully
+    - Source retention pruning and bookmarks are disabled in this mode
+    - Retention and Use ZFS bookmarks fields are greyed out in the UI when
+      "Use existing snapshots" is enabled
   * Add time-based retention for scheduled snapshot jobs
     - New "Unit" selector alongside the existing "Keep" count field
     - Units: snapshots (count, default), days, weeks, months, years

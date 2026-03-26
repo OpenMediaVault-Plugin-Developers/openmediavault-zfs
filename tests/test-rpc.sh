@@ -926,6 +926,69 @@ else
     _fail "skipping getSnapshotJob/runSnapshotJobBg/deleteSnapshotJob — no UUID" ""
 fi
 
+# ---------------------------------------------------------------------------
+# Regression test: recursive snapshot job must snapshot child datasets too.
+# Bug: the cron template hardcoded the recursive argument as 0, so even when
+# recursive=true was saved, omv-zfs-snapshot was always called non-recursively.
+# ---------------------------------------------------------------------------
+info "Creating child dataset $POOL/fs1/child for recursive snapshot test"
+zfs create "$POOL/fs1/child" 2>/dev/null || true
+
+SNAP_JOB_REC_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':              '$OMV_NEW_UUID',
+    'enable':            True,
+    'dataset':           '$POOL/fs1',
+    'prefix':            'rec-snap',
+    'retention':         5,
+    'retentionunit':     'count',
+    'recursive':         True,
+    'execution':         'daily',
+    'minute':            ['0'],
+    'hour':              ['3'],
+    'dayofmonth':        ['*'],
+    'month':             ['*'],
+    'dayofweek':         ['*'],
+    'everynminute':      False,
+    'everynhour':        False,
+    'everyndayofmonth':  False,
+    'sendemail':         False,
+    'emailonerror':      False,
+    'comment':           'recursive regression test',
+}))
+")
+SNAP_JOB_REC_RAW=$(rpc "Zfs" "setSnapshotJob" "$SNAP_JOB_REC_PARAMS" 2>&1) && {
+    SNAP_JOB_REC_UUID=$(echo "$SNAP_JOB_REC_RAW" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+    if [ -n "$SNAP_JOB_REC_UUID" ]; then
+        _pass "setSnapshotJob — create recursive"
+    else
+        _fail "setSnapshotJob — create recursive" "UUID not found in response: ${SNAP_JOB_REC_RAW:0:200}"
+    fi
+} || {
+    _fail "setSnapshotJob — create recursive" "${SNAP_JOB_REC_RAW:0:200}"
+    SNAP_JOB_REC_UUID=""
+}
+
+if [ -n "$SNAP_JOB_REC_UUID" ]; then
+    assert_rpc_bg "runSnapshotJobBg — recursive" "Zfs" "runSnapshotJobBg" "{\"uuid\":\"$SNAP_JOB_REC_UUID\"}"
+
+    # Verify the snapshot was created on the child dataset (proves -r was passed).
+    if zfs list -H -t snapshot -o name -r "$POOL/fs1" 2>/dev/null \
+            | grep -q "^$POOL/fs1/child@rec-snap"; then
+        _pass "runSnapshotJobBg — recursive: child dataset $POOL/fs1/child received snapshot"
+    else
+        _fail "runSnapshotJobBg — recursive: child dataset $POOL/fs1/child missing snapshot (recursive flag not passed)" ""
+    fi
+
+    assert_rpc "deleteSnapshotJob — recursive" "Zfs" "deleteSnapshotJob" "{\"uuid\":\"$SNAP_JOB_REC_UUID\"}"
+else
+    _fail "skipping runSnapshotJobBg recursive / deleteSnapshotJob recursive — no UUID" ""
+fi
+
+info "Removing child dataset $POOL/fs1/child"
+zfs destroy -r "$POOL/fs1/child" 2>/dev/null || true
+
 # ===========================================================================
 section "Scheduled Scrub Jobs — CRUD and run"
 # ===========================================================================

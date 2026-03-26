@@ -29,7 +29,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 {%- else -%}
 @{{ job.execution }}
 {%- endif -%}
-{{ separator }}root{{ separator }}/usr/sbin/omv-zfs-snapshot {{ job.dataset | quote }} {{ job.prefix | quote }} {{ job.retention }} 0
+{{ separator }}root{{ separator }}/usr/sbin/omv-zfs-snapshot {{ job.dataset | quote }} {{ job.prefix | quote }} {{ job.retention }} {{ job.recursive | int }}
 {%- if (job.retentionunit | default('count')) != 'count' %} -u {{ job.retentionunit }}{% endif -%}
 {%- if job.sendemail | to_bool %} -e {{ 'onerror' if job.emailonerror | to_bool else 'always' }}{% if job.comment | length > 0 %} -c "{{ job.comment | replace('\n', ' ') }}"{% endif %}{% endif -%}
 {{ separator }}>/dev/null 2>&1

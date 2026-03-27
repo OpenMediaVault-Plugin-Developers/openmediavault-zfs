@@ -17,7 +17,7 @@ case "$1" in
     fi
 
     # run saltstack
-    omv-salt deploy run --no-color --quiet zfs zfszed zfscron || :
+    omv-salt deploy run --no-color zfs zfszed zfscron || :
 
     # Mark zfs module dirty if the zfs kernel module is not loaded
     if ! lsmod | grep -q "^zfs "; then

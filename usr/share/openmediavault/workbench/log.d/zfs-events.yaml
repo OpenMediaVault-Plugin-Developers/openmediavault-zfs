@@ -1,0 +1,23 @@
+version: "1.0"
+type: log
+data:
+  id: omv-zfs-events
+  text: _("ZFS Pool Events")
+  columns:
+    - name: _("Date/Time")
+      sortable: true
+      prop: ts
+      flexGrow: 2
+    - name: _("Pool")
+      sortable: true
+      prop: pool
+      flexGrow: 1
+    - name: _("Event")
+      sortable: true
+      prop: class
+      flexGrow: 4
+  request:
+    service: LogFile
+    method: getList
+    params:
+      id: omv-zfs-events

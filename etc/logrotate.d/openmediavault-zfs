@@ -1,0 +1,11 @@
+/var/log/omv-zfs-events.log
+/var/log/omv-zfs-replicate.log
+/var/log/omv-zfs-scrub.log
+/var/log/omv-zfs-snapshot.log {
+    missingok
+    rotate 12
+    weekly
+    maxsize 5M
+    compress
+    notifempty
+}

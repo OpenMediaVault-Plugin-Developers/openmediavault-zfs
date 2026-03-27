@@ -68,7 +68,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('cloneDataset');
         $this->registerMethod('promoteDataset');
         $this->registerMethod('getPoolHistory');
-        $this->registerMethod('getPoolEvents');
         $this->registerMethod('quickSnapshot');
         $this->registerMethod('getEmptyCandidates');
         $this->registerMethod('rollbackSnapshot');
@@ -1361,18 +1360,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         if (empty($out)) {
             return sprintf("No history available for pool '%s'.", $params['name']);
-        }
-        return implode("\n\r", $out);
-    }
-
-    public function getPoolEvents($params, $context)
-    {
-        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
-        if (!self::zfsTryExec('zpool events 2>&1', $out)) {
-            return 'ZFS event log unavailable.';
-        }
-        if (empty($out)) {
-            return 'No ZFS events logged.';
         }
         return implode("\n\r", $out);
     }

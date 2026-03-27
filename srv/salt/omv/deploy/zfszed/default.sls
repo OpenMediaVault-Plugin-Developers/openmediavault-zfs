@@ -33,10 +33,20 @@ create_zed-rc_config:
     - group: root
     - mode: 644
 
+deploy_omv_zfs_events_zed_script:
+  file.managed:
+    - name: /etc/zfs/zed.d/all-omv-zfs-events.sh
+    - source:
+      - salt://{{ tpldir }}/files/all-omv-zfs-events.sh
+    - user: root
+    - group: root
+    - mode: 755
+
 restart_zed_service:
   service.running:
     - name: zfs-zed
     - enable: True
     - watch:
       - file: create_zed-rc_config
+      - file: deploy_omv_zfs_events_zed_script
 

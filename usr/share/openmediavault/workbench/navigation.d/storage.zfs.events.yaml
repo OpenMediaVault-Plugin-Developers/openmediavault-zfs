@@ -1,8 +1,0 @@
-version: "1.0"
-type: navigation-item
-data:
-  path: "storage.zfs.events"
-  text: _("Pool Events")
-  position: 70
-  icon: mdi:bell-outline
-  url: "/storage/zfs/events"

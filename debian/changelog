@@ -191,8 +191,23 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Mirrors the existing emailonerror feature on scrub and replication jobs
     - Snapshot script refactored to use tmpfile + EXIT trap pattern so the
       email is only sent (or suppressed) after the full job completes
+  * Fix replication job failing when snapshot already exists (race with auto-snapshot job)
+    - omv-zfs-replicate now detects "dataset already exists" on snapshot creation
+      and uses the pre-existing snapshot for replication instead of exiting
+    - Affects setups where a snapshot job and replication job share the same prefix
+      and run at the same cron time
+  * Replace Pool Events tab with a persistent log viewer in Diagnostics → System Logs → Logs
+    - Pool Events tab (zpool events live query) removed from Storage → ZFS navigation
+    - ZED script all-omv-zfs-events.sh deployed to /etc/zfs/zed.d/ to log every
+      pool event to /var/log/omv-zfs-events.log as it occurs
+    - history_event entries include the ZFS command string (ZEVENT_HISTORY_INTERNAL_STR)
+    - Log viewer shows Date/Time, Pool, and Event columns
+  * Add logrotate config for all ZFS log files
+    - Covers omv-zfs-events.log, omv-zfs-replicate.log, omv-zfs-scrub.log,
+      omv-zfs-snapshot.log
+    - Weekly rotation, 12 weeks retention, compressed, 5 MB max size
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 24 Mar 2026 00:00:00 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 27 Mar 2026 00:00:00 +0000
 
 openmediavault-zfs (8.0.4) stable; urgency=low
 

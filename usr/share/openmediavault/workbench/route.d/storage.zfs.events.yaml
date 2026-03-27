@@ -1,6 +1,0 @@
-version: "1.0"
-type: route
-data:
-  url: "/storage/zfs/events"
-  title: _("Pool Events")
-  component: omv-storage-zfs-events-text-page

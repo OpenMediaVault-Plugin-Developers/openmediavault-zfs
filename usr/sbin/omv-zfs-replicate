@@ -136,13 +136,25 @@ if [ "${NOSNAPSHOT}" = "1" ]; then
 else
     SNAPNAME="${PREFIX}-$(date +%Y%m%d-%H%M%S)"
     NEW_SNAP="${DATASET}@${SNAPNAME}"
+    snap_err=$(mktemp)
     if [ "${RECURSIVE}" = "1" ]; then
         echo "$(date -Iseconds): Creating recursive snapshot ${NEW_SNAP}"
-        run zfs snapshot -r "${NEW_SNAP}"
+        snap_cmd="zfs snapshot -r ${NEW_SNAP}"
     else
         echo "$(date -Iseconds): Creating snapshot ${NEW_SNAP}"
-        run zfs snapshot "${NEW_SNAP}"
+        snap_cmd="zfs snapshot ${NEW_SNAP}"
     fi
+    echo "$(date -Iseconds): + ${snap_cmd}"
+    if ! ${snap_cmd} 2>"${snap_err}"; then
+        if grep -q "dataset already exists" "${snap_err}"; then
+            echo "$(date -Iseconds): Snapshot ${NEW_SNAP} already exists (created by another job), using it for replication."
+        else
+            cat "${snap_err}" >&2
+            rm -f "${snap_err}"
+            exit 1
+        fi
+    fi
+    rm -f "${snap_err}"
 fi
 
 # ---------------------------------------------------------------------------

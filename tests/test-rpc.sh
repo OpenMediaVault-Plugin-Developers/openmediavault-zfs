@@ -1318,6 +1318,47 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Regression: snapshot already exists (race with auto-snapshot job).
+# Simulate the case where a separate auto-snapshot job created a snapshot with
+# the same prefix-YYYYMMDD-HHMMSS name at the same second.  The replication
+# job must not fail — it should detect "dataset already exists", use the
+# pre-existing snapshot, and complete replication successfully.
+# ---------------------------------------------------------------------------
+sleep 1
+zfs create "$POOL/racesrc" 2>/dev/null || true
+# Pre-create the snapshot as an auto-snapshot job would.
+RACE_SNAP="stest-$(date +%Y%m%d-%H%M%S)"
+zfs snapshot "$POOL/racesrc@${RACE_SNAP}" 2>/dev/null || true
+
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/racesrc" "stest" "$POOL/racedst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — snapshot-already-exists race: exits 0"
+    if zfs list "$POOL/racedst" &>/dev/null; then
+        _pass "omv-zfs-replicate — snapshot-already-exists race: destination dataset created"
+    else
+        _fail "omv-zfs-replicate — snapshot-already-exists race: destination dataset missing after send" ""
+    fi
+    if zfs list -H -t snapshot -o name -r "$POOL/racedst" \
+            2>/dev/null | grep -q "@${RACE_SNAP}"; then
+        _pass "omv-zfs-replicate — snapshot-already-exists race: pre-existing snapshot replicated to destination"
+    else
+        _fail "omv-zfs-replicate — snapshot-already-exists race: pre-existing snapshot not found on destination" ""
+    fi
+    # Source should still have exactly the pre-existing snapshot (no duplicate created).
+    RACE_SRC_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/racesrc" \
+        2>/dev/null | grep -c "@stest-" || true)
+    if [ "$RACE_SRC_COUNT" -eq 1 ]; then
+        _pass "omv-zfs-replicate — snapshot-already-exists race: exactly 1 source snapshot (no duplicate)"
+    else
+        _fail "omv-zfs-replicate — snapshot-already-exists race: expected 1 source snapshot, found $RACE_SRC_COUNT" ""
+    fi
+else
+    _fail "omv-zfs-replicate — snapshot-already-exists race: job failed instead of using pre-existing snapshot" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# ---------------------------------------------------------------------------
 # Retention pruning (-r N): source snapshots should be capped after each send.
 # Use a fresh source/dest pair so the snapshot count is predictable.
 # ---------------------------------------------------------------------------

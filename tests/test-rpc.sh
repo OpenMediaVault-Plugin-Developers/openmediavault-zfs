@@ -1359,6 +1359,53 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Regression: interleaved snapshots from a separate job break incremental chain.
+# Simulates the case where an auto-snapshot job creates snapshots with the same
+# prefix between replication runs, so the source has snapshots the destination
+# has never seen.  The replication job must find the most recent common snapshot
+# (not just the newest source snapshot) and send incrementally from there.
+#
+# Timeline:
+#   rep-run-1:  replication creates stest-T1, full send to dest → dest has T1
+#   auto-snap:  auto-snapshot job creates stest-T2 (dest never gets it)
+#   rep-run-2:  replication creates stest-T3, must send T1→T3 (not full send)
+# ---------------------------------------------------------------------------
+sleep 1
+zfs create "$POOL/intlvsrc" 2>/dev/null || true
+
+# Run 1: full send — dest gets stest-T1.
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/intlvsrc" "stest" "$POOL/intlvdst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — interleaved: first (full) send succeeded"
+else
+    _fail "omv-zfs-replicate — interleaved: first send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# Simulate auto-snapshot job creating stest-T2 on source only (dest never gets it).
+sleep 1
+zfs snapshot "$POOL/intlvsrc@stest-$(date +%Y%m%d-%H%M%S)" 2>/dev/null || true
+
+# Run 2: replication creates stest-T3; must send T1→T3 (skip T2 as base).
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/intlvsrc" "stest" "$POOL/intlvdst" \
+        "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — interleaved: second send succeeded (found common base, not full send)"
+    INTLV_DST_COUNT=$(zfs list -H -t snapshot -o name -r "$POOL/intlvdst" \
+        2>/dev/null | grep -c "@stest-" || true)
+    if [ "$INTLV_DST_COUNT" -ge 2 ]; then
+        _pass "omv-zfs-replicate — interleaved: destination has ≥2 snapshots (incremental confirmed)"
+    else
+        _fail "omv-zfs-replicate — interleaved: expected ≥2 dst snapshots, found $INTLV_DST_COUNT (full send would give 1)" ""
+    fi
+else
+    _fail "omv-zfs-replicate — interleaved: second send failed (spurious full send or no common base found)" \
+          "$(tail -10 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+
+# ---------------------------------------------------------------------------
 # Retention pruning (-r N): source snapshots should be capped after each send.
 # Use a fresh source/dest pair so the snapshot count is predictable.
 # ---------------------------------------------------------------------------

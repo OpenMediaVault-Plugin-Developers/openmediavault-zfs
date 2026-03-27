@@ -191,20 +191,32 @@ if [ "${USEBOOKMARKS}" = "1" ]; then
 fi
 
 # Try snapshot-based incremental.
+# Collect all destination snapshots matching the prefix in a single call (one
+# SSH round-trip for remote), then walk source snapshots newest-to-oldest to
+# find the most recent one that exists on both sides.  This handles the case
+# where snapshots from another job (e.g. an auto-snapshot job sharing the same
+# prefix) exist on the source but were never replicated to the destination.
 if [ "${sent}" = "0" ]; then
-    PREV_SNAP=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
+    DST_SNAPS=$(dest_exec zfs list -H -t snapshot -o name -r "${DEST}" \
+        2>/dev/null | grep "^${DEST}@${PREFIX}-" | sed 's/.*@//' || true)
+    COMMON_BASE=""
+    while IFS= read -r snap; do
+        [ -n "${snap}" ] || continue
+        snapname="${snap##*@}"
+        if [[ $'\n'"${DST_SNAPS}"$'\n' == *$'\n'"${snapname}"$'\n'* ]]; then
+            COMMON_BASE="${snap}"
+            break
+        fi
+    done < <(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
         | grep "^${DATASET}@${PREFIX}-" \
         | grep -v "^${NEW_SNAP}$" \
-        | tail -1 || true)
-    if [ -n "${PREV_SNAP}" ]; then
-        PREV_SNAPNAME="${PREV_SNAP##*@}"
-        if dest_exec zfs list -H -t snapshot "${DEST}@${PREV_SNAPNAME}" \
-                >/dev/null 2>&1; then
-            _incremental_send "${PREV_SNAP}"
-            sent=1
-        else
-            echo "$(date -Iseconds): Destination missing base snapshot ${PREV_SNAPNAME}, falling back to full send."
-        fi
+        | tac \
+        || true)
+    if [ -n "${COMMON_BASE}" ]; then
+        _incremental_send "${COMMON_BASE}"
+        sent=1
+    else
+        echo "$(date -Iseconds): No common base snapshot found on source and destination, falling back to full send."
     fi
 fi
 

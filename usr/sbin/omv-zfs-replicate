@@ -124,7 +124,7 @@ if [ "${NOSNAPSHOT}" = "1" ]; then
     NEW_SNAP=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" \
         | grep "^${DATASET}@${PREFIX}-" | tail -1 || true)
     if [ -z "${NEW_SNAP}" ]; then
-        echo "$(date -Iseconds): ERROR: No snapshots found matching ${DATASET}@${PREFIX}-*. Cannot replicate."
+        echo "$(date -Iseconds): ERROR: No snapshots found matching ${DATASET}@${PREFIX}-*. Cannot replicate. Check that the snapshot prefix in this replication job matches the prefix used by the snapshot job managing this dataset."
         exit 1
     fi
     SNAPNAME="${NEW_SNAP##*@}"

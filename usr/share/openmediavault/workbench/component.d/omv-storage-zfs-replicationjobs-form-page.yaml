@@ -35,7 +35,7 @@ data:
         name: prefix
         label: _("Snapshot prefix")
         value: "replicate"
-        hint: _("Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS.")
+        hint: _("Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use existing snapshots' is enabled, this must exactly match the prefix used by the snapshot job that manages this dataset (e.g. 'auto') — a mismatch will cause replication to fail with 'No snapshots found'.")
         validators:
           required: true
           pattern:

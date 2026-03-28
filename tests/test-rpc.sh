@@ -2954,4 +2954,8 @@ if [ "${#FAILED_TESTS[@]}" -gt 0 ]; then
 fi
 echo
 
+systemctl restart monit
+omv-salt deploy run --quiet collectd fstab monit quota sftp zfscron zfs
+echo "[]" > /var/lib/openmediavault/dirtymodules.json
+
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1

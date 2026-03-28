@@ -1323,14 +1323,29 @@ fi
 # the same prefix-YYYYMMDD-HHMMSS name at the same second.  The replication
 # job must not fail — it should detect "dataset already exists", use the
 # pre-existing snapshot, and complete replication successfully.
+#
+# To make the test deterministic we inject a fake 'date' binary via PATH that
+# always returns the pre-created snapshot's timestamp for +%Y%m%d-%H%M%S
+# calls (the format used for snapshot naming).  Log-timestamp calls
+# (date -Iseconds) are forwarded to the real binary so the log stays valid.
 # ---------------------------------------------------------------------------
 sleep 1
 zfs create "$POOL/racesrc" 2>/dev/null || true
-# Pre-create the snapshot as an auto-snapshot job would.
-RACE_SNAP="stest-$(date +%Y%m%d-%H%M%S)"
+RACE_STAMP="$(date +%Y%m%d-%H%M%S)"
+RACE_SNAP="stest-${RACE_STAMP}"
 zfs snapshot "$POOL/racesrc@${RACE_SNAP}" 2>/dev/null || true
 
-if /usr/sbin/omv-zfs-replicate \
+_FAKE_DATE_DIR=$(mktemp -d)
+cat > "${_FAKE_DATE_DIR}/date" <<FAKE_DATE_EOF
+#!/bin/sh
+case "\$*" in
+    "+%Y%m%d-%H%M%S") echo "${RACE_STAMP}" ;;
+    *)                 /bin/date "\$@" ;;
+esac
+FAKE_DATE_EOF
+chmod +x "${_FAKE_DATE_DIR}/date"
+
+if PATH="${_FAKE_DATE_DIR}:${PATH}" /usr/sbin/omv-zfs-replicate \
         "$POOL/racesrc" "stest" "$POOL/racedst" \
         "local" "" "" "root" 22 0 0 >/dev/null 2>&1; then
     _pass "omv-zfs-replicate — snapshot-already-exists race: exits 0"
@@ -1357,6 +1372,7 @@ else
     _fail "omv-zfs-replicate — snapshot-already-exists race: job failed instead of using pre-existing snapshot" \
           "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
 fi
+rm -rf "${_FAKE_DATE_DIR}"
 
 # ---------------------------------------------------------------------------
 # Regression: interleaved snapshots from a separate job break incremental chain.

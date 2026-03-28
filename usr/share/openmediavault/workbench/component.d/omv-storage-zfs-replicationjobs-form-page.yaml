@@ -73,13 +73,19 @@ data:
         name: usebookmarks
         label: _("Use ZFS bookmarks")
         value: false
-        hint: _("After each successful send, create a ZFS bookmark as the incremental base. Allows pruning source snapshots to 1 while maintaining incremental replication. Not needed when 'Use existing snapshots' is enabled.")
+        hint: _("After each successful send, create a ZFS bookmark as the incremental base. Allows pruning source snapshots to 1 while maintaining incremental replication. Not compatible with 'Recursive' (ZFS does not support recursive sends from a bookmark) and not needed when 'Use existing snapshots' is enabled.")
         modifiers:
           - type: disabled
             constraint:
-              operator: truthy
+              operator: or
               arg0:
-                prop: nosnapshot
+                operator: truthy
+                arg0:
+                  prop: nosnapshot
+              arg1:
+                operator: truthy
+                arg0:
+                  prop: recursive
       - type: divider
         title: _("Destination")
       - type: select

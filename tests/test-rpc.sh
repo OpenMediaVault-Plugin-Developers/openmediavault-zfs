@@ -1486,6 +1486,39 @@ else
           "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
 fi
 
+# Regression test: --bookmarks with -r (recursive) must NOT attempt a
+# bookmark-based incremental send — ZFS rejects "zfs send -R -i bookmark snap"
+# with "multiple snapshots cannot be sent from a bookmark".  The fix silently
+# skips the bookmark path when RECURSIVE=1 and falls back to snapshot-based
+# incremental.  Verify two consecutive recursive+bookmark sends both succeed.
+zfs create "$POOL/bkrsrc" 2>/dev/null || true
+zfs create "$POOL/bkrsrc/child" 2>/dev/null || true
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/bkrsrc" "bkrtest" "$POOL/bkrdst" \
+        "local" "" "" "root" 22 1 0 --bookmarks >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --bookmarks + recursive: first send succeeded"
+else
+    _fail "omv-zfs-replicate — --bookmarks + recursive: first send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+sleep 1
+if /usr/sbin/omv-zfs-replicate \
+        "$POOL/bkrsrc" "bkrtest" "$POOL/bkrdst" \
+        "local" "" "" "root" 22 1 0 --bookmarks >/dev/null 2>&1; then
+    _pass "omv-zfs-replicate — --bookmarks + recursive: second send (snapshot-based incremental) succeeded"
+else
+    _fail "omv-zfs-replicate — --bookmarks + recursive: second send failed" \
+          "$(tail -5 /var/log/omv-zfs-replicate.log 2>/dev/null)"
+fi
+# No bookmarks should be created when recursive is enabled.
+BKR_BK_COUNT=$(zfs list -H -t bookmark -o name -r "$POOL/bkrsrc" \
+    2>/dev/null | grep -c "#bkrtest-" || true)
+if [ "$BKR_BK_COUNT" -eq 0 ]; then
+    _pass "omv-zfs-replicate — --bookmarks + recursive: no bookmarks created (correctly suppressed)"
+else
+    _fail "omv-zfs-replicate — --bookmarks + recursive: expected 0 bookmarks, found $BKR_BK_COUNT" ""
+fi
+
 # Script datasets are children of $POOL and will be destroyed with the pool.
 
 # ===========================================================================

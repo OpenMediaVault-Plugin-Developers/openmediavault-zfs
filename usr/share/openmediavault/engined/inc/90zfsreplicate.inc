@@ -19,7 +19,7 @@
 require_once("openmediavault/functions.inc");
 
 // Log format produced by omv-zfs-replicate:
-// 2026-03-25T10:00:00+00:00: Creating snapshot tank/data@replicate-20260325-100000
+// 2026-03-25T10:00:00+00:00: [tank/data -> backup/data] Creating snapshot tank/data@replicate-20260325-100000
 \OMV\System\LogFileSpec::registerSpecification("omv-zfs-replicate", [
     "filename" => "omv-zfs-replicate.log",
     "filepath" => "/var/log/omv-zfs-replicate.log",

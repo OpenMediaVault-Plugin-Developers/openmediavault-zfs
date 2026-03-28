@@ -3382,7 +3382,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $retention      = (int)($j['retention'] ?? 0);
         $nosnapshot     = !empty($j['nosnapshot']);
         $nosnapshotFlag = $nosnapshot ? ' --no-snapshot' : '';
-        $bookmarksFlag  = (!$nosnapshot && !empty($j['usebookmarks'])) ? ' --bookmarks' : '';
+        $bookmarksFlag  = (!$nosnapshot && !empty($j['usebookmarks']) && empty($j['recursive'])) ? ' --bookmarks' : '';
         $cmd = sprintf(
             '/usr/sbin/omv-zfs-replicate %s %s %s %s %s %s %s %d %d %d -r %d%s%s 2>&1',
             escapeshellarg($j['dataset']),

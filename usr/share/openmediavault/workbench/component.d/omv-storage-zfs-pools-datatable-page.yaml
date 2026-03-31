@@ -84,6 +84,11 @@ data:
         flexGrow: 1
         sortable: true
         hidden: true
+      - name: _("Devices")
+        prop: devices
+        flexGrow: 2
+        sortable: false
+        hidden: true
     actions:
       - type: menu
         icon: mdi:database

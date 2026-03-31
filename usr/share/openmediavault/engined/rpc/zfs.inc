@@ -2786,6 +2786,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'fragmentation' => $pz ? $pz['frag']     : 0,
                     'dedup'         => $pz ? $pz['dedup']    : '1.00x',
                     'capacity'      => $pz ? $pz['capacity'] : 0,
+                    'devices'       => implode('<br/>', $ps['devices'] ?? []),
                 ];
                 // Also emit the pool root as a Filesystem entry so it appears
                 // on the Datasets tab and its filesystem properties are accessible.
@@ -3031,6 +3032,17 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     $lastscrub = 'Never';
                     break;
             }
+            $sections = array_merge(
+                array_values($pool['vdevs'][$name]['vdevs'] ?? []),
+                array_values($pool['logs']    ?? []),
+                array_values($pool['l2cache'] ?? []),
+                array_values($pool['special'] ?? []),
+                array_values($pool['spares']  ?? [])
+            );
+            $devicePaths = [];
+            foreach ($sections as $vdev) {
+                self::collectLeafPaths($vdev, [], $devicePaths);
+            }
             $result[$name] = [
                 'state'         => $state,
                 'status'        => $status,
@@ -3039,6 +3051,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 'lastscrub'     => $lastscrub,
                 'removalstate'  => 'none',
                 'removalactive' => false,
+                'devices'       => $devicePaths,
             ];
         }
         // The JSON output does not include removal state, so parse the text

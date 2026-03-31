@@ -172,6 +172,16 @@ data:
                   operator: truthy
                   arg0:
                     prop: compress
+      - type: select
+        name: casesensitivity
+        label: _("Case sensitivity")
+        value: "sensitive"
+        store:
+          data:
+            - ["sensitive", _("Sensitive (default)")]
+            - ["insensitive", _("Insensitive")]
+            - ["mixed", _("Mixed")]
+        hint: _("Filename case sensitivity for the pool's root dataset. Cannot be changed after creation.")
     buttons:
       - template: submit
         execute:

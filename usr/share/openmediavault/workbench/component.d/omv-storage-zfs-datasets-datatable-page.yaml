@@ -193,6 +193,17 @@ data:
                         - ["256K", "256K"]
                         - ["512K", "512K"]
                         - ["1M", "1M"]
+                  - type: select
+                    name: casesensitivity
+                    label: _("Case sensitivity")
+                    value: ""
+                    hint: _("Filename case sensitivity. Cannot be changed after creation.")
+                    store:
+                      data:
+                        - ["", _("Inherit from parent")]
+                        - ["sensitive", _("Sensitive")]
+                        - ["insensitive", _("Insensitive")]
+                        - ["mixed", _("Mixed")]
                   - type: hidden
                     name: type
                     value: "filesystem"
@@ -301,6 +312,17 @@ data:
                         - ["256K", "256K"]
                         - ["512K", "512K"]
                         - ["1M", "1M"]
+                  - type: select
+                    name: casesensitivity
+                    label: _("Case sensitivity")
+                    value: ""
+                    hint: _("Filename case sensitivity. Cannot be changed after creation.")
+                    store:
+                      data:
+                        - ["", _("Inherit from parent")]
+                        - ["sensitive", _("Sensitive")]
+                        - ["insensitive", _("Insensitive")]
+                        - ["mixed", _("Mixed")]
                 buttons:
                   submit:
                     text: _("Add")

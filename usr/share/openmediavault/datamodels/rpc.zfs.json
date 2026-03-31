@@ -47,6 +47,15 @@
         "ashiftval": {
           "type": "integer",
           "required": true
+        },
+        "casesensitivity": {
+          "type": "string",
+          "enum": [
+            "sensitive",
+            "insensitive",
+            "mixed"
+          ],
+          "required": true
         }
       }
     }
@@ -475,6 +484,10 @@
         "recordsize": {
           "type": "string",
           "required": false
+        },
+        "casesensitivity": {
+          "type": "string",
+          "required": false
         }
       }
     }
@@ -510,6 +523,10 @@
           "required": false
         },
         "recordsize": {
+          "type": "string",
+          "required": false
+        },
+        "casesensitivity": {
           "type": "string",
           "required": false
         }

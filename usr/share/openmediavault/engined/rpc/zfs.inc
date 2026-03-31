@@ -408,6 +408,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             $opts .= sprintf('-o ashift=%s ', $params['ashiftval']);
         }
         $opts .= '-o failmode=continue -o autoexpand=on -O atime=off -O acltype=posix -O xattr=sa ';
+        $opts .= sprintf('-O casesensitivity=%s ', escapeshellarg($params['casesensitivity']));
         if (strlen($params['mountpoint']) > 0) {
             $opts .= sprintf('-m %s ', escapeshellarg($params['mountpoint']));
         }
@@ -659,6 +660,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 }
                 if (!empty($params['recordsize'])) {
                     $propOpts .= ' -o recordsize=' . escapeshellarg($params['recordsize']);
+                }
+                if (!empty($params['casesensitivity'])) {
+                    $propOpts .= ' -o casesensitivity=' . escapeshellarg($params['casesensitivity']);
                 }
                 $cmd = sprintf('zfs create -p%s %s 2>&1', $propOpts, escapeshellarg($name));
                 self::zfsExec($cmd, $out, $res);
@@ -1443,6 +1447,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         if (!empty($params['recordsize'])) {
             $encryptOpts .= ' -o recordsize=' . escapeshellarg($params['recordsize']);
+        }
+        if (!empty($params['casesensitivity'])) {
+            $encryptOpts .= ' -o casesensitivity=' . escapeshellarg($params['casesensitivity']);
         }
         $cmd = sprintf('zfs create %s %s 2>&1', $encryptOpts, escapeshellarg($fullPath));
         self::execWithStdin($cmd, $params['key']);

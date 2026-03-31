@@ -25,6 +25,7 @@ fi
 DEVICES=("$@")
 POOL="omvzfstest$$"
 STRIPE_POOL=""   # set later if a temporary vdev-removal test pool is created
+CASE_POOL=""     # set later if a temporary casesensitivity=insensitive pool is created
 
 # ---------------------------------------------------------------------------
 # Colours / counters
@@ -188,6 +189,8 @@ cleanup() {
     zpool destroy -f "$POOL" 2>/dev/null || true
     info "Destroying temporary stripe pool ${STRIPE_POOL:-} (if it exists)"
     [ -n "${STRIPE_POOL:-}" ] && zpool destroy -f "$STRIPE_POOL" 2>/dev/null || true
+    info "Destroying temporary case-sensitivity pool ${CASE_POOL:-} (if it exists)"
+    [ -n "${CASE_POOL:-}" ] && zpool destroy -f "$CASE_POOL" 2>/dev/null || true
     info "Clearing device labels"
     for dev in "${DEVICES[@]}"; do
         zpool labelclear -f "$dev" 2>/dev/null || true
@@ -294,16 +297,17 @@ section "Pool — create"
 ADDPOOL_PARAMS=$(python3 -c "
 import json, sys
 print(json.dumps({
-    'pooltype':    '$POOLTYPE',
-    'force':       True,
-    'mountpoint':  '',
-    'name':        '$POOL',
-    'devices':     $DEVICE_JSON,
-    'devalias':    'dev',
-    'ashift':      False,
-    'ashiftval':   0,
-    'compress':    False,
-    'compresstype':'lz4',
+    'pooltype':        '$POOLTYPE',
+    'force':           True,
+    'mountpoint':      '',
+    'name':            '$POOL',
+    'devices':         $DEVICE_JSON,
+    'devalias':        'dev',
+    'ashift':          False,
+    'ashiftval':       0,
+    'compress':        False,
+    'compresstype':    'lz4',
+    'casesensitivity': 'sensitive',
 }))
 ")
 assert_rpc "addPool ($POOLTYPE)" "Zfs" "addPool" "$ADDPOOL_PARAMS"
@@ -312,6 +316,14 @@ if zpool list "$POOL" &>/dev/null; then
     _pass "addPool — pool $POOL exists"
 else
     _fail "addPool — pool $POOL not found after create" ""
+fi
+
+# Verify casesensitivity was applied to the pool's root dataset.
+POOL_CASE=$(zfs get -H -o value casesensitivity "$POOL" 2>/dev/null || echo "")
+if [ "$POOL_CASE" = "sensitive" ]; then
+    _pass "addPool — casesensitivity=sensitive on root dataset"
+else
+    _fail "addPool — expected casesensitivity=sensitive, got '$POOL_CASE'"
 fi
 
 # Enable raidz_expansion if we reserved a device for the expansion test.
@@ -711,6 +723,94 @@ assert_rpc "setProperties (Filesystem) — atime=off" "Zfs" "setProperties" \
     "{\"name\":\"$POOL/fs1\",\"type\":\"Filesystem\",\"properties\":[{\"property\":\"atime\",\"value\":\"off\",\"modified\":true}]}"
 
 assert_rpc "getDatasetNames" "Zfs" "getDatasetNames" "{}" "$POOL"
+
+# ===========================================================================
+section "Case sensitivity — pool creation and filesystem creation"
+# ===========================================================================
+
+# Pool root dataset was created with casesensitivity=sensitive (verified above
+# immediately after addPool).  Create filesystems with each valid value and
+# confirm the ZFS property matches what was requested.
+
+# insensitive filesystem
+assert_rpc "addObject — filesystem fs_case_insensitive (casesensitivity=insensitive)" \
+    "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_case_insensitive\",\"mountpoint\":\"\",\"casesensitivity\":\"insensitive\"}"
+FS_CASE=$(zfs get -H -o value casesensitivity "$POOL/fs_case_insensitive" 2>/dev/null || echo "")
+if [ "$FS_CASE" = "insensitive" ]; then
+    _pass "addObject — casesensitivity=insensitive confirmed on $POOL/fs_case_insensitive"
+else
+    _fail "addObject — expected casesensitivity=insensitive, got '$FS_CASE'"
+fi
+
+# mixed filesystem
+assert_rpc "addObject — filesystem fs_case_mixed (casesensitivity=mixed)" \
+    "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_case_mixed\",\"mountpoint\":\"\",\"casesensitivity\":\"mixed\"}"
+FS_CASE=$(zfs get -H -o value casesensitivity "$POOL/fs_case_mixed" 2>/dev/null || echo "")
+if [ "$FS_CASE" = "mixed" ]; then
+    _pass "addObject — casesensitivity=mixed confirmed on $POOL/fs_case_mixed"
+else
+    _fail "addObject — expected casesensitivity=mixed, got '$FS_CASE'"
+fi
+
+# inherit (empty string) — should inherit sensitive from the pool root
+assert_rpc "addObject — filesystem fs_case_inherit (casesensitivity inherited)" \
+    "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_case_inherit\",\"mountpoint\":\"\",\"casesensitivity\":\"\"}"
+FS_CASE=$(zfs get -H -o value casesensitivity "$POOL/fs_case_inherit" 2>/dev/null || echo "")
+if [ "$FS_CASE" = "sensitive" ]; then
+    _pass "addObject — casesensitivity inherited as sensitive on $POOL/fs_case_inherit"
+else
+    _fail "addObject — expected inherited casesensitivity=sensitive, got '$FS_CASE'"
+fi
+
+# addPool with casesensitivity=insensitive — create a temporary pool to verify
+# the non-default pool value is applied correctly.
+if [ "${#DEVICES[@]}" -ge 1 ]; then
+    CASE_POOL="omvzfscasetest$$"
+    CASE_POOL_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'pooltype':        'basic',
+    'force':           True,
+    'mountpoint':      '',
+    'name':            '$CASE_POOL',
+    'devices':         ['${DEVICES[-1]}'],
+    'devalias':        'dev',
+    'ashift':          False,
+    'ashiftval':       0,
+    'compress':        False,
+    'compresstype':    'lz4',
+    'casesensitivity': 'insensitive',
+}))
+")
+    # Only run if the last device is not already part of any active pool.
+    LAST_DEV="${DEVICES[-1]}"
+    LAST_DEV_BASE=$(basename "$LAST_DEV")
+    if zpool status 2>/dev/null | grep -qE "^\s+($LAST_DEV|$LAST_DEV_BASE)\s"; then
+        info "Skipping insensitive-pool test — last device ($LAST_DEV) is part of an active pool"
+    else
+        assert_rpc "addPool — casesensitivity=insensitive pool" "Zfs" "addPool" "$CASE_POOL_PARAMS"
+        CASE_POOL_VAL=$(zfs get -H -o value casesensitivity "$CASE_POOL" 2>/dev/null || echo "")
+        if [ "$CASE_POOL_VAL" = "insensitive" ]; then
+            _pass "addPool — casesensitivity=insensitive confirmed on $CASE_POOL root dataset"
+        else
+            _fail "addPool — expected casesensitivity=insensitive on $CASE_POOL, got '$CASE_POOL_VAL'"
+        fi
+        zpool destroy -f "$CASE_POOL" 2>/dev/null || true
+    fi
+fi
+
+# Clean up case-sensitivity test datasets.
+for _cs_ds in "$POOL/fs_case_insensitive" "$POOL/fs_case_mixed" "$POOL/fs_case_inherit"; do
+    if zfs list -H -o name "$_cs_ds" >/dev/null 2>&1; then
+        _cs_mp=$(zfs get -H -o value mountpoint "$_cs_ds" 2>/dev/null || echo "")
+        assert_rpc "deleteObject — $_cs_ds" "Zfs" "deleteObject" \
+            "{\"name\":\"$_cs_ds\",\"mp\":\"$_cs_mp\",\"type\":\"Filesystem\"}"
+    fi
+done
+unset _cs_ds _cs_mp FS_CASE
 
 # ===========================================================================
 section "Snapshot — add, list, rollback, delete"

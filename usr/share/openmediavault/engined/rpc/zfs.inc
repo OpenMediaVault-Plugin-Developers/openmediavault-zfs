@@ -2588,14 +2588,31 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 if (in_array($mntpoint, ['-', 'none', 'legacy', '/'])) {
                     continue;
                 }
+                // Skip well-known OS/system mount points that must never be
+                // managed by this plugin, even on ZFS-on-root systems (e.g.
+                // bpool/BOOT/debian mounted at /boot per the OpenZFS Debian
+                // root-on-ZFS guide).
+                $skip = false;
+                foreach (['/boot', '/proc', '/sys', '/dev', '/run', '/tmp'] as $osPrefix) {
+                    if ($mntpoint === $osPrefix
+                            || str_starts_with($mntpoint, $osPrefix . '/')) {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) {
+                    continue;
+                }
                 $current[] = ['fsname' => $name, 'dir' => $mntpoint];
             }
         } catch (\Exception $e) {
             return;
         }
-        // Get existing ZFS fstab entries.
-        $prev = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
-        $prev = array_values(array_filter($prev, function ($e) {
+        // Fetch ALL fstab entries so we can detect directory conflicts below,
+        // then narrow to ZFS-only for the add/delete diff.
+        $allMntent     = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
+        $allMntentDirs = array_column($allMntent, 'dir');
+        $prev = array_values(array_filter($allMntent, function ($e) {
             return isset($e['type']) && $e['type'] === 'zfs';
         }));
         // Compare entries by fsname and dir.
@@ -2606,6 +2623,13 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Add entries that are in $current but missing from $prev.
         if ($addMissing) {
             foreach (array_udiff($current, $prev, $compare) as $object) {
+                // Skip if this dir is already owned by any mntent entry (even a
+                // non-ZFS one, e.g. a traditional /boot partition imported from
+                // the system fstab).  Without this check, FsTab set would throw
+                // a uniqueness-constraint error on the dir field.
+                if (in_array($object['dir'], $allMntentDirs)) {
+                    continue;
+                }
                 $uuid = \OMV\Environment::get('OMV_CONFIGOBJECT_NEW_UUID');
                 \OMV\Rpc\Rpc::call('FsTab', 'set', [
                     'uuid'   => $uuid,

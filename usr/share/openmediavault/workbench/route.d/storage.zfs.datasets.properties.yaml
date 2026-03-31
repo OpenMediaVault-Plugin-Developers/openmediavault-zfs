@@ -2,7 +2,8 @@ version: "1.0"
 type: route
 data:
   url: "/storage/zfs/dataset-properties"
-  title: _("Properties")
+  breadcrumb:
+    text: '{{ "Properties" | translate }} @ {{ _routeQueryParams.name }}'
   editing: true
   notificationTitle: _("Properties saved.")
   component: omv-storage-zfs-datasets-properties-form-page

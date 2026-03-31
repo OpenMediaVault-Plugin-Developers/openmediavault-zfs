@@ -2,6 +2,9 @@ version: "1.0"
 type: route
 data:
   url: "/storage/zfs/pools/properties/:name/:type"
+  title: _("Properties")
+  breadcrumb:
+    text: '{{ "Properties" | translate }} @ {{ _routeParams.name }}'
   editing: true
   notificationTitle: _("Properties saved.")
   component: omv-storage-zfs-pools-properties-form-page

@@ -767,6 +767,19 @@ assert_rpc "setProperties (Filesystem) — compression=lz4" "Zfs" "setProperties
 assert_rpc "setProperties (Filesystem) — atime=off" "Zfs" "setProperties" \
     "{\"name\":\"$POOL/fs1\",\"type\":\"Filesystem\",\"properties\":[{\"property\":\"atime\",\"value\":\"off\",\"modified\":true}]}"
 
+# ===========================================================================
+# Regression: setProperties on a dataset with a custom mountpoint must not
+# throw a schema validation error.  The old code called FsTab->getByFsName
+# which validates the fsname against UUID/devicefile formats — ZFS dataset
+# names like "pool/data" match neither and caused:
+#   fsname: The value "pool\/data" does not match exactly one schema of
+#   [{"type":"string","format":"fsuuid"},{"type":"string","format":"devicefile"}]
+# The fix enumerates entries directly instead of calling getByFsName.
+# ===========================================================================
+assert_rpc "setProperties (Filesystem) — fs2 custom mountpoint (relocateOMVMntEnt regression)" \
+    "Zfs" "setProperties" \
+    "{\"name\":\"$POOL/fs2\",\"type\":\"Filesystem\",\"properties\":[{\"property\":\"compression\",\"value\":\"lz4\",\"modified\":true}]}"
+
 assert_rpc "getDatasetNames" "Zfs" "getDatasetNames" "{}" "$POOL"
 
 # ===========================================================================

@@ -2483,7 +2483,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::zfsExec($cmd2, $mout, $mres);
             $parts      = preg_split('/\t+/', $mout[0] ?? '');
             $mountpoint = $parts[2] ?? '';
-            $object     = \OMV\Rpc\Rpc::call('FsTab', 'getByFsName', ['fsname' => $child], $context);
+            $entries = \OMV\Rpc\Rpc::call('FsTab', 'enumerateEntries', [], $context);
+            $object  = null;
+            foreach ($entries as $entry) {
+                if (isset($entry['fsname']) && $entry['fsname'] === $child) {
+                    $object = $entry;
+                    break;
+                }
+            }
             if ($object) {
                 $config = $db->get('conf.system.filesystem.mountpoint', $object['uuid']);
                 $config->set('dir', $mountpoint);

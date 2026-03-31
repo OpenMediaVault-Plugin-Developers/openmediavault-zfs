@@ -1407,6 +1407,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 'vendor'       => $sd->getVendor(),
                 'serialnumber' => $sd->getSerialNumber(),
                 'description'  => $sd->getDescription(),
+                'label'        => ($sn = $sd->getSerialNumber())
+                                    ? $sd->getDescription() . ", S/N: $sn"
+                                    : $sd->getDescription(),
             ];
         }
         return $result;

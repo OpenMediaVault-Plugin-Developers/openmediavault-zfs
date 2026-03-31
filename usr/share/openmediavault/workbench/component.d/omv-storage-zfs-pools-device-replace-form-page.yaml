@@ -38,7 +38,7 @@ data:
         name: newdevice
         label: _("Replacement device")
         valueField: devicefile
-        textField: devicefile
+        textField: label
         store:
           proxy:
             service: Zfs
@@ -46,7 +46,7 @@ data:
               method: getEmptyCandidates
           sorters:
             dir: asc
-            prop: devicefile
+            prop: label
         validators:
           required: true
     buttons:

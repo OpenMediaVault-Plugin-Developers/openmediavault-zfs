@@ -35,7 +35,7 @@ data:
         label: _("Devices")
         multiple: true
         valueField: devicefile
-        textField: devicefile
+        textField: label
         store:
           proxy:
             service: Zfs
@@ -43,7 +43,7 @@ data:
               method: getEmptyCandidates
           sorters:
             dir: asc
-            prop: devicefile
+            prop: label
         validators:
           required: true
           custom:

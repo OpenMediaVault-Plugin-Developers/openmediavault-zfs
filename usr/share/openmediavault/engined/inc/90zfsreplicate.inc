@@ -23,9 +23,10 @@ require_once("openmediavault/functions.inc");
 \OMV\System\LogFileSpec::registerSpecification("omv-zfs-replicate", [
     "filename" => "omv-zfs-replicate.log",
     "filepath" => "/var/log/omv-zfs-replicate.log",
-    "regex"    => "/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[^\s]*): (.*)$/",
+    "regex"    => "/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[^\s]*): (\[[^\]]+\]) (.*)$/",
     "columns"  => [
         "ts"      => 1,
-        "message" => 2,
+        "job"     => 2,
+        "message" => 3,
     ]
 ]);

@@ -8,6 +8,10 @@ data:
       sortable: true
       prop: ts
       flexGrow: 2
+    - name: _("Job")
+      sortable: true
+      prop: job
+      flexGrow: 3
     - name: _("Message")
       sortable: false
       prop: message

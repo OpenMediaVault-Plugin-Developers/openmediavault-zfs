@@ -360,6 +360,51 @@ assert_rpc "getPoolHealth" "Zfs" "getPoolHealth" "{}" "$POOL"
 assert_rpc "getPoolNames"  "Zfs" "getPoolNames"  "{}" "$POOL"
 
 # ===========================================================================
+section "Regression: degraded pool must still appear in listPoolsOnly"
+# ===========================================================================
+# Regression: older versions threw "Error 500: A mirror must contain at least
+# 2 disks" when listing pools if any mirror had only one active device.
+# The listing path must never validate pool topology — it should reflect reality.
+
+if [ "$POOLTYPE" = "mirror" ] && [ "${#POOL_DEVICES[@]}" -ge 2 ]; then
+    OFFLINE_DEV="${POOL_DEVICES[0]}"
+    info "Offlining $OFFLINE_DEV to simulate a degraded mirror"
+    zpool offline "$POOL" "$OFFLINE_DEV" 2>/dev/null || true
+    sleep 1
+
+    DEGRADE_OUT=$(omv-rpc -u admin "Zfs" "listPoolsOnly" \
+        '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' 2>&1)
+    DEGRADE_EC=$?
+    if [ $DEGRADE_EC -ne 0 ] || echo "$DEGRADE_OUT" | grep -qi "exception\|error"; then
+        _fail "listPoolsOnly — degraded mirror threw an error (regression)" \
+              "${DEGRADE_OUT:0:300}"
+    else
+        _pass "listPoolsOnly — degraded mirror listed without error"
+    fi
+
+    # Pool must still appear in the response with DEGRADED state.
+    DEGRADE_STATE=$(echo "$DEGRADE_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+rows = d.get('data', d) if isinstance(d, dict) else d
+match = next((r for r in rows if r.get('name') == '$POOL'), None)
+print(match['state'] if match else 'NOT_FOUND')
+" 2>/dev/null || echo "")
+    if [ "$DEGRADE_STATE" = "DEGRADED" ]; then
+        _pass "listPoolsOnly — degraded pool shows state=DEGRADED"
+    elif [ "$DEGRADE_STATE" = "NOT_FOUND" ]; then
+        _fail "listPoolsOnly — degraded pool missing from response entirely"
+    else
+        _pass "listPoolsOnly — degraded pool present with state='$DEGRADE_STATE'"
+    fi
+
+    zpool online "$POOL" "$OFFLINE_DEV" 2>/dev/null || true
+    info "Device $OFFLINE_DEV brought back online"
+else
+    info "Skipping degraded-mirror test (need mirror pool with >=2 devices; type is $POOLTYPE)"
+fi
+
+# ===========================================================================
 section "Device management — pool devices, top-level vdevs, vdev removal"
 # ===========================================================================
 
@@ -811,6 +856,80 @@ for _cs_ds in "$POOL/fs_case_insensitive" "$POOL/fs_case_mixed" "$POOL/fs_case_i
     fi
 done
 unset _cs_ds _cs_mp FS_CASE
+
+# ===========================================================================
+section "Regression: CLI zfs create must not reassign existing mntent entries"
+# ===========================================================================
+# Regression: older versions of fixOMVMntEnt matched mntent entries only by
+# mountpoint directory, not by (fsname, dir) pair.  When a new child dataset
+# was created via CLI (e.g. zfs create tank/stuff), discovery would find the
+# new dataset mounted inside an existing shared path and reassign existing
+# shared-folder mntent entries from "tank" to "tank/stuff".
+#
+# The current code compares by both fsname AND dir so it can only add new
+# entries, never silently reparent existing ones.
+
+assert_rpc "addObject — fs_mntfix1 (mntent regression)" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_mntfix1\",\"mountpoint\":\"\"}"
+assert_rpc "addObject — fs_mntfix2 (mntent regression)" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"fs_mntfix2\",\"mountpoint\":\"\"}"
+
+# Confirm mntent entries exist for both datasets immediately after creation.
+if [ "$(mntent_exists "$POOL/fs_mntfix1")" = "True" ]; then
+    _pass "mntent regression — fs_mntfix1 mntent entry created"
+else
+    _fail "mntent regression — fs_mntfix1 mntent entry not found after addObject"
+fi
+if [ "$(mntent_exists "$POOL/fs_mntfix2")" = "True" ]; then
+    _pass "mntent regression — fs_mntfix2 mntent entry created"
+else
+    _fail "mntent regression — fs_mntfix2 mntent entry not found after addObject"
+fi
+
+# Create a child dataset directly via CLI — bypassing the plugin entirely.
+info "Creating $POOL/fs_mntfix1/child via CLI (simulating user running zfs create directly)"
+zfs create "$POOL/fs_mntfix1/child" 2>/dev/null || true
+
+# Run discover so the plugin processes the new dataset.
+assert_rpc "doDiscover — after CLI zfs create (addMissing=true)" "Zfs" "doDiscover" \
+    '{"addMissing":true,"deleteStale":false}'
+
+# Core assertion: the original mntent entries must not have been reassigned.
+if [ "$(mntent_exists "$POOL/fs_mntfix1")" = "True" ]; then
+    _pass "mntent regression — fs_mntfix1 fsname unchanged after CLI child create + discover"
+else
+    _fail "mntent regression — fs_mntfix1 mntent entry gone or fsname changed (regression!)"
+fi
+if [ "$(mntent_exists "$POOL/fs_mntfix2")" = "True" ]; then
+    _pass "mntent regression — fs_mntfix2 fsname unchanged after CLI child create + discover"
+else
+    _fail "mntent regression — fs_mntfix2 mntent entry gone or fsname changed (regression!)"
+fi
+
+# The new child dataset must have got its own mntent entry, not stolen a parent's.
+if [ "$(mntent_exists "$POOL/fs_mntfix1/child")" = "True" ]; then
+    _pass "mntent regression — CLI-created child got its own mntent entry"
+    # Its dir must be its own mountpoint, not the parent's.
+    CHILD_DIR=$(mntent_dir "$POOL/fs_mntfix1/child")
+    PARENT_DIR=$(mntent_dir "$POOL/fs_mntfix1")
+    if [ "$CHILD_DIR" != "$PARENT_DIR" ]; then
+        _pass "mntent regression — child mntent dir differs from parent's ('$CHILD_DIR' vs '$PARENT_DIR')"
+    else
+        _fail "mntent regression — child and parent mntent share the same dir '$CHILD_DIR' (reassignment!)"
+    fi
+else
+    _pass "mntent regression — CLI-created child has no mntent entry (addMissing did not run or it has no mountpoint; acceptable)"
+fi
+
+# Cleanup — must destroy child before parent.
+for _mf_ds in "$POOL/fs_mntfix1/child" "$POOL/fs_mntfix1" "$POOL/fs_mntfix2"; do
+    if zfs list -H -o name "$_mf_ds" >/dev/null 2>&1; then
+        _mf_mp=$(zfs get -H -o value mountpoint "$_mf_ds" 2>/dev/null || echo "")
+        assert_rpc "deleteObject — $_mf_ds" "Zfs" "deleteObject" \
+            "{\"name\":\"$_mf_ds\",\"mp\":\"$_mf_mp\",\"type\":\"Filesystem\"}"
+    fi
+done
+unset _mf_ds _mf_mp CHILD_DIR PARENT_DIR
 
 # ===========================================================================
 section "Snapshot — add, list, rollback, delete"

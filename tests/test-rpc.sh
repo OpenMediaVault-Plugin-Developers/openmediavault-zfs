@@ -519,7 +519,7 @@ case "$POOLTYPE" in
         # Pick the first device from the pool status directly (RAIDZ members no longer
         # appear in getAttachAnchors, so we query zpool status instead).
         RAIDZ_DEV=$(zpool status -P "$POOL" 2>/dev/null \
-            | awk '/^\s+\//{print $1; exit}')
+            | awk '/^[[:space:]]+\//{print $1; exit}')
         if [ -n "$RAIDZ_DEV" ]; then
             assert_rpc_fails "deviceDetach on RAIDZ — clean error (not stack trace)" \
                 "Zfs" "deviceDetach" \
@@ -3048,6 +3048,10 @@ fi
 # Reload so zfs-mount-generator picks up the new cache entry and generates
 # the zfs-load-key@ unit, giving deleteObject something concrete to stop.
 systemctl daemon-reload 2>/dev/null || true
+# On slow physical servers systemd may still be activating the zfs-load-key@
+# unit (which mounts the dataset) when deleteObject is called.  Wait a moment
+# to ensure the mount is fully settled before attempting destruction.
+sleep 3
 
 ZLC_INSTANCE=$(systemd-escape -p "$ZLC_DS" 2>/dev/null || echo "")
 ZLC_UNIT="zfs-load-key@${ZLC_INSTANCE}.service"

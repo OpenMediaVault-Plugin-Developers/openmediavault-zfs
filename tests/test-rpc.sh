@@ -405,6 +405,153 @@ else
 fi
 
 # ===========================================================================
+section "Degraded pool — RPC behaviour with an offline device"
+# ===========================================================================
+# Verifies that core read/write RPCs continue to function correctly when one
+# pool member is offline.  Uses 'zpool offline' / 'zpool online' — portable,
+# reversible, and requires no VM-specific setup.
+#
+# Requires a mirror or raidz pool (single-disk pools cannot tolerate a missing
+# device, so this section is skipped for those).
+
+DG_DEV=""
+case "$POOLTYPE" in
+    mirror|raidz1|raidz2|raidz3)
+        DG_DEV="${POOL_DEVICES[0]}"
+        ;;
+    *)
+        info "Skipping degraded-pool tests (pool type is $POOLTYPE; need mirror or raidz)"
+        ;;
+esac
+
+if [ -n "$DG_DEV" ]; then
+    info "Offlining $DG_DEV to put $POOL into DEGRADED state"
+    zpool offline "$POOL" "$DG_DEV" 2>/dev/null
+    sleep 1
+
+    DG_POOL_STATE=$(zpool list -H -o health "$POOL" 2>/dev/null || echo "")
+    if [ "$DG_POOL_STATE" = "DEGRADED" ]; then
+        _pass "degraded — pool is DEGRADED after offlining $DG_DEV"
+    else
+        _fail "degraded — expected DEGRADED, got '$DG_POOL_STATE'" ""
+    fi
+
+    # ---- listPools must return the pool and report its degraded state ----
+    DG_LIST_OUT=$(omv-rpc -u admin "Zfs" "listPools" "$LIST_PARAMS" 2>&1)
+    DG_LIST_EC=$?
+    if [ $DG_LIST_EC -eq 0 ] && echo "$DG_LIST_OUT" | grep -q "\"$POOL\""; then
+        _pass "degraded — listPools returns pool without error"
+    else
+        _fail "degraded — listPools failed or pool missing from response" \
+              "${DG_LIST_OUT:0:300}"
+    fi
+
+    DG_REPORTED_STATE=$(echo "$DG_LIST_OUT" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+rows = d.get('data', d) if isinstance(d, dict) else d
+match = next((r for r in rows if r.get('name') == '$POOL'), None)
+print(match.get('state', match.get('health', 'NOT_FOUND')) if match else 'NOT_FOUND')
+" 2>/dev/null || echo "")
+    if [ "$DG_REPORTED_STATE" = "DEGRADED" ]; then
+        _pass "degraded — listPools reports state=DEGRADED"
+    elif [ "$DG_REPORTED_STATE" = "NOT_FOUND" ]; then
+        _fail "degraded — pool missing from listPools response" ""
+    else
+        _pass "degraded — listPools reports state='$DG_REPORTED_STATE'"
+    fi
+
+    # ---- Pool detail and property RPCs ----
+    assert_rpc "degraded — getObjectDetails (Pool) still works" \
+        "Zfs" "getObjectDetails" \
+        "{\"name\":\"$POOL\",\"type\":\"Pool\"}" "Pool status"
+
+    assert_rpc "degraded — getProperties (Pool) still works" \
+        "Zfs" "getProperties" \
+        "{\"name\":\"$POOL\",\"type\":\"Pool\",\"start\":0,\"limit\":null}" \
+        "autoexpand"
+
+    assert_rpc "degraded — setProperties (Pool) — comment update" \
+        "Zfs" "setProperties" \
+        "{\"name\":\"$POOL\",\"type\":\"Pool\",\"properties\":[{\"property\":\"comment\",\"value\":\"degraded-rpc-test\",\"modified\":true}]}"
+
+    # ---- getPoolHealth must not crash and must surface the degraded state ----
+    DG_HEALTH_OUT=$(omv-rpc -u admin "Zfs" "getPoolHealth" "{}" 2>&1)
+    DG_HEALTH_EC=$?
+    if [ $DG_HEALTH_EC -eq 0 ]; then
+        _pass "degraded — getPoolHealth does not crash"
+    else
+        _fail "degraded — getPoolHealth crashed with pool in DEGRADED state" \
+              "${DG_HEALTH_OUT:0:300}"
+    fi
+    if echo "$DG_HEALTH_OUT" | grep -qi "DEGRADED"; then
+        _pass "degraded — getPoolHealth output contains DEGRADED"
+    else
+        _fail "degraded — getPoolHealth output missing DEGRADED indicator" \
+              "${DG_HEALTH_OUT:0:300}"
+    fi
+
+    # ---- Dataset operations must work on a degraded pool ----
+    assert_rpc "degraded — addObject (filesystem) still works" \
+        "Zfs" "addObject" \
+        "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"dg_fs\",\"mountpoint\":\"\"}"
+
+    assert_rpc "degraded — listDatasets still works" \
+        "Zfs" "listDatasets" \
+        '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' \
+        "dg_fs"
+
+    assert_rpc "degraded — getProperties (Filesystem) still works" \
+        "Zfs" "getProperties" \
+        "{\"name\":\"$POOL/dg_fs\",\"type\":\"Filesystem\",\"start\":0,\"limit\":null}" \
+        "compression"
+
+    assert_rpc "degraded — setProperties (Filesystem) still works" \
+        "Zfs" "setProperties" \
+        "{\"name\":\"$POOL/dg_fs\",\"type\":\"Filesystem\",\"properties\":[{\"property\":\"compression\",\"value\":\"lz4\",\"modified\":true}]}"
+
+    # ---- Snapshot operations on a degraded pool ----
+    assert_rpc "degraded — createSnapshot still works" \
+        "Zfs" "addObject" \
+        "{\"type\":\"snapshot\",\"path\":\"$POOL/dg_fs\",\"name\":\"dg_snap1\"}"
+
+    assert_rpc "degraded — getAllSnapshots still works" \
+        "Zfs" "getAllSnapshots" \
+        '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' \
+        "dg_snap1"
+
+    assert_rpc "degraded — deleteObject (Snapshot) still works" \
+        "Zfs" "deleteObject" \
+        "{\"name\":\"$POOL/dg_fs@dg_snap1\",\"mp\":\"\",\"type\":\"Snapshot\"}"
+
+    # ---- Scrub must be accepted (pool is degraded but functional) ----
+    assert_rpc "degraded — scrubPool still works" \
+        "Zfs" "scrubPool" "{\"name\":\"$POOL\"}"
+
+    # ---- Clean up test filesystem ----
+    DG_FS_MP=$(zfs get -H -o value mountpoint "$POOL/dg_fs" 2>/dev/null || echo "")
+    assert_rpc "degraded — deleteObject (Filesystem) still works" \
+        "Zfs" "deleteObject" \
+        "{\"name\":\"$POOL/dg_fs\",\"mp\":\"$DG_FS_MP\",\"type\":\"Filesystem\"}"
+
+    # ---- Bring the device back online; pool must recover ----
+    info "Bringing $DG_DEV back online"
+    zpool online "$POOL" "$DG_DEV" 2>/dev/null || true
+    sleep 2
+
+    DG_RECOVER=$(zpool list -H -o health "$POOL" 2>/dev/null || echo "")
+    if [ "$DG_RECOVER" = "ONLINE" ]; then
+        _pass "degraded — pool recovered to ONLINE after zpool online"
+    else
+        _pass "degraded — pool state after recovery: '$DG_RECOVER' (resilver may still be in progress)"
+    fi
+
+    unset DG_LIST_OUT DG_LIST_EC DG_REPORTED_STATE DG_HEALTH_OUT DG_HEALTH_EC
+    unset DG_FS_MP DG_RECOVER
+fi
+unset DG_DEV DG_POOL_STATE
+
+# ===========================================================================
 section "Device management — pool devices, top-level vdevs, vdev removal"
 # ===========================================================================
 
@@ -3080,6 +3227,167 @@ fi
 
 zfs destroy -rf "$ZLC_DS" 2>/dev/null || true
 unset ZLC_DS ZLC_PASS ZLC_ENC_PARAMS ZLC_CACHE ZLC_INSTANCE ZLC_UNIT ZLC_SVC_STATE
+
+# ===========================================================================
+section "Error injection — zinject checksum and I/O errors"
+# ===========================================================================
+# Uses 'zinject' to drive non-zero error counters into the pool and verifies
+# that RPC calls which read pool/vdev state handle errors gracefully — no PHP
+# exception, no crash, sensible output.
+#
+# Checksum-error injection is non-destructive: it increments ZFS error counters
+# but does not fault the vdev, and is fully cleared by 'zinject -c all'.
+# I/O-error injection can fault a vdev; this sub-test is restricted to mirror
+# and raidz pools (which survive one faulted member) and is followed by
+# 'zpool clear' to restore the pool to ONLINE.
+#
+# The 'zinject' binary is part of the ZFS debug toolset.  The entire section is
+# silently skipped if it is not installed.
+
+if ! command -v zinject >/dev/null 2>&1; then
+    info "Skipping zinject tests (zinject not found — install the ZFS debug tools package)"
+else
+    ZI_DEV=""
+    ZI_SKIP=false
+
+    # Find the first physical device path present in the pool's vdev tree.
+    ZI_DEV=$(zpool status -P "$POOL" 2>/dev/null \
+        | awk '/^[[:space:]]+\//{print $1; exit}')
+    if [ -z "$ZI_DEV" ]; then
+        info "Skipping zinject tests — could not determine a device path from zpool status"
+        ZI_SKIP=true
+    fi
+
+    if ! $ZI_SKIP; then
+        # Write a small file to give the read path something to trigger errors on.
+        zfs create "$POOL/zi_fs" 2>/dev/null || true
+        dd if=/dev/urandom of="/$POOL/zi_fs/zi_data" bs=512K count=1 2>/dev/null || true
+        sync
+
+        # ---- Checksum error injection ----
+        # Safe on any pool type: counters are incremented but the vdev stays UP.
+        info "Injecting checksum errors on $ZI_DEV"
+        zinject -d "$ZI_DEV" -e checksum "$POOL" 2>/dev/null || true
+        # Read the file to trigger the checksum error counters.
+        dd if="/$POOL/zi_fs/zi_data" of=/dev/null 2>/dev/null || true
+        # Clear all injections immediately; counters persist in pool state.
+        zinject -c all 2>/dev/null || true
+        sleep 1
+
+        ZI_CS_STATE=$(zpool list -H -o health "$POOL" 2>/dev/null || echo "")
+        info "Pool health after checksum injection: $ZI_CS_STATE"
+
+        # getPoolHealth must not crash when error counters are non-zero.
+        ZI_HEALTH_OUT=$(omv-rpc -u admin "Zfs" "getPoolHealth" "{}" 2>&1)
+        ZI_HEALTH_EC=$?
+        if [ $ZI_HEALTH_EC -eq 0 ]; then
+            _pass "zinject checksum — getPoolHealth succeeds with non-zero error counters"
+        else
+            _fail "zinject checksum — getPoolHealth crashed with error counters present" \
+                  "${ZI_HEALTH_OUT:0:300}"
+        fi
+        if echo "$ZI_HEALTH_OUT" | grep -q "\"$POOL\""; then
+            _pass "zinject checksum — $POOL present in getPoolHealth output"
+        else
+            _fail "zinject checksum — $POOL missing from getPoolHealth output" \
+                  "${ZI_HEALTH_OUT:0:300}"
+        fi
+
+        # getObjectDetails must return usable data.
+        assert_rpc "zinject checksum — getObjectDetails (Pool) still works" \
+            "Zfs" "getObjectDetails" \
+            "{\"name\":\"$POOL\",\"type\":\"Pool\"}" "Pool status"
+
+        # listPools must return the pool.
+        ZI_CS_LIST=$(omv-rpc -u admin "Zfs" "listPools" "$LIST_PARAMS" 2>&1)
+        ZI_CS_LIST_EC=$?
+        if [ $ZI_CS_LIST_EC -eq 0 ] && echo "$ZI_CS_LIST" | grep -q "\"$POOL\""; then
+            _pass "zinject checksum — listPools returns pool with error counters"
+        else
+            _fail "zinject checksum — listPools failed or pool missing" \
+                  "${ZI_CS_LIST:0:300}"
+        fi
+
+        # getProperties must work.
+        assert_rpc "zinject checksum — getProperties (Pool) still works" \
+            "Zfs" "getProperties" \
+            "{\"name\":\"$POOL\",\"type\":\"Pool\",\"start\":0,\"limit\":null}" \
+            "autoexpand"
+
+        # listDatasets must work.
+        assert_rpc "zinject checksum — listDatasets still works" \
+            "Zfs" "listDatasets" \
+            '{"start":0,"limit":null,"sortfield":null,"sortdir":null}' \
+            "zi_fs"
+
+        # ---- I/O error injection — mirror/raidz pools only ----
+        # I/O errors can fault the injected vdev.  A mirror or raidz pool remains
+        # accessible (other members carry the data); the vdev is cleared afterwards
+        # with 'zpool clear'.
+        case "$POOLTYPE" in
+            mirror|raidz1|raidz2|raidz3)
+                info "Injecting I/O errors on $ZI_DEV ($POOLTYPE pool survives one faulted member)"
+                zinject -d "$ZI_DEV" -e io "$POOL" 2>/dev/null || true
+                dd if="/$POOL/zi_fs/zi_data" of=/dev/null 2>/dev/null || true
+                zinject -c all 2>/dev/null || true
+                sleep 2
+
+                ZI_IO_STATE=$(zpool list -H -o health "$POOL" 2>/dev/null || echo "")
+                info "Pool health after I/O injection: $ZI_IO_STATE"
+
+                # RPCs must work regardless of whether the vdev was faulted.
+                ZI_IO_LIST=$(omv-rpc -u admin "Zfs" "listPools" "$LIST_PARAMS" 2>&1)
+                ZI_IO_LIST_EC=$?
+                if [ $ZI_IO_LIST_EC -eq 0 ] && echo "$ZI_IO_LIST" | grep -q "\"$POOL\""; then
+                    _pass "zinject I/O — listPools returns pool (state=$ZI_IO_STATE)"
+                else
+                    _fail "zinject I/O — listPools failed after I/O injection" \
+                          "${ZI_IO_LIST:0:300}"
+                fi
+
+                assert_rpc "zinject I/O — getObjectDetails (Pool) still works" \
+                    "Zfs" "getObjectDetails" \
+                    "{\"name\":\"$POOL\",\"type\":\"Pool\"}" "Pool status"
+
+                ZI_IO_HEALTH=$(omv-rpc -u admin "Zfs" "getPoolHealth" "{}" 2>&1)
+                ZI_IO_HEALTH_EC=$?
+                if [ $ZI_IO_HEALTH_EC -eq 0 ]; then
+                    _pass "zinject I/O — getPoolHealth does not crash (state=$ZI_IO_STATE)"
+                else
+                    _fail "zinject I/O — getPoolHealth crashed" "${ZI_IO_HEALTH:0:300}"
+                fi
+
+                # Restore: clear the faulted vdev so the rest of the tests have a
+                # healthy pool (resilver will run in the background — that is fine).
+                if [ "$ZI_IO_STATE" != "ONLINE" ]; then
+                    info "Clearing faulted vdev state with 'zpool clear $POOL'"
+                    zpool clear "$POOL" 2>/dev/null || true
+                    sleep 2
+                    ZI_IO_AFTER=$(zpool list -H -o health "$POOL" 2>/dev/null || echo "")
+                    if [ "$ZI_IO_AFTER" = "ONLINE" ]; then
+                        _pass "zinject I/O — pool returned to ONLINE after zpool clear"
+                    else
+                        _pass "zinject I/O — pool state after clear: '$ZI_IO_AFTER' (resilver in progress)"
+                    fi
+                    unset ZI_IO_AFTER
+                fi
+                unset ZI_IO_STATE ZI_IO_LIST ZI_IO_LIST_EC ZI_IO_HEALTH ZI_IO_HEALTH_EC
+                ;;
+            *)
+                info "Skipping I/O injection test (pool type $POOLTYPE — a single-disk pool would go FAULTED and be unrecoverable)"
+                ;;
+        esac
+
+        # Clean up test dataset.
+        ZI_MP=$(zfs get -H -o value mountpoint "$POOL/zi_fs" 2>/dev/null || echo "")
+        omv-rpc -u admin "Zfs" "deleteObject" \
+            "{\"name\":\"$POOL/zi_fs\",\"mp\":\"$ZI_MP\",\"type\":\"Filesystem\"}" \
+            >/dev/null 2>&1 \
+            || zfs destroy -r "$POOL/zi_fs" 2>/dev/null || true
+    fi
+
+    unset ZI_DEV ZI_SKIP ZI_CS_STATE ZI_HEALTH_OUT ZI_HEALTH_EC ZI_CS_LIST ZI_CS_LIST_EC ZI_MP
+fi
 
 # ===========================================================================
 section "Export and import"

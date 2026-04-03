@@ -832,7 +832,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 foreach ($devices as $device) {
                     self::zfsTryExec(sprintf('zpool labelclear %s 2>&1', escapeshellarg($device)));
                     self::zfsTryExec(sprintf('wipefs -a %s 2>&1', escapeshellarg($device)));
-                    print_r("wipefs");
                 }
                 self::cleanupJobsForPool($name);
                 break;

@@ -105,8 +105,7 @@
           "required": true
         },
         "oldname": {
-          "type": "string",
-          "required": true
+          "type": "string"
         },
         "type": {
           "type": "string",
@@ -963,6 +962,9 @@
           "type": "boolean"
         },
         "sendemail": {
+          "type": "boolean"
+        },
+        "emailonerror": {
           "type": "boolean"
         },
         "comment": {

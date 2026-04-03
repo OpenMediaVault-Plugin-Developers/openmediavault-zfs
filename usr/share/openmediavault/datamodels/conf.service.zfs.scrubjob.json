@@ -47,6 +47,9 @@
     "sendemail": {
       "type": "boolean"
     },
+    "emailonerror": {
+      "type": "boolean"
+    },
     "comment": {
       "type": "string"
     }

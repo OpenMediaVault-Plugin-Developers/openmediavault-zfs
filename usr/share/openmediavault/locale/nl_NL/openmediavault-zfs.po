@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 21:25+0000\n"
+"POT-Creation-Date: 2026-04-03 13:47+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2025-2026\n"
 "Language-Team: Dutch (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/nl/)\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "‘Momentopnames’ behoudt N meest recente; tijdseenheden verwijderen momentopnames ouder dan N dagen/weken/maanden/jaren."
 
 msgid "A different name must be specified."
 msgstr "Er moet een andere naam worden opgegeven."
@@ -35,13 +35,13 @@ msgid "Add"
 msgstr "Toevoegen"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "Speciaal apparaat toevoegen"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "Cache/logboek/reserve/speciaal toevoegen"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "Versleuteld bestandssysteem toevoegen"
 
 msgid "Add filesystem"
 msgstr "Bestandssysteem toevoegen"
@@ -79,13 +79,13 @@ msgid ""
 "replication. Not compatible with 'Recursive' (ZFS does not support recursive"
 " sends from a bookmark) and not needed when 'Use existing snapshots' is "
 "enabled."
-msgstr ""
+msgstr "Maak na elke succesvolle verzending een ZFS-bladwijzer aan als de incrementele basis. Hiermee kan het aantal bron-momentopnames worden teruggebracht tot 1 terwijl incrementele replicatie behouden blijft. Niet compatibel met 'Recursief' (ZFS ondersteunt geen recursieve verzendingen vanaf een bladwijzer) en niet nodig wanneer 'Bestaande momentopnames gebruiken' is ingeschakeld."
 
 msgid "Algorithm"
 msgstr "Algoritme"
 
 msgid "All snapshots deleted."
-msgstr ""
+msgstr "Alle momentopnames verwijderd."
 
 msgid "Alloc"
 msgstr "Alloc"
@@ -93,21 +93,21 @@ msgstr "Alloc"
 msgid ""
 "Allow self-signed or untrusted certificates. Use only on trusted local "
 "networks."
-msgstr ""
+msgstr "Zelf-ondertekende of niet-vertrouwde certificaten toestaan. Gebruik alleen op vertrouwde lokale netwerken."
 
 msgid "Anchor (existing device or RAIDZ vdev)"
-msgstr ""
+msgstr "Anker (bestaand apparaat of RAIDZ vdev)"
 
 msgid "April"
 msgstr "April"
 
 msgid "Are you sure you want to add this device to the pool?"
-msgstr ""
+msgstr "Weet u zeker dat u dit apparaat aan de pool wilt toevoegen?"
 
 msgid ""
 "Are you sure you want to cancel the vdev removal? Data evacuation will stop "
 "and the vdev will remain in the pool."
-msgstr ""
+msgstr "Weet u zeker dat u het verwijderen van de vdev wilt annuleren? Het evacueren van gegevens wordt gestopt en de vdev blijft in de pool."
 
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
@@ -117,26 +117,26 @@ msgstr ""
 msgid ""
 "Are you sure you want to delete ALL snapshots on the parent dataset '{{ "
 "_selected[0].parent }}'?"
-msgstr ""
+msgstr "Weet u zeker dat u ALLE momentopnames op de bovenliggende dataset '{{ _selected[0].parent }}' wilt verwijderen?"
 
 msgid "Are you sure you want to delete the selected snapshot(s)?"
-msgstr ""
+msgstr "Weet u zeker dat u de geselecteerde momentopname(s) wilt verwijderen?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all earlier snapshots on "
 "the same dataset?"
-msgstr ""
+msgstr "Weet u zeker dat u deze momentopname en alle eerdere momentopnames van dezelfde dataset wilt verwijderen?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all later snapshots on the"
 " same dataset?"
-msgstr ""
+msgstr "Weet u zeker dat u deze momentopname en alle latere momentopnames van dezelfde dataset wilt verwijderen?"
 
 msgid "Are you sure you want to delete?"
 msgstr "Weet u zeker dat u wilt verwijderen?"
 
 msgid "Are you sure you want to detach this device from the pool?"
-msgstr ""
+msgstr "Weet u zeker dat u dit apparaat uit de pool wilt loskoppelen?"
 
 msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
@@ -150,7 +150,7 @@ msgstr "Weet u zeker dat u wilt exporteren?"
 msgid ""
 "Are you sure you want to promote this dataset? This detaches the clone from "
 "its origin snapshot dependency."
-msgstr ""
+msgstr "Weet u zeker dat u deze dataset wilt promoveren? Dit maakt de kloon los van de afhankelijkheid van de oorsprongs-momentopname."
 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
@@ -163,13 +163,13 @@ msgstr "Weet u zeker dat u deze momentopname werkt terugzetten?"
 msgid ""
 "Are you sure you want to start a TRIM operation on this pool? This is only "
 "meaningful for SSD-backed pools."
-msgstr ""
+msgstr "Weet u zeker dat u een TRIM-bewerking op dit opslagpool wilt starten? Dit is alleen zinvol voor SSD-ondersteunde pools."
 
 msgid "Are you sure you want to start a scrub?"
-msgstr ""
+msgstr "Weet u zeker dat u een scrub wilt starten?"
 
 msgid "Are you sure you want to stop the scrub?"
-msgstr ""
+msgstr "Weet u zeker dat u een scrub wilt stoppen?"
 
 msgid "Are you sure you want to take this device offline?"
 msgstr ""
@@ -177,13 +177,13 @@ msgstr ""
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
 "inaccessible until it is unlocked again."
-msgstr ""
+msgstr "Weet u zeker dat u de encryptiesleutel wilt ontladen? De dataset wordt ontoegankelijk totdat deze opnieuw wordt ontgrendeld."
 
 msgid ""
 "Are you sure you want to upgrade this pool? This enables new feature flags "
 "and cannot be undone. The pool will no longer be accessible by older ZFS "
 "versions."
-msgstr ""
+msgstr "Weet u zeker dat u dit pool wilt opwaarderen? Dit schakelt nieuwe functionaliteitsvlaggen in en kan niet ongedaan worden gemaakt. Het pool zal niet langer toegankelijk zijn voor oudere ZFS-versies."
 
 msgid ""
 "Are you sure? For a mirror or stripe pool this attaches the new device to "
@@ -191,7 +191,7 @@ msgid ""
 "device into a 2-way mirror (irreversible without full pool recreation). For "
 "a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, "
 "permanently increasing its width."
-msgstr ""
+msgstr "Weet u het zeker? Voor een mirror- of stripe-pool voegt dit het nieuwe apparaat toe aan het geselecteerde bestaande apparaat, waardoor de mirror wordt uitgebreid of een stripe-apparaat wordt omgezet in een 2-weg mirror (niet omkeerbaar zonder volledige hercreatie van de pool). Voor een RAIDZ-pool breidt dit het geselecteerde RAIDZ-vdev uit door één apparaat toe te voegen, waardoor de breedte permanent wordt vergroot."
 
 msgid "Ashift value"
 msgstr "Ashift waarde"
@@ -209,26 +209,26 @@ msgid "At least two devices are required."
 msgstr "Er zijn minimaal twee apparaten nodig."
 
 msgid "At reboot"
-msgstr ""
+msgstr "Bij herstart"
 
 msgid "Attach device"
-msgstr ""
+msgstr "Apparaat aansluiten"
 
 msgid "August"
-msgstr ""
+msgstr "Augustus"
 
 msgid "Auto-unlock"
-msgstr ""
+msgstr "Autom. ontgrendeling"
 
 msgid "Auto-unlock at boot"
-msgstr ""
+msgstr "Autom. ontgrendeling bij herstart"
 
 msgid "Auto-unlock disabled."
-msgstr ""
+msgstr "Autom. ontgrendeling uitgeschakeld."
 
 msgid ""
 "Auto-unlock enabled. The key will be loaded from the local keyfile at boot."
-msgstr ""
+msgstr "Autom. ontgrendeling ingeschakeld. De sleutel wordt bij het opstarten geladen van het lokale sleutelbestand."
 
 msgid "Available"
 msgstr "Beschikbaar"
@@ -237,7 +237,7 @@ msgid "Basic"
 msgstr "Basis"
 
 msgid "Bulk Delete"
-msgstr ""
+msgstr "Bulk verwijderen"
 
 msgid "By ID"
 msgstr "Op basis van ID"
@@ -246,64 +246,64 @@ msgid "By Path"
 msgstr "Op basis van pad"
 
 msgid "Cache (L2ARC)"
-msgstr ""
+msgstr "Cache (L2ARC)"
 
 msgid "Cancel vdev removal"
-msgstr ""
+msgstr "Verwijdering van vdev annuleren"
 
 msgid "Cancelling vdev removal ..."
-msgstr ""
+msgstr "Verwijdering van vdev annuleren…"
 
 msgid "Cap"
-msgstr ""
+msgstr "Cap."
 
 msgid "Case sensitivity"
-msgstr ""
+msgstr "Hoofdlettergevoeligheid"
 
 msgid "Certain date"
-msgstr ""
+msgstr "Bepaalde datum"
 
 msgid "Change encryption key"
-msgstr ""
+msgstr "Encryptiesleutel wijzigen"
 
 msgid "Change key"
-msgstr ""
+msgstr "Sleutel wijzigen"
 
 msgid "Changing encryption key ..."
-msgstr ""
+msgstr "Encryptiesleutel wijzigen…"
 
 msgid "Clear errors"
-msgstr ""
+msgstr "Fouten wissen"
 
 msgid "Clearing pool errors ..."
-msgstr ""
+msgstr "Pool-fouten wissen..."
 
 msgid "Clone"
 msgstr "Klonen"
 
 msgid "Clone dataset"
-msgstr ""
+msgstr "Dataset klonen"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Naam klonen"
 
 msgid "Clone path (within pool)"
-msgstr ""
+msgstr "Pad klonen (binnen pool)"
 
 msgid "Clone snapshot"
 msgstr "Momentopname klonen"
 
 msgid "Cloning dataset ..."
-msgstr ""
+msgstr "Dataset klonen…"
 
 msgid "Cloning snapshot ..."
 msgstr "Momentopname klonen…"
 
 msgid "Comment"
-msgstr ""
+msgstr "Opmerking"
 
 msgid "Compress ratio"
-msgstr ""
+msgstr "Compressieverhouding"
 
 msgid "Compression"
 msgstr "Compressie"
@@ -312,13 +312,13 @@ msgid "Compression type"
 msgstr "Compressietype"
 
 msgid "Confirm new passphrase / key"
-msgstr ""
+msgstr "Nieuwe wachtwoordzin / sleutel bevestigen"
 
 msgid "Confirm passphrase"
-msgstr ""
+msgstr "Wachtwoordzin bevestigen"
 
 msgid "Confirm passphrase / key"
-msgstr ""
+msgstr "Wachtwoordzin / sleutel bevestigen"
 
 msgid "Create"
 msgstr "Aanmaken"
@@ -327,37 +327,37 @@ msgid "Created pool."
 msgstr "Pool aangemaakt."
 
 msgid "Created replication job."
-msgstr ""
+msgstr "Replicatietaak aangemaakt."
 
 msgid "Created scrub job."
-msgstr ""
+msgstr "Scrubtaak aangemeaakt."
 
 msgid "Created snapshot job."
-msgstr ""
+msgstr "Taak voor momentopname aangemaakt."
 
 msgid "Creating encrypted filesystem ..."
-msgstr ""
+msgstr "Versleuteld bestandssysteem aanmaken…"
 
 msgid "Creating recursive snapshot ..."
-msgstr ""
+msgstr "Recursieve momentopname aanmaken…"
 
 msgid "Creating snapshot ..."
-msgstr ""
+msgstr "Momentopname aanmaken…"
 
 msgid "Current passphrase / key"
-msgstr ""
+msgstr "Huidige wachtwoordzin / sleutel"
 
 msgid "DEGRADED"
-msgstr ""
+msgstr "GEDEGRADEERD"
 
 msgid "Daily"
-msgstr ""
+msgstr "Dagelijks"
 
 msgid "Dataset"
-msgstr ""
+msgstr "Dataset"
 
 msgid "Dataset cloned."
-msgstr ""
+msgstr "Dataset gekloond."
 
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
@@ -365,124 +365,124 @@ msgid ""
 msgstr ""
 
 msgid "Dataset promoted."
-msgstr ""
+msgstr "Dataset gepromoveerd."
 
 msgid "Dataset renamed."
-msgstr ""
+msgstr "Dataset hernoemd."
 
 msgid "Datasets"
-msgstr ""
+msgstr "Datasets"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Datum/Tijd"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Dag van maand"
 
 msgid "Day of week"
-msgstr ""
+msgstr "Dag van week"
 
 msgid "December"
-msgstr ""
+msgstr "December"
 
 msgid "Decryption passphrase (optional)"
-msgstr ""
+msgstr "Decryptiewachtwoordzin (optioneel)"
 
 msgid "Dedup"
-msgstr ""
+msgstr "Ontdubbelen"
 
 msgid "Default (128K)"
-msgstr ""
+msgstr "Standaard (128K)"
 
 msgid "Delete"
 msgstr "Verwijderen"
 
 msgid "Delete all snapshots on parent dataset"
-msgstr ""
+msgstr "Alle momentopnames op het ouderdataset verwijderen"
 
 msgid "Delete missing"
 msgstr "Ontbrekende verwijderen"
 
 msgid "Delete recursively"
-msgstr ""
+msgstr "Recursief verwijderen"
 
 msgid "Delete this and all earlier snapshots"
-msgstr ""
+msgstr "Deze en alle eerdere momentopnames verwijderen"
 
 msgid "Delete this and all later snapshots"
-msgstr ""
+msgstr "Deze en alle latere momentopnames verwijderen"
 
 msgid "Deleting all snapshots ..."
-msgstr ""
+msgstr "Alle momentopnames verwijderen…"
 
 msgid "Deleting object ..."
 msgstr "Object verwijderen…"
 
 msgid "Deleting pool ..."
-msgstr ""
+msgstr "Pool verwijderen…"
 
 msgid "Deleting snapshot ..."
 msgstr "Momentopname verwijderen…"
 
 msgid "Deleting snapshot recursively ..."
-msgstr ""
+msgstr "Momentopnames recursief verwijderen…"
 
 msgid "Deleting snapshots ..."
-msgstr ""
+msgstr "Momentopnames verwijderen…"
 
 msgid "Destination"
-msgstr ""
+msgstr "Bestemming"
 
 msgid "Destination dataset"
-msgstr ""
+msgstr "Bestemmingsdataset"
 
 msgid "Detach device"
-msgstr ""
+msgstr "Apparaat loskoppelen"
 
 msgid "Details"
 msgstr "Details"
 
 msgid "Device"
-msgstr ""
+msgstr "Apparaat"
 
 msgid "Device Attach"
-msgstr ""
+msgstr "Apparaat aansluiten"
 
 msgid "Device Detach"
-msgstr ""
+msgstr "Apparaat loskoppelen"
 
 msgid "Device Offline"
-msgstr ""
+msgstr "Apparaat offline"
 
 msgid "Device Online"
-msgstr ""
+msgstr "Apparaat online"
 
 msgid "Device Replace"
-msgstr ""
+msgstr "Apparaat vervangen"
 
 msgid "Device alias"
 msgstr "Apparaat alias"
 
 msgid "Device to detach"
-msgstr ""
+msgstr "Apparaat om te ontkoppelen"
 
 msgid "Device to replace"
-msgstr ""
+msgstr "Apparaat om te vervangen"
 
 msgid "Device type"
-msgstr ""
+msgstr "Type apparaat"
 
 msgid "Devices"
 msgstr "Apparaten"
 
 msgid "Diff"
-msgstr ""
+msgstr "Verschil"
 
 msgid "Disable auto-unlock at boot"
-msgstr ""
+msgstr "Autom. ontgrendeling bij opstarten uitschakelen"
 
 msgid "Disabling auto-unlock ..."
-msgstr ""
+msgstr "Autom. ontgrendeling bij opstarten uitschakelen…"
 
 msgid "Discover"
 msgstr "Ontdekken"
@@ -491,7 +491,7 @@ msgid ""
 "Displays the health of all ZFS pools with traffic-light status. Green = "
 "healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click "
 "a pool to view details."
-msgstr ""
+msgstr "Toont de gezondheid van alle ZFS-pools met een verkeerslichtstatus. Groen = gezond, oranje = >80% vol, rood = gedegradeerd/defect/fouten/>90% vol. Klik op een pool om details te bekijken."
 
 msgid ""
 "Do not create a new snapshot. Instead, replicate the most recent existing "
@@ -499,22 +499,22 @@ msgid ""
 "manages snapshots for this dataset — this is the recommended approach when "
 "replicating to multiple destinations or at different frequencies, as it "
 "avoids conflicts between replication chains."
-msgstr ""
+msgstr "Maak geen nieuwe momentopname aan. Reproduceer in plaats daarvan de meest recente bestaande momentopname die overeenkomt met de prefix. Gebruik dit wanneer een aparte momentopname-taak al momentopnames voor deze dataset beheert — dit is de aanbevolen aanpak bij replicatie naar meerdere bestemmingen of met verschillende frequenties, omdat het conflicten tussen replicatieketens voorkomt."
 
 msgid "Do you really want to expand the ZFS pool?"
 msgstr "Wilt u de ZFS-pool echt uitbreiden?"
 
 msgid "Docs"
-msgstr ""
+msgstr "Docs"
 
 msgid "Edit"
-msgstr ""
+msgstr "Bewerken"
 
 msgid "Edit property"
 msgstr "Eigenschap bewerken"
 
 msgid "Enable auto-unlock"
-msgstr ""
+msgstr "Autom. ontgrendeling inschakelen"
 
 msgid "Enable auto-unlock at boot (local file)"
 msgstr ""
@@ -529,7 +529,7 @@ msgid "Enable auto-unlock — remote HTTPS"
 msgstr ""
 
 msgid "Enabled"
-msgstr ""
+msgstr "Ingeschakeld"
 
 msgid "Enabling auto-unlock ..."
 msgstr ""
@@ -538,31 +538,31 @@ msgid "Encrypted filesystem created."
 msgstr ""
 
 msgid "Encryption"
-msgstr ""
+msgstr "Versleuteling"
 
 msgid "Encryption key changed."
-msgstr ""
+msgstr "Encryptiesleutel gewijzigd."
 
 msgid "Encryption key loaded."
-msgstr ""
+msgstr "Encryptiesleutel geladen."
 
 msgid "Encryption key unloaded."
-msgstr ""
+msgstr "Encryptiesleutel ontladen."
 
 msgid "Error"
-msgstr ""
+msgstr "Fout"
 
 msgid "Event"
-msgstr ""
+msgstr "Gebeurtenis"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Elke N-e dag van de maand"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Elke N uur"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Elke N minuten"
 
 msgid "Expand"
 msgstr "Uitbreiden"
@@ -577,18 +577,18 @@ msgid "Exporting pool ..."
 msgstr "Pool exporteren…"
 
 msgid "FAULTED"
-msgstr ""
+msgstr "DEFECT"
 
 msgid "February"
-msgstr ""
+msgstr "Februari"
 
 msgid ""
 "Filename case sensitivity for the pool's root dataset. Cannot be changed "
 "after creation."
-msgstr ""
+msgstr "Hoofdlettergevoeligheid van bestandsnamen voor de rootdataset van de pool. Kan niet worden gewijzigd na aanmaak."
 
 msgid "Filename case sensitivity. Cannot be changed after creation."
-msgstr ""
+msgstr "Hoofdlettergevoeligheid van bestandsnamen. Kan na aanmaak niet worden gewijzigd."
 
 msgid "Filesystem added."
 msgstr "Bestandssysteem toegevoegd."
@@ -621,40 +621,40 @@ msgid ""
 msgstr "Forceert de aanmaak van de pool, zelfs als fouten worden gerapporteerd. Wees voorzichtig met gebruik!"
 
 msgid "Frag"
-msgstr ""
+msgstr "Frag"
 
 msgid "Free"
-msgstr ""
+msgstr "Vrij"
 
 msgid "Friday"
-msgstr ""
+msgstr "Vrijdag"
 
 msgid "Has children"
-msgstr ""
+msgstr "Heeft onderliggend"
 
 msgid "Has shares"
-msgstr ""
+msgstr "Heeft shares"
 
 msgid "Health"
-msgstr ""
+msgstr "Gezondheid"
 
 msgid "History"
-msgstr ""
+msgstr "Geschiedenis"
 
 msgid "Hits"
 msgstr "Hits"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr ""
+msgstr "Hostnaam of IP-adres van de ZFS-host op afstand."
 
 msgid "Hot spare"
-msgstr ""
+msgstr "Hot reserve"
 
 msgid "Hour"
-msgstr ""
+msgstr "Uur"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Ieder uur"
 
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
@@ -683,76 +683,76 @@ msgid "Importing pool ..."
 msgstr "Pool importeren…"
 
 msgid "Inherit from parent"
-msgstr ""
+msgstr "Overnemen van bovenliggend"
 
 msgid "Insensitive"
-msgstr ""
+msgstr "Ongevoelig"
 
 msgid "Is encryption root"
-msgstr ""
+msgstr "Is encryptie root"
 
 msgid "January"
-msgstr ""
+msgstr "Januari"
 
 msgid "Job"
-msgstr ""
+msgstr "Taak"
 
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 msgid "Keep"
-msgstr ""
+msgstr "Behouden"
 
 msgid "Keep snapshots on source"
-msgstr ""
+msgstr "Momentopnames op de bron bewaren"
 
 msgid "Key URL"
-msgstr ""
+msgstr "URL van sleutel"
 
 msgid "Key status"
-msgstr ""
+msgstr "Status van sleutel"
 
 msgid "Last scrub"
-msgstr ""
+msgstr "Laatste scrub"
 
 msgid "Level"
-msgstr ""
+msgstr "Niveau"
 
 msgid "Load encryption key"
-msgstr ""
+msgstr "Encryptiesleutel laden."
 
 msgid "Load key"
-msgstr ""
+msgstr "Sleutel laden"
 
 msgid "Load key (unlock)"
-msgstr ""
+msgstr "Sleutel laden (ontgrendelen)"
 
 msgid "Loading encryption key ..."
-msgstr ""
+msgstr "Encryptiesleutel laden…"
 
 msgid "Local"
-msgstr ""
+msgstr "Lokaal"
 
 msgid "Log (ZIL/SLOG)"
-msgstr ""
+msgstr "Logboek (ZIL/SLOG)"
 
 msgid "March"
-msgstr ""
+msgstr "Maart"
 
 msgid "May"
-msgstr ""
+msgstr "Mei"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
 msgstr ""
 
 msgid "Message"
-msgstr ""
+msgstr "Bericht"
 
 msgid "Minute"
-msgstr ""
+msgstr "Minuut"
 
 msgid "Mirror"
 msgstr "Spiegel"
@@ -764,22 +764,22 @@ msgid "Missing ZFS mntent entries added."
 msgstr "Ontbrekende ZFS mntent-items toegevoegd."
 
 msgid "Mixed"
-msgstr ""
+msgstr "Gemengd"
 
 msgid "Modified"
 msgstr "Aangepast"
 
 msgid "Monday"
-msgstr ""
+msgstr "Maandag"
 
 msgid "Month"
-msgstr ""
+msgstr "Maand"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Maandelijks"
 
 msgid "Mounted"
-msgstr ""
+msgstr "Gekoppeld"
 
 msgid "Mountpoint"
 msgstr "Koppelpunt"
@@ -800,10 +800,10 @@ msgid "New Property"
 msgstr "Nieuwe eigenschap"
 
 msgid "New device to attach"
-msgstr ""
+msgstr "Nieuw apparaat om aan te sluiten"
 
 msgid "New name"
-msgstr ""
+msgstr "Nieuwe naam"
 
 msgid "New passphrase / key"
 msgstr ""
@@ -815,13 +815,13 @@ msgid "New property"
 msgstr "Nieuwe eigenschap"
 
 msgid "No ZFS pools found."
-msgstr ""
+msgstr "Geen ZFS-pools gevonden."
 
 msgid "None"
 msgstr "Geen"
 
 msgid "November"
-msgstr ""
+msgstr "November"
 
 msgid ""
 "Number of replication snapshots to keep on the source after each successful "
@@ -829,28 +829,28 @@ msgid ""
 "replication jobs share the same dataset and prefix — prefer 0 and manage "
 "retention with a dedicated snapshot job instead. Ignored when 'Use existing "
 "snapshots' is enabled."
-msgstr ""
+msgstr "Aantal replicatiemomentopnames dat op de bron moet worden bewaard na elke succesvolle verzending. 0 = alles bewaren. Het terugsnoeien van de bron kan incrementele ketens verbreken als meerdere replicatietaken dezelfde dataset en prefix delen — geef de voorkeur aan 0 en beheer het behoud via een specifieke taak voor momentopnames. Wordt genegeerd wanneer 'Bestaande momentopnames gebruiken' is ingeschakeld."
 
 msgid "OFFLINE"
-msgstr ""
+msgstr "OFFLINE"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "ONLINE"
-msgstr ""
+msgstr "ONLINE"
 
 msgid "Object deleted."
 msgstr "Object verwijderd."
 
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 msgid "Offline device"
-msgstr ""
+msgstr "Apparaat offline"
 
 msgid "Online device"
-msgstr ""
+msgstr "Apparaat online"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
 msgstr ""
@@ -874,31 +874,31 @@ msgid "Parent"
 msgstr "Ouder"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Wachtwoordzin"
 
 msgid "Passphrase / key"
-msgstr ""
+msgstr "Wachtwoordzin / sleutel"
 
 msgid "Passphrases do not match."
-msgstr ""
+msgstr "Wachtwoordzinnen komen niet overeen."
 
 msgid "Path"
 msgstr "Pad"
 
 msgid "Pause scrub"
-msgstr ""
+msgstr "Scrub pauzeren"
 
 msgid "Pausing scrub ..."
-msgstr ""
+msgstr "Scrub pauzeren…"
 
 msgid "Pool"
 msgstr "Pool"
 
 msgid "Pool deleted."
-msgstr ""
+msgstr "Pool verwijderd."
 
 msgid "Pool errors cleared."
-msgstr ""
+msgstr "Pool-fouten gewist."
 
 msgid "Pool exported."
 msgstr "Pool geëxporteerd."
@@ -910,13 +910,13 @@ msgid "Pool name"
 msgstr "Pool-naam"
 
 msgid "Pool root"
-msgstr ""
+msgstr "Pool-root"
 
 msgid "Pool type"
 msgstr "Pool-type"
 
 msgid "Pool upgraded."
-msgstr ""
+msgstr "Pool opgewaardeerd."
 
 msgid "Pools"
 msgstr "Pools"
@@ -925,7 +925,7 @@ msgid "Prefix"
 msgstr "Voorvoegsel"
 
 msgid "Promote"
-msgstr ""
+msgstr "Promoveren"
 
 msgid "Promoting dataset ..."
 msgstr ""
@@ -940,10 +940,10 @@ msgid "Property"
 msgstr "Eigenschap"
 
 msgid "Quick recursive snapshot"
-msgstr ""
+msgstr "Snelle recursieve momentopname"
 
 msgid "Quick snapshot"
-msgstr ""
+msgstr "Snelle momentopname"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -955,7 +955,7 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "REMOVED"
-msgstr ""
+msgstr "VERWIJDERD"
 
 msgid "Raw send"
 msgstr ""
@@ -964,10 +964,10 @@ msgid "Record size"
 msgstr ""
 
 msgid "Recursive"
-msgstr ""
+msgstr "Recursief"
 
 msgid "Recursive snapshot created."
-msgstr ""
+msgstr "Recursieve momentopname aangemaakt."
 
 msgid "Refer"
 msgstr "Verwijzen"
@@ -976,13 +976,13 @@ msgid "Referenced"
 msgstr ""
 
 msgid "Remote"
-msgstr ""
+msgstr "Op afstand"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
 msgstr ""
 
 msgid "Remote host"
-msgstr ""
+msgstr "Host op afstand"
 
 msgid "Removal state"
 msgstr ""
@@ -1000,7 +1000,7 @@ msgid "Removing stale ZFS mntent entries ..."
 msgstr "Ongebruikte ZFS mntent-items verwijderen…"
 
 msgid "Rename"
-msgstr ""
+msgstr "Hernoemen"
 
 msgid "Rename dataset"
 msgstr ""
@@ -1022,13 +1022,13 @@ msgid ""
 "existing snapshots' is enabled, this must exactly match the prefix used by "
 "the snapshot job that manages this dataset (e.g. 'auto') — a mismatch will "
 "cause replication to fail with 'No snapshots found'."
-msgstr ""
+msgstr "Replicatiemomentopnames krijgen een naam <prefix>-YYYYMMDD-HHMMSS. Wanneer 'Bestaande momentopnames gebruiken' is ingeschakeld, moet dit exact overeenkomen met het voorvoegsel dat wordt gebruikt door de taak voor momentopnames die deze dataset beheert (bijv. 'autom.') — als dit niet overeenkomt zal dit ertoe leiden dat replicatie mislukt met 'Geen momentopnames gevonden'."
 
 msgid "Resume scrub"
-msgstr ""
+msgstr "Scrub hervatten"
 
 msgid "Resuming scrub ..."
-msgstr ""
+msgstr "Scrub hervatten…"
 
 msgid "Rollback"
 msgstr "Terugzetten"
@@ -1037,19 +1037,19 @@ msgid "Rolling back snapshot ..."
 msgstr "Momentopname terugzetten…"
 
 msgid "Run"
-msgstr ""
+msgstr "Uitvoeren"
 
 msgid "Run now"
-msgstr ""
+msgstr "Nu uitvoeren"
 
 msgid "Run replication job"
 msgstr ""
 
 msgid "Run snapshot job"
-msgstr ""
+msgstr "Taak voor momentopname uitvoeren"
 
 msgid "SSH Certificate"
-msgstr ""
+msgstr "SSH-certificaat"
 
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
@@ -1057,13 +1057,13 @@ msgid ""
 msgstr ""
 
 msgid "SSH port"
-msgstr ""
+msgstr "SSH-poort"
 
 msgid "SSH user"
-msgstr ""
+msgstr "SSH-gebruiker"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Zaterdag"
 
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
@@ -1080,37 +1080,37 @@ msgid "Scan for and import all pools not currently imported."
 msgstr "Scan naar en importeer alle pools die momenteel niet worden geïmporteerd."
 
 msgid "Schedule"
-msgstr ""
+msgstr "Planning"
 
 msgid "Scheduling"
-msgstr ""
+msgstr "Plannen"
 
 msgid "Scrub"
-msgstr "Schrobben"
+msgstr "Scrub"
 
 msgid "Scrub Jobs"
-msgstr ""
+msgstr "Scrubtaken"
 
 msgid "Scrub paused."
-msgstr ""
+msgstr "Scrub gepauzeerd."
 
 msgid "Scrub resumed."
-msgstr ""
+msgstr "Scrub hervat."
 
 msgid "Scrub started."
-msgstr ""
+msgstr "Scrub gestart."
 
 msgid "Scrub started. Monitor progress in the Pools tab."
-msgstr ""
+msgstr "Scrub gestart. Volg de voortgang in het tabblad Pools."
 
 msgid "Scrub state"
-msgstr ""
+msgstr "Scrubtoestand"
 
 msgid "Scrub status"
-msgstr ""
+msgstr "Scrubstatus"
 
 msgid "Scrub stopped."
-msgstr ""
+msgstr "Scrub gestopt."
 
 msgid "Send email on error only"
 msgstr ""
@@ -1122,19 +1122,19 @@ msgid "Send the command output via email on completion."
 msgstr ""
 
 msgid "Sensitive"
-msgstr ""
+msgstr "Gevoelig"
 
 msgid "Sensitive (default)"
-msgstr ""
+msgstr "Gevoelig (standaard)"
 
 msgid "September"
-msgstr ""
+msgstr "September"
 
 msgid "Set ashift"
 msgstr "Stel ashift in"
 
 msgid "Settings"
-msgstr ""
+msgstr "Instellingen"
 
 msgid "Size"
 msgstr "Grootte"
@@ -1143,31 +1143,31 @@ msgid "Skip certificate verification"
 msgstr ""
 
 msgid "Snapshot Diff"
-msgstr ""
+msgstr "Momentopname Verschil"
 
 msgid "Snapshot Jobs"
-msgstr ""
+msgstr "Momentopname Taken"
 
 msgid "Snapshot added."
 msgstr "Momentopname toegevoegd."
 
 msgid "Snapshot and replicate the dataset and all its children."
-msgstr ""
+msgstr "Maak een momentopname van de dataset en repliceer deze en alle onderliggende objecten."
 
 msgid "Snapshot cloned."
 msgstr "Momentopname gekloond."
 
 msgid "Snapshot created."
-msgstr ""
+msgstr "Momentopname aangemaakt."
 
 msgid "Snapshot deleted recursively."
-msgstr ""
+msgstr "Momentopname recursief verwijderd."
 
 msgid "Snapshot deleted."
 msgstr "Momentopname verwijderd."
 
 msgid "Snapshot prefix"
-msgstr ""
+msgstr "Momentopname voorvoegsel"
 
 msgid "Snapshot rolled back."
 msgstr "Momentopname teruggezet."
@@ -1176,19 +1176,19 @@ msgid ""
 "Snapshot the dataset and all its children. Retention pruning counts "
 "generations at the parent level and destroys each expired generation across "
 "all children."
-msgstr ""
+msgstr "Maak een momentopname van de dataset en al zijn onderliggende objecten. Retentie-snoeien telt generaties op het ouderniveau en vernietigt elke verlopen generatie over alle onderliggende objecten."
 
 msgid "Snapshot this dataset and all its children."
-msgstr ""
+msgstr "Maak een momentopname van deze dataset en al zijn onderliggende objecten."
 
 msgid "Snapshots"
 msgstr "Momentopnames"
 
 msgid "Snapshots deleted."
-msgstr ""
+msgstr "Momentopnames verwijderd."
 
 msgid "Snapshots will be named <prefix>-YYYYMMDD-HHMMSS."
-msgstr ""
+msgstr "Momentopnames krijgen een naam <prefix>-YYYYMMDD-HHMMSS."
 
 msgid "Source"
 msgstr "Bron"
@@ -1206,7 +1206,7 @@ msgid "Source pool"
 msgstr "Bronpool"
 
 msgid "Special (metadata)"
-msgstr ""
+msgstr "Speciaal (metagegevens)"
 
 msgid "Specifies which device alias should be used."
 msgstr ""
@@ -1222,31 +1222,31 @@ msgid "Stale ZFS mntent entries removed."
 msgstr "Ongebruikte ZFS mntent-items verwijderd."
 
 msgid "Start scrub"
-msgstr ""
+msgstr "Scrub starten"
 
 msgid "Starting TRIM ..."
-msgstr ""
+msgstr "TRIM starten…"
 
 msgid "Starting scrub ..."
-msgstr ""
+msgstr "Scrub starten…"
 
 msgid "Status"
 msgstr "Status"
 
 msgid "Stop scrub"
-msgstr ""
+msgstr "Scrub stoppen"
 
 msgid "Stopping scrub ..."
-msgstr ""
+msgstr "Scrub stoppen…"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Zondag"
 
 msgid "Synchronising ZFS mntent entries ..."
 msgstr "ZFS mntent-items synchroniseren…"
 
 msgid "TRIM started."
-msgstr ""
+msgstr "TRIM gestart."
 
 msgid "The field should only contain * or a comma separated list of values."
 msgstr ""
@@ -1266,74 +1266,74 @@ msgid "Thin provisioning"
 msgstr "Thin provisioning"
 
 msgid "Thursday"
-msgstr ""
+msgstr "Donderdag"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Tijd van uitvoering"
 
 msgid "Trim"
-msgstr ""
+msgstr "Trim"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Dinsdag"
 
 msgid "Type"
 msgstr "Type"
 
 msgid "UNAVAIL"
-msgstr ""
+msgstr "NIET BESCHIKBAAR"
 
 msgid "UNKNOWN"
-msgstr ""
+msgstr "ONBEKEND"
 
 msgid "URL must start with https://"
-msgstr ""
+msgstr "URL moet starten met https://"
 
 msgid "Unit"
-msgstr ""
+msgstr "Eenheid"
 
 msgid "Unload key (lock)"
 msgstr ""
 
 msgid "Unloading encryption key ..."
-msgstr ""
+msgstr "Encryptiesleutel ontladen…."
 
 msgid "Updated replication job."
 msgstr ""
 
 msgid "Updated scrub job."
-msgstr ""
+msgstr "Scrubtaak bijgewerkt."
 
 msgid "Updated snapshot job."
-msgstr ""
+msgstr "Taak voor momentopname bijgewerkt."
 
 msgid "Upgrade"
-msgstr ""
+msgstr "Opwaarderen"
 
 msgid "Upgrading pool ..."
-msgstr ""
+msgstr "Pool opwaarderen…"
 
 msgid "Use ZFS bookmarks"
-msgstr ""
+msgstr "ZFS-bladwijzers gebruiken"
 
 msgid ""
 "Use default (128K) for general use. Use 4K-16K for databases, 1M for large "
 "files/media."
-msgstr ""
+msgstr "Gebruik standaard (128K) voor algemeen gebruik. Gebruik 4K-16K voor databases, 1M voor grote bestanden/media."
 
 msgid "Use existing snapshots"
-msgstr ""
+msgstr "Bestaande momentopnames gebruiken"
 
 msgid ""
 "Use zfs send -w to send encrypted data without decrypting. Requires "
 "encryption on the source dataset."
-msgstr ""
+msgstr "Gebruik zfs send -w om versleutelde gegevens te verzenden zonder te ontsleutelen. Vereist encryptie op de brondataset."
 
 msgid "Used"
 msgstr "Gebruikt"
 
 msgid "Used (%)"
-msgstr ""
+msgstr "Gebruikt (%)"
 
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
@@ -1344,10 +1344,10 @@ msgid "Value"
 msgstr "Waarde"
 
 msgid "Vdev removal cancelled."
-msgstr ""
+msgstr "Verwijdering van vdev geannulleerd."
 
 msgid "Vdev to remove"
-msgstr ""
+msgstr "Te verwijderen vdev"
 
 msgid "Vdev type"
 msgstr "Vdev type"
@@ -1356,37 +1356,37 @@ msgid "Volume added."
 msgstr "Volume toegevoegd."
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Woensdag"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Wekelijks"
 
 msgid "Yearly"
-msgstr ""
+msgstr "Jaarlijks"
 
 msgid "ZFS ARC Hits/Misses"
-msgstr ""
+msgstr "ZFS ARC Hits/Misses"
 
 msgid "ZFS ARC Size"
-msgstr ""
+msgstr "ZFS ARC-grootte"
 
 msgid "ZFS Pool Events"
-msgstr ""
+msgstr "ZFS-pool Gebeurtenissen"
 
 msgid "ZFS Pool Health"
-msgstr ""
+msgstr "ZFS-pool Gezondheid"
 
 msgid "ZFS Pool Status"
-msgstr ""
+msgstr "ZFS-pool Status"
 
 msgid "ZFS Remote Unlock"
-msgstr ""
+msgstr "ZFS Ontgrendeling op afstand"
 
 msgid "ZFS Replication"
-msgstr ""
+msgstr "ZFS-Replicatie"
 
 msgid "ZFS Scrub"
-msgstr ""
+msgstr "ZFS-scrub"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
@@ -1395,22 +1395,22 @@ msgid "ZFS mntent entries synchronised."
 msgstr "ZFS mntent-items gesynchroniseerd."
 
 msgid "days"
-msgstr ""
+msgstr "dagen"
 
 msgid "months"
-msgstr ""
+msgstr "maanden"
 
 msgid "omv-extras.org wiki"
-msgstr ""
+msgstr "omv-extras.org wiki"
 
 msgid "snapshots"
-msgstr ""
+msgstr "momentopnames"
 
 msgid "weeks"
-msgstr ""
+msgstr "weken"
 
 msgid "years"
-msgstr ""
+msgstr "jaren"
 
 msgid "zfs"
 msgstr "zfs"

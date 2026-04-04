@@ -28,7 +28,7 @@ data:
           proxy:
             service: Zfs
             get:
-              method: getPoolNames
+              method: getScrubPoolNames
         validators:
           required: true
       - type: divider

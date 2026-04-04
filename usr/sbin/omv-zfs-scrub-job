@@ -44,6 +44,19 @@ _send_email() {
 }
 trap '_send_email $?' EXIT
 
-echo "$(date -Iseconds): Starting scrub on pool ${POOL}"
-zpool scrub "${POOL}"
-echo "$(date -Iseconds): Scrub started on pool ${POOL}. Use 'zpool status ${POOL}' to monitor progress."
+if [ "${POOL}" = "*" ]; then
+    pools=$(zpool list -H -o name,health 2>/dev/null | awk -F'\t' '$2=="ONLINE"{print $1}')
+    if [ -z "${pools}" ]; then
+        echo "$(date -Iseconds): No ONLINE pools found to scrub."
+        exit 0
+    fi
+    echo "${pools}" | while read -r pool; do
+        echo "$(date -Iseconds): Starting scrub on pool ${pool}"
+        zpool scrub "${pool}"
+        echo "$(date -Iseconds): Scrub started on pool ${pool}. Use 'zpool status ${pool}' to monitor progress."
+    done
+else
+    echo "$(date -Iseconds): Starting scrub on pool ${POOL}"
+    zpool scrub "${POOL}"
+    echo "$(date -Iseconds): Scrub started on pool ${POOL}. Use 'zpool status ${POOL}' to monitor progress."
+fi

@@ -77,6 +77,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getArcStats');
         $this->registerMethod('getDatasetNames');
         $this->registerMethod('getPoolNames');
+        $this->registerMethod('getScrubPoolNames');
         $this->registerMethod('getSnapshotJobList');
         $this->registerMethod('getSnapshotJob');
         $this->registerMethod('setSnapshotJob');
@@ -228,6 +229,22 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
     {
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $result = [];
+        if (!self::zfsTryExec('zpool list -H -o name 2>&1', $out)) {
+            return $result;
+        }
+        foreach ($out as $line) {
+            $name = trim($line);
+            if ($name !== '') {
+                $result[] = [$name, $name];
+            }
+        }
+        return $result;
+    }
+
+    public function getScrubPoolNames($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $result = [['*', 'All pools']];
         if (!self::zfsTryExec('zpool list -H -o name 2>&1', $out)) {
             return $result;
         }

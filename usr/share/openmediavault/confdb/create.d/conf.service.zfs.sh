@@ -51,32 +51,27 @@ fi
 # out and the ZFS kernel module is loaded.
 ZFSUTILS_CRON="/etc/cron.d/zfsutils-linux"
 if [ -f "${ZFSUTILS_CRON}" ] && grep -q "^[^#].*zfs-linux/scrub" "${ZFSUTILS_CRON}"; then
-  if command -v zpool >/dev/null 2>&1 && zpool list >/dev/null 2>&1; then
-    zpool list -H -o name,health 2>/dev/null | while IFS="$(printf '\t')" read -r pool health; do
-      [ "${health}" = "ONLINE" ] || continue
-      if ! omv_config_exists "/config/services/zfs/scrubjobs/job[pool='${pool}']"; then
-        object="<uuid>$(omv_uuid)</uuid>"
-        object="${object}<enable>1</enable>"
-        object="${object}<pool>${pool}</pool>"
-        object="${object}<execution>exactly</execution>"
-        object="${object}<minute>24</minute>"
-        object="${object}<hour>0</hour>"
-        object="${object}<dayofmonth>1</dayofmonth>"
-        object="${object}<month>*</month>"
-        object="${object}<dayofweek>*</dayofweek>"
-        object="${object}<everynminute>0</everynminute>"
-        object="${object}<everynhour>0</everynhour>"
-        object="${object}<everyndayofmonth>0</everyndayofmonth>"
-        object="${object}<sendemail>0</sendemail>"
-        object="${object}<emailonerror>0</emailonerror>"
-        object="${object}<comment>Imported from zfsutils-linux</comment>"
-        omv_config_add_node_data "/config/services/zfs/scrubjobs" "job" "${object}"
-      fi
-    done
-    # Disable the system scrub line to avoid double-scrubbing; the TRIM
-    # line in the same file is intentionally left untouched.
-    sed -i 's|^\([^#].*zfs-linux/scrub.*\)|# \1|' "${ZFSUTILS_CRON}" || true
+  if ! omv_config_exists "/config/services/zfs/scrubjobs/job[pool='*']"; then
+    object="<uuid>$(omv_uuid)</uuid>"
+    object="${object}<enable>1</enable>"
+    object="${object}<pool>*</pool>"
+    object="${object}<execution>exactly</execution>"
+    object="${object}<minute>24</minute>"
+    object="${object}<hour>0</hour>"
+    object="${object}<dayofmonth>1</dayofmonth>"
+    object="${object}<month>*</month>"
+    object="${object}<dayofweek>*</dayofweek>"
+    object="${object}<everynminute>0</everynminute>"
+    object="${object}<everynhour>0</everynhour>"
+    object="${object}<everyndayofmonth>0</everyndayofmonth>"
+    object="${object}<sendemail>0</sendemail>"
+    object="${object}<emailonerror>0</emailonerror>"
+    object="${object}<comment>Imported from zfsutils-linux</comment>"
+    omv_config_add_node_data "/config/services/zfs/scrubjobs" "job" "${object}"
   fi
+  # Disable the system scrub line to avoid double-scrubbing; the TRIM
+  # line in the same file is intentionally left untouched.
+  sed -i 's|^\([^#].*zfs-linux/scrub.*\)|# \1|' "${ZFSUTILS_CRON}" || true
 fi
 
 exit 0

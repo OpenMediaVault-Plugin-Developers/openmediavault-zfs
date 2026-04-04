@@ -22,6 +22,8 @@ data:
         prop: pool
         flexGrow: 2
         sortable: true
+        cellTemplateName: template
+        cellTemplateConfig: "{% if pool == '*' %}{{ 'All pools' | translate }}{% else %}{{ pool }}{% endif %}"
       - name: _("Scheduling")
         prop: ""
         flexGrow: 2

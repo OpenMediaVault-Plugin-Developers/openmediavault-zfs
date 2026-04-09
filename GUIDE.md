@@ -100,7 +100,7 @@ Before creating anything, it helps to understand how ZFS organises storage.
 Pool (tank)
 ├── VDEV 1 — mirror: sda, sdb       ← redundancy lives here
 ├── VDEV 2 — mirror: sdc, sdd       ← adding a second VDEV expands capacity
-├── [log VDEV]                       ← optional write cache (ZIL)
+├── [log VDEV]                       ← optional sync write accelerator (SLOG)
 ├── [cache VDEV]                     ← optional read cache (L2ARC)
 └── [spare]                          ← optional hot spare
 
@@ -132,7 +132,7 @@ VDEV, not between VDEVs.
 | RAIDZ2 | 2 parity | 4 | Tolerates 2 disk losses. Keep to ≤11 disks per VDEV. |
 | RAIDZ3 | 3 parity | 5 | Tolerates 3 disk losses. Keep to ≤15 disks per VDEV. |
 
-**VDEVs cannot be converted or removed after creation.** A mirror VDEV stays a mirror forever.
+A basic VDEV can be converted to mirror, but a mirror VDEV cannot be converted to a RAIDZ VDEV and RAIDZ1 cannot later become a RAIDZ2 VDEV.
 Adding more disks to expand a RAIDZ VDEV is possible via RAIDZ expansion (if the pool has
 `feature@raidz_expansion` active) but this is a slow, one-at-a-time process.
 
@@ -171,7 +171,7 @@ Click **Pool → Add pool**. The form fields are:
 | **VDEV type** | Basic, Mirror, RAIDZ1, RAIDZ2, or RAIDZ3. |
 | **Devices** | Disks to include. The plugin lists unpartitioned, unused disks. |
 | **Device identification** | How disks are identified in the pool: `by-id` (stable across reboots — recommended), `by-path`, or `dev` (e.g. `/dev/sda` — unstable). |
-| **Ashift** | Sector size hint. `0` = auto-detect (recommended). Set to `12` for 4K-native SSDs if auto-detection gives the wrong result. |
+| **Ashift** | Sector size hint. Do NOT rely on auto-detection. Set to `12` for modern 4K HDD/SSD. Only go higher if you know otherwise. |
 | **Force** | Pass `-f` to `zpool create`. Required if disks have existing partition tables or ZFS labels. |
 | **Compression** | Applied to the pool root dataset and inherited by all children unless overridden. `lz4` is an excellent default — fast and space-efficient. |
 | **Mountpoint** | Where the pool root mounts. Defaults to `/<poolname>`. |
@@ -232,7 +232,7 @@ Select a pool and use the action menus:
 |--------|-------------|
 | **Offline** | Temporarily stop using a device without removing it from the pool. The pool remains healthy (DEGRADED) if it has enough redundancy. Use before a planned maintenance swap. |
 | **Online** | Bring an offlined device back into service. ZFS resilvered any writes that occurred while the device was offline. |
-| **Attach** | Add a device to an existing single-disk (basic) VDEV to convert it into a mirror, or add a disk to an existing mirror to expand it. |
+| **Attach** | Add a device to an existing single-disk (basic) VDEV to convert it into a mirror, or add a disk to an existing mirror to expand it. Add to existing RAIDZ device. |
 | **Detach** | Remove one disk from a mirror, leaving the remaining disk(s) in place. The mirror is downgraded accordingly. |
 | **Replace** | Swap a failed or unwanted device for a new one. ZFS begins resilvering immediately. The pool remains DEGRADED until resilvering completes. |
 
@@ -710,13 +710,13 @@ The plugin adds four dashboard widgets. Enable them via **Dashboard → Configur
 | **Pool Health** | A table showing the health status of every pool (ONLINE, DEGRADED, FAULTED, etc.). |
 | **Pool Status** | A compact table showing each pool's health, capacity percentage, and used/available space. |
 | **ARC Size** | A single number showing the current total ARC (Adaptive Replacement Cache) size. |
-| **ARC Hit Ratio** | A line chart showing the ARC hit ratio and cache size over time. A hit ratio above 90% indicates the cache is effective for your workload. |
+| **ZFS ARC Hit/Misses** | The ratio of total hits to misses. A hit ratio above 90% indicates the cache is effective for your workload. |
 
 ### ARC Statistics page
 
 Navigate to **Storage → ZFS → ARC Stats** for a full text dump of ARC internals: total size,
 MRU/MFU cache sizes, hit/miss counters, prefetch statistics, and more. This is the same output
-as the `arc_summary` command-line tool.
+as the `arc_summary`/`zarcsummary` command-line tool.
 
 ### ZFS Logs
 
@@ -735,11 +735,16 @@ Four log viewers are available under **Storage → ZFS → Logs**:
 
 ### Pool design
 
-- **Use mirrors for home NAS.** They offer the best combination of read performance (reads can
-  be spread across both disks), write performance, and simplicity. They are also the fastest
-  to resilver after a disk failure.
-- **Do not mix VDEV types.** A pool with one mirror VDEV and one RAIDZ1 VDEV is valid but
-  complicated. Keep all data VDEVs the same type and size.
+Designing a ZFS pool layout is about balancing **performance, redundancy, capacity, and future flexibility**. Decisions made up front may be hard to change later, so plan carefully.
+
+**The optimum pool layout depends on how the data will be used.** For sequential workloads (media, backups, archive) RAIDZ works well, but prefer RAIDZ2 for larger drives to reduce resilver second-failure risk. For random I/O (containers, VMs, databases) use mirrors — they offer the best combination of read performance (spread across disks), write performance, and faster resilver after disk replacement.
+
+**Do not add optional devices (log, cache, and/or special VDEV) without justification and understanding.** For example, a "log device" is useless on a home NAS which does not generate sync writes (SMB shares do not, NFS shares do). Analyse first, but the answer to improving pool performance may simply be to add RAM.
+
+**For a mix of SSDs and HDDs, consider using the SSDs in a mirror pool and the HDDs in a separate RAIDZ pool.** In a home NAS this separation is preferable to trying to enhance RAIDZ performance by using a log, cache, and/or special VDEV, which only adds complexity and cost (typical consumer SSD/NVMe devices are not suitable for these optional VDEVs).
+
+**Beware adding a basic VDEV to an existing mirror/RAIDZ pool.** This turns a pool into a stripe, where losing a single drive can lose the entire pool.
+
 - **Use `by-id` device identification.** Device names like `/dev/sda` can change after a
   reboot if drives are added or removed. Stable `by-id` paths ensure ZFS always finds the
   right disk.

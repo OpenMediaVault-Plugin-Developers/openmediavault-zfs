@@ -17,6 +17,17 @@ class ZVol extends BackendAbstract
         return $this->enumerateProcFs("zd[0-9]+");
     }
 
+    /**
+     * Report all zvol block devices as "slaves" so that enumerateUnused()
+     * excludes them.  Zvols are ZFS-managed and must not appear as candidates
+     * in the Filesystems-tab device dropdown (getCandidates), where a user
+     * could accidentally run mkfs on them.
+     */
+    function enumerateSlaves()
+    {
+        return $this->enumerateProcFs("zd[0-9]+");
+    }
+
     function isTypeOf($deviceFile)
     {
         // Examples:

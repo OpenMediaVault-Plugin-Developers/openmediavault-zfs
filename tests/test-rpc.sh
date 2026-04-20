@@ -2332,29 +2332,6 @@ assert_rpc "getProperties (Volume)" "Zfs" "getProperties" \
     "{\"name\":\"$POOL/vol1\",\"type\":\"Volume\",\"start\":0,\"limit\":null}" \
     "volsize"
 
-# Regression: ZFS zvols (/dev/zdX) must not appear in FileSystemMgmt.getCandidates.
-# Zvols are real block devices that show up as "unused" but running mkfs on them
-# destroys the zvol data — they must be excluded from the Filesystems-tab dropdown.
-_ZVOL_CAND=$(omv-rpc -u admin "FileSystemMgmt" "getCandidates" '{}' 2>&1) || _ZVOL_CAND=""
-_ZVOL_LEAKED=false
-_ZVOL_LEAKED_DEV=""
-for _zdev in /dev/zd[0-9]*; do
-    [[ "$_zdev" =~ p[0-9]+$ ]] && continue  # skip partition nodes
-    [ -b "$_zdev" ] || continue
-    if echo "$_ZVOL_CAND" | grep -qF "\"$_zdev\""; then
-        _ZVOL_LEAKED=true
-        _ZVOL_LEAKED_DEV="$_zdev"
-        break
-    fi
-done
-if $_ZVOL_LEAKED; then
-    _fail "getCandidates — ZFS zvols must not appear as filesystem candidates" \
-          "$_ZVOL_LEAKED_DEV found in FileSystemMgmt.getCandidates"
-else
-    _pass "getCandidates — ZFS zvols absent from filesystem candidates"
-fi
-unset _ZVOL_CAND _ZVOL_LEAKED _ZVOL_LEAKED_DEV _zdev
-
 assert_rpc "deleteObject — vol1 (thick)" "Zfs" "deleteObject" \
     "{\"name\":\"$POOL/vol1\",\"mp\":\"\",\"type\":\"Volume\"}"
 

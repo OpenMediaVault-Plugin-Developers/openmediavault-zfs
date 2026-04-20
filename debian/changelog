@@ -206,6 +206,12 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Covers omv-zfs-events.log, omv-zfs-replicate.log, omv-zfs-scrub.log,
       omv-zfs-snapshot.log
     - Weekly rotation, 12 weeks retention, compressed, 5 MB max size
+  * Fix zvols appearing as filesystem candidates in the Filesystems tab
+    - ZVol backend now reports its devices as slaves so enumerateUnused() excludes them
+    - Prevents users from accidentally running mkfs on a zvol block device (/dev/zdX)
+  * Add regression tests for ZFS devices in FileSystemMgmt.getCandidates
+    - Verify pool member disks are absent from getCandidates after pool creation
+    - Verify zvol block devices are absent from getCandidates while volumes exist
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Fri, 27 Mar 2026 00:00:00 +0000
 

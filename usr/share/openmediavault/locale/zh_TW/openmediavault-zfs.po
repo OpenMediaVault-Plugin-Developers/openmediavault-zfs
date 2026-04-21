@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-03 13:47+0000\n"
+"POT-Creation-Date: 2026-04-21 12:29+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2024,2026\n"
 "Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "'快照' 保留最新的 N 個；時間單位，用來決定刪除比 N 日/週/月/年 老的快照。"
 
 msgid "A different name must be specified."
 msgstr "必須指定一個不同的名稱。"
@@ -33,13 +33,13 @@ msgid "Add"
 msgstr "新增"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "新增特殊裝置"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "新增 快取 / 日誌 / 備用 / 特殊"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "新增加密檔案系統"
 
 msgid "Add filesystem"
 msgstr "新增檔案系統"
@@ -77,27 +77,27 @@ msgid ""
 "replication. Not compatible with 'Recursive' (ZFS does not support recursive"
 " sends from a bookmark) and not needed when 'Use existing snapshots' is "
 "enabled."
-msgstr ""
+msgstr "每次成功的傳送後，建立一個 ZFS 書籤作為遞增的基底。允許修剪來源快照到剩 1 個，同時保持遞增複製。這與 '遞迴式' 傳送不相容(ZFS 不支援從書籤做遞迴傳送)，並且當 '使用現存快照' 被啟用時，這也沒有必要。"
 
 msgid "Algorithm"
-msgstr ""
+msgstr "演算法"
 
 msgid "All snapshots deleted."
 msgstr "所有快照已被刪除。"
 
 msgid "Alloc"
-msgstr ""
+msgstr "調配"
 
 msgid ""
 "Allow self-signed or untrusted certificates. Use only on trusted local "
 "networks."
-msgstr ""
+msgstr "允許使用自我簽署或不受信任的憑證。僅在受信任的本地網路中使用。"
 
 msgid "Anchor (existing device or RAIDZ vdev)"
-msgstr ""
+msgstr "定錨（現存裝置或 RAIDZ vdev）"
 
 msgid "April"
-msgstr ""
+msgstr "四月"
 
 msgid "Are you sure you want to add this device to the pool?"
 msgstr "您確定要將這裝置加到此集用場？"
@@ -105,7 +105,7 @@ msgstr "您確定要將這裝置加到此集用場？"
 msgid ""
 "Are you sure you want to cancel the vdev removal? Data evacuation will stop "
 "and the vdev will remain in the pool."
-msgstr ""
+msgstr "您確定要取消移除該 vdev 嗎？資料清撤將會停止，並且該 vdev 將保留在集用場中。"
 
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
@@ -140,7 +140,7 @@ msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
 "configuration will be removed and you will need to enter the passphrase "
 "manually after each reboot."
-msgstr ""
+msgstr "您確定要停用自動開鎖嗎？所存留的金鑰或遠端 URL 設置將被移除，並且您將需要在每次重新啟動時輸入密碼短語。"
 
 msgid "Are you sure you want to export?"
 msgstr "您確定要匯出？"
@@ -148,12 +148,12 @@ msgstr "您確定要匯出？"
 msgid ""
 "Are you sure you want to promote this dataset? This detaches the clone from "
 "its origin snapshot dependency."
-msgstr "您確定要晉升此資料集？這將使此複製版從它的原本依存關係中拆離。"
+msgstr "您確定要晉升此資料集？這將使複本從它根源快照的依存關係中拆離。"
 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
 "immediately."
-msgstr ""
+msgstr "您確定要取代此裝置嗎？資料修復將立即開始。"
 
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "您確定要轉回到此快照？"
@@ -161,7 +161,7 @@ msgstr "您確定要轉回到此快照？"
 msgid ""
 "Are you sure you want to start a TRIM operation on this pool? This is only "
 "meaningful for SSD-backed pools."
-msgstr ""
+msgstr "您確定要在此集用場開始 TRIM 修整操作嗎？這只對援用 SSD 的集用場有意義。"
 
 msgid "Are you sure you want to start a scrub?"
 msgstr "您確定要開始清刷嗎？"
@@ -170,7 +170,7 @@ msgid "Are you sure you want to stop the scrub?"
 msgstr "您確定要停止清刷嗎？"
 
 msgid "Are you sure you want to take this device offline?"
-msgstr ""
+msgstr "您確定要將此裝置離線嗎？"
 
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
@@ -181,7 +181,7 @@ msgid ""
 "Are you sure you want to upgrade this pool? This enables new feature flags "
 "and cannot be undone. The pool will no longer be accessible by older ZFS "
 "versions."
-msgstr ""
+msgstr "您確定要升級此集用場嗎？這將啟用新功能旗標，並且無法撤銷。此集用場將不再能被舊版 ZFS 存取。"
 
 msgid ""
 "Are you sure? For a mirror or stripe pool this attaches the new device to "
@@ -189,7 +189,7 @@ msgid ""
 "device into a 2-way mirror (irreversible without full pool recreation). For "
 "a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, "
 "permanently increasing its width."
-msgstr ""
+msgstr "您確定嗎？對一個鏡像或條串化集用場，這會附接此新裝置到所選的現存裝置，延展該鏡像或轉變條串化裝置成為一個雙邊鏡像（無法還原，除非整個集用場重建）。對一個 RAIDZ 集用場，則會藉由增加一個裝置延展所選的 RAIDZ vdev，永久性地增加了它的寬度。"
 
 msgid "Ashift value"
 msgstr "Ashift 數值"
@@ -207,26 +207,26 @@ msgid "At least two devices are required."
 msgstr "至少須要兩個裝置。"
 
 msgid "At reboot"
-msgstr ""
+msgstr "重新啟動時"
 
 msgid "Attach device"
-msgstr ""
+msgstr "附接裝置"
 
 msgid "August"
-msgstr ""
+msgstr "八月"
 
 msgid "Auto-unlock"
-msgstr ""
+msgstr "自動開鎖"
 
 msgid "Auto-unlock at boot"
-msgstr ""
+msgstr "啟動時自動開鎖"
 
 msgid "Auto-unlock disabled."
-msgstr ""
+msgstr "自動開鎖已停用。"
 
 msgid ""
 "Auto-unlock enabled. The key will be loaded from the local keyfile at boot."
-msgstr ""
+msgstr "自動開鎖已啟用。啟動時，金鑰將從本機上金鑰檔案載入。"
 
 msgid "Available"
 msgstr "可用"
@@ -235,7 +235,7 @@ msgid "Basic"
 msgstr "基本"
 
 msgid "Bulk Delete"
-msgstr ""
+msgstr "批量刪除"
 
 msgid "By ID"
 msgstr "以 ID"
@@ -244,49 +244,49 @@ msgid "By Path"
 msgstr "以路徑"
 
 msgid "Cache (L2ARC)"
-msgstr ""
+msgstr "快取 (L2ARC)"
 
 msgid "Cancel vdev removal"
-msgstr ""
+msgstr "取消 vdev 移除"
 
 msgid "Cancelling vdev removal ..."
-msgstr ""
+msgstr "取消 vdev 移除中 ..."
 
 msgid "Cap"
-msgstr ""
+msgstr "用量"
 
 msgid "Case sensitivity"
-msgstr ""
+msgstr "大小寫區分"
 
 msgid "Certain date"
-msgstr ""
+msgstr "某個日期"
 
 msgid "Change encryption key"
-msgstr ""
+msgstr "改變加密金鑰"
 
 msgid "Change key"
-msgstr ""
+msgstr "改變金鑰"
 
 msgid "Changing encryption key ..."
-msgstr ""
+msgstr "改變加密金鑰中 ..."
 
 msgid "Clear errors"
-msgstr ""
+msgstr "清除錯誤"
 
 msgid "Clearing pool errors ..."
 msgstr "清理集用場錯誤中 ..."
 
 msgid "Clone"
-msgstr "複製"
+msgstr "複本"
 
 msgid "Clone dataset"
 msgstr "複製資料集"
 
 msgid "Clone name"
-msgstr ""
+msgstr "複本名稱"
 
 msgid "Clone path (within pool)"
-msgstr "複製路徑(於集用場內)"
+msgstr "複本路徑(於集用場內)"
 
 msgid "Clone snapshot"
 msgstr "複製快照"
@@ -298,10 +298,10 @@ msgid "Cloning snapshot ..."
 msgstr "複製快照中 ..."
 
 msgid "Comment"
-msgstr ""
+msgstr "註釋"
 
 msgid "Compress ratio"
-msgstr ""
+msgstr "壓縮比"
 
 msgid "Compression"
 msgstr "壓縮"
@@ -310,13 +310,13 @@ msgid "Compression type"
 msgstr "壓縮型式"
 
 msgid "Confirm new passphrase / key"
-msgstr ""
+msgstr "確認新密碼短語 / 金鑰"
 
 msgid "Confirm passphrase"
-msgstr ""
+msgstr "確認密碼短語"
 
 msgid "Confirm passphrase / key"
-msgstr ""
+msgstr "確認密碼短語 / 金鑰"
 
 msgid "Create"
 msgstr "建立"
@@ -325,7 +325,7 @@ msgid "Created pool."
 msgstr "建立集用場。"
 
 msgid "Created replication job."
-msgstr ""
+msgstr "已建立複製工作。"
 
 msgid "Created scrub job."
 msgstr "已建立清刷工作。"
@@ -334,7 +334,7 @@ msgid "Created snapshot job."
 msgstr "已建立快照工作。"
 
 msgid "Creating encrypted filesystem ..."
-msgstr ""
+msgstr "建立加密檔案系統中 ..."
 
 msgid "Creating recursive snapshot ..."
 msgstr "建立遞迴快照中 ..."
@@ -343,13 +343,13 @@ msgid "Creating snapshot ..."
 msgstr "建立快照中 ..."
 
 msgid "Current passphrase / key"
-msgstr ""
+msgstr "目前的密碼短語 / 金鑰"
 
 msgid "DEGRADED"
-msgstr ""
+msgstr "降級"
 
 msgid "Daily"
-msgstr ""
+msgstr "每日"
 
 msgid "Dataset"
 msgstr "資料集"
@@ -372,25 +372,25 @@ msgid "Datasets"
 msgstr "資料集"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "日期/時間"
 
 msgid "Day of month"
-msgstr ""
+msgstr "當月何日"
 
 msgid "Day of week"
-msgstr ""
+msgstr "當週何日"
 
 msgid "December"
-msgstr ""
+msgstr "十二月"
 
 msgid "Decryption passphrase (optional)"
-msgstr ""
+msgstr "解密密碼短語(選用性)"
 
 msgid "Dedup"
-msgstr ""
+msgstr "除重複"
 
 msgid "Default (128K)"
-msgstr ""
+msgstr "預設 (128K)"
 
 msgid "Delete"
 msgstr "刪除"
@@ -402,7 +402,7 @@ msgid "Delete missing"
 msgstr "删除移失"
 
 msgid "Delete recursively"
-msgstr ""
+msgstr "遞迴刪除"
 
 msgid "Delete this and all earlier snapshots"
 msgstr "刪除這個與其之前的快照"
@@ -429,58 +429,58 @@ msgid "Deleting snapshots ..."
 msgstr "刪除快照中 ..."
 
 msgid "Destination"
-msgstr ""
+msgstr "目的地"
 
 msgid "Destination dataset"
 msgstr "目的地資料集"
 
 msgid "Detach device"
-msgstr ""
+msgstr "拆離裝置"
 
 msgid "Details"
 msgstr "詳細資料"
 
 msgid "Device"
-msgstr ""
+msgstr "裝置"
 
 msgid "Device Attach"
-msgstr ""
+msgstr "裝置附接"
 
 msgid "Device Detach"
-msgstr ""
+msgstr "裝置拆離"
 
 msgid "Device Offline"
-msgstr ""
+msgstr "裝置下線"
 
 msgid "Device Online"
-msgstr ""
+msgstr "裝置在線"
 
 msgid "Device Replace"
-msgstr ""
+msgstr "裝置取代"
 
 msgid "Device alias"
 msgstr "裝置別名"
 
 msgid "Device to detach"
-msgstr ""
+msgstr "要拆離之裝置"
 
 msgid "Device to replace"
-msgstr ""
+msgstr "要取代之裝置"
 
 msgid "Device type"
-msgstr ""
+msgstr "裝置型式"
 
 msgid "Devices"
 msgstr "裝置"
 
 msgid "Diff"
-msgstr ""
+msgstr "差異"
 
 msgid "Disable auto-unlock at boot"
-msgstr ""
+msgstr "停用啟動時自動開鎖"
 
 msgid "Disabling auto-unlock ..."
-msgstr ""
+msgstr "停用自動開鎖中 ..."
 
 msgid "Discover"
 msgstr "發現"
@@ -489,7 +489,7 @@ msgid ""
 "Displays the health of all ZFS pools with traffic-light status. Green = "
 "healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click "
 "a pool to view details."
-msgstr ""
+msgstr "以交通號誌來顯示全部 ZFS 集用場的健康狀況。綠 = 健康，橘 = >80% 滿，紅 = 降級/故障/錯誤/>90% 滿。點選一個集用場來檢視詳情。"
 
 msgid ""
 "Do not create a new snapshot. Instead, replicate the most recent existing "
@@ -503,64 +503,64 @@ msgid "Do you really want to expand the ZFS pool?"
 msgstr "您真的要擴展 ZFS 集用場嗎？"
 
 msgid "Docs"
-msgstr ""
+msgstr "說明文件"
 
 msgid "Edit"
-msgstr ""
+msgstr "編輯"
 
 msgid "Edit property"
 msgstr "編輯特性"
 
 msgid "Enable auto-unlock"
-msgstr ""
+msgstr "啟用自動開鎖"
 
 msgid "Enable auto-unlock at boot (local file)"
-msgstr ""
+msgstr "啟用啟動時自動開鎖(本機檔案)"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr ""
+msgstr "啟用啟動時自動開鎖(遠端 HTTPS)"
 
 msgid "Enable auto-unlock — local file"
-msgstr ""
+msgstr "啟用自動開鎖 — 本機檔案"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr ""
+msgstr "啟用自動開鎖 — 遠端 HTTPS"
 
 msgid "Enabled"
-msgstr ""
+msgstr "已啟用"
 
 msgid "Enabling auto-unlock ..."
-msgstr ""
+msgstr "啟用自動開鎖中 ..."
 
 msgid "Encrypted filesystem created."
-msgstr ""
+msgstr "加密檔案系統已建立。"
 
 msgid "Encryption"
-msgstr ""
+msgstr "加密"
 
 msgid "Encryption key changed."
-msgstr ""
+msgstr "加密金鑰已變更。"
 
 msgid "Encryption key loaded."
-msgstr ""
+msgstr "加密金鑰已載入。"
 
 msgid "Encryption key unloaded."
-msgstr ""
+msgstr "加密金鑰已卸載。"
 
 msgid "Error"
-msgstr ""
+msgstr "錯誤"
 
 msgid "Event"
-msgstr ""
+msgstr "事件"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "月內每 N 日"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "每 N 小時"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "每 N 分鐘"
 
 msgid "Expand"
 msgstr "擴展"
@@ -575,18 +575,18 @@ msgid "Exporting pool ..."
 msgstr "擴展集用場中 ..."
 
 msgid "FAULTED"
-msgstr ""
+msgstr "故障"
 
 msgid "February"
-msgstr ""
+msgstr "二月"
 
 msgid ""
 "Filename case sensitivity for the pool's root dataset. Cannot be changed "
 "after creation."
-msgstr "集用場根資料集的檔案名稱對大小寫區分。一旦建立後無法改變。"
+msgstr "集用場根資料集的檔案名稱對大小寫區分性。一旦建立後無法改變。"
 
 msgid "Filename case sensitivity. Cannot be changed after creation."
-msgstr ""
+msgstr "檔案名稱對大小寫區分性。一旦建立後無法改變。"
 
 msgid "Filesystem added."
 msgstr "檔案系統已加入。"
@@ -619,51 +619,51 @@ msgid ""
 msgstr "即使有錯誤報告，也強迫建立集用場。請務必謹慎使用！"
 
 msgid "Frag"
-msgstr ""
+msgstr "片段化"
 
 msgid "Free"
-msgstr ""
+msgstr "未用"
 
 msgid "Friday"
-msgstr ""
+msgstr "週五"
 
 msgid "Has children"
-msgstr ""
+msgstr "有子項目"
 
 msgid "Has shares"
-msgstr ""
+msgstr "有共享"
 
 msgid "Health"
-msgstr ""
+msgstr "健康"
 
 msgid "History"
-msgstr ""
+msgstr "歷史"
 
 msgid "Hits"
 msgstr "命中"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr ""
+msgstr "遠端 ZFS 主機之名稱或 IP 地址。"
 
 msgid "Hot spare"
-msgstr ""
+msgstr "熱備用"
 
 msgid "Hour"
-msgstr ""
+msgstr "時"
 
 msgid "Hourly"
-msgstr ""
+msgstr "每小時"
 
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
 "network is slow to come up at boot."
-msgstr ""
+msgstr "要等待網路取用多久時間才放棄。若啟動時你的網路很慢才上線，請增加時間。"
 
 msgid ""
 "If set, the remote server must serve an OpenSSL-encrypted key. Generate the "
 "encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc "
 "-pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
-msgstr ""
+msgstr "若設定，遠端伺服器必須提供一個 OpenSSL-加密的金鑰。執行這個指令來產生加密值 -- echo -n '你的金鑰' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:解密密碼短語"
 
 msgid "Import"
 msgstr "匯入"
@@ -681,76 +681,76 @@ msgid "Importing pool ..."
 msgstr "匯入集用場中 ..."
 
 msgid "Inherit from parent"
-msgstr ""
+msgstr "從上層繼承"
 
 msgid "Insensitive"
-msgstr ""
+msgstr "不區分"
 
 msgid "Is encryption root"
-msgstr ""
+msgstr "是加密根資料集"
 
 msgid "January"
-msgstr ""
+msgstr "一月"
 
 msgid "Job"
-msgstr ""
+msgstr "工作"
 
 msgid "July"
-msgstr ""
+msgstr "七月"
 
 msgid "June"
-msgstr ""
+msgstr "六月"
 
 msgid "Keep"
-msgstr ""
+msgstr "保留"
 
 msgid "Keep snapshots on source"
 msgstr "保留在來源上的快照"
 
 msgid "Key URL"
-msgstr ""
+msgstr "金鑰 URL"
 
 msgid "Key status"
-msgstr ""
+msgstr "金鑰狀況"
 
 msgid "Last scrub"
 msgstr "前次清刷"
 
 msgid "Level"
-msgstr ""
+msgstr "層級"
 
 msgid "Load encryption key"
-msgstr ""
+msgstr "載入加密金鑰"
 
 msgid "Load key"
-msgstr ""
+msgstr "載入金鑰"
 
 msgid "Load key (unlock)"
-msgstr ""
+msgstr "載入金鑰 (開鎖)"
 
 msgid "Loading encryption key ..."
-msgstr ""
+msgstr "載入加密金鑰中 ..."
 
 msgid "Local"
-msgstr ""
+msgstr "本機"
 
 msgid "Log (ZIL/SLOG)"
-msgstr ""
+msgstr "日誌 (ZIL/SLOG)"
 
 msgid "March"
-msgstr ""
+msgstr "三月"
 
 msgid "May"
-msgstr ""
+msgstr "五月"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
 msgstr "可包含子資料集，例如：secure/clone1"
 
 msgid "Message"
-msgstr ""
+msgstr "訊息"
 
 msgid "Minute"
-msgstr ""
+msgstr "分"
 
 msgid "Mirror"
 msgstr "鏡像"
@@ -762,22 +762,22 @@ msgid "Missing ZFS mntent entries added."
 msgstr "移失的 ZFS mntent 項目已加入。 "
 
 msgid "Mixed"
-msgstr ""
+msgstr "混用"
 
 msgid "Modified"
 msgstr "已修改"
 
 msgid "Monday"
-msgstr ""
+msgstr "週一"
 
 msgid "Month"
-msgstr ""
+msgstr "月"
 
 msgid "Monthly"
-msgstr ""
+msgstr "每月"
 
 msgid "Mounted"
-msgstr ""
+msgstr "已掛載"
 
 msgid "Mountpoint"
 msgstr "掛載點"
@@ -786,28 +786,28 @@ msgid "Name"
 msgstr "名稱"
 
 msgid "Name of the new clone, created in the same parent as the source."
-msgstr ""
+msgstr "新的複本名稱，會建立在與來源相同的上層。"
 
 msgid "Name of the specific pool to import."
 msgstr "所要匯入之特定集用場的名稱。"
 
 msgid "Network timeout (seconds)"
-msgstr ""
+msgstr "網路逾時 (秒)"
 
 msgid "New Property"
 msgstr "新特性"
 
 msgid "New device to attach"
-msgstr ""
+msgstr "要附接之新裝置"
 
 msgid "New name"
-msgstr ""
+msgstr "新名稱"
 
 msgid "New passphrase / key"
-msgstr ""
+msgstr "新密碼短語 / 金鑰"
 
 msgid "New passphrases do not match."
-msgstr ""
+msgstr "新密碼短語不符合。"
 
 msgid "New property"
 msgstr "新特性"
@@ -819,7 +819,7 @@ msgid "None"
 msgstr "無"
 
 msgid "November"
-msgstr ""
+msgstr "十一月"
 
 msgid ""
 "Number of replication snapshots to keep on the source after each successful "
@@ -830,31 +830,31 @@ msgid ""
 msgstr "於每次成功的傳送後，要在來源保留的複製快照個數。0 = 保留全部。若多個複製工作共用相同之資料集和前綴詞，做來源修剪可能破壞快照遞增鍊 — 最好輸入 0 並讓專責快照工作來管理保存。這會被忽略當 '使用現存快照' 被啟用。"
 
 msgid "OFFLINE"
-msgstr ""
+msgstr "離線"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "ONLINE"
-msgstr ""
+msgstr "在線"
 
 msgid "Object deleted."
 msgstr "物件已刪除。"
 
 msgid "October"
-msgstr ""
+msgstr "十月"
 
 msgid "Offline device"
-msgstr ""
+msgstr "離線裝置"
 
 msgid "Online device"
-msgstr ""
+msgstr "在線裝置"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
-msgstr ""
+msgstr "僅允許文數字元、連字符及底線。"
 
 msgid "Only send an email if the job exits with an error."
-msgstr ""
+msgstr "只在工作結束含錯誤時才送發電子郵件。"
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "給集用場的選用性掛載點。預設使用集用場的名稱。"
@@ -863,7 +863,7 @@ msgid "Optional mountpoint. Default is to use the dataset path."
 msgstr "選用性掛載點。預設為使用 dataset 路徑。"
 
 msgid "Origin"
-msgstr ""
+msgstr "根源"
 
 msgid "Packages fixed."
 msgstr "套件已修復。"
@@ -872,13 +872,13 @@ msgid "Parent"
 msgstr "上層"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "密碼短語"
 
 msgid "Passphrase / key"
-msgstr ""
+msgstr "密碼短語 / 金鑰"
 
 msgid "Passphrases do not match."
-msgstr ""
+msgstr "密碼短語不符合。"
 
 msgid "Path"
 msgstr "路徑"
@@ -923,7 +923,7 @@ msgid "Prefix"
 msgstr "前綴詞"
 
 msgid "Promote"
-msgstr ""
+msgstr "晉升"
 
 msgid "Promoting dataset ..."
 msgstr "晉升資料集中 ..."
@@ -953,16 +953,16 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "REMOVED"
-msgstr ""
+msgstr "已移除"
 
 msgid "Raw send"
-msgstr ""
+msgstr "原樣傳送"
 
 msgid "Record size"
-msgstr ""
+msgstr "記錄大小"
 
 msgid "Recursive"
-msgstr ""
+msgstr "遞迴"
 
 msgid "Recursive snapshot created."
 msgstr "遞迴快照已被建立。"
@@ -971,34 +971,34 @@ msgid "Refer"
 msgstr "參用"
 
 msgid "Referenced"
-msgstr ""
+msgstr "已參用"
 
 msgid "Remote"
-msgstr ""
+msgstr "遠端"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr ""
+msgstr "遠端自動開鎖已啟用。啟動時，金鑰將被抓取。"
 
 msgid "Remote host"
-msgstr ""
+msgstr "遠端主機"
 
 msgid "Removal state"
-msgstr ""
+msgstr "移除狀態"
 
 msgid "Removal status"
-msgstr ""
+msgstr "移除狀況"
 
 msgid "Remove Vdev"
-msgstr ""
+msgstr "移除 Vdev"
 
 msgid "Remove vdev"
-msgstr ""
+msgstr "移除 vdev"
 
 msgid "Removing stale ZFS mntent entries ..."
 msgstr "移除過時的 ZFS mntent 項目中 ..."
 
 msgid "Rename"
-msgstr ""
+msgstr "重新命名"
 
 msgid "Rename dataset"
 msgstr "重新命名資料集"
@@ -1007,13 +1007,13 @@ msgid "Renaming dataset ..."
 msgstr "重新命名資料集中 ..."
 
 msgid "Replace device"
-msgstr ""
+msgstr "取代裝置"
 
 msgid "Replacement device"
-msgstr ""
+msgstr "取代用裝置"
 
 msgid "Replication Jobs"
-msgstr ""
+msgstr "複製工作"
 
 msgid ""
 "Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use "
@@ -1035,33 +1035,33 @@ msgid "Rolling back snapshot ..."
 msgstr "轉回快照中 ..."
 
 msgid "Run"
-msgstr ""
+msgstr "執行"
 
 msgid "Run now"
-msgstr ""
+msgstr "立即執行"
 
 msgid "Run replication job"
-msgstr ""
+msgstr "執行複製工作"
 
 msgid "Run snapshot job"
 msgstr "執行快照工作"
 
 msgid "SSH Certificate"
-msgstr ""
+msgstr "SSH 憑證"
 
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr ""
+msgstr "用來對遠端主機做驗證的 SSH 金鑰對。於 系統 > 憑證 > SSH 中產生，然後用 複製到遠端 來授權它。"
 
 msgid "SSH port"
-msgstr ""
+msgstr "SSH 連接埠"
 
 msgid "SSH user"
-msgstr ""
+msgstr "SSH 用戶"
 
 msgid "Saturday"
-msgstr ""
+msgstr "週六"
 
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
@@ -1078,10 +1078,10 @@ msgid "Scan for and import all pools not currently imported."
 msgstr "掃瞄並匯入所有目前尚未匯入的集用場。"
 
 msgid "Schedule"
-msgstr ""
+msgstr "預定工作"
 
 msgid "Scheduling"
-msgstr ""
+msgstr "預定時程"
 
 msgid "Scrub"
 msgstr "清刷"
@@ -1111,34 +1111,34 @@ msgid "Scrub stopped."
 msgstr "清刷已停止。"
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "只有錯誤時送電子郵件"
 
 msgid "Send output via email"
-msgstr ""
+msgstr "經由電子郵件傳送輸出"
 
 msgid "Send the command output via email on completion."
-msgstr ""
+msgstr "完成時經由電子郵件傳送指令的輸出。"
 
 msgid "Sensitive"
-msgstr ""
+msgstr "區分"
 
 msgid "Sensitive (default)"
-msgstr ""
+msgstr "區分(預設)"
 
 msgid "September"
-msgstr ""
+msgstr "九月"
 
 msgid "Set ashift"
 msgstr "設定 ashift"
 
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 msgid "Size"
 msgstr "大小"
 
 msgid "Skip certificate verification"
-msgstr ""
+msgstr "跳過憑證驗證"
 
 msgid "Snapshot Diff"
 msgstr "快照差異"
@@ -1204,14 +1204,14 @@ msgid "Source pool"
 msgstr "來源集用場"
 
 msgid "Special (metadata)"
-msgstr ""
+msgstr "特殊 (元資料)"
 
 msgid "Specifies which device alias should be used."
-msgstr ""
+msgstr "指定裝置的哪一個別名應被使用。"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "指定哪一個裝置別名應被使用。除非需要，不要更改。"
+msgstr "指定裝置的哪一個別名應被使用。除非必要，不要更改。"
 
 msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "指定 ashift 數值。只有當你確定需要時才使用。"
@@ -1223,7 +1223,7 @@ msgid "Start scrub"
 msgstr "開始清刷"
 
 msgid "Starting TRIM ..."
-msgstr ""
+msgstr "開始 TRIM 修整中 ..."
 
 msgid "Starting scrub ..."
 msgstr "開始清刷中 ..."
@@ -1238,66 +1238,66 @@ msgid "Stopping scrub ..."
 msgstr "停止清刷中 ..."
 
 msgid "Sunday"
-msgstr ""
+msgstr "週日"
 
 msgid "Synchronising ZFS mntent entries ..."
 msgstr "同步 ZFS mntent 項目中 ..."
 
 msgid "TRIM started."
-msgstr ""
+msgstr "TRIM 修整已開始。"
 
 msgid "The field should only contain * or a comma separated list of values."
-msgstr ""
+msgstr "此欄位應該只含 * 或一串以逗號分開的值。"
 
 msgid ""
 "The passphrase will be fetched from a remote HTTPS server at boot. The key "
 "is never stored on this machine, protecting against theft of the whole "
 "server. Requires network access during boot."
-msgstr ""
+msgstr "在啟動時將從遠端 HTTPS 伺服器抓取密碼短語。此金鑰永遠不會處存在這個機器上，以防護整個伺服器被偷竊。這需要啟動時可以取用網路。"
 
 msgid ""
 "The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. "
 "Protects against drive theft but not theft of the whole server."
-msgstr ""
+msgstr "未加密的密碼短語將被儲存在此機器上的 /etc/zfs/keys/。可防護硬碟被盜，但不能防護整個伺服器被盜。"
 
 msgid "Thin provisioning"
 msgstr "精簡配置"
 
 msgid "Thursday"
-msgstr ""
+msgstr "週四"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "執行時間"
 
 msgid "Trim"
-msgstr ""
+msgstr "修整"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "週二"
 
 msgid "Type"
 msgstr "型式"
 
 msgid "UNAVAIL"
-msgstr ""
+msgstr "不可用"
 
 msgid "UNKNOWN"
-msgstr ""
+msgstr "未知"
 
 msgid "URL must start with https://"
-msgstr ""
+msgstr "URL 必須以 https:// 開頭"
 
 msgid "Unit"
-msgstr ""
+msgstr "單位"
 
 msgid "Unload key (lock)"
-msgstr ""
+msgstr "卸載金鑰 (鎖上)"
 
 msgid "Unloading encryption key ..."
-msgstr ""
+msgstr "卸載加密金鑰中 ..."
 
 msgid "Updated replication job."
-msgstr ""
+msgstr "已更新複製工作。"
 
 msgid "Updated scrub job."
 msgstr "已更新清刷工作。"
@@ -1306,18 +1306,18 @@ msgid "Updated snapshot job."
 msgstr "已更新快照工作。"
 
 msgid "Upgrade"
-msgstr ""
+msgstr "升級"
 
 msgid "Upgrading pool ..."
 msgstr "升級集用場中 ..."
 
 msgid "Use ZFS bookmarks"
-msgstr ""
+msgstr "使用 ZFS 書籤"
 
 msgid ""
 "Use default (128K) for general use. Use 4K-16K for databases, 1M for large "
 "files/media."
-msgstr ""
+msgstr "在一般應用，使用預設 (128K)。對資料庫使用 4K-16K ，對大檔案/媒體使用 1M。"
 
 msgid "Use existing snapshots"
 msgstr "使用現存快照"
@@ -1328,24 +1328,24 @@ msgid ""
 msgstr "使用 zfs send -w 來傳送未解密的加密資料。來源資料集需要有加密。"
 
 msgid "Used"
-msgstr "已使用"
+msgstr "已用"
 
 msgid "Used (%)"
-msgstr ""
+msgstr "已用 (%)"
 
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
 "on the remote to grant non-root access."
-msgstr ""
+msgstr "在遠端主機的用戶，有權限來執行 zfs receive。在遠端上用 'zfs allow' 指令來授予 非-root 取用權限。"
 
 msgid "Value"
 msgstr "數值"
 
 msgid "Vdev removal cancelled."
-msgstr ""
+msgstr "Vdev 移除已被取消。"
 
 msgid "Vdev to remove"
-msgstr ""
+msgstr "要移除之 Vdev"
 
 msgid "Vdev type"
 msgstr "Vdev 型式"
@@ -1354,19 +1354,19 @@ msgid "Volume added."
 msgstr "儲存巻已加入。"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "週三"
 
 msgid "Weekly"
-msgstr ""
+msgstr "每週"
 
 msgid "Yearly"
-msgstr ""
+msgstr "每年"
 
 msgid "ZFS ARC Hits/Misses"
-msgstr ""
+msgstr "ZFS ARC 命中/未中"
 
 msgid "ZFS ARC Size"
-msgstr ""
+msgstr "ZFS ARC 大小"
 
 msgid "ZFS Pool Events"
 msgstr "ZFS 集用場事件"
@@ -1378,10 +1378,10 @@ msgid "ZFS Pool Status"
 msgstr "ZFS 集用場狀況"
 
 msgid "ZFS Remote Unlock"
-msgstr ""
+msgstr "ZFS 遠端開鎖"
 
 msgid "ZFS Replication"
-msgstr ""
+msgstr "ZFS 複製"
 
 msgid "ZFS Scrub"
 msgstr "ZFS 清刷"
@@ -1393,22 +1393,22 @@ msgid "ZFS mntent entries synchronised."
 msgstr "ZFS mntent 項目已同步。"
 
 msgid "days"
-msgstr ""
+msgstr "日"
 
 msgid "months"
-msgstr ""
+msgstr "月"
 
 msgid "omv-extras.org wiki"
-msgstr ""
+msgstr "omv-extras.org 維基"
 
 msgid "snapshots"
 msgstr "快照"
 
 msgid "weeks"
-msgstr ""
+msgstr "週"
 
 msgid "years"
-msgstr ""
+msgstr "年"
 
 msgid "zfs"
 msgstr "zfs"

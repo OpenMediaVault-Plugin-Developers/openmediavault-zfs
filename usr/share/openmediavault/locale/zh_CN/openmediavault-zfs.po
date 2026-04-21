@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# haai so <s1097854603@gmail.com>, 2021
+# 蘇鵬宇 <s1097854603@gmail.com>, 2021
 # songming <by@songming.me>, 2014,2018,2021-2022,2024,2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 21:25+0000\n"
+"POT-Creation-Date: 2026-04-21 12:29+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: songming <by@songming.me>, 2014,2018,2021-2022,2024,2026\n"
 "Language-Team: Chinese (China) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_CN/)\n"

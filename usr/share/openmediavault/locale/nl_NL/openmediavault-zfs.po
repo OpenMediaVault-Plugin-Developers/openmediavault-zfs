@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-03 13:47+0000\n"
+"POT-Creation-Date: 2026-04-21 12:29+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>, 2025-2026\n"
 "Language-Team: Dutch (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/nl/)\n"
@@ -112,7 +112,7 @@ msgstr "Weet u zeker dat u het verwijderen van de vdev wilt annuleren? Het evacu
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
 "and all child datasets?"
-msgstr ""
+msgstr "Weet u zeker dat u '{{ _selected[0].path }}' wilt verwijderen uit deze dataset en alle onderliggende datasets?"
 
 msgid ""
 "Are you sure you want to delete ALL snapshots on the parent dataset '{{ "
@@ -142,7 +142,7 @@ msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
 "configuration will be removed and you will need to enter the passphrase "
 "manually after each reboot."
-msgstr ""
+msgstr "Weet u zeker dat u automatisch ontgrendelen wilt uitschakelen? De opgeslagen sleutel of externe URL-configuratie wordt verwijderd en u moet de wachtwoordzin na elke herstart handmatig invoeren."
 
 msgid "Are you sure you want to export?"
 msgstr "Weet u zeker dat u wilt exporteren?"
@@ -155,7 +155,7 @@ msgstr "Weet u zeker dat u deze dataset wilt promoveren? Dit maakt de kloon los 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
 "immediately."
-msgstr ""
+msgstr "Weet u zeker dat u dit apparaat wilt vervangen? Resilvering zal onmiddellijk beginnen."
 
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "Weet u zeker dat u deze momentopname werkt terugzetten?"
@@ -172,7 +172,7 @@ msgid "Are you sure you want to stop the scrub?"
 msgstr "Weet u zeker dat u een scrub wilt stoppen?"
 
 msgid "Are you sure you want to take this device offline?"
-msgstr ""
+msgstr "Weet u zeker dat u dit apparaat offline wilt halen?"
 
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
@@ -362,7 +362,7 @@ msgstr "Dataset gekloond."
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
 "the dataset path on the remote host."
-msgstr ""
+msgstr "Pad van dataset op de bestemming (bijvoorbeeld back-up/replica). Voor remote is dit het datasetpad op de remote host."
 
 msgid "Dataset promoted."
 msgstr "Dataset gepromoveerd."
@@ -517,25 +517,25 @@ msgid "Enable auto-unlock"
 msgstr "Autom. ontgrendeling inschakelen"
 
 msgid "Enable auto-unlock at boot (local file)"
-msgstr ""
+msgstr "Autom. ontgrendelen inschakelen bij het opstarten (lokaal bestand)"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr ""
+msgstr "Autom. ontgrendelen inschakelen bij het opstarten (HTTPS op afstand)"
 
 msgid "Enable auto-unlock — local file"
-msgstr ""
+msgstr "Autom. ontgrendelen inschakelen — lokaal bestand"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr ""
+msgstr "Autom. ontgrendelen inschakelen — HTTPS op afstand"
 
 msgid "Enabled"
 msgstr "Ingeschakeld"
 
 msgid "Enabling auto-unlock ..."
-msgstr ""
+msgstr "Autom. ontgrendelen inschakelen…"
 
 msgid "Encrypted filesystem created."
-msgstr ""
+msgstr "Versleuteld bestandssysteem aangemaakt."
 
 msgid "Encryption"
 msgstr "Versleuteling"
@@ -659,13 +659,13 @@ msgstr "Ieder uur"
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
 "network is slow to come up at boot."
-msgstr ""
+msgstr "Hoe lang wachten op netwerktoegang voordat u het opgeeft. Verhogen als uw netwerk langzaam verschijnt bij het opstarten."
 
 msgid ""
 "If set, the remote server must serve an OpenSSL-encrypted key. Generate the "
 "encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc "
 "-pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
-msgstr ""
+msgstr "Indien ingesteld, moet de externe server een OpenSSL-gecodeerde sleutel aanbieden. Genereer de gecodeerde waarde door uitvoering van -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
 
 msgid "Import"
 msgstr "Importeren"
@@ -746,7 +746,7 @@ msgid "May"
 msgstr "Mei"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
-msgstr ""
+msgstr "Kan sub-datasets bevatten, bijv. secure/clone1"
 
 msgid "Message"
 msgstr "Bericht"
@@ -788,13 +788,13 @@ msgid "Name"
 msgstr "Naam"
 
 msgid "Name of the new clone, created in the same parent as the source."
-msgstr ""
+msgstr "Naam van de nieuwe kloon, aangemaakt in dezelfde ouder als de bron."
 
 msgid "Name of the specific pool to import."
 msgstr "Naam van de specifieke pool die moet worden geïmporteerd."
 
 msgid "Network timeout (seconds)"
-msgstr ""
+msgstr "Netwerk time-out (seconden)"
 
 msgid "New Property"
 msgstr "Nieuwe eigenschap"
@@ -806,10 +806,10 @@ msgid "New name"
 msgstr "Nieuwe naam"
 
 msgid "New passphrase / key"
-msgstr ""
+msgstr "Nieuwe wachtwoordzin/sleutel"
 
 msgid "New passphrases do not match."
-msgstr ""
+msgstr "Nieuwe wachtwoordzinnen komen niet overeen."
 
 msgid "New property"
 msgstr "Nieuwe eigenschap"
@@ -853,10 +853,10 @@ msgid "Online device"
 msgstr "Apparaat online"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
-msgstr ""
+msgstr "Alleen alfanumerieke tekens, koppeltekens en onderstrepingstekens zijn toegestaan."
 
 msgid "Only send an email if the job exits with an error."
-msgstr ""
+msgstr "Stuur alleen een e-mail als de taak met een fout wordt afgesloten."
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "Optioneel koppelpunt voor de pool. Standaard wordt de naam van de pool gebruikt."
@@ -865,7 +865,7 @@ msgid "Optional mountpoint. Default is to use the dataset path."
 msgstr "Optioneel koppelpunt. Standaard wordt het datasetpad gebruikt."
 
 msgid "Origin"
-msgstr ""
+msgstr "Oorsprong"
 
 msgid "Packages fixed."
 msgstr "Pakketten gerepareerd."
@@ -928,7 +928,7 @@ msgid "Promote"
 msgstr "Promoveren"
 
 msgid "Promoting dataset ..."
-msgstr ""
+msgstr "Dataset promoten..."
 
 msgid "Properties"
 msgstr "Eigenschappen"
@@ -958,10 +958,10 @@ msgid "REMOVED"
 msgstr "VERWIJDERD"
 
 msgid "Raw send"
-msgstr ""
+msgstr "Raw verzenden"
 
 msgid "Record size"
-msgstr ""
+msgstr "Recordgrootte"
 
 msgid "Recursive"
 msgstr "Recursief"
@@ -973,28 +973,28 @@ msgid "Refer"
 msgstr "Verwijzen"
 
 msgid "Referenced"
-msgstr ""
+msgstr "Met verwijzing"
 
 msgid "Remote"
 msgstr "Op afstand"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr ""
+msgstr "Automatisch ontgrendelen op afstand ingeschakeld. De sleutel wordt bij het opstarten opgehaald."
 
 msgid "Remote host"
 msgstr "Host op afstand"
 
 msgid "Removal state"
-msgstr ""
+msgstr "Verwijderingstoestand"
 
 msgid "Removal status"
-msgstr ""
+msgstr "Verwijderingsstatus"
 
 msgid "Remove Vdev"
-msgstr ""
+msgstr "Vdev verwijderen"
 
 msgid "Remove vdev"
-msgstr ""
+msgstr "Vdev verwijderen"
 
 msgid "Removing stale ZFS mntent entries ..."
 msgstr "Ongebruikte ZFS mntent-items verwijderen…"
@@ -1003,19 +1003,19 @@ msgid "Rename"
 msgstr "Hernoemen"
 
 msgid "Rename dataset"
-msgstr ""
+msgstr "Dataset hernoemen"
 
 msgid "Renaming dataset ..."
-msgstr ""
+msgstr "Dataset hernoemen…"
 
 msgid "Replace device"
-msgstr ""
+msgstr "Apparaat vervangen"
 
 msgid "Replacement device"
-msgstr ""
+msgstr "Vervangingsapparaat"
 
 msgid "Replication Jobs"
-msgstr ""
+msgstr "Replicatietaken"
 
 msgid ""
 "Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use "
@@ -1043,7 +1043,7 @@ msgid "Run now"
 msgstr "Nu uitvoeren"
 
 msgid "Run replication job"
-msgstr ""
+msgstr "Replicatietaak uitvoeren"
 
 msgid "Run snapshot job"
 msgstr "Taak voor momentopname uitvoeren"
@@ -1054,7 +1054,7 @@ msgstr "SSH-certificaat"
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr ""
+msgstr "SSH-sleutelpaar om te authenticeren met de externe host. Maak er een aan onder Systeem > Certificaten > SSH en gebruik vervolgens Kopiëren op afstand om dit te autoriseren."
 
 msgid "SSH port"
 msgstr "SSH-poort"
@@ -1068,13 +1068,13 @@ msgstr "Zaterdag"
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
 "on startup."
-msgstr ""
+msgstr "Slaat de wachtwoordzin op in /etc/zfs/keys/ opdat de dataset automatisch wordt ontgrendeld bij het opstarten."
 
 msgid ""
 "Saves the passphrase unencrypted to /etc/zfs/keys/ so the dataset unlocks "
 "automatically on startup. Protects against drive theft but not theft of the "
 "whole server."
-msgstr ""
+msgstr "Slaat de wachtwoordzin onversleuteld op in /etc/zfs/keys/ opdat de dataset automatisch wordt ontgrendeld bij het opstarten. Dit beschermt tegen diefstal van de schijf, maar niet tegen diefstal van de hele server."
 
 msgid "Scan for and import all pools not currently imported."
 msgstr "Scan naar en importeer alle pools die momenteel niet worden geïmporteerd."
@@ -1113,13 +1113,13 @@ msgid "Scrub stopped."
 msgstr "Scrub gestopt."
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "Verstuur alleen een e-mail bij een fout"
 
 msgid "Send output via email"
-msgstr ""
+msgstr "Stuur uitvoer via e-mail"
 
 msgid "Send the command output via email on completion."
-msgstr ""
+msgstr "Stuur bij voltooiing de uitvoer van de opdracht via e-mail."
 
 msgid "Sensitive"
 msgstr "Gevoelig"
@@ -1140,7 +1140,7 @@ msgid "Size"
 msgstr "Grootte"
 
 msgid "Skip certificate verification"
-msgstr ""
+msgstr "Verificatie van certificaat overslaan"
 
 msgid "Snapshot Diff"
 msgstr "Momentopname Verschil"
@@ -1194,7 +1194,7 @@ msgid "Source"
 msgstr "Bron"
 
 msgid "Source dataset"
-msgstr ""
+msgstr "Bron-dataset"
 
 msgid "Source name"
 msgstr "Bronnaam"
@@ -1209,7 +1209,7 @@ msgid "Special (metadata)"
 msgstr "Speciaal (metagegevens)"
 
 msgid "Specifies which device alias should be used."
-msgstr ""
+msgstr "Geeft aan welke apparaalias moet worden gebruikt."
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -1249,18 +1249,18 @@ msgid "TRIM started."
 msgstr "TRIM gestart."
 
 msgid "The field should only contain * or a comma separated list of values."
-msgstr ""
+msgstr "Het veld mag alleen * of een door komma's gescheiden lijst met waarden bevatten."
 
 msgid ""
 "The passphrase will be fetched from a remote HTTPS server at boot. The key "
 "is never stored on this machine, protecting against theft of the whole "
 "server. Requires network access during boot."
-msgstr ""
+msgstr "De wachtwoordzin wordt bij het opstarten opgehaald van een externe HTTPS-server. De sleutel wordt nooit op deze machine opgeslagen, waardoor diefstal van de volledige server wordt voorkomen. Vereist netwerktoegang tijdens het opstarten."
 
 msgid ""
 "The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. "
 "Protects against drive theft but not theft of the whole server."
-msgstr ""
+msgstr "De wachtwoordzin wordt onbeveiligd opgeslagen in /etc/zfs/keys/ op deze machine. Beschermt tegen diefstal van de schijf, maar niet tegen diefstal van de hele server."
 
 msgid "Thin provisioning"
 msgstr "Thin provisioning"
@@ -1293,13 +1293,13 @@ msgid "Unit"
 msgstr "Eenheid"
 
 msgid "Unload key (lock)"
-msgstr ""
+msgstr "Sleutel ontladen (vergrendelen)"
 
 msgid "Unloading encryption key ..."
 msgstr "Encryptiesleutel ontladen…."
 
 msgid "Updated replication job."
-msgstr ""
+msgstr "Replicatietaak bijgewerkt."
 
 msgid "Updated scrub job."
 msgstr "Scrubtaak bijgewerkt."
@@ -1338,7 +1338,7 @@ msgstr "Gebruikt (%)"
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
 "on the remote to grant non-root access."
-msgstr ""
+msgstr "Gebruiker op de externe host met toestemming om zfs receive uit te voeren. Gebruik 'zfs allow' op de externe host om niet-root toegang te verlenen."
 
 msgid "Value"
 msgstr "Waarde"

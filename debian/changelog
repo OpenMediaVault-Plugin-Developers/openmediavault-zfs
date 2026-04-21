@@ -206,6 +206,16 @@ openmediavault-zfs (8.1) UNRELEASED; urgency=medium
     - Covers omv-zfs-events.log, omv-zfs-replicate.log, omv-zfs-scrub.log,
       omv-zfs-snapshot.log
     - Weekly rotation, 12 weeks retention, compressed, 5 MB max size
+  * Fix pool member disks appearing as candidates in the OMV Filesystems tab
+    - getPoolDeviceFiles() used \s{4,} to detect device lines in zpool status output,
+      but single-disk pool devices are indented with TAB+2 spaces (3 chars) so they
+      never matched and getPoolDeviceFiles() returned empty; changed to \s{2,}
+    - getPoolDeviceFiles() now resolves by-id symlinks via realpath() so pools created
+      with ata-WDC... names correctly exclude their /dev/sdX devices from candidates
+    - getDeviceFiles() now strips partition suffixes (via baseDeviceFile()) and resolves
+      to canonical paths for all pool members, not just the first; pools using partition
+      devices (e.g. ata-QEMU...-part1) were only excluding /dev/sdX for the first
+      member and leaking /dev/sdY through /dev/sdZ
   * Add regression test: pool member disks must not appear in FileSystemMgmt.getCandidates
     - Verifies that after pool creation, the underlying disk devices are excluded
       from the Filesystems-tab device dropdown to prevent accidental overwrite

@@ -177,7 +177,22 @@ class FilesystemZfs implements FilesystemInterface, SharedFolderCandidateInterfa
     {
         $poolDevices = $this->getPoolDeviceFiles();
         if (!empty($poolDevices)) {
-            return $poolDevices;
+            $mngr = \OMV\System\Storage\Backend\Manager::getInstance();
+            $result = [];
+            foreach ($poolDevices as $device) {
+                $backend = $mngr->getBackend($device);
+                if ($backend !== null) {
+                    $base = $backend->baseDeviceFile($device);
+                    if (is_devicefile($base)) {
+                        $result[] = realpath($base) ?: $base;
+                        continue;
+                    }
+                }
+                if (is_devicefile($device)) {
+                    $result[] = realpath($device) ?: $device;
+                }
+            }
+            return array_values(array_unique($result));
         }
         return [$this->deviceFile];
     }
@@ -354,8 +369,9 @@ class FilesystemZfs implements FilesystemInterface, SharedFolderCandidateInterfa
                 if (trim($line) === '') {
                     break;
                 }
-                if (preg_match('/^\s{4,}(\/\S+)\s+\S+/', $line, $m)) {
-                    $devices[] = $m[1];
+                if (preg_match('/^\s{2,}(\/\S+)\s+\S+/', $line, $m)) {
+                    $resolved = realpath($m[1]);
+                    $devices[] = $resolved !== false ? $resolved : $m[1];
                 }
             }
             return array_values(array_filter($devices, 'is_devicefile'));

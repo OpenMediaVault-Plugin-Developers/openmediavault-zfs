@@ -328,12 +328,25 @@ fi
 
 # Regression: pool member devices must not appear in FileSystemMgmt.getCandidates.
 # If they do, users can accidentally overwrite ZFS pool disks with a new filesystem.
-_CAND_OUT=$(omv-rpc -u admin "FileSystemMgmt" "getCandidates" '{}' 2>&1) || _CAND_OUT=""
+# Only check devices actually IN the pool — reserved devices (expansion, log, special)
+# are intentionally not yet pool members and correctly remain in candidates.
+# Sleep briefly so zfs list reflects the new pool before getCandidates queries it.
+sleep 2
+_RESERVED=( ${EXPAND_DEV:-} ${LOG_DEV_1:-} ${LOG_DEV_2:-} ${SPECIAL_DEV_1:-} ${SPECIAL_DEV_2:-} )
+_CAND_DEVS=$(omv-rpc -u admin "FileSystemMgmt" "getCandidates" '{}' 2>/dev/null \
+    | python3 -c "import sys,json; [print(d['devicefile']) for d in json.load(sys.stdin)]" \
+    2>/dev/null) || _CAND_DEVS=""
 _POOL_LEAKED=false
 _LEAKED_DEV=""
 for _dev in "${DEVICES[@]}"; do
     _base=$(realpath "$_dev" 2>/dev/null || echo "$_dev")
-    if echo "$_CAND_OUT" | grep -qF "\"$_base\""; then
+    # Skip devices reserved for later vdev tests.
+    _is_reserved=false
+    for _r in "${_RESERVED[@]}"; do
+        [ "$(realpath "$_r" 2>/dev/null || echo "$_r")" = "$_base" ] && _is_reserved=true && break
+    done
+    $_is_reserved && continue
+    if echo "$_CAND_DEVS" | grep -qxF "$_base"; then
         _POOL_LEAKED=true
         _LEAKED_DEV="$_base"
         break
@@ -345,7 +358,7 @@ if $_POOL_LEAKED; then
 else
     _pass "getCandidates — pool member disks absent from filesystem candidates"
 fi
-unset _CAND_OUT _POOL_LEAKED _LEAKED_DEV _dev _base
+unset _CAND_DEVS _POOL_LEAKED _LEAKED_DEV _dev _base _reserved _is_reserved _r
 
 # Enable raidz_expansion if we reserved a device for the expansion test.
 if [ -n "$EXPAND_DEV" ]; then

@@ -3,4 +3,5 @@ type: route
 data:
   url: "/storage/zfs/settings"
   title: _("Settings")
+  editing: true
   component: omv-storage-zfs-settings-form-page

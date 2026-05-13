@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-21 12:29+0000\n"
+"POT-Creation-Date: 2026-05-13 12:01+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: kochin <kochinc@outlook.com>, 2014,2018,2022-2024,2026\n"
 "Language-Team: Chinese (Taiwan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/zh_TW/)\n"
@@ -740,6 +740,14 @@ msgstr "日誌 (ZIL/SLOG)"
 msgid "March"
 msgstr "三月"
 
+msgid "Maximum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
+"default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
+msgstr ""
+
 msgid "May"
 msgstr "五月"
 
@@ -748,6 +756,14 @@ msgstr "可包含子資料集，例如：secure/clone1"
 
 msgid "Message"
 msgstr "訊息"
+
+msgid "Minimum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
+"to use the ZFS default."
+msgstr ""
 
 msgid "Minute"
 msgstr "分"

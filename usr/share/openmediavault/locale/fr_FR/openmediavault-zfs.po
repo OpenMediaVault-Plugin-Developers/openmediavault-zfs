@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-21 12:29+0000\n"
+"POT-Creation-Date: 2026-05-13 12:01+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: seigneurfuo <seigneurfuo@gmail.com>, 2025\n"
 "Language-Team: French (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/fr/)\n"
@@ -744,6 +744,14 @@ msgstr ""
 msgid "March"
 msgstr ""
 
+msgid "Maximum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
+"default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
+msgstr ""
+
 msgid "May"
 msgstr ""
 
@@ -751,6 +759,14 @@ msgid "May include sub-datasets, e.g. secure/clone1"
 msgstr ""
 
 msgid "Message"
+msgstr ""
+
+msgid "Minimum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
+"to use the ZFS default."
 msgstr ""
 
 msgid "Minute"

@@ -5,13 +5,14 @@
 # Translators:
 # Karl Jonatan Nyberg, 2018,2021
 # efef6ec5b435a041fce803c7f8af77d2_2341d43, 2017
+# Karl Jonatan Nyberg, 2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-21 12:29+0000\n"
+"POT-Creation-Date: 2026-05-13 12:01+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Karl Jonatan Nyberg, 2018,2021\n"
+"Last-Translator: Karl Jonatan Nyberg, 2026\n"
 "Language-Team: Swedish (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -460,7 +461,7 @@ msgid "Device Replace"
 msgstr ""
 
 msgid "Device alias"
-msgstr "Enhet alias"
+msgstr "Enhetsalias"
 
 msgid "Device to detach"
 msgstr ""
@@ -599,7 +600,7 @@ msgid "Fixing packages ..."
 msgstr ""
 
 msgid "Force creation"
-msgstr "Force skapande"
+msgstr "Tvinga skapandet"
 
 msgid "Force import"
 msgstr ""
@@ -612,12 +613,12 @@ msgstr ""
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Tvingar skapandet av Vded även om fel rapporteras. Använd med extrem försiktighet! "
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Krafter skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
+msgstr "Tvingar skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
 
 msgid "Frag"
 msgstr ""
@@ -741,6 +742,14 @@ msgstr ""
 msgid "March"
 msgstr ""
 
+msgid "Maximum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
+"default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
+msgstr ""
+
 msgid "May"
 msgstr ""
 
@@ -748,6 +757,14 @@ msgid "May include sub-datasets, e.g. secure/clone1"
 msgstr ""
 
 msgid "Message"
+msgstr ""
+
+msgid "Minimum ARC size (MiB)"
+msgstr ""
+
+msgid ""
+"Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
+"to use the ZFS default."
 msgstr ""
 
 msgid "Minute"
@@ -766,7 +783,7 @@ msgid "Mixed"
 msgstr ""
 
 msgid "Modified"
-msgstr "Modifiera"
+msgstr "Ändrad"
 
 msgid "Monday"
 msgstr ""
@@ -912,7 +929,7 @@ msgid "Pool root"
 msgstr ""
 
 msgid "Pool type"
-msgstr "Pool typ"
+msgstr "Pooltyp"
 
 msgid "Pool upgraded."
 msgstr ""
@@ -1208,7 +1225,7 @@ msgid "Special (metadata)"
 msgstr ""
 
 msgid "Specifies which device alias should be used."
-msgstr ""
+msgstr "Anger vilket enhetsalias som ska användas."
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."

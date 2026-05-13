@@ -37,6 +37,12 @@ if ! omv_config_exists "/config/services/zfs/replicationjobs"; then
     omv_config_add_node "/config/services/zfs" "replicationjobs"
 fi
 
+if ! omv_config_exists "/config/services/zfs/settings"; then
+    omv_config_add_node "/config/services/zfs" "settings"
+    omv_config_add_key "/config/services/zfs/settings" "arcmax" "0"
+    omv_config_add_key "/config/services/zfs/settings" "arcmin" "0"
+fi
+
 # add zfs-zed notfication
 xpath="/config/system/notification/notifications"
 if ! omv_config_exists "${xpath}/notification[id='zfs']"; then

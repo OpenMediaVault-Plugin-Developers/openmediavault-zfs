@@ -1,0 +1,7 @@
+# Managed by openmediavault-zfs plugin
+{% if arc_max_bytes > 0 %}
+options zfs zfs_arc_max={{ arc_max_bytes }}
+{% endif %}
+{% if arc_min_bytes > 0 %}
+options zfs zfs_arc_min={{ arc_min_bytes }}
+{% endif %}

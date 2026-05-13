@@ -1,0 +1,8 @@
+version: "1.0"
+type: navigation-item
+data:
+  path: "storage.zfs.settings"
+  text: _("Settings")
+  position: 70
+  icon: tune
+  url: "/storage/zfs/settings"

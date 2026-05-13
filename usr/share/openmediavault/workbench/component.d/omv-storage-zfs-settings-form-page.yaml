@@ -1,0 +1,36 @@
+version: "1.0"
+type: component
+data:
+  name: omv-storage-zfs-settings-form-page
+  type: formPage
+  config:
+    request:
+      service: Zfs
+      get:
+        method: getSettings
+      post:
+        method: setSettings
+    fields:
+      - type: numberInput
+        name: arcmax
+        label: _("Maximum ARC size (MiB)")
+        value: 0
+        hint: _("Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB).")
+        validators:
+          min: 0
+      - type: numberInput
+        name: arcmin
+        label: _("Minimum ARC size (MiB)")
+        value: 0
+        hint: _("Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 to use the ZFS default.")
+        validators:
+          min: 0
+    buttons:
+      - template: submit
+        execute:
+          type: url
+          url: /storage/zfs/settings
+      - template: cancel
+        execute:
+          type: url
+          url: /storage/zfs/pools

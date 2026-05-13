@@ -1,0 +1,18 @@
+{
+  "type": "config",
+  "id": "conf.service.zfs.settings",
+  "queryinfo": {
+    "xpath": "//services/zfs/settings",
+    "iterable": false
+  },
+  "properties": {
+    "arcmax": {
+      "type": "integer",
+      "default": 0
+    },
+    "arcmin": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

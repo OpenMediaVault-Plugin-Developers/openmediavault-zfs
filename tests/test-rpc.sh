@@ -3482,6 +3482,54 @@ else
 fi
 
 # ===========================================================================
+section "ARC settings"
+# ===========================================================================
+
+# getSettings — should return arcmax and arcmin keys.
+assert_rpc "getSettings — returns settings object" "Zfs" "getSettings" '{}' '"arcmax"'
+ARC_GET=$(rpc "Zfs" "getSettings" '{}')
+
+for key in arcmax arcmin; do
+    if echo "$ARC_GET" | python3 -c \
+        "import sys,json; d=json.load(sys.stdin); assert '$key' in d" 2>/dev/null; then
+        _pass "getSettings — response contains '$key'"
+    else
+        _fail "getSettings — response missing '$key'" "${ARC_GET:0:200}"
+    fi
+done
+
+# setSettings — set a valid limit (8 GiB max, 1 GiB min).
+assert_rpc "setSettings — set arcmax=8192 arcmin=1024" \
+    "Zfs" "setSettings" '{"arcmax":8192,"arcmin":1024}' '"arcmax"'
+
+# getSettings — verify saved values round-trip correctly.
+ARC_AFTER=$(rpc "Zfs" "getSettings" '{}')
+if echo "$ARC_AFTER" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); assert d['arcmax']==8192 and d['arcmin']==1024" \
+    2>/dev/null; then
+    _pass "getSettings — arcmax=8192 arcmin=1024 persisted"
+else
+    _fail "getSettings — values did not persist" "${ARC_AFTER:0:200}"
+fi
+
+# setSettings — negative values should be rejected by the RPC schema.
+assert_rpc_fails "setSettings — negative arcmax rejected" \
+    "Zfs" "setSettings" '{"arcmax":-1,"arcmin":0}'
+
+# setSettings — reset to 0 (unlimited).
+assert_rpc "setSettings — reset to unlimited (0)" \
+    "Zfs" "setSettings" '{"arcmax":0,"arcmin":0}' '"arcmax"'
+
+ARC_RESET=$(rpc "Zfs" "getSettings" '{}')
+if echo "$ARC_RESET" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); assert d['arcmax']==0 and d['arcmin']==0" \
+    2>/dev/null; then
+    _pass "getSettings — arcmax=0 arcmin=0 persisted after reset"
+else
+    _fail "getSettings — reset to 0 did not persist" "${ARC_RESET:0:200}"
+fi
+
+# ===========================================================================
 section "Pool — delete"
 # ===========================================================================
 

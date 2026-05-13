@@ -75,6 +75,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->registerMethod('getPoolHealth');
         $this->registerMethod('getPoolStatus');
         $this->registerMethod('getArcStats');
+        $this->registerMethod('getSettings');
+        $this->registerMethod('setSettings');
         $this->registerMethod('getDatasetNames');
         $this->registerMethod('getPoolNames');
         $this->registerMethod('getScrubPoolNames');
@@ -207,6 +209,28 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         self::zfsExec($cmd, $out, $res);
         return implode("\n\r", $out);
+    }
+
+    public function getSettings($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.settings');
+        return $obj->getAssoc();
+    }
+
+    public function setSettings($params, $context)
+    {
+        $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
+        $this->validateMethodParams($params, 'rpc.zfs.setsettings');
+        $arcmax = max(0, intval($params['arcmax']));
+        $arcmin = max(0, intval($params['arcmin']));
+        $db = \OMV\Config\Database::getInstance();
+        $obj = $db->get('conf.service.zfs.settings');
+        $obj->set('arcmax', $arcmax);
+        $obj->set('arcmin', $arcmin);
+        $db->set($obj);
+        return ['arcmax' => $arcmax, 'arcmin' => $arcmin];
     }
 
     public function getDatasetNames($params, $context)

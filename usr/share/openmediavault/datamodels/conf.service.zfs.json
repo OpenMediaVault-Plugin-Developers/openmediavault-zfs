@@ -7,6 +7,19 @@
     "iterable": false
   },
   "properties": {
+    "settings": {
+      "type": "object",
+      "properties": {
+        "arcmax": {
+          "type": "integer",
+          "default": 0
+        },
+        "arcmin": {
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
     "snapshotjobs": {
       "type": "object",
       "properties": {

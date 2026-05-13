@@ -73,5 +73,9 @@
           OMV_NOTIFY_CREATE | OMV_NOTIFY_MODIFY,
           "org.openmediavault.conf.service.nfs.share",
           [ $this, "onSharedFolder" ]);
+        $dispatcher->addListener(
+          OMV_NOTIFY_MODIFY,
+          "org.openmediavault.conf.service.zfs.settings",
+          [ $this, "setDirty" ]);
     }
 }

@@ -130,6 +130,50 @@ zfs_provider_arm64_missing_headers:
 {% endif %}
 {% endif %}
 
+{% set zfs_settings = salt['omv_conf.get']('conf.service.zfs.settings') %}
+{% set arc_max_bytes = (zfs_settings.get('arcmax', 0) | int) * 1048576 %}
+{% set arc_min_bytes = (zfs_settings.get('arcmin', 0) | int) * 1048576 %}
+
+{% if arc_max_bytes > 0 or arc_min_bytes > 0 %}
+zfs_arc_modprobe_conf:
+  file.managed:
+    - name: /etc/modprobe.d/zfs.conf
+    - source:
+      - salt://omv/deploy/zfs/files/etc_modprobe.d_zfs.conf.j2
+    - template: jinja
+    - context:
+        arc_max_bytes: {{ arc_max_bytes }}
+        arc_min_bytes: {{ arc_min_bytes }}
+    - mode: '0644'
+    - user: root
+    - group: root
+{% else %}
+zfs_arc_modprobe_conf:
+  file.absent:
+    - name: /etc/modprobe.d/zfs.conf
+{% endif %}
+
+zfs_arc_update_initramfs:
+  cmd.run:
+    - name: update-initramfs -u -k $(uname -r)
+    - onchanges:
+      - file: zfs_arc_modprobe_conf
+    - onlyif: command -v update-initramfs > /dev/null 2>&1
+
+zfs_arc_apply_sysfs_max:
+  cmd.run:
+    - name: echo {{ arc_max_bytes }} > /sys/module/zfs/parameters/zfs_arc_max
+    - onchanges:
+      - file: zfs_arc_modprobe_conf
+    - onlyif: test -f /sys/module/zfs/parameters/zfs_arc_max
+
+zfs_arc_apply_sysfs_min:
+  cmd.run:
+    - name: echo {{ arc_min_bytes }} > /sys/module/zfs/parameters/zfs_arc_min
+    - onchanges:
+      - file: zfs_arc_modprobe_conf
+    - onlyif: test -f /sys/module/zfs/parameters/zfs_arc_min
+
 zfs_modules_load_conf:
   file.managed:
     - name: /etc/modules-load.d/zfs.conf

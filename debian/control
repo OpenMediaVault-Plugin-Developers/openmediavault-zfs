@@ -9,7 +9,7 @@ Homepage: http://omv-extras.org/
 
 Package: openmediavault-zfs
 Architecture: any
-Depends: openmediavault (>= 8),
+Depends: openmediavault (>= 8.3),
          zfsutils-linux,
          zfs-zed,
          omv-zfs-provider-pve [amd64] | omv-zfs-provider-dkms | zfs-dkms,

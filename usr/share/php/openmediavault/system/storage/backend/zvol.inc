@@ -1,6 +1,5 @@
 <?php
 namespace OMV\System\Storage\Backend;
-define("OMV_STORAGE_DEVICE_TYPE_ZVOL", 0x20);
 /**
  * Implements the storage device backend for ZFS Zvol devices.
  * @ingroup api
@@ -9,7 +8,10 @@ class ZVol extends BackendAbstract
 {
     function getType()
     {
-        return OMV_STORAGE_DEVICE_TYPE_ZVOL;
+        return OMV_STORAGE_DEVICE_KIND_GENERIC |
+               OMV_STORAGE_DEVICE_TRAIT_BLOCK |
+               OMV_STORAGE_DEVICE_TRAIT_VIRTUAL |
+               OMV_STORAGE_DEVICE_TRAIT_STACKED;
     }
 
     function enumerate()

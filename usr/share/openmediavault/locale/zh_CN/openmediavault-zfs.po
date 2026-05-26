@@ -22,55 +22,55 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "“快照”保留最近的 N 个；按时间单位删除比 N 天/周/月/年更旧的快照。"
 
 msgid "A different name must be specified."
-msgstr ""
+msgstr "必须指定一个不同的名称。"
 
 msgid "ARC Stats"
-msgstr ""
+msgstr "ARC 统计"
 
 msgid "Add"
 msgstr "添加"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "添加特殊设备"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "添加 缓存 / 日志 / 备用 / 特殊"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "添加加密文件系统"
 
 msgid "Add filesystem"
-msgstr ""
+msgstr "添加文件系统"
 
 msgid "Add new"
-msgstr ""
+msgstr "新增"
 
 msgid "Add new + delete missing"
-msgstr ""
+msgstr "新增 + 删除丢失"
 
 msgid "Add pool"
 msgstr "添加池"
 
 msgid "Add snapshot"
-msgstr ""
+msgstr "添加快照"
 
 msgid "Add volume"
-msgstr ""
+msgstr "添加卷"
 
 msgid "Adding filesystem ..."
-msgstr ""
+msgstr "添加文件系统中 ..."
 
 msgid "Adding missing ZFS mntent entries ..."
-msgstr ""
+msgstr "添加缺失的 ZFS mntent 项目中 ..."
 
 msgid "Adding snapshot ..."
-msgstr ""
+msgstr "添加快照中 ..."
 
 msgid "Adding volume ..."
-msgstr ""
+msgstr "添加卷中 ..."
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -78,70 +78,70 @@ msgid ""
 "replication. Not compatible with 'Recursive' (ZFS does not support recursive"
 " sends from a bookmark) and not needed when 'Use existing snapshots' is "
 "enabled."
-msgstr ""
+msgstr "在每次成功发送后，创建一个 ZFS 书签作为增量基础。允许将源快照清理到 1个，同时保持增量复制。不兼容“递归”（ZFS 不支持从书签递归发送），且在启用“使用现有快照”时不需要。"
 
 msgid "Algorithm"
-msgstr ""
+msgstr "算法"
 
 msgid "All snapshots deleted."
-msgstr ""
+msgstr "已删除全部快照。"
 
 msgid "Alloc"
-msgstr ""
+msgstr "分配"
 
 msgid ""
 "Allow self-signed or untrusted certificates. Use only on trusted local "
 "networks."
-msgstr ""
+msgstr "允许自签名或不受信任的证书。仅在受信任的本地网络上使用。"
 
 msgid "Anchor (existing device or RAIDZ vdev)"
-msgstr ""
+msgstr "锚点（现有设备或RAIDZ vdev）"
 
 msgid "April"
-msgstr ""
+msgstr "四月"
 
 msgid "Are you sure you want to add this device to the pool?"
-msgstr ""
+msgstr "您确定要将此设备添加到池中吗？"
 
 msgid ""
 "Are you sure you want to cancel the vdev removal? Data evacuation will stop "
 "and the vdev will remain in the pool."
-msgstr ""
+msgstr "您确定要取消移出 vdev 吗？将停止数据迁移，vdev 将保持在存储池中。"
 
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
 "and all child datasets?"
-msgstr ""
+msgstr "您确定要从此数据集及所有子数据集中删除 '{{ _selected[0].path }}' 吗？"
 
 msgid ""
 "Are you sure you want to delete ALL snapshots on the parent dataset '{{ "
 "_selected[0].parent }}'?"
-msgstr ""
+msgstr "您确定要删除父数据集 '{{ _selected[0].parent }}' 上的所有快照吗？"
 
 msgid "Are you sure you want to delete the selected snapshot(s)?"
-msgstr ""
+msgstr "您确定要删除选定的快照吗？"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all earlier snapshots on "
 "the same dataset?"
-msgstr ""
+msgstr "您确定要删除此快照以及同一数据集上的所有早期快照吗？"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all later snapshots on the"
 " same dataset?"
-msgstr ""
+msgstr "您确定要删除此快照以及同一数据集上的所有后续快照吗？"
 
 msgid "Are you sure you want to delete?"
 msgstr "您确定要删除？"
 
 msgid "Are you sure you want to detach this device from the pool?"
-msgstr ""
+msgstr "您确定要将此设备从池中分离吗？"
 
 msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
 "configuration will be removed and you will need to enter the passphrase "
 "manually after each reboot."
-msgstr ""
+msgstr "您确定要禁用自动解锁吗？已保存的密钥或远程 URL 配置将被移除，您每次重启后都需要手动输入密码。"
 
 msgid "Are you sure you want to export?"
 msgstr "您确定要导出？"
@@ -149,12 +149,12 @@ msgstr "您确定要导出？"
 msgid ""
 "Are you sure you want to promote this dataset? This detaches the clone from "
 "its origin snapshot dependency."
-msgstr ""
+msgstr "你确定要升级这个数据集吗？这会使克隆与其原始快照依赖分离。"
 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
 "immediately."
-msgstr ""
+msgstr "您确定要更换此设备吗？重新同步修复将立即开始。"
 
 msgid "Are you sure you want to rollback to this snapshot?"
 msgstr "您确定要回滚快照？"
@@ -162,27 +162,27 @@ msgstr "您确定要回滚快照？"
 msgid ""
 "Are you sure you want to start a TRIM operation on this pool? This is only "
 "meaningful for SSD-backed pools."
-msgstr ""
+msgstr "您确定要在此存储池上启动 TRIM 操作吗？这仅对支持的 SSD 存储池有意义。"
 
 msgid "Are you sure you want to start a scrub?"
-msgstr ""
+msgstr "你确定要开始擦洗吗？"
 
 msgid "Are you sure you want to stop the scrub?"
-msgstr ""
+msgstr "你确定要停止擦洗吗？"
 
 msgid "Are you sure you want to take this device offline?"
-msgstr ""
+msgstr "你确定要将此设备下线吗？"
 
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
 "inaccessible until it is unlocked again."
-msgstr ""
+msgstr "你确定要卸载加密密钥吗？数据集在再次解锁之前将无法访问。"
 
 msgid ""
 "Are you sure you want to upgrade this pool? This enables new feature flags "
 "and cannot be undone. The pool will no longer be accessible by older ZFS "
 "versions."
-msgstr ""
+msgstr "你确定要升级此池吗？这将启用新的功能标志，且无法撤销。旧版本的 ZFS 将无法再访问此池。"
 
 msgid ""
 "Are you sure? For a mirror or stripe pool this attaches the new device to "
@@ -190,44 +190,44 @@ msgid ""
 "device into a 2-way mirror (irreversible without full pool recreation). For "
 "a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, "
 "permanently increasing its width."
-msgstr ""
+msgstr "你确定吗？对于镜像或条带池，这会将新设备附加到选定的现有设备，扩展镜像或将条带设备转换为双向镜像（无法复原，除非重新创建整个池）。对于RAIDZ池，这会通过添加一个设备来扩展选定的RAIDZ vdev，永久增加其宽度。"
 
 msgid "Ashift value"
 msgstr "Ashift 值"
 
 msgid "At least five devices are required."
-msgstr ""
+msgstr "至少需要五个设备。"
 
 msgid "At least four devices are required."
-msgstr ""
+msgstr "至少需要四个设备。"
 
 msgid "At least three devices are required."
-msgstr ""
+msgstr "至少需要三个设备。"
 
 msgid "At least two devices are required."
-msgstr ""
+msgstr "至少需要两个设备。"
 
 msgid "At reboot"
-msgstr ""
+msgstr "在重启时"
 
 msgid "Attach device"
-msgstr ""
+msgstr "连接设备"
 
 msgid "August"
-msgstr ""
+msgstr "八月"
 
 msgid "Auto-unlock"
-msgstr ""
+msgstr "自动解锁"
 
 msgid "Auto-unlock at boot"
-msgstr ""
+msgstr "在启动时自动解锁"
 
 msgid "Auto-unlock disabled."
-msgstr ""
+msgstr "停用自动解锁。"
 
 msgid ""
 "Auto-unlock enabled. The key will be loaded from the local keyfile at boot."
-msgstr ""
+msgstr "自动解锁已启用。启动时将从本地密钥文件加载密钥。"
 
 msgid "Available"
 msgstr "可用"
@@ -236,7 +236,7 @@ msgid "Basic"
 msgstr "基础"
 
 msgid "Bulk Delete"
-msgstr ""
+msgstr "批量删除"
 
 msgid "By ID"
 msgstr "以 ID"
@@ -245,64 +245,64 @@ msgid "By Path"
 msgstr "以路径"
 
 msgid "Cache (L2ARC)"
-msgstr ""
+msgstr "缓存（L2ARC）"
 
 msgid "Cancel vdev removal"
-msgstr ""
+msgstr "取消移除 vdev "
 
 msgid "Cancelling vdev removal ..."
-msgstr ""
+msgstr "取消移出 vdev 中 ..."
 
 msgid "Cap"
-msgstr ""
+msgstr "用量"
 
 msgid "Case sensitivity"
-msgstr ""
+msgstr "区分大小写"
 
 msgid "Certain date"
-msgstr ""
+msgstr "特定日期"
 
 msgid "Change encryption key"
-msgstr ""
+msgstr "更改加密密钥"
 
 msgid "Change key"
-msgstr ""
+msgstr "变更密钥"
 
 msgid "Changing encryption key ..."
-msgstr ""
+msgstr "变更加密钥中 ..."
 
 msgid "Clear errors"
-msgstr ""
+msgstr "清除错误"
 
 msgid "Clearing pool errors ..."
-msgstr ""
+msgstr "清除池错误中 ..."
 
 msgid "Clone"
 msgstr "克隆"
 
 msgid "Clone dataset"
-msgstr ""
+msgstr "克隆数据集"
 
 msgid "Clone name"
-msgstr ""
+msgstr "克隆名称"
 
 msgid "Clone path (within pool)"
-msgstr ""
+msgstr "克隆路径（池内）"
 
 msgid "Clone snapshot"
-msgstr ""
+msgstr "克隆快照"
 
 msgid "Cloning dataset ..."
-msgstr ""
+msgstr "克隆数据集中 ..."
 
 msgid "Cloning snapshot ..."
-msgstr ""
+msgstr "克隆快照中 ..."
 
 msgid "Comment"
-msgstr ""
+msgstr "注释"
 
 msgid "Compress ratio"
-msgstr ""
+msgstr "压缩比"
 
 msgid "Compression"
 msgstr "压缩"
@@ -311,13 +311,13 @@ msgid "Compression type"
 msgstr "压缩类型"
 
 msgid "Confirm new passphrase / key"
-msgstr ""
+msgstr "确认新密码/密钥"
 
 msgid "Confirm passphrase"
-msgstr ""
+msgstr "确认密码"
 
 msgid "Confirm passphrase / key"
-msgstr ""
+msgstr "确认密码 / 密钥"
 
 msgid "Create"
 msgstr "创建"
@@ -326,162 +326,162 @@ msgid "Created pool."
 msgstr "创建的池。"
 
 msgid "Created replication job."
-msgstr ""
+msgstr "已创建复制任务。"
 
 msgid "Created scrub job."
-msgstr ""
+msgstr "已创建擦洗任务。"
 
 msgid "Created snapshot job."
-msgstr ""
+msgstr "已创建快照任务。"
 
 msgid "Creating encrypted filesystem ..."
-msgstr ""
+msgstr "创建加密文件系统中 ..."
 
 msgid "Creating recursive snapshot ..."
-msgstr ""
+msgstr "创建递归快照中 ..."
 
 msgid "Creating snapshot ..."
-msgstr ""
+msgstr "创建快照中 ..."
 
 msgid "Current passphrase / key"
-msgstr ""
+msgstr "当前密码 / 密钥"
 
 msgid "DEGRADED"
-msgstr ""
+msgstr "降级"
 
 msgid "Daily"
-msgstr ""
+msgstr "每日"
 
 msgid "Dataset"
-msgstr ""
+msgstr "数据集"
 
 msgid "Dataset cloned."
-msgstr ""
+msgstr "数据集克隆"
 
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
 "the dataset path on the remote host."
-msgstr ""
+msgstr "目标上的数据集路径（例如 backup/replica）。对于远程，这是远程主机上的数据集路径。"
 
 msgid "Dataset promoted."
-msgstr ""
+msgstr "数据集已升级"
 
 msgid "Dataset renamed."
-msgstr ""
+msgstr "数据集已重命名"
 
 msgid "Datasets"
-msgstr ""
+msgstr "数据集"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "日期 / 时间"
 
 msgid "Day of month"
-msgstr ""
+msgstr "当月哪天"
 
 msgid "Day of week"
-msgstr ""
+msgstr "当周哪天"
 
 msgid "December"
-msgstr ""
+msgstr "十二月"
 
 msgid "Decryption passphrase (optional)"
-msgstr ""
+msgstr "解密密码（可选）"
 
 msgid "Dedup"
-msgstr ""
+msgstr "去重"
 
 msgid "Default (128K)"
-msgstr ""
+msgstr "默认 (128K)"
 
 msgid "Delete"
 msgstr "删除"
 
 msgid "Delete all snapshots on parent dataset"
-msgstr ""
+msgstr "删除父数据集上的所有快照"
 
 msgid "Delete missing"
-msgstr ""
+msgstr "删除丢失"
 
 msgid "Delete recursively"
-msgstr ""
+msgstr "递归删除"
 
 msgid "Delete this and all earlier snapshots"
-msgstr ""
+msgstr "删除此快照及所有较早的快照"
 
 msgid "Delete this and all later snapshots"
-msgstr ""
+msgstr "删除此快照及所有后续快照"
 
 msgid "Deleting all snapshots ..."
-msgstr ""
+msgstr "删除所有快照中 ..."
 
 msgid "Deleting object ..."
 msgstr "删除对象中 ..."
 
 msgid "Deleting pool ..."
-msgstr ""
+msgstr "删除池中 ..."
 
 msgid "Deleting snapshot ..."
 msgstr "删除快照中 ..."
 
 msgid "Deleting snapshot recursively ..."
-msgstr ""
+msgstr "递归删除快照中 ..."
 
 msgid "Deleting snapshots ..."
-msgstr ""
+msgstr "删除快照中 ..."
 
 msgid "Destination"
-msgstr ""
+msgstr "目标"
 
 msgid "Destination dataset"
-msgstr ""
+msgstr "目标数据集"
 
 msgid "Detach device"
-msgstr ""
+msgstr "分离设备"
 
 msgid "Details"
 msgstr "详情"
 
 msgid "Device"
-msgstr ""
+msgstr "设备"
 
 msgid "Device Attach"
-msgstr ""
+msgstr "设备挂载"
 
 msgid "Device Detach"
-msgstr ""
+msgstr "设备分离"
 
 msgid "Device Offline"
-msgstr ""
+msgstr "设备离线"
 
 msgid "Device Online"
-msgstr ""
+msgstr "设备在线"
 
 msgid "Device Replace"
-msgstr ""
+msgstr "设备更换"
 
 msgid "Device alias"
 msgstr "设备别名"
 
 msgid "Device to detach"
-msgstr ""
+msgstr "待分离设备"
 
 msgid "Device to replace"
-msgstr ""
+msgstr "待更换设备"
 
 msgid "Device type"
-msgstr ""
+msgstr "设备类型"
 
 msgid "Devices"
 msgstr "设备"
 
 msgid "Diff"
-msgstr ""
+msgstr "差异"
 
 msgid "Disable auto-unlock at boot"
-msgstr ""
+msgstr "停用在启动时自动解锁"
 
 msgid "Disabling auto-unlock ..."
-msgstr ""
+msgstr "停用自动解锁中 ..."
 
 msgid "Discover"
 msgstr "发现"
@@ -490,7 +490,7 @@ msgid ""
 "Displays the health of all ZFS pools with traffic-light status. Green = "
 "healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click "
 "a pool to view details."
-msgstr ""
+msgstr "以“红绿灯”状态显示所有 ZFS 存储池的健康状况。绿色 = 健康，橙色 = 容量使用率 > 80%，红色 = 状态降级/故障/错误/容量使用率 > 90%。点击任一存储池即可查看详细信息。"
 
 msgid ""
 "Do not create a new snapshot. Instead, replicate the most recent existing "
@@ -498,70 +498,70 @@ msgid ""
 "manages snapshots for this dataset — this is the recommended approach when "
 "replicating to multiple destinations or at different frequencies, as it "
 "avoids conflicts between replication chains."
-msgstr ""
+msgstr "请勿创建新的快照。相反，请复制与指定前缀匹配的最新现有快照。当已有独立的快照任务负责管理该数据集的快照时，应采用此设置——这也是向多个目的地进行复制或以不同频率进行复制时的推荐做法，因为它有助于避免复制链之间发生冲突。"
 
 msgid "Do you really want to expand the ZFS pool?"
-msgstr ""
+msgstr "您真的要扩充 ZFS 存储池吗？"
 
 msgid "Docs"
-msgstr ""
+msgstr "文档"
 
 msgid "Edit"
-msgstr ""
+msgstr "编辑"
 
 msgid "Edit property"
 msgstr "编辑特性"
 
 msgid "Enable auto-unlock"
-msgstr ""
+msgstr "启用自动解锁"
 
 msgid "Enable auto-unlock at boot (local file)"
-msgstr ""
+msgstr "启用启动时自动解锁（本地文件）"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr ""
+msgstr "启用启动时自动解锁（远程 HTTPS）"
 
 msgid "Enable auto-unlock — local file"
-msgstr ""
+msgstr "启用自动解锁 — 本地文件"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr ""
+msgstr "启用自动解锁 — 远程 HTTPS"
 
 msgid "Enabled"
-msgstr ""
+msgstr "已启用"
 
 msgid "Enabling auto-unlock ..."
-msgstr ""
+msgstr "启用自动解锁中 ..."
 
 msgid "Encrypted filesystem created."
-msgstr ""
+msgstr "加密文件系统已创建。"
 
 msgid "Encryption"
-msgstr ""
+msgstr "加密"
 
 msgid "Encryption key changed."
-msgstr ""
+msgstr "加密密钥已变更。"
 
 msgid "Encryption key loaded."
-msgstr ""
+msgstr "加密密钥已加载"
 
 msgid "Encryption key unloaded."
-msgstr ""
+msgstr "加密密钥已卸载"
 
 msgid "Error"
-msgstr ""
+msgstr "错误"
 
 msgid "Event"
-msgstr ""
+msgstr "事件"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "每月第 N 天"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "每 N 小时"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "每 N 分钟"
 
 msgid "Expand"
 msgstr "扩展"
@@ -573,41 +573,41 @@ msgid "Expanded pool."
 msgstr "扩展池。"
 
 msgid "Exporting pool ..."
-msgstr ""
+msgstr "扩展池中 ..."
 
 msgid "FAULTED"
-msgstr ""
+msgstr "故障"
 
 msgid "February"
-msgstr ""
+msgstr "二月"
 
 msgid ""
 "Filename case sensitivity for the pool's root dataset. Cannot be changed "
 "after creation."
-msgstr ""
+msgstr "存储池根数据集的文件名区分大小写。创建后无法更改。"
 
 msgid "Filename case sensitivity. Cannot be changed after creation."
-msgstr ""
+msgstr "文件名区分大小写。创建后无法更改。"
 
 msgid "Filesystem added."
-msgstr ""
+msgstr "文件系统已创建"
 
 msgid "Fix packages"
 msgstr "修复软件包"
 
 msgid "Fixing packages ..."
-msgstr ""
+msgstr "修复套件中 ..."
 
 msgid "Force creation"
 msgstr "强制创建"
 
 msgid "Force import"
-msgstr ""
+msgstr "强制导入"
 
 msgid ""
 "Force import even if the pool appears to be in use or was not cleanly "
 "exported."
-msgstr ""
+msgstr "强制导入，即使存储池看似正在使用或未被干净导出。"
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
@@ -620,154 +620,154 @@ msgid ""
 msgstr "即使报错也强制创建池，请谨慎使用该设置！"
 
 msgid "Frag"
-msgstr ""
+msgstr "碎片化"
 
 msgid "Free"
-msgstr ""
+msgstr "空闲"
 
 msgid "Friday"
-msgstr ""
+msgstr "星期五"
 
 msgid "Has children"
-msgstr ""
+msgstr "有子项目"
 
 msgid "Has shares"
-msgstr ""
+msgstr "有共享"
 
 msgid "Health"
-msgstr ""
+msgstr "健康"
 
 msgid "History"
-msgstr ""
+msgstr "历史"
 
 msgid "Hits"
 msgstr "Hits"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr ""
+msgstr "远程 ZFS 主机的主机名或 IP 地址。"
 
 msgid "Hot spare"
-msgstr ""
+msgstr "热备"
 
 msgid "Hour"
-msgstr ""
+msgstr "小时"
 
 msgid "Hourly"
-msgstr ""
+msgstr "每小时"
 
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
 "network is slow to come up at boot."
-msgstr ""
+msgstr "在放弃之前，等待网络连接的时长。如果您的网络在启动时连接较慢，请适当增加此值。"
 
 msgid ""
 "If set, the remote server must serve an OpenSSL-encrypted key. Generate the "
 "encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc "
 "-pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
-msgstr ""
+msgstr "如果此选项已设置，远程服务器必须提供一个经 OpenSSL 加密的密钥。请运行以下命令来生成该加密值：`echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE`"
 
 msgid "Import"
-msgstr ""
+msgstr "导入"
 
 msgid "Import / Export"
-msgstr ""
+msgstr "导入 / 导出"
 
 msgid "Import all available pools"
-msgstr ""
+msgstr "导入所有可用池"
 
 msgid "Import pool(s)"
-msgstr ""
+msgstr "导入池"
 
 msgid "Importing pool ..."
-msgstr ""
+msgstr "导入池中 ..."
 
 msgid "Inherit from parent"
-msgstr ""
+msgstr "继承自父级"
 
 msgid "Insensitive"
-msgstr ""
+msgstr "不区分"
 
 msgid "Is encryption root"
-msgstr ""
+msgstr "是加密 root"
 
 msgid "January"
-msgstr ""
+msgstr "一月"
 
 msgid "Job"
-msgstr ""
+msgstr "任务"
 
 msgid "July"
-msgstr ""
+msgstr "七月"
 
 msgid "June"
-msgstr ""
+msgstr "六月"
 
 msgid "Keep"
-msgstr ""
+msgstr "保留"
 
 msgid "Keep snapshots on source"
-msgstr ""
+msgstr "在源端保留快照"
 
 msgid "Key URL"
-msgstr ""
+msgstr "密钥 URL"
 
 msgid "Key status"
-msgstr ""
+msgstr "密钥状态"
 
 msgid "Last scrub"
-msgstr ""
+msgstr "上次擦洗"
 
 msgid "Level"
-msgstr ""
+msgstr "级别"
 
 msgid "Load encryption key"
-msgstr ""
+msgstr "加载加密密钥"
 
 msgid "Load key"
-msgstr ""
+msgstr "加载密钥"
 
 msgid "Load key (unlock)"
-msgstr ""
+msgstr "加载密钥（解锁）"
 
 msgid "Loading encryption key ..."
-msgstr ""
+msgstr "加载加密密钥中 ..."
 
 msgid "Local"
-msgstr ""
+msgstr "本地"
 
 msgid "Log (ZIL/SLOG)"
-msgstr ""
+msgstr "日志 (ZIL/SLOG)"
 
 msgid "March"
-msgstr ""
+msgstr "三月"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "最大 ARC 大小 (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "ZFS ARC 缓存的最大大小（单位：MiB）。设为 0 表示不设限制（ZFS 默认值）。典型取值为已安装内存（RAM）容量的 50%（例如，对于 16 GiB 内存，该值为 16384）。"
 
 msgid "May"
-msgstr ""
+msgstr "五月"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
-msgstr ""
+msgstr "可能包含子数据集，例如 secure/clone1"
 
 msgid "Message"
-msgstr ""
+msgstr "消息"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "最小 ARC 大小 (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "内存稀缺时，ARC 能够收缩到的最小大小（单位：MiB）。设为 0 以使用 ZFS 默认值。"
 
 msgid "Minute"
-msgstr ""
+msgstr "分钟"
 
 msgid "Mirror"
 msgstr "镜像"
@@ -776,25 +776,25 @@ msgid "Misses"
 msgstr "Misses"
 
 msgid "Missing ZFS mntent entries added."
-msgstr ""
+msgstr "已添加缺失的 ZFS 挂载项目。"
 
 msgid "Mixed"
-msgstr ""
+msgstr "混用"
 
 msgid "Modified"
 msgstr "修改"
 
 msgid "Monday"
-msgstr ""
+msgstr "星期一"
 
 msgid "Month"
-msgstr ""
+msgstr "月"
 
 msgid "Monthly"
-msgstr ""
+msgstr "每月"
 
 msgid "Mounted"
-msgstr ""
+msgstr "已挂载"
 
 msgid "Mountpoint"
 msgstr "挂载点"
@@ -803,40 +803,40 @@ msgid "Name"
 msgstr "名称"
 
 msgid "Name of the new clone, created in the same parent as the source."
-msgstr ""
+msgstr "新克隆的名称，创建于与源对象相同的父级下。"
 
 msgid "Name of the specific pool to import."
-msgstr ""
+msgstr "要导入的特定池的名称。"
 
 msgid "Network timeout (seconds)"
-msgstr ""
+msgstr "网络超时（秒）"
 
 msgid "New Property"
 msgstr "新特性"
 
 msgid "New device to attach"
-msgstr ""
+msgstr "待连接的新设备"
 
 msgid "New name"
-msgstr ""
+msgstr "新名称"
 
 msgid "New passphrase / key"
-msgstr ""
+msgstr "新密码 / 密钥"
 
 msgid "New passphrases do not match."
-msgstr ""
+msgstr "新密码不匹配。"
 
 msgid "New property"
 msgstr "新特性"
 
 msgid "No ZFS pools found."
-msgstr ""
+msgstr "未找到 ZFS 存储池。"
 
 msgid "None"
 msgstr "无"
 
 msgid "November"
-msgstr ""
+msgstr "十一月"
 
 msgid ""
 "Number of replication snapshots to keep on the source after each successful "
@@ -844,94 +844,94 @@ msgid ""
 "replication jobs share the same dataset and prefix — prefer 0 and manage "
 "retention with a dedicated snapshot job instead. Ignored when 'Use existing "
 "snapshots' is enabled."
-msgstr ""
+msgstr "每次成功发送后，在源端保留的复制快照数量。0 表示保留所有快照。如果多个复制任务共享同一数据集和前缀，源端清理操作可能会破坏增量链——因此建议设为 0，转而通过专门的快照任务来管理保留策略。当启用“使用现有快照”选项时，此设置将被忽略。"
 
 msgid "OFFLINE"
-msgstr ""
+msgstr "离线"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "ONLINE"
-msgstr ""
+msgstr "在线"
 
 msgid "Object deleted."
 msgstr "对象已删除。"
 
 msgid "October"
-msgstr ""
+msgstr "十月"
 
 msgid "Offline device"
-msgstr ""
+msgstr "离线设备"
 
 msgid "Online device"
-msgstr ""
+msgstr "在线设备"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
-msgstr ""
+msgstr "仅允许使用字母、数字、连字符和下划线。"
 
 msgid "Only send an email if the job exits with an error."
-msgstr ""
+msgstr "仅当任务因错误退出时，才发送电子邮件。"
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
 msgstr "池的挂载点可选，默认使用池名称挂载。"
 
 msgid "Optional mountpoint. Default is to use the dataset path."
-msgstr ""
+msgstr "可选挂载点。默认为使用数据集路径。"
 
 msgid "Origin"
-msgstr ""
+msgstr "原始"
 
 msgid "Packages fixed."
-msgstr ""
+msgstr "套件已修复。"
 
 msgid "Parent"
 msgstr "父"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "口令"
 
 msgid "Passphrase / key"
-msgstr ""
+msgstr "口令 / 密钥"
 
 msgid "Passphrases do not match."
-msgstr ""
+msgstr "口令不符合。"
 
 msgid "Path"
 msgstr "路径"
 
 msgid "Pause scrub"
-msgstr ""
+msgstr "暂停擦洗"
 
 msgid "Pausing scrub ..."
-msgstr ""
+msgstr "暂停擦洗中 ..."
 
 msgid "Pool"
 msgstr "池"
 
 msgid "Pool deleted."
-msgstr ""
+msgstr "已删除池"
 
 msgid "Pool errors cleared."
-msgstr ""
+msgstr "池错误已清理。"
 
 msgid "Pool exported."
-msgstr ""
+msgstr "池已导出。"
 
 msgid "Pool imported."
-msgstr ""
+msgstr "池已导入。"
 
 msgid "Pool name"
 msgstr "池名称"
 
 msgid "Pool root"
-msgstr ""
+msgstr "根池"
 
 msgid "Pool type"
 msgstr "池类型"
 
 msgid "Pool upgraded."
-msgstr ""
+msgstr "池已升级"
 
 msgid "Pools"
 msgstr "池"
@@ -940,10 +940,10 @@ msgid "Prefix"
 msgstr "前缀"
 
 msgid "Promote"
-msgstr ""
+msgstr "升级"
 
 msgid "Promoting dataset ..."
-msgstr ""
+msgstr "升级数据集中 ..."
 
 msgid "Properties"
 msgstr "特性"
@@ -955,10 +955,10 @@ msgid "Property"
 msgstr "特性"
 
 msgid "Quick recursive snapshot"
-msgstr ""
+msgstr "快速递归快照"
 
 msgid "Quick snapshot"
-msgstr ""
+msgstr "快速快照"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -970,246 +970,246 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "REMOVED"
-msgstr ""
+msgstr "已移出"
 
 msgid "Raw send"
-msgstr ""
+msgstr "原始发送"
 
 msgid "Record size"
-msgstr ""
+msgstr "记录大小"
 
 msgid "Recursive"
-msgstr ""
+msgstr "递归"
 
 msgid "Recursive snapshot created."
-msgstr ""
+msgstr "已创建递归快照。"
 
 msgid "Refer"
-msgstr "Refer"
+msgstr "引用"
 
 msgid "Referenced"
-msgstr ""
+msgstr "被引用"
 
 msgid "Remote"
-msgstr ""
+msgstr "远程"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr ""
+msgstr "已启用远程自动解锁。密钥将在启动时获取。"
 
 msgid "Remote host"
-msgstr ""
+msgstr "远程主机"
 
 msgid "Removal state"
-msgstr ""
+msgstr "移除状态"
 
 msgid "Removal status"
-msgstr ""
+msgstr "移除状态"
 
 msgid "Remove Vdev"
-msgstr ""
+msgstr "移出 Vdev"
 
 msgid "Remove vdev"
-msgstr ""
+msgstr "移出 Vdev"
 
 msgid "Removing stale ZFS mntent entries ..."
-msgstr ""
+msgstr "移除旧的 ZFS 挂载项目中 …"
 
 msgid "Rename"
-msgstr ""
+msgstr "重命名"
 
 msgid "Rename dataset"
-msgstr ""
+msgstr "重命名数据集"
 
 msgid "Renaming dataset ..."
-msgstr ""
+msgstr "重命名数据集中 ..."
 
 msgid "Replace device"
-msgstr ""
+msgstr "替换设备"
 
 msgid "Replacement device"
-msgstr ""
+msgstr "替换设备"
 
 msgid "Replication Jobs"
-msgstr ""
+msgstr "复制任务"
 
 msgid ""
 "Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use "
 "existing snapshots' is enabled, this must exactly match the prefix used by "
 "the snapshot job that manages this dataset (e.g. 'auto') — a mismatch will "
 "cause replication to fail with 'No snapshots found'."
-msgstr ""
+msgstr "复制快照将被命名为 `-YYYYMMDD-HHMMSS` 格式。当启用“使用现有快照”选项时，该名称必须与负责管理此数据集的快照任务所使用的前缀（例如 'auto'）完全匹配——若不匹配，复制任务将因提示“未找到快照”而失败。"
 
 msgid "Resume scrub"
-msgstr ""
+msgstr "恢复擦洗"
 
 msgid "Resuming scrub ..."
-msgstr ""
+msgstr "恢复擦洗中 ..."
 
 msgid "Rollback"
 msgstr "回滚"
 
 msgid "Rolling back snapshot ..."
-msgstr ""
+msgstr "回滚快照中 …"
 
 msgid "Run"
-msgstr ""
+msgstr "运行"
 
 msgid "Run now"
-msgstr ""
+msgstr "现在运行"
 
 msgid "Run replication job"
-msgstr ""
+msgstr "运行复制任务"
 
 msgid "Run snapshot job"
-msgstr ""
+msgstr "运行快照任务"
 
 msgid "SSH Certificate"
-msgstr ""
+msgstr "SSH 证书"
 
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr ""
+msgstr "用于向远程主机进行身份验证的 SSH 密钥对。请在“系统”>“证书”>“SSH”下创建一个，然后使用“复制到远程”进行授权。"
 
 msgid "SSH port"
-msgstr ""
+msgstr "SSH 端口"
 
 msgid "SSH user"
-msgstr ""
+msgstr "SSH 用户"
 
 msgid "Saturday"
-msgstr ""
+msgstr "星期六"
 
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
 "on startup."
-msgstr ""
+msgstr "将口令保存至 `/etc/zfs/keys/`，以便数据集在启动时自动解锁。"
 
 msgid ""
 "Saves the passphrase unencrypted to /etc/zfs/keys/ so the dataset unlocks "
 "automatically on startup. Protects against drive theft but not theft of the "
 "whole server."
-msgstr ""
+msgstr "将口令以未加密的形式保存至 `/etc/zfs/keys/` 目录，从而使数据集能够在系统启动时自动解锁。此举可防范硬盘被盗，但无法防范整台服务器被盗。"
 
 msgid "Scan for and import all pools not currently imported."
-msgstr ""
+msgstr "扫描并导入所有当前未导入的池。"
 
 msgid "Schedule"
-msgstr ""
+msgstr "计划任务"
 
 msgid "Scheduling"
-msgstr ""
+msgstr "计划任务"
 
 msgid "Scrub"
-msgstr "侦测 (Scrub)"
+msgstr "擦洗"
 
 msgid "Scrub Jobs"
-msgstr ""
+msgstr "擦洗任务"
 
 msgid "Scrub paused."
-msgstr ""
+msgstr "擦洗已暂停"
 
 msgid "Scrub resumed."
-msgstr ""
+msgstr "擦洗已恢复"
 
 msgid "Scrub started."
-msgstr ""
+msgstr "擦洗已开始"
 
 msgid "Scrub started. Monitor progress in the Pools tab."
-msgstr ""
+msgstr "擦洗已开始，请在“池”选项卡中监视进度。"
 
 msgid "Scrub state"
-msgstr ""
+msgstr "擦洗状态"
 
 msgid "Scrub status"
-msgstr ""
+msgstr "擦洗状态"
 
 msgid "Scrub stopped."
-msgstr ""
+msgstr "擦洗已停止"
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "仅在出错时发送邮件"
 
 msgid "Send output via email"
-msgstr ""
+msgstr "通过电子邮件发送输出"
 
 msgid "Send the command output via email on completion."
-msgstr ""
+msgstr "命令执行完成后，通过电子邮件发送输出结果。"
 
 msgid "Sensitive"
-msgstr ""
+msgstr "区分"
 
 msgid "Sensitive (default)"
-msgstr ""
+msgstr "区分（默认）"
 
 msgid "September"
-msgstr ""
+msgstr "九月"
 
 msgid "Set ashift"
 msgstr "设置ashift"
 
 msgid "Settings"
-msgstr ""
+msgstr "设置"
 
 msgid "Size"
 msgstr "大小"
 
 msgid "Skip certificate verification"
-msgstr ""
+msgstr "跳过证书验证"
 
 msgid "Snapshot Diff"
-msgstr ""
+msgstr "快照差异"
 
 msgid "Snapshot Jobs"
-msgstr ""
+msgstr "快照任务"
 
 msgid "Snapshot added."
-msgstr ""
+msgstr "快照已创建。"
 
 msgid "Snapshot and replicate the dataset and all its children."
-msgstr ""
+msgstr "对数据集及其所有子集进行快照与复制。"
 
 msgid "Snapshot cloned."
-msgstr ""
+msgstr "快照已克隆。"
 
 msgid "Snapshot created."
-msgstr ""
+msgstr "快照已创建。"
 
 msgid "Snapshot deleted recursively."
-msgstr ""
+msgstr "快照已递归删除。"
 
 msgid "Snapshot deleted."
 msgstr "快照已删除。"
 
 msgid "Snapshot prefix"
-msgstr ""
+msgstr "快照前缀"
 
 msgid "Snapshot rolled back."
-msgstr ""
+msgstr "快照已回滚。"
 
 msgid ""
 "Snapshot the dataset and all its children. Retention pruning counts "
 "generations at the parent level and destroys each expired generation across "
 "all children."
-msgstr ""
+msgstr "对数据集及其所有子集进行快照。保留清理在父级的代数，并销毁所有子集中每个过期的代数。"
 
 msgid "Snapshot this dataset and all its children."
-msgstr ""
+msgstr "为该数据集及其所有子数据集创建快照。"
 
 msgid "Snapshots"
 msgstr "快照"
 
 msgid "Snapshots deleted."
-msgstr ""
+msgstr "快照已删除。"
 
 msgid "Snapshots will be named <prefix>-YYYYMMDD-HHMMSS."
-msgstr ""
+msgstr "快照将被命名为 -YYYYMMDD-HHMMSS。"
 
 msgid "Source"
 msgstr "源"
 
 msgid "Source dataset"
-msgstr ""
+msgstr "源数据集"
 
 msgid "Source name"
 msgstr "源名称"
@@ -1221,10 +1221,10 @@ msgid "Source pool"
 msgstr "源池"
 
 msgid "Special (metadata)"
-msgstr ""
+msgstr "特殊（元数据）"
 
 msgid "Specifies which device alias should be used."
-msgstr ""
+msgstr "指定应使用哪个设备别名。"
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -1234,198 +1234,198 @@ msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "指定ashift值，如果你清楚该值的意义才调整它。"
 
 msgid "Stale ZFS mntent entries removed."
-msgstr ""
+msgstr "已移除陈旧的 ZFS 挂载重新项目。"
 
 msgid "Start scrub"
-msgstr ""
+msgstr "开始擦洗"
 
 msgid "Starting TRIM ..."
-msgstr ""
+msgstr "开始 TRIM 中 ..."
 
 msgid "Starting scrub ..."
-msgstr ""
+msgstr "开始擦洗中 ..."
 
 msgid "Status"
 msgstr "状态"
 
 msgid "Stop scrub"
-msgstr ""
+msgstr "停止擦洗"
 
 msgid "Stopping scrub ..."
-msgstr ""
+msgstr "停止擦洗中 ..."
 
 msgid "Sunday"
-msgstr ""
+msgstr "星期天"
 
 msgid "Synchronising ZFS mntent entries ..."
-msgstr ""
+msgstr "正在同步 ZFS 挂载项目 …"
 
 msgid "TRIM started."
-msgstr ""
+msgstr "TRIM 已开始。"
 
 msgid "The field should only contain * or a comma separated list of values."
-msgstr ""
+msgstr "该字段只能包含 * 或以逗号分隔的值列表。"
 
 msgid ""
 "The passphrase will be fetched from a remote HTTPS server at boot. The key "
 "is never stored on this machine, protecting against theft of the whole "
 "server. Requires network access during boot."
-msgstr ""
+msgstr "该口令将在系统启动时从远程 HTTPS 服务器获取。密钥绝不会存储在本机上，从而有效防范整台服务器被盗的风险。此机制要求在系统启动期间具备网络连接。"
 
 msgid ""
 "The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. "
 "Protects against drive theft but not theft of the whole server."
-msgstr ""
+msgstr "该口令将以未加密的形式保存至本机的 `/etc/zfs/keys/` 目录下。此举可防范硬盘被盗，但无法防范整台服务器被盗。"
 
 msgid "Thin provisioning"
 msgstr "精简配置"
 
 msgid "Thursday"
-msgstr ""
+msgstr "星期四"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "执行时间"
 
 msgid "Trim"
-msgstr ""
+msgstr "Trim"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "星期二"
 
 msgid "Type"
 msgstr "类型"
 
 msgid "UNAVAIL"
-msgstr ""
+msgstr "不可用"
 
 msgid "UNKNOWN"
-msgstr ""
+msgstr "未知"
 
 msgid "URL must start with https://"
-msgstr ""
+msgstr "网址必须以 https:// 开头。"
 
 msgid "Unit"
-msgstr ""
+msgstr "单位"
 
 msgid "Unload key (lock)"
-msgstr ""
+msgstr "卸载密钥（锁上）"
 
 msgid "Unloading encryption key ..."
-msgstr ""
+msgstr "卸载密码密钥中 ..."
 
 msgid "Updated replication job."
-msgstr ""
+msgstr "已更新复制任务。"
 
 msgid "Updated scrub job."
-msgstr ""
+msgstr "已更新擦洗任务。"
 
 msgid "Updated snapshot job."
-msgstr ""
+msgstr "已更新快照任务。"
 
 msgid "Upgrade"
-msgstr ""
+msgstr "升级"
 
 msgid "Upgrading pool ..."
-msgstr ""
+msgstr "升级池中 ..."
 
 msgid "Use ZFS bookmarks"
-msgstr ""
+msgstr "使用 ZFS 书签"
 
 msgid ""
 "Use default (128K) for general use. Use 4K-16K for databases, 1M for large "
 "files/media."
-msgstr ""
+msgstr "一般用途请使用默认值（128K）。数据库请使用 4K–16K，大型文件或媒体文件请使用 1M。"
 
 msgid "Use existing snapshots"
-msgstr ""
+msgstr "使用现有快照"
 
 msgid ""
 "Use zfs send -w to send encrypted data without decrypting. Requires "
 "encryption on the source dataset."
-msgstr ""
+msgstr "使用 `zfs send -w` 发送加密数据，无需进行解密。此操作要求源数据集已启用加密。"
 
 msgid "Used"
 msgstr "使用"
 
 msgid "Used (%)"
-msgstr ""
+msgstr "已用（%）"
 
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
 "on the remote to grant non-root access."
-msgstr ""
+msgstr "远程主机上拥有执行 `zfs receive` 权限的用户。请在远程主机上使用 `zfs allow` 命令，以授予非 root 用户的访问权限。"
 
 msgid "Value"
 msgstr "值"
 
 msgid "Vdev removal cancelled."
-msgstr ""
+msgstr "已取消移出 Vdev。"
 
 msgid "Vdev to remove"
-msgstr ""
+msgstr "待移除的 Vdev"
 
 msgid "Vdev type"
 msgstr "Vdev类型"
 
 msgid "Volume added."
-msgstr ""
+msgstr "卷已创建。"
 
 msgid "Wednesday"
-msgstr ""
+msgstr "星期三"
 
 msgid "Weekly"
-msgstr ""
+msgstr "每周"
 
 msgid "Yearly"
-msgstr ""
+msgstr "每年"
 
 msgid "ZFS ARC Hits/Misses"
-msgstr ""
+msgstr "ZFS ARC 命中/未命中"
 
 msgid "ZFS ARC Size"
-msgstr ""
+msgstr "ZFS ARC 大小"
 
 msgid "ZFS Pool Events"
-msgstr ""
+msgstr "ZFS 存储池事件"
 
 msgid "ZFS Pool Health"
-msgstr ""
+msgstr "ZFS 存储池健康"
 
 msgid "ZFS Pool Status"
-msgstr ""
+msgstr "ZFS 存储池状态"
 
 msgid "ZFS Remote Unlock"
-msgstr ""
+msgstr "ZFS 远程解锁"
 
 msgid "ZFS Replication"
-msgstr ""
+msgstr "ZFS 复制"
 
 msgid "ZFS Scrub"
-msgstr ""
+msgstr "ZFS 擦洗"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
 msgid "ZFS mntent entries synchronised."
-msgstr ""
+msgstr "ZFS 挂载项目已同步。"
 
 msgid "days"
-msgstr ""
+msgstr "日"
 
 msgid "months"
-msgstr ""
+msgstr "月"
 
 msgid "omv-extras.org wiki"
-msgstr ""
+msgstr "omv-extras.org 维基"
 
 msgid "snapshots"
-msgstr ""
+msgstr "快照"
 
 msgid "weeks"
-msgstr ""
+msgstr "周"
 
 msgid "years"
-msgstr ""
+msgstr "年"
 
 msgid "zfs"
 msgstr "zfs"

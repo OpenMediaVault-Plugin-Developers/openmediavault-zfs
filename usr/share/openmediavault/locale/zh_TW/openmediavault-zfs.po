@@ -741,12 +741,12 @@ msgid "March"
 msgstr "三月"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "最大 ARC 大小 (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "ZFS ARC 快取的最大大小，以 MiB 為單位。.設定為 0 表示無限制 (ZFS 的預設)。典型值為所安裝 RAM 的 50% (例如：16384 代表 16 GiB 快取)。"
 
 msgid "May"
 msgstr "五月"
@@ -758,12 +758,12 @@ msgid "Message"
 msgstr "訊息"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "最小 ARC 大小 (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "當記憶體使用有壓迫，ARC 將縮減到的最小大小，以 MiB 為單位。設定為 0 則使用 ZFS 的預設。"
 
 msgid "Minute"
 msgstr "分"

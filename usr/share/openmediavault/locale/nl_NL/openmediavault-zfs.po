@@ -743,12 +743,12 @@ msgid "March"
 msgstr "Maart"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "Maximale ARC-grootte (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "Maximale grootte van de ZFS ARC-cache in MiB. Ingesteld op 0 voor geen limiet (ZFS standaard). Een typische waarde is 50% van het geïnstalleerde RAM (bijvoorbeeld 16384 voor 16 GiB)."
 
 msgid "May"
 msgstr "Mei"
@@ -760,12 +760,12 @@ msgid "Message"
 msgstr "Bericht"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "Minimale ARC-grootte (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "Minimale grootte waartoe de ARC zal krimpen onder geheugendruk, in MiB. Instellen op 0 om de ZFS-standaard te gebruiken."
 
 msgid "Minute"
 msgstr "Minuut"

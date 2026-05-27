@@ -1,7 +1,7 @@
 # OpenMediaVault ZFS Plugin — Complete User Guide
 
 This guide covers installation, configuration, and daily use of the openmediavault-zfs plugin.
-It assumes OpenMediaVault 7 (OMV7) is already installed and operational.
+It assumes OpenMediaVault 8 (OMV8) is already installed and operational.
 
 ---
 
@@ -21,7 +21,8 @@ It assumes OpenMediaVault 7 (OMV7) is already installed and operational.
 12. [Properties](#12-properties)
 13. [Discovery (OMV Sync)](#13-discovery-omv-sync)
 14. [Dashboard Widgets and ARC Statistics](#14-dashboard-widgets-and-arc-statistics)
-15. [Tips and Best Practices](#15-tips-and-best-practices)
+15. [Settings](#15-settings)
+16. [Tips and Best Practices](#16-tips-and-best-practices)
 
 ---
 
@@ -402,6 +403,7 @@ Select a pool or parent filesystem and click **Add → Add encrypted filesystem*
 | **Auto-unlock** | Automatically unlock and mount the dataset at boot (stores passphrase in `/etc/zfs/keys/`). |
 | **Compression** | Compression algorithm (applied before encryption). |
 | **Record size** | Internal block size. |
+| **Case sensitivity** | `sensitive`, `insensitive`, or `mixed`. Set at creation, cannot be changed later. |
 | **Mountpoint** | Where the dataset mounts. |
 
 > **Note on child datasets:** Child filesystems created under an encrypted dataset inherit the
@@ -728,10 +730,26 @@ Four log viewers are available under **Storage → ZFS → Logs**:
 | **ZFS Snapshot** | Output from all snapshot job runs (`/var/log/omv-zfs-snapshot.log`). |
 | **ZFS Scrub** | Output from all scrub job runs (`/var/log/omv-zfs-scrub.log`). |
 | **ZFS Replicate** | Output from all replication job runs (`/var/log/omv-zfs-replicate.log`). |
+| **ZFS Remote Unlock** | Output from the remote HTTPS key-fetch service (`zfs-remote-unlock`). Useful for diagnosing boot-time failures when a remote auto-unlock is configured. |
 
 ---
 
-## 15. Tips and Best Practices
+## 15. Settings
+
+Navigate to **Storage → ZFS → Settings**.
+
+This page controls system-level ZFS tuning that applies globally, independent of any individual pool or dataset.
+
+| Field | Description |
+|-------|-------------|
+| **Maximum ARC size (MiB)** | Hard ceiling on how much RAM the Adaptive Replacement Cache may use. Set to `0` for no limit (ZFS default — ARC will use up to roughly half of installed RAM at steady state). A typical explicit value is 50% of installed RAM (e.g. `16384` for a 32 GiB system). |
+| **Minimum ARC size (MiB)** | The floor the ARC will not shrink below even under memory pressure. Set to `0` to use the ZFS default. Raising this prevents other processes from evicting the cache entirely on a RAM-constrained system. |
+
+Changes are written to `/etc/modprobe.d/zfs.conf` and take effect after a reboot or after reloading the ZFS module.
+
+---
+
+## 16. Tips and Best Practices
 
 ### Pool design
 

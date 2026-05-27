@@ -101,4 +101,6 @@ else
     fi
 fi
 
-echo "$(date -Iseconds): Done. ${DATASET} has $(printf '%s\n' "${SNAPS}" | grep -c . || true) snapshot(s) matching prefix '${PREFIX}'."
+REMAINING=$(zfs list -H -t snapshot -o name -s creation -r "${DATASET}" 2>/dev/null \
+    | grep -c "^${DATASET}@${PREFIX}-" || true)
+echo "$(date -Iseconds): Done. ${DATASET} has ${REMAINING} snapshot(s) matching prefix '${PREFIX}'."

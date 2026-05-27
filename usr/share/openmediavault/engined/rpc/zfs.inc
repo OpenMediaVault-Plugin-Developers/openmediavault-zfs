@@ -421,7 +421,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.scrubjob', $params['uuid']);
         $j = $obj->getAssoc();
-        self::zfsExec(sprintf('zpool scrub %s 2>&1', escapeshellarg($j['pool'])), $out, $res);
+        $cmd = sprintf('/usr/sbin/omv-zfs-scrub-job %s 2>&1', escapeshellarg($j['pool']));
+        self::zfsExec($cmd, $out, $res);
         return implode("\n", $out);
     }
 
@@ -593,18 +594,18 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // Validate the RPC caller context.
         $this->validateMethodContext($context, ['role' => OMV_ROLE_ADMINISTRATOR]);
         $objects = ['gzip'];
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 1; $i <= 9; $i++) {
             $objects[] = sprintf('gzip-%d', $i);
         }
         $objects[] = 'lz4';
         $objects[] = 'lzjb';
         $objects[] = 'zle';
         $objects[] = 'zstd';
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 1; $i <= 19; $i++) {
             $objects[] = sprintf('zstd-%d', $i);
         }
         $objects[] = 'zstd-fast';
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 1; $i < 10; $i++) {
             $objects[] = sprintf('zstd-fast-%d', $i);
         }
         for ($i = 10; $i <= 100; $i += 10) {

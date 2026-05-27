@@ -287,6 +287,38 @@ section "Informational RPCs (no pool required)"
 
 assert_rpc "getStats"             "Zfs" "getStats"
 assert_rpc "listCompressionTypes" "Zfs" "listCompressionTypes"
+
+# Bug fix: gzip-0, zstd-0, zstd-fast-0 are not valid ZFS compression values.
+# The loops in listCompressionTypes used to start at 0; they now start at 1.
+COMP_LIST=$(rpc "Zfs" "listCompressionTypes" '{}' 2>/dev/null || echo "[]")
+for _bad in gzip-0 zstd-0 zstd-fast-0; do
+    if echo "$COMP_LIST" | python3 -c \
+            "import sys,json; d=json.load(sys.stdin); assert '$_bad' not in d" 2>/dev/null; then
+        _pass "listCompressionTypes — $_bad absent (invalid off-by-one value)"
+    else
+        _fail "listCompressionTypes — $_bad present (off-by-one bug, levels must start at 1)" ""
+    fi
+done
+_COMP_ALL=true
+for _gi in 1 2 3 4 5 6 7 8 9; do
+    if ! echo "$COMP_LIST" | python3 -c \
+            "import sys,json; d=json.load(sys.stdin); assert 'gzip-$_gi' in d" 2>/dev/null; then
+        _COMP_ALL=false
+        _fail "listCompressionTypes — gzip-$_gi missing from list" ""
+    fi
+done
+$_COMP_ALL && _pass "listCompressionTypes — gzip-1 through gzip-9 all present"
+_COMP_ALL=true
+for _zi in $(seq 1 19); do
+    if ! echo "$COMP_LIST" | python3 -c \
+            "import sys,json; d=json.load(sys.stdin); assert 'zstd-$_zi' in d" 2>/dev/null; then
+        _COMP_ALL=false
+        _fail "listCompressionTypes — zstd-$_zi missing from list" ""
+    fi
+done
+$_COMP_ALL && _pass "listCompressionTypes — zstd-1 through zstd-19 all present"
+unset _bad _gi _zi _COMP_ALL COMP_LIST
+
 assert_rpc "getEmptyCandidates"   "Zfs" "getEmptyCandidates"
 assert_rpc "getArcStats"          "Zfs" "getArcStats"  # returns plain text, no JSON pattern
 
@@ -1447,6 +1479,42 @@ else
     _fail "skipping getScrubJob/runScrubJobBg/deleteScrubJob — no UUID" ""
 fi
 
+# Bug 2 regression: runScrubJob with pool='*' must succeed (delegates to
+# omv-zfs-scrub-job which handles the wildcard; old code called zpool scrub '*'
+# directly and would pass a literal '*' string to zpool, which is invalid).
+SCRUB_ALL_RAW=$(rpc "Zfs" "setScrubJob" "$(python3 -c "
+import json
+print(json.dumps({
+    'uuid':             '$OMV_NEW_UUID',
+    'enable':           True,
+    'pool':             '*',
+    'execution':        'monthly',
+    'minute':           ['0'],
+    'hour':             ['0'],
+    'dayofmonth':       ['1'],
+    'month':            ['*'],
+    'dayofweek':        ['*'],
+    'everynminute':     False,
+    'everynhour':       False,
+    'everyndayofmonth': False,
+    'sendemail':        False,
+    'comment':          'all-pools regression test',
+}))")" 2>/dev/null || echo "{}")
+SCRUB_ALL_UUID=$(echo "$SCRUB_ALL_RAW" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(d.get('uuid',''))" 2>/dev/null || echo "")
+if [ -n "$SCRUB_ALL_UUID" ]; then
+    _pass "setScrubJob — pool='*' (all pools)"
+    if assert_rpc_bg "runScrubJobBg pool='*'" "Zfs" "runScrubJobBg" "{\"uuid\":\"$SCRUB_ALL_UUID\"}"; then
+        _pass "runScrubJobBg — pool='*' succeeded (fix: delegates to omv-zfs-scrub-job)"
+    else
+        _fail "runScrubJobBg — pool='*' failed (regression: old code called zpool scrub '*' directly)" ""
+    fi
+    rpc "Zfs" "deleteScrubJob" "{\"uuid\":\"$SCRUB_ALL_UUID\"}" >/dev/null 2>&1 || true
+else
+    _fail "setScrubJob — pool='*': could not create job (skipping runScrubJobBg all-pools test)" ""
+fi
+unset SCRUB_ALL_RAW SCRUB_ALL_UUID
+
 # ===========================================================================
 section "Replication Jobs — CRUD and local run"
 # ===========================================================================
@@ -2146,6 +2214,36 @@ if [ "$TSTEST_FINAL" -le 1 ]; then
 else
     _fail "omv-zfs-snapshot — count mode: expected ≤1 snapshot, found $TSTEST_FINAL" ""
 fi
+
+# Bug 3 regression: the "Done" message must report the post-prune count, not
+# the pre-prune count captured in $SNAPS.  Create 3 snapshots, then run with
+# retention=1 and confirm the reported count matches the actual ZFS count.
+DONEMSG_DS="$POOL/snapdone"
+zfs create "$DONEMSG_DS" 2>/dev/null || true
+for _i in 1 2 3; do
+    sleep 1
+    zfs snapshot "${DONEMSG_DS}@done-$(date +%Y%m%d-%H%M%S)"
+done
+# Sleep 2 s so the script's own snapshot gets a timestamp distinct from the
+# last pre-created one (same-second collision would make zfs snapshot fail).
+sleep 2
+# The script tees all output to /var/log/omv-zfs-snapshot.log internally.
+# Capture via command substitution is unreliable (background tee process can
+# exit after the subshell closes), so read the log line directly instead.
+/usr/sbin/omv-zfs-snapshot "$DONEMSG_DS" "done" 1 0 >/dev/null 2>&1 || true
+# Extract the count from the most recent "Done." line for this dataset.
+DONEMSG_REPORTED=$(grep "Done\. ${DONEMSG_DS} has" /var/log/omv-zfs-snapshot.log \
+    | tail -1 | grep -oP '(?<=has )\d+(?= snapshot)' || echo "")
+DONEMSG_ACTUAL=$(zfs list -H -t snapshot -o name -r "$DONEMSG_DS" 2>/dev/null \
+    | grep -c "^${DONEMSG_DS}@done-" || true)
+if [ -n "$DONEMSG_REPORTED" ] && [ "$DONEMSG_REPORTED" = "$DONEMSG_ACTUAL" ]; then
+    _pass "omv-zfs-snapshot — Done message count ($DONEMSG_REPORTED) matches actual ZFS count (fix: re-queries after prune)"
+else
+    _fail "omv-zfs-snapshot — Done message count mismatch: reported=$DONEMSG_REPORTED actual=$DONEMSG_ACTUAL (regression: stale pre-prune count)" \
+          "$(grep "Done\. ${DONEMSG_DS} has\|${DONEMSG_DS}@done-" /var/log/omv-zfs-snapshot.log | tail -5)"
+fi
+zfs destroy -r "$DONEMSG_DS" 2>/dev/null || true
+unset DONEMSG_DS DONEMSG_REPORTED DONEMSG_ACTUAL _i
 
 # ===========================================================================
 section "Cron files — omv-salt deploy generates valid entries"

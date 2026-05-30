@@ -37,7 +37,7 @@ configure_zfs_snapshot_cron:
         jobs: {{ snapshot_jobs | json }}
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 configure_zfs_scrub_cron:
   file.managed:
@@ -49,7 +49,7 @@ configure_zfs_scrub_cron:
         jobs: {{ scrub_jobs | json }}
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 configure_zfs_replication_cron:
   file.managed:
@@ -61,4 +61,4 @@ configure_zfs_replication_cron:
         jobs: {{ replication_jobs | json }}
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'

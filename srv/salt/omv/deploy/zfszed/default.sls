@@ -31,7 +31,7 @@ create_zed-rc_config:
         notification_config: {{ notification_config | json }}
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 deploy_omv_zfs_events_zed_script:
   file.managed:
@@ -40,7 +40,7 @@ deploy_omv_zfs_events_zed_script:
       - salt://{{ tpldir }}/files/all-omv-zfs-events.sh
     - user: root
     - group: root
-    - mode: 755
+    - mode: '0755'
 
 restart_zed_service:
   service.running:

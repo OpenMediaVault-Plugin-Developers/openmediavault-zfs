@@ -66,3 +66,4 @@ debian/*substvars
 ### Composer ###
 composer.phar
 /vendor/
+.claude/

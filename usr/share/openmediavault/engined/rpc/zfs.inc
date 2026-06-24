@@ -1861,6 +1861,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::zfsExec(sprintf('zfs set keylocation=prompt %s 2>&1', escapeshellarg($name)), $out, $res);
             self::manageRemoteUnlockService();
         } else {
+            // Verify the passphrase actually unlocks the dataset before persisting
+            // it.  Without this check a wrong passphrase is accepted silently and
+            // only fails at the next boot, when zfs-load-key@<dataset> aborts with
+            // "Incorrect key provided" and the dataset stays locked.
+            $key = (string)($params['key'] ?? '');
+            if ($key === '') {
+                throw new \OMV\Exception('A passphrase is required to enable local auto-unlock.');
+            }
+            self::validateEncryptionKey($name, $key);
             $keyfile = self::getKeyfilePath($name);
             $keydir  = dirname($keyfile);
             if (!is_dir($keydir)) {
@@ -2004,6 +2013,36 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $result = proc_close($process);
         if ($result !== 0) {
             throw new \OMV\Exception('Command failed: ' . trim($stderr ?: $stdout));
+        }
+    }
+
+    /**
+     * Verify that a passphrase actually unlocks the given dataset, throwing if
+     * it does not.  Uses a dry-run load-key (-n) reading the key from stdin
+     * (-L prompt): ZFS checks the supplied key against the dataset's wrapping
+     * key WITHOUT loading it or changing any state, so this works whether or
+     * not the key is currently loaded.  Validation targets the encryption root,
+     * since ZFS only permits keys to be loaded there.
+     *
+     * @throws \OMV\Exception if the passphrase does not unlock the dataset.
+     */
+    private static function validateEncryptionKey(string $name, string $key): void
+    {
+        $encStatus = self::zfsGetEncryptionStatus($name);
+        $encRoot   = $encStatus['encryptionroot']['value'] ?? $name;
+        if ($encRoot === '-' || $encRoot === '') {
+            $encRoot = $name;
+        }
+        try {
+            self::execWithStdin(
+                sprintf('zfs load-key -n -L prompt %s 2>&1', escapeshellarg($encRoot)),
+                $key
+            );
+        } catch (\Exception $e) {
+            throw new \OMV\Exception(sprintf(
+                "The supplied passphrase does not unlock '%s'; auto-unlock was not enabled. (%s)",
+                $name, $e->getMessage()
+            ));
         }
     }
 

@@ -2913,6 +2913,28 @@ else
     _fail "simulate reboot — keystatus should be unavailable, got: $AU_KEYSTATUS2" ""
 fi
 
+# ---- setAutoUnlock must reject a wrong passphrase before saving anything ----
+# A wrong passphrase would otherwise be written to the keyfile and only fail at
+# the next boot ("Incorrect key provided"), leaving the dataset locked.  The
+# RPC must validate the key (dry-run zfs load-key) and refuse, leaving no keyfile.
+AU_BAD_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'name': '$AU_DS', 'keyloctype': 'local', 'key': 'WrongPassphrase000!'}))
+")
+assert_rpc_fails "setAutoUnlock — wrong passphrase rejected on $AU_DS" \
+    "Zfs" "setAutoUnlock" "$AU_BAD_PARAMS"
+if [ -f "$AU_KEYFILE" ]; then
+    _fail "setAutoUnlock — keyfile must NOT be created for a wrong passphrase: $AU_KEYFILE" ""
+else
+    _pass "setAutoUnlock — no keyfile created after wrong-passphrase rejection"
+fi
+AU_KEYLOC_BAD=$(zfs get -H -o value keylocation "$AU_DS" 2>/dev/null || echo "unknown")
+if [ "$AU_KEYLOC_BAD" = "prompt" ]; then
+    _pass "setAutoUnlock — keylocation unchanged (prompt) after wrong-passphrase rejection"
+else
+    _fail "setAutoUnlock — keylocation must stay 'prompt' after rejection, got: $AU_KEYLOC_BAD" ""
+fi
+
 # ---- setAutoUnlock must unmask the unit (tested while dataset is locked) ----
 # The round-trip is done here — after unloadEncryptionKey while datasets are
 # unmounted — so that the daemon-reload inside setAutoUnlock/removeAutoUnlock

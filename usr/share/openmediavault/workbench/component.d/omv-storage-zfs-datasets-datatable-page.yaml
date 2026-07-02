@@ -46,7 +46,7 @@ data:
         hidden: true
         cellTemplateName: progressBar
         cellTemplateConfig:
-          text: '{{ used | tobytes | binaryunit | notavailable("-") }}'
+          text: '{{ usedpercent | tofixed(1) }}%'
       - name: _("Available")
         prop: available
         flexGrow: 1

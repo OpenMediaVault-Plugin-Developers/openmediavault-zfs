@@ -2918,7 +2918,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'origin'        => 'n/a',
                     'size'          => null,
                     'used'          => $fsUsed,
-                    'usedpercent'   => 0,
+                    'usedpercent'   => ($fsUsed + $fsAvail) > 0 ? ($fsUsed / ($fsUsed + $fsAvail) * 100) : 0,
                     'available'     => $fsAvail,
                     'mountpoint'    => ($mountpoint !== '-') ? $mountpoint : '',
                     'lastscrub'     => 'n/a',
@@ -2947,6 +2947,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 // AVAIL from zfs list is the actual space available to this dataset
                 // (pool free space, or quota remaining if a quota is set).
                 $availBytes  = $availRaw;
+                // Without a quota a filesystem has no fixed size, so base the
+                // usage percentage on the space it can actually occupy
+                // (used + available); with a quota, use the quota as the total.
+                $totalBytes  = $quotaBytes > 0 ? $quotaBytes : ($usedBytes + $availBytes);
                 $objects[] = [
                     'id'          => $prefix . $path,
                     'parentid'    => $prefix . $result[1],
@@ -2959,7 +2963,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                     'origin'      => ($origin !== '-' && $origin !== '') ? $origin : 'n/a',
                     'size'        => $size,
                     'used'        => $usedBytes,
-                    'usedpercent' => $size > 0 ? ($usedBytes / $size * 100) : 0,
+                    'usedpercent' => $totalBytes > 0 ? ($usedBytes / $totalBytes * 100) : 0,
                     'available'   => $availBytes,
                     'mountpoint'  => ($mountpoint !== '-') ? $mountpoint : '',
                     'lastscrub'   => 'n/a',

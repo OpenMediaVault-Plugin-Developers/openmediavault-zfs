@@ -3609,7 +3609,7 @@ section "ARC settings"
 assert_rpc "getSettings — returns settings object" "Zfs" "getSettings" '{}' '"arcmax"'
 ARC_GET=$(rpc "Zfs" "getSettings" '{}')
 
-for key in arcmax arcmin; do
+for key in arcmax arcmin extraoptions; do
     if echo "$ARC_GET" | python3 -c \
         "import sys,json; d=json.load(sys.stdin); assert '$key' in d" 2>/dev/null; then
         _pass "getSettings — response contains '$key'"
@@ -3636,15 +3636,30 @@ fi
 assert_rpc_fails "setSettings — negative arcmax rejected" \
     "Zfs" "setSettings" '{"arcmax":-1,"arcmin":0}'
 
-# setSettings — reset to 0 (unlimited).
+# setSettings — set extra module options and verify round-trip.
+assert_rpc "setSettings — set extraoptions" \
+    "Zfs" "setSettings" \
+    '{"arcmax":0,"arcmin":0,"extraoptions":"options zfs l2arc_mfuonly=1"}' \
+    '"extraoptions"'
+
+EXTRA_AFTER=$(rpc "Zfs" "getSettings" '{}')
+if echo "$EXTRA_AFTER" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); assert d['extraoptions']=='options zfs l2arc_mfuonly=1'" \
+    2>/dev/null; then
+    _pass "getSettings — extraoptions persisted"
+else
+    _fail "getSettings — extraoptions did not persist" "${EXTRA_AFTER:0:200}"
+fi
+
+# setSettings — reset to 0 (unlimited) and clear extraoptions.
 assert_rpc "setSettings — reset to unlimited (0)" \
-    "Zfs" "setSettings" '{"arcmax":0,"arcmin":0}' '"arcmax"'
+    "Zfs" "setSettings" '{"arcmax":0,"arcmin":0,"extraoptions":""}' '"arcmax"'
 
 ARC_RESET=$(rpc "Zfs" "getSettings" '{}')
 if echo "$ARC_RESET" | python3 -c \
-    "import sys,json; d=json.load(sys.stdin); assert d['arcmax']==0 and d['arcmin']==0" \
+    "import sys,json; d=json.load(sys.stdin); assert d['arcmax']==0 and d['arcmin']==0 and d['extraoptions']==''" \
     2>/dev/null; then
-    _pass "getSettings — arcmax=0 arcmin=0 persisted after reset"
+    _pass "getSettings — arcmax=0 arcmin=0 extraoptions='' persisted after reset"
 else
     _fail "getSettings — reset to 0 did not persist" "${ARC_RESET:0:200}"
 fi

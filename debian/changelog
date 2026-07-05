@@ -1,4 +1,14 @@
-openmediavault-zfs (8.1) UNRELEASED; urgency=medium
+openmediavault-zfs (8.1.1) stable; urgency=low
+
+  * Fix used (%) column on dataset tab
+  * Add "Extra module options" field to Settings tab for manually tuning ZFS module
+    parameters (e.g. L2ARC) not otherwise exposed in the UI
+    - Raw text appended verbatim to /etc/modprobe.d/zfs.conf below the ARC options
+    - Kept in the OMV config DB so it survives config export/import/backup
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 05 Jul 2026 17:08:56 +0000
+
+openmediavault-zfs (8.1) stable; urgency=medium
 
   * Rewrite backend for better maintainability and performance
   * Show progress messages when performing actions

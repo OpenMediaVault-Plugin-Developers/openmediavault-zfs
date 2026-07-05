@@ -133,8 +133,9 @@ zfs_provider_arm64_missing_headers:
 {% set zfs_settings = salt['omv_conf.get']('conf.service.zfs.settings') %}
 {% set arc_max_bytes = (zfs_settings.get('arcmax', 0) | int) * 1048576 %}
 {% set arc_min_bytes = (zfs_settings.get('arcmin', 0) | int) * 1048576 %}
+{% set extra_options = zfs_settings.get('extraoptions', '') | trim %}
 
-{% if arc_max_bytes > 0 or arc_min_bytes > 0 %}
+{% if arc_max_bytes > 0 or arc_min_bytes > 0 or extra_options %}
 zfs_arc_modprobe_conf:
   file.managed:
     - name: /etc/modprobe.d/zfs.conf
@@ -144,6 +145,7 @@ zfs_arc_modprobe_conf:
     - context:
         arc_max_bytes: {{ arc_max_bytes }}
         arc_min_bytes: {{ arc_min_bytes }}
+        extra_options: {{ extra_options | yaml_encode }}
     - mode: '0644'
     - user: root
     - group: root

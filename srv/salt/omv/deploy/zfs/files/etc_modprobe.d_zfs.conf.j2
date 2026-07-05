@@ -5,3 +5,6 @@ options zfs zfs_arc_max={{ arc_max_bytes }}
 {% if arc_min_bytes > 0 %}
 options zfs zfs_arc_min={{ arc_min_bytes }}
 {% endif %}
+{% if extra_options %}
+{{ extra_options }}
+{% endif %}

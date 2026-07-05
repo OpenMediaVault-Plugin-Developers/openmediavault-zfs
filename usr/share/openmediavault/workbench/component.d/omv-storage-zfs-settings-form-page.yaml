@@ -25,6 +25,11 @@ data:
         hint: _("Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 to use the ZFS default.")
         validators:
           min: 0
+      - type: textarea
+        name: extraoptions
+        label: _("Extra module options")
+        value: ""
+        hint: _("Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next Apply/reboot.")
     buttons:
       - template: submit
         execute:

@@ -17,6 +17,10 @@
         "arcmin": {
           "type": "integer",
           "default": 0
+        },
+        "extraoptions": {
+          "type": "string",
+          "default": ""
         }
       }
     },

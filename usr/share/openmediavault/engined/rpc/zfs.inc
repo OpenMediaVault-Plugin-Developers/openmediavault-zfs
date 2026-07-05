@@ -225,12 +225,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.setsettings');
         $arcmax = max(0, intval($params['arcmax']));
         $arcmin = max(0, intval($params['arcmin']));
+        $extraoptions = array_key_exists('extraoptions', $params) ?
+            trim($params['extraoptions']) : '';
         $db = \OMV\Config\Database::getInstance();
         $obj = $db->get('conf.service.zfs.settings');
         $obj->set('arcmax', $arcmax);
         $obj->set('arcmin', $arcmin);
+        $obj->set('extraoptions', $extraoptions);
         $db->set($obj);
-        return ['arcmax' => $arcmax, 'arcmin' => $arcmin];
+        return ['arcmax' => $arcmax, 'arcmin' => $arcmin, 'extraoptions' => $extraoptions];
     }
 
     public function getDatasetNames($params, $context)

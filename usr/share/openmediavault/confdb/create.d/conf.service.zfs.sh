@@ -43,6 +43,10 @@ if ! omv_config_exists "/config/services/zfs/settings"; then
     omv_config_add_key "/config/services/zfs/settings" "arcmin" "0"
 fi
 
+if ! omv_config_exists "/config/services/zfs/settings/extraoptions"; then
+    omv_config_add_key "/config/services/zfs/settings" "extraoptions" ""
+fi
+
 # add zfs-zed notfication
 xpath="/config/system/notification/notifications"
 if ! omv_config_exists "${xpath}/notification[id='zfs']"; then

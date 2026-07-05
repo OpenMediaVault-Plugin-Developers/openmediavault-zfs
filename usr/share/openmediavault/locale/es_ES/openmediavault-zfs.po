@@ -3,19 +3,20 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
+# Chente OMV, 2026
 # Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022,2024
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 12:01+0000\n"
+"POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Raul Fernandez Garcia <raulfg3@gmail.com>, 2014,2018,2022,2024\n"
-"Language-Team: Spanish (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es/)\n"
+"Last-Translator: Chente OMV, 2026\n"
+"Language-Team: Spanish (Spain) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/es_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: es\n"
+"Language: es_ES\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 msgid ""
@@ -69,6 +70,12 @@ msgid "Adding snapshot ..."
 msgstr ""
 
 msgid "Adding volume ..."
+msgstr ""
+
+msgid ""
+"Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
+" per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
+"Apply/reboot."
 msgstr ""
 
 msgid ""
@@ -131,7 +138,7 @@ msgid ""
 msgstr ""
 
 msgid "Are you sure you want to delete?"
-msgstr "¿Está seguro de que desea borrar?"
+msgstr "¿Está seguro de que desea eliminar?"
 
 msgid "Are you sure you want to detach this device from the pool?"
 msgstr ""
@@ -393,7 +400,7 @@ msgid "Default (128K)"
 msgstr ""
 
 msgid "Delete"
-msgstr "Borrar"
+msgstr "Eliminar"
 
 msgid "Delete all snapshots on parent dataset"
 msgstr ""
@@ -414,13 +421,13 @@ msgid "Deleting all snapshots ..."
 msgstr ""
 
 msgid "Deleting object ..."
-msgstr "Borrando objeto ..."
+msgstr "Eliminando objeto ..."
 
 msgid "Deleting pool ..."
 msgstr ""
 
 msgid "Deleting snapshot ..."
-msgstr "Borrando instantánea ..."
+msgstr "Eliminando instantánea ..."
 
 msgid "Deleting snapshot recursively ..."
 msgstr ""
@@ -572,6 +579,9 @@ msgid "Expanded pool."
 msgstr "Pool expandido."
 
 msgid "Exporting pool ..."
+msgstr ""
+
+msgid "Extra module options"
 msgstr ""
 
 msgid "FAULTED"
@@ -948,7 +958,7 @@ msgid "Properties"
 msgstr "Propiedades"
 
 msgid "Properties saved."
-msgstr "Propiedades salvadas."
+msgstr "Propiedades guardadas."
 
 msgid "Property"
 msgstr "Propiedad"
@@ -1211,7 +1221,7 @@ msgid "Source dataset"
 msgstr ""
 
 msgid "Source name"
-msgstr "nombre origen"
+msgstr "Nombre origen"
 
 msgid "Source path"
 msgstr "Ruta origen"
@@ -1230,7 +1240,7 @@ msgid ""
 msgstr "Especifica que alias de dispositivo debe ser usado. No cambiar a menos que sea necesario."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Especifica el valor de ashift. Solo usar si esta seguro de que se necesita."
+msgstr "Especifica el valor de ashift. Solo usar si está seguro de que se necesita."
 
 msgid "Stale ZFS mntent entries removed."
 msgstr ""
@@ -1292,7 +1302,7 @@ msgid "Tuesday"
 msgstr ""
 
 msgid "Type"
-msgstr "tipo"
+msgstr "Tipo"
 
 msgid "UNAVAIL"
 msgstr ""

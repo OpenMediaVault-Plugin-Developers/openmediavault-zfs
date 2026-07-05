@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 12:01+0000\n"
+"POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023\n"
 "Language-Team: Japanese (Japan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ja_JP/)\n"
@@ -69,6 +69,12 @@ msgid "Adding snapshot ..."
 msgstr ""
 
 msgid "Adding volume ..."
+msgstr ""
+
+msgid ""
+"Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
+" per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
+"Apply/reboot."
 msgstr ""
 
 msgid ""
@@ -572,6 +578,9 @@ msgid "Expanded pool."
 msgstr "プールを拡張。"
 
 msgid "Exporting pool ..."
+msgstr ""
+
+msgid "Extra module options"
 msgstr ""
 
 msgid "FAULTED"

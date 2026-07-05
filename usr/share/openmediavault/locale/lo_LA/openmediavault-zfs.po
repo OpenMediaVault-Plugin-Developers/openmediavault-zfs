@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 12:01+0000\n"
+"POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Lao (Laos) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/lo_LA/)\n"
@@ -69,6 +69,12 @@ msgstr "ກຳລັງເພີ່ມສະແນັບຊັອດ ..."
 
 msgid "Adding volume ..."
 msgstr "ກຳລັງເພີ່ມວໍລຸມ ..."
+
+msgid ""
+"Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
+" per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
+"Apply/reboot."
+msgstr ""
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -572,6 +578,9 @@ msgstr "ຂະຫຍາຍພູລແລ້ວ."
 
 msgid "Exporting pool ..."
 msgstr "ກຳລັງສົ່ງອອກພູລ ..."
+
+msgid "Extra module options"
+msgstr ""
 
 msgid "FAULTED"
 msgstr "FAULTED (ຜິດພາດ)"

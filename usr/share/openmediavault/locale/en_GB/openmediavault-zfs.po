@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 12:01+0000\n"
+"POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>, 2015,2019,2023-2024,2026\n"
 "Language-Team: English (United Kingdom) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/en_GB/)\n"
@@ -70,6 +70,12 @@ msgstr "Adding snapshot ..."
 
 msgid "Adding volume ..."
 msgstr "Adding volume ..."
+
+msgid ""
+"Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
+" per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
+"Apply/reboot."
+msgstr ""
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -574,6 +580,9 @@ msgstr "Expanded pool."
 msgid "Exporting pool ..."
 msgstr "Exporting pool ..."
 
+msgid "Extra module options"
+msgstr ""
+
 msgid "FAULTED"
 msgstr "FAULTED"
 
@@ -741,12 +750,12 @@ msgid "March"
 msgstr "March"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "Maximum ARC size (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
 
 msgid "May"
 msgstr "May"
@@ -758,12 +767,12 @@ msgid "Message"
 msgstr "Message"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "Minimum ARC size (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 to use the ZFS default."
 
 msgid "Minute"
 msgstr "Minute"

@@ -26,6 +26,10 @@ DEVICES=("$@")
 POOL="omvzfstest$$"
 STRIPE_POOL=""   # set later if a temporary vdev-removal test pool is created
 CASE_POOL=""     # set later if a temporary casesensitivity=insensitive pool is created
+LVM_POOL=""      # set later if a temporary LVM-backed vdev leak test pool is created
+LVM_VG=""        # set later if a temporary LVM volume group is created
+LVM_LOOP_DEV=""  # set later if a temporary loop device is attached
+LVM_LOOP_FILE="" # set later if a temporary loop-backed image file is created
 
 # ---------------------------------------------------------------------------
 # Colours / counters
@@ -191,6 +195,19 @@ cleanup() {
     [ -n "${STRIPE_POOL:-}" ] && zpool destroy -f "$STRIPE_POOL" 2>/dev/null || true
     info "Destroying temporary case-sensitivity pool ${CASE_POOL:-} (if it exists)"
     [ -n "${CASE_POOL:-}" ] && zpool destroy -f "$CASE_POOL" 2>/dev/null || true
+    info "Destroying temporary LVM-backed vdev leak test pool ${LVM_POOL:-} (if it exists)"
+    [ -n "${LVM_POOL:-}" ] && zpool destroy -f "$LVM_POOL" 2>/dev/null || true
+    if [ -n "${LVM_VG:-}" ]; then
+        info "Removing temporary LVM volume group $LVM_VG"
+        lvremove -f "/dev/$LVM_VG/zfsvdev" 2>/dev/null || true
+        vgremove -f "$LVM_VG" 2>/dev/null || true
+    fi
+    if [ -n "${LVM_LOOP_DEV:-}" ]; then
+        info "Detaching temporary loop device $LVM_LOOP_DEV"
+        pvremove -f "$LVM_LOOP_DEV" 2>/dev/null || true
+        losetup -d "$LVM_LOOP_DEV" 2>/dev/null || true
+    fi
+    [ -n "${LVM_LOOP_FILE:-}" ] && rm -f "$LVM_LOOP_FILE" 2>/dev/null || true
     info "Clearing device labels"
     for dev in "${DEVICES[@]}"; do
         zpool labelclear -f "$dev" 2>/dev/null || true
@@ -390,7 +407,128 @@ if $_POOL_LEAKED; then
 else
     _pass "getCandidates — pool member disks absent from filesystem candidates"
 fi
-unset _CAND_DEVS _POOL_LEAKED _LEAKED_DEV _dev _base _reserved _is_reserved _r
+unset _CAND_DEVS _POOL_LEAKED _LEAKED_DEV _dev _base _is_reserved _r
+
+# Same regression, but for the ZFS-specific "Create Pool" device picker
+# (Zfs.getEmptyCandidates). It has its own code path (StorageDevice::
+# enumerateUnused + Filesystem::hasFileSystem) and can regress independently
+# of FileSystemMgmt.getCandidates.
+_EMPTY_DEVS=$(omv-rpc -u admin "Zfs" "getEmptyCandidates" '{}' 2>/dev/null \
+    | python3 -c "import sys,json; [print(d['devicefile']) for d in json.load(sys.stdin)]" \
+    2>/dev/null) || _EMPTY_DEVS=""
+_POOL_LEAKED=false
+_LEAKED_DEV=""
+for _dev in "${DEVICES[@]}"; do
+    _base=$(realpath "$_dev" 2>/dev/null || echo "$_dev")
+    _is_reserved=false
+    for _r in "${_RESERVED[@]}"; do
+        [ "$(realpath "$_r" 2>/dev/null || echo "$_r")" = "$_base" ] && _is_reserved=true && break
+    done
+    $_is_reserved && continue
+    if echo "$_EMPTY_DEVS" | grep -qxF "$_base"; then
+        _POOL_LEAKED=true
+        _LEAKED_DEV="$_base"
+        break
+    fi
+done
+if $_POOL_LEAKED; then
+    _fail "getEmptyCandidates — pool member disk must not appear as ZFS pool candidate" \
+          "$_LEAKED_DEV found in Zfs.getEmptyCandidates"
+else
+    _pass "getEmptyCandidates — pool member disks absent from ZFS pool candidates"
+fi
+unset _EMPTY_DEVS _POOL_LEAKED _LEAKED_DEV _dev _base _is_reserved _r _RESERVED
+
+# ===========================================================================
+section "Regression: LVM-backed vdev must not leak into candidate lists"
+# ===========================================================================
+# A ZFS vdev built on an LVM logical volume must be excluded from both
+# FileSystemMgmt.getCandidates and Zfs.getEmptyCandidates the same way a raw
+# disk pool member is (see the checks above). This uses a self-contained
+# loop-device/PV/VG/LV stack so it does not consume any caller-supplied device.
+
+if command -v pvcreate >/dev/null 2>&1 && command -v vgcreate >/dev/null 2>&1 \
+        && command -v lvcreate >/dev/null 2>&1 && command -v losetup >/dev/null 2>&1; then
+    LVM_LOOP_FILE=$(mktemp /tmp/omvzfstest-lvm-XXXXXX.img)
+    truncate -s 512M "$LVM_LOOP_FILE"
+    LVM_LOOP_DEV=$(losetup -f --show "$LVM_LOOP_FILE" 2>/dev/null || echo "")
+    LVM_VG="omvzfstestvg$$"
+    LVM_POOL="omvzfslvmtest$$"
+
+    if [ -n "$LVM_LOOP_DEV" ] \
+            && pvcreate -f "$LVM_LOOP_DEV" >/dev/null 2>&1 \
+            && vgcreate "$LVM_VG" "$LVM_LOOP_DEV" >/dev/null 2>&1 \
+            && lvcreate -n zfsvdev -L 400M "$LVM_VG" >/dev/null 2>&1; then
+        LVM_LV_PATH="/dev/$LVM_VG/zfsvdev"
+        udevadm settle 2>/dev/null || sleep 1
+
+        ADDPOOL_LVM_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'pooltype':        'basic',
+    'force':           True,
+    'mountpoint':      '',
+    'name':            '$LVM_POOL',
+    'devices':         ['$LVM_LV_PATH'],
+    'devalias':        'dev',
+    'ashift':          False,
+    'ashiftval':       0,
+    'compress':        False,
+    'compresstype':    'lz4',
+    'casesensitivity': 'sensitive',
+}))
+")
+        assert_rpc "addPool (LVM-backed vdev)" "Zfs" "addPool" "$ADDPOOL_LVM_PARAMS"
+
+        if zpool list "$LVM_POOL" &>/dev/null; then
+            sleep 2
+            LVM_BASE=$(realpath "$LVM_LV_PATH" 2>/dev/null || echo "$LVM_LV_PATH")
+
+            LVM_CAND_OUT=$(omv-rpc -u admin "FileSystemMgmt" "getCandidates" '{}' 2>/dev/null \
+                | python3 -c "import sys,json; [print(d['devicefile']) for d in json.load(sys.stdin)]" \
+                2>/dev/null) || LVM_CAND_OUT=""
+            if echo "$LVM_CAND_OUT" | grep -qxF "$LVM_BASE"; then
+                _fail "getCandidates — LVM-backed pool member must not appear as filesystem candidate" \
+                      "$LVM_BASE found in FileSystemMgmt.getCandidates"
+            else
+                _pass "getCandidates — LVM-backed pool member absent from filesystem candidates"
+            fi
+
+            LVM_EMPTY_OUT=$(omv-rpc -u admin "Zfs" "getEmptyCandidates" '{}' 2>/dev/null \
+                | python3 -c "import sys,json; [print(d['devicefile']) for d in json.load(sys.stdin)]" \
+                2>/dev/null) || LVM_EMPTY_OUT=""
+            if echo "$LVM_EMPTY_OUT" | grep -qxF "$LVM_BASE"; then
+                _fail "getEmptyCandidates — LVM-backed pool member must not appear as ZFS pool candidate" \
+                      "$LVM_BASE found in Zfs.getEmptyCandidates"
+            else
+                _pass "getEmptyCandidates — LVM-backed pool member absent from ZFS pool candidates"
+            fi
+
+            zpool destroy -f "$LVM_POOL" 2>/dev/null || true
+            LVM_POOL=""
+        else
+            _fail "addPool (LVM-backed vdev) — pool $LVM_POOL not found after create" ""
+        fi
+        unset LVM_CAND_OUT LVM_EMPTY_OUT LVM_BASE LVM_LV_PATH ADDPOOL_LVM_PARAMS
+    else
+        _fail "LVM-backed vdev leak test — failed to set up loop/PV/VG/LV stack" \
+              "pvcreate/vgcreate/lvcreate on $LVM_LOOP_DEV failed"
+    fi
+
+    # Tear down immediately; the trap-based cleanup() is a safety net only.
+    [ -n "$LVM_VG" ] && lvremove -f "/dev/$LVM_VG/zfsvdev" 2>/dev/null || true
+    [ -n "$LVM_VG" ] && vgremove -f "$LVM_VG" 2>/dev/null || true
+    LVM_VG=""
+    if [ -n "$LVM_LOOP_DEV" ]; then
+        pvremove -f "$LVM_LOOP_DEV" 2>/dev/null || true
+        losetup -d "$LVM_LOOP_DEV" 2>/dev/null || true
+        LVM_LOOP_DEV=""
+    fi
+    rm -f "$LVM_LOOP_FILE" 2>/dev/null || true
+    LVM_LOOP_FILE=""
+else
+    info "Skipping LVM-backed vdev leak test (pvcreate/vgcreate/lvcreate/losetup not available)"
+fi
 
 # Enable raidz_expansion if we reserved a device for the expansion test.
 if [ -n "$EXPAND_DEV" ]; then

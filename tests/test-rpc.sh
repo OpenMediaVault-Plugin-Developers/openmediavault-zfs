@@ -184,6 +184,17 @@ print(match['dir'] if match else '')
 " 2>/dev/null || echo ""
 }
 
+# Return the uuid field of the OMV FsTab entry for the given fsname, or empty string.
+mntent_uuid() {
+    omv-rpc -u admin "FsTab" "enumerateEntries" '{}' 2>/dev/null \
+        | python3 -c "
+import sys, json
+entries = json.load(sys.stdin)
+match = next((e for e in entries if e.get('fsname') == '$1'), None)
+print(match['uuid'] if match else '')
+" 2>/dev/null || echo ""
+}
+
 # ---------------------------------------------------------------------------
 # Cleanup — always runs on exit
 # ---------------------------------------------------------------------------
@@ -1195,9 +1206,23 @@ print(json.dumps({
 }))
 ")
     # Only run if the last device is not already part of any active pool.
+    # Compare resolved realpaths against 'zpool status -P' (full device paths
+    # for every imported pool) rather than grepping for the raw device string —
+    # LVM/dm-mapper devices are often displayed by zpool under a different
+    # alias (e.g. a persistent by-id/dm name) than the path the caller passed,
+    # so a plain name/basename grep can miss an in-use device entirely.
     LAST_DEV="${DEVICES[-1]}"
-    LAST_DEV_BASE=$(basename "$LAST_DEV")
-    if zpool status 2>/dev/null | grep -qE "^\s+($LAST_DEV|$LAST_DEV_BASE)\s"; then
+    LAST_DEV_REAL=$(realpath "$LAST_DEV" 2>/dev/null || echo "$LAST_DEV")
+    LAST_DEV_IN_USE=false
+    while read -r _zp_dev; do
+        [ -z "$_zp_dev" ] && continue
+        _zp_dev_real=$(realpath "$_zp_dev" 2>/dev/null || echo "$_zp_dev")
+        if [ "$_zp_dev_real" = "$LAST_DEV_REAL" ]; then
+            LAST_DEV_IN_USE=true
+            break
+        fi
+    done < <(zpool status -P 2>/dev/null | awk '/^[[:space:]]+\//{print $1}')
+    if $LAST_DEV_IN_USE; then
         info "Skipping insensitive-pool test — last device ($LAST_DEV) is part of an active pool"
     else
         assert_rpc "addPool — casesensitivity=insensitive pool" "Zfs" "addPool" "$CASE_POOL_PARAMS"
@@ -1209,6 +1234,7 @@ print(json.dumps({
         fi
         zpool destroy -f "$CASE_POOL" 2>/dev/null || true
     fi
+    unset LAST_DEV LAST_DEV_REAL LAST_DEV_IN_USE _zp_dev _zp_dev_real
 fi
 
 # Clean up case-sensitivity test datasets.
@@ -1294,6 +1320,181 @@ for _mf_ds in "$POOL/fs_mntfix1/child" "$POOL/fs_mntfix1" "$POOL/fs_mntfix2"; do
     fi
 done
 unset _mf_ds _mf_mp CHILD_DIR PARENT_DIR
+
+# ===========================================================================
+section "Bug repro: Shared Folder ACL on a nested ZFS dataset mountpoint"
+# ===========================================================================
+# User report: a Shared Folder whose Filesystem=<pool root> + Relative Path
+# resolves into the mountpoint of a *nested* child dataset (e.g. created via
+# `zfs create pool/parent/child`, as opposed to a plain subdirectory of the
+# pool root) appeared to save its ACL successfully in the WebGUI, but the
+# POSIX ACL was never actually written to disk — the directory kept ZFS's
+# default root:root 0755 forever, so SMB write access for the assigned user
+# failed. This exercises the exact same RPCs the WebGUI's dedicated "ACL"
+# page uses (ShareMgmt.set + ShareMgmt.getPath + ShareMgmt.setFileACL)
+# against a CLI-created nested dataset, so the repro can be re-run as fixes
+# land either in this plugin or in OMV core (see sharemgmt.inc).
+#
+# This is deliberately independent of the "Privileges" tab (ShareMgmt.
+# setPrivileges), which only ever updates the config DB / smb.conf and never
+# touches on-disk ACLs — that is not the mechanism under test here.
+
+info "Creating nested dataset $POOL/aclbug/nested via CLI (simulating user running 'zfs create -p' directly)"
+zfs create -p "$POOL/aclbug/nested" 2>/dev/null || true
+
+ACLBUG_MP=$(zfs get -H -o value mountpoint "$POOL/aclbug/nested" 2>/dev/null || echo "")
+if [ -n "$ACLBUG_MP" ] && [ -d "$ACLBUG_MP" ]; then
+    _pass "aclbug — nested dataset mounted at $ACLBUG_MP"
+else
+    _fail "aclbug — nested dataset did not mount; skipping ACL repro" "mountpoint='$ACLBUG_MP'"
+fi
+
+if [ -n "$ACLBUG_MP" ]; then
+    POOL_MNTENT_UUID=$(mntent_uuid "$POOL")
+    if [ -z "$POOL_MNTENT_UUID" ]; then
+        _fail "aclbug — no FsTab mntent entry found for pool root $POOL" ""
+    else
+        # Only the pool root is selectable as "Filesystem" in the Shared Folder
+        # dialog (see issue #1070 — nested datasets don't appear in the
+        # dropdown), so mntentref is always the pool root's mntent entry and
+        # the nested path is expressed purely via reldirpath, exactly as a
+        # real user is forced to do.
+        SF_SET_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid': '$OMV_NEW_UUID',
+    'name': 'aclbugsf$$',
+    'reldirpath': 'aclbug/nested',
+    'comment': 'ACL nested-dataset regression test',
+    'mntentref': '$POOL_MNTENT_UUID',
+    'mode': '775',
+}))
+")
+        SF_SET_OUT=$(rpc "ShareMgmt" "set" "$SF_SET_PARAMS" 2>&1)
+        SF_SET_EC=$?
+        if [ $SF_SET_EC -ne 0 ]; then
+            _fail "aclbug — ShareMgmt.set (shared folder on nested dataset path)" "${SF_SET_OUT:0:300}"
+        else
+            _pass "aclbug — ShareMgmt.set (shared folder on nested dataset path)"
+        fi
+
+        SF_UUID=$(echo "$SF_SET_OUT" | python3 -c \
+            "import sys,json; print(json.load(sys.stdin).get('uuid',''))" 2>/dev/null || echo "")
+
+        if [ -z "$SF_UUID" ]; then
+            _fail "aclbug — could not extract shared folder uuid from ShareMgmt.set response" \
+                  "${SF_SET_OUT:0:200}"
+        else
+            # Confirm ShareMgmt.getPath resolves to the nested dataset's real mountpoint
+            # (plain mntent-dir + reldirpath concatenation — no mount-boundary logic).
+            # getPath returns a JSON-encoded string (forward slashes escaped as
+            # '\/' by PHP's json_encode) — decode it properly with python3
+            # rather than stripping quote characters, which leaves the
+            # backslash escapes behind.
+            SF_PATH=$(rpc "ShareMgmt" "getPath" "{\"uuid\":\"$SF_UUID\"}" 2>/dev/null \
+                | python3 -c "import sys,json; print(json.load(sys.stdin))" 2>/dev/null)
+            SF_PATH_NORM=$(echo "$SF_PATH" | sed 's:/*$::')
+            ACLBUG_MP_NORM=$(echo "$ACLBUG_MP" | sed 's:/*$::')
+            if [ "$SF_PATH_NORM" = "$ACLBUG_MP_NORM" ]; then
+                _pass "aclbug — ShareMgmt.getPath resolves to the nested dataset mountpoint ($SF_PATH)"
+            else
+                _fail "aclbug — ShareMgmt.getPath mismatch" \
+                      "expected '$ACLBUG_MP_NORM', got '$SF_PATH_NORM'"
+            fi
+
+            # Set a named-user ACL via the WebGUI's actual "ACL" page code path,
+            # then re-open and re-save it several times more — the original
+            # report was explicit that it happened "regardless of how many
+            # times the [ACL] dialog is edited, saved, and applied", so a
+            # single fresh save is not enough to rule that out. Each call below
+            # reuses the same shared folder uuid, exactly as re-opening the ACL
+            # tab and hitting Save again would.
+            #
+            # Helper (local to this section): apply the given 'users' ACL spec
+            # via setFileACL and return the resulting on-disk getfacl output.
+            aclbug_apply_and_getfacl() {
+                local desc=$1 users_json=$2 params
+                params=$(python3 -c "
+import json
+print(json.dumps({
+    'uuid': '$SF_UUID',
+    'file': '/',
+    'recursive': False,
+    'replace': True,
+    'users': $users_json,
+    'groups': [],
+}))
+")
+                assert_rpc_bg "$desc" "ShareMgmt" "setFileACL" "$params"
+                getfacl "$ACLBUG_MP" 2>/dev/null || echo ""
+            }
+
+            # Edit #1 — first-ever save: grant nobody Read/Write.
+            ONDISK_ACL=$(aclbug_apply_and_getfacl \
+                "aclbug — setFileACL #1, first save (user:nobody:rwx)" \
+                '[{"name": "nobody", "perms": 7}]')
+            if echo "$ONDISK_ACL" | grep -qE "^user:nobody:rwx"; then
+                _pass "aclbug — getfacl on $ACLBUG_MP shows user:nobody:rwx (ACL correctly deployed)"
+            else
+                _fail "aclbug — getfacl on $ACLBUG_MP has NO user:nobody entry (BUG REPRODUCED)" \
+                      "$(echo "$ONDISK_ACL" | tr '\n' ' ')"
+            fi
+
+            # Edit #2 — re-open the ACL tab and change the same user's
+            # permissions (Read/Write -> Read-only), then save again.
+            ONDISK_ACL=$(aclbug_apply_and_getfacl \
+                "aclbug — setFileACL #2, re-edit same user (user:nobody:r-x)" \
+                '[{"name": "nobody", "perms": 5}]')
+            if echo "$ONDISK_ACL" | grep -qE "^user:nobody:r-x" \
+                    && ! echo "$ONDISK_ACL" | grep -qE "^user:nobody:rwx"; then
+                _pass "aclbug — re-edit #2 updated the on-disk ACL to user:nobody:r-x"
+            else
+                _fail "aclbug — re-edit #2 did not update the on-disk ACL (BUG REPRODUCED)" \
+                      "$(echo "$ONDISK_ACL" | tr '\n' ' ')"
+            fi
+
+            # Edit #3 — re-open again and add a second named user, keeping the
+            # first (two-entry ACL, as when granting access to another user
+            # after the fact).
+            ONDISK_ACL=$(aclbug_apply_and_getfacl \
+                "aclbug — setFileACL #3, add second user (user:daemon:rwx)" \
+                '[{"name": "nobody", "perms": 5}, {"name": "daemon", "perms": 7}]')
+            if echo "$ONDISK_ACL" | grep -qE "^user:nobody:r-x" \
+                    && echo "$ONDISK_ACL" | grep -qE "^user:daemon:rwx"; then
+                _pass "aclbug — re-edit #3 shows both user:nobody:r-x and user:daemon:rwx"
+            else
+                _fail "aclbug — re-edit #3 missing an expected entry (BUG REPRODUCED)" \
+                      "$(echo "$ONDISK_ACL" | tr '\n' ' ')"
+            fi
+
+            # Edit #4 — re-open once more and remove the first user entirely
+            # (Replace is on by default, so the previous entry must actually
+            # be wiped, not just left stale alongside the new set).
+            ONDISK_ACL=$(aclbug_apply_and_getfacl \
+                "aclbug — setFileACL #4, remove first user (replace wipes user:nobody)" \
+                '[{"name": "daemon", "perms": 7}]')
+            if echo "$ONDISK_ACL" | grep -qE "^user:daemon:rwx" \
+                    && ! echo "$ONDISK_ACL" | grep -q "^user:nobody:"; then
+                _pass "aclbug — re-edit #4 correctly removed user:nobody, kept user:daemon:rwx"
+            else
+                _fail "aclbug — re-edit #4 left a stale user:nobody entry or lost user:daemon (BUG REPRODUCED)" \
+                      "$(echo "$ONDISK_ACL" | tr '\n' ' ')"
+            fi
+
+            unset -f aclbug_apply_and_getfacl
+
+            # Cleanup — config object only, never touch the on-disk dataset (recursive=false).
+            assert_rpc "aclbug — ShareMgmt.delete (cleanup shared folder)" \
+                "ShareMgmt" "delete" "{\"uuid\":\"$SF_UUID\",\"recursive\":false}"
+        fi
+    fi
+fi
+
+# Cleanup the nested dataset itself (deepest first); safe no-op if never created.
+zfs destroy "$POOL/aclbug/nested" 2>/dev/null || true
+zfs destroy "$POOL/aclbug" 2>/dev/null || true
+unset ACLBUG_MP POOL_MNTENT_UUID SF_SET_PARAMS SF_SET_OUT SF_SET_EC SF_UUID
+unset SF_PATH SF_PATH_NORM ACLBUG_MP_NORM ONDISK_ACL
 
 # ===========================================================================
 section "Snapshot — add, list, rollback, delete"

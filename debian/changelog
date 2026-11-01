@@ -1,8 +1,14 @@
-openmediavault-zfs (8.1.2) UNRELEASED; urgency=medium
+openmediavault-zfs (8.1.2) stable; urgency=low
 
   * Change datasets tab to tree view
+  * Create zfs-list.cache for new and imported pools so zfs-mount-generator
+    generates boot mount units for every pool, not just the first (#119)
+    - Remove the cache file on export; Discover backfills missing files
+    - Keep unlocked encrypted datasets mounted when units are regenerated
+    - Mask zfs-load-key@ units for keylocation=prompt datasets to avoid a
+      passphrase prompt at boot
 
- -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 01 Nov 2026 14:14:35 +0000
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Sun, 01 Nov 2026 14:38:55 +0000
 
 openmediavault-zfs (8.1.1) stable; urgency=low
 

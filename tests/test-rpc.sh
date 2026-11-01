@@ -225,7 +225,7 @@ cleanup() {
     done
     info "Removing any remaining mntent entries for this pool"
     omv-rpc -u admin "Zfs" "doDiscover" \
-        '{"addMissing":false,"deleteStale":true}' 2>/dev/null || true
+        '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -4146,6 +4146,11 @@ fi
 echo
 
 systemctl restart monit
+# Wait for monit's control socket; otherwise salt's monit calls race the restart.
+for _i in $(seq 1 20); do
+    monit status >/dev/null 2>&1 && break
+    sleep 0.5
+done
 omv-salt deploy run --quiet collectd fstab monit quota sftp zfscron zfs
 echo "[]" > /var/lib/openmediavault/dirtymodules.json
 

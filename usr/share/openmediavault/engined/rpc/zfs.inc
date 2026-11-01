@@ -122,6 +122,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $addMissing  = $params['addMissing']  ?? true;
         $deleteStale = $params['deleteStale'] ?? false;
         self::fixOMVMntEnt($context, $addMissing, $deleteStale);
+        // Backfill zfs-list.cache files for pools created/imported before the
+        // plugin maintained them, so zfs-mount-generator orders their mounts.
+        self::ensureZfsListCacheForAllPools();
     }
 
     public function doDiscoverBg($params, $context)
@@ -481,6 +484,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 escapeshellarg($params['name']));
             self::zfsExec($cmd, $out, $res);
         }
+        // Create the zfs-list.cache file so zfs-mount-generator generates
+        // .mount units for this pool at boot (ZED only updates existing files).
+        self::updateZfsListCache($params['name']);
         // Sync OMV mount entries and mark config modules dirty.
         self::fixOMVMntEnt($context);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
@@ -503,6 +509,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd .= '2>&1';
         self::zfsExec($cmd, $out, $res);
+        // The imported pool name may differ from the identifier passed in
+        // (numeric id) and 'all' imports several pools, so cover every pool
+        // that does not yet have a zfs-list.cache file.
+        self::ensureZfsListCacheForAllPools();
     }
 
     public function exportPool($params, $context)
@@ -513,6 +523,10 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $this->validateMethodParams($params, 'rpc.zfs.name');
         $cmd = sprintf('zpool export %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
+        // Drop the pool's zfs-list.cache so no .mount units are generated for
+        // an exported pool; importPool recreates it.
+        @unlink('/etc/zfs/zfs-list.cache/' . $params['name']);
+        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
     }
 
     public function clearPool($params, $context)
@@ -1515,8 +1529,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             self::zfsExec(sprintf('zfs set keylocation=%s %s 2>&1',
                 escapeshellarg('file://' . $keyfile),
                 escapeshellarg($fullPath)), $out, $res);
-            self::updateZfsListCache(explode('/', $fullPath)[0]);
         }
+        // Refresh the cache in both cases: auto-unlock needs a file:// entry,
+        // and a prompt dataset needs its load-key unit masked (see
+        // syncLoadKeyUnits) so boot does not wait for a passphrase.
+        self::updateZfsListCache(explode('/', $fullPath)[0]);
         self::addOMVMntEntForDataset($context, $fullPath);
         // Re-mount after addOMVMntEntForDataset: setting omvzfsplugin:uuid on a
         // mounted encrypted dataset can clear ZFS's mounted-state tracking on
@@ -3416,6 +3433,124 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::zfsTryExec($cmd, $lines);
         sort($lines);
         file_put_contents($cacheFile, implode("\n", $lines) . "\n");
+        self::syncLoadKeyUnits($lines);
+    }
+
+    /**
+     * Create /etc/zfs/zfs-list.cache/<pool> for every imported pool that does
+     * not have one yet.  Existing files are left alone (ZED keeps them current).
+     */
+    private static function ensureZfsListCacheForAllPools(): void
+    {
+        $pools = [];
+        self::zfsTryExec('zpool list -H -o name 2>/dev/null', $pools);
+        foreach ($pools as $pool) {
+            $pool = trim($pool);
+            if ($pool === '' || file_exists('/etc/zfs/zfs-list.cache/' . $pool)) {
+                continue;
+            }
+            self::updateZfsListCache($pool);
+        }
+    }
+
+    /**
+     * Regenerate units from the freshly written cache and keep the generated
+     * zfs-load-key@ units consistent with the current state.
+     *
+     * Generated .mount units BindsTo= their encryption root's zfs-load-key@
+     * service, so after daemon-reload systemd unmounts any unlocked encrypted
+     * dataset whose load-key unit is inactive.  Starting the unit is a no-op
+     * when the key is already loaded (ExecStart exits 0) and keeps it active.
+     *
+     * Encryption roots with keylocation=prompt get their load-key unit masked
+     * so the next boot does not block on a passphrase prompt — the same policy
+     * removeAutoUnlock applies.  The key is loaded via loadEncryptionKey.
+     *
+     * The unit only exists after daemon-reload, so systemd may already have
+     * stopped (unmounted) the dataset before we can start it.  Encrypted
+     * datasets that were mounted beforehand are therefore re-mounted once the
+     * load-key unit is active.
+     *
+     * Cache columns: 0=name ... 10=encroot 11=keylocation (see updateZfsListCache).
+     */
+    private static function syncLoadKeyUnits(array $lines): void
+    {
+        $wasMounted = [];
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            if (count($parts) < 12 || $parts[10] === '-' || $parts[10] === '') {
+                continue; // not encrypted
+            }
+            $mOut = [];
+            exec(sprintf('zfs get -H -o value mounted %s 2>/dev/null', escapeshellarg($parts[0])), $mOut);
+            if (trim(implode('', $mOut)) === 'yes') {
+                $wasMounted[] = $parts[0];
+            }
+        }
+        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
+        $toStart = [];
+        $toMask  = [];
+        foreach ($lines as $line) {
+            $parts = explode("\t", $line);
+            if (count($parts) < 12 || $parts[10] !== $parts[0]) {
+                continue; // not an encryption root
+            }
+            $name = $parts[0];
+            $instanceOut = [];
+            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
+            $instance = trim(implode('', $instanceOut));
+            if ($instance === '') {
+                continue;
+            }
+            $unit = 'zfs-load-key@' . $instance . '.service';
+            $keyOut = [];
+            exec(sprintf('zfs get -H -o value keystatus %s 2>/dev/null', escapeshellarg($name)), $keyOut);
+            $activeOut = [];
+            exec(sprintf('systemctl is-active %s 2>/dev/null', escapeshellarg($unit)), $activeOut);
+            if (trim(implode('', $keyOut)) === 'available'
+                && trim(implode('', $activeOut)) !== 'active') {
+                $toStart[] = $unit;
+            }
+            if ($parts[11] === 'prompt') {
+                $toMask[] = $unit;
+            }
+        }
+        if (!empty($toStart)) {
+            // A masked unit cannot start; unmask first, start, then re-mask
+            // below if it is a prompt unit (the active state survives masking).
+            $masked = [];
+            foreach ($toStart as $unit) {
+                $enOut = [];
+                exec(sprintf('systemctl is-enabled %s 2>/dev/null', escapeshellarg($unit)), $enOut);
+                if (str_starts_with(trim(implode('', $enOut)), 'masked')) {
+                    $masked[] = $unit;
+                }
+            }
+            if (!empty($masked)) {
+                self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
+                    implode(' ', array_map('escapeshellarg', $masked))));
+                self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
+                // Restore the mask on non-prompt units too; we only unmasked
+                // them to start them.
+                $toMask = array_unique(array_merge($toMask, $masked));
+            }
+            foreach ($toStart as $unit) {
+                self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($unit)));
+                self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($unit)));
+            }
+        }
+        if (!empty($toMask)) {
+            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null',
+                implode(' ', array_map('escapeshellarg', $toMask))));
+        }
+        // $lines is sorted, so parents are re-mounted before children.
+        foreach ($wasMounted as $ds) {
+            $mOut = [];
+            exec(sprintf('zfs get -H -o value mounted %s 2>/dev/null', escapeshellarg($ds)), $mOut);
+            if (trim(implode('', $mOut)) !== 'yes') {
+                self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
+            }
+        }
     }
 
     /**

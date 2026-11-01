@@ -8,17 +8,28 @@ data:
     hasSearchField: true
     rowId: id
     stateId: 2a3f8c10-50b3-11ec-bf5c-37dde54fc31c
+    # Display all datasets on one page, paging would split the tree.
+    limit: 0
+    treeFromRelation: parentid
+    treeToRelation: treeid
     store:
       proxy:
         service: Zfs
         get:
           method: listDatasetsBg
           task: true
+      transform:
+        # Top level datasets reference their pool as 'root/pool-<name>',
+        # so use that as the ID of the pool root filesystem.
+        treeid: "{{ 'root/pool-' ~ path if poolroot else id }}"
+        treeStatus: "{{ 'expanded' if haschildren else 'disabled' }}"
     columns:
       - name: _("Name")
         prop: name
         flexGrow: 1
         sortable: true
+        isTreeColumn: true
+        treeLevelIndent: 24
       - name: _("Pool")
         prop: pool
         flexGrow: 1

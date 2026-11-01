@@ -386,6 +386,29 @@ else
     _fail "addPool — expected casesensitivity=sensitive, got '$POOL_CASE'"
 fi
 
+# Issue #119: zfs-mount-generator only builds .mount units for pools that have
+# /etc/zfs/zfs-list.cache/<pool>, and ZED only updates files that already
+# exist.  addPool must create it or the pool gets no boot mount ordering.
+if [ -s "/etc/zfs/zfs-list.cache/$POOL" ] && grep -q "^${POOL}	" "/etc/zfs/zfs-list.cache/$POOL"; then
+    _pass "addPool — zfs-list.cache/$POOL created with root dataset"
+else
+    _fail "addPool — zfs-list.cache/$POOL missing or lacks root dataset" \
+        "$(ls -la /etc/zfs/zfs-list.cache/ 2>&1 | head -5)"
+fi
+_POOL_MP=$(zfs get -H -o value mountpoint "$POOL" 2>/dev/null)
+_POOL_MNT_UNIT=$(systemd-escape -p --suffix=mount "$_POOL_MP" 2>/dev/null || echo "")
+if [ -n "$_POOL_MNT_UNIT" ] && [ -f "/run/systemd/generator/$_POOL_MNT_UNIT" ]; then
+    _pass "addPool — generated $_POOL_MNT_UNIT"
+else
+    _fail "addPool — no generated mount unit for $POOL ($_POOL_MNT_UNIT)" ""
+fi
+if [ "$(zfs get -H -o value mounted "$POOL" 2>/dev/null)" = "yes" ]; then
+    _pass "addPool — $POOL still mounted after unit generation"
+else
+    _fail "addPool — $POOL unmounted after daemon-reload" ""
+fi
+unset _POOL_MP _POOL_MNT_UNIT
+
 # Regression: pool member devices must not appear in FileSystemMgmt.getCandidates.
 # If they do, users can accidentally overwrite ZFS pool disks with a new filesystem.
 # Only check devices actually IN the pool — reserved devices (expansion, log, special)
@@ -3722,6 +3745,62 @@ zfs destroy -rf "$ZLC_DS" 2>/dev/null || true
 unset ZLC_DS ZLC_PASS ZLC_ENC_PARAMS ZLC_CACHE ZLC_INSTANCE ZLC_UNIT ZLC_SVC_STATE
 
 # ===========================================================================
+section "zfs-list.cache — prompt encryption roots and doDiscover backfill"
+# ===========================================================================
+# Every pool now has a cache file, so generated .mount units BindsTo= the
+# encryption root's zfs-load-key@ unit.  For keylocation=prompt the plugin
+# must (a) keep the unlocked dataset mounted across daemon-reload and
+# (b) mask the load-key unit so boot does not block on a passphrase prompt.
+
+ZP_DS="$POOL/zlc_prompt"
+ZP_PARAMS=$(python3 -c "
+import json
+print(json.dumps({
+    'path':           '$POOL',
+    'name':           'zlc_prompt',
+    'encryptiontype': 'aes-256-gcm',
+    'key':            'ZlcPromptPass321!',
+    'autounlock':     False,
+}))
+")
+if omv-rpc -u admin "Zfs" "enableEncryption" "$ZP_PARAMS" >/dev/null 2>&1; then
+    _pass "zlc_prompt — encrypted dataset created (keylocation=prompt)"
+else
+    _fail "zlc_prompt — encrypted dataset creation failed" ""
+fi
+ZP_UNIT="zfs-load-key@$(systemd-escape -p "$ZP_DS" 2>/dev/null).service"
+ZP_ENABLED=$(systemctl is-enabled "$ZP_UNIT" 2>/dev/null || true)
+if [[ "$ZP_ENABLED" == masked* ]]; then
+    _pass "zlc_prompt — $ZP_UNIT masked (no boot prompt)"
+else
+    _fail "zlc_prompt — $ZP_UNIT not masked" "is-enabled: $ZP_ENABLED"
+fi
+systemctl daemon-reload 2>/dev/null || true
+sleep 2
+if [ "$(zfs get -H -o value mounted "$ZP_DS" 2>/dev/null)" = "yes" ]; then
+    _pass "zlc_prompt — still mounted after daemon-reload (BindsTo satisfied)"
+else
+    _fail "zlc_prompt — unmounted by systemd after daemon-reload" \
+        "load-key unit: $(systemctl is-active "$ZP_UNIT" 2>/dev/null)"
+fi
+assert_rpc "deleteObject — zlc_prompt" "Zfs" "deleteObject" \
+    "{\"name\":\"$ZP_DS\",\"mp\":\"/$ZP_DS\",\"type\":\"Filesystem\"}"
+zfs destroy -rf "$ZP_DS" 2>/dev/null || true
+
+# doDiscover backfills a missing cache file (existing installs, issue #119).
+cp -p "/etc/zfs/zfs-list.cache/$POOL" "/tmp/zlc_backup_$$" 2>/dev/null || true
+rm -f "/etc/zfs/zfs-list.cache/$POOL"
+assert_rpc "doDiscover — backfill" "Zfs" "doDiscover" '{"addMissing":false,"deleteStale":false}'
+if [ -s "/etc/zfs/zfs-list.cache/$POOL" ] && grep -q "^${POOL}	" "/etc/zfs/zfs-list.cache/$POOL"; then
+    _pass "doDiscover — recreated zfs-list.cache/$POOL"
+else
+    _fail "doDiscover — zfs-list.cache/$POOL not recreated" ""
+    cp -p "/tmp/zlc_backup_$$" "/etc/zfs/zfs-list.cache/$POOL" 2>/dev/null || true
+fi
+rm -f "/tmp/zlc_backup_$$"
+unset ZP_DS ZP_PARAMS ZP_UNIT ZP_ENABLED
+
+# ===========================================================================
 section "Error injection — zinject checksum and I/O errors"
 # ===========================================================================
 # Uses 'zinject' to drive non-zero error counters into the pool and verifies
@@ -3930,6 +4009,12 @@ else
     _fail "Pool still visible after export" ""
 fi
 
+if [ ! -e "/etc/zfs/zfs-list.cache/$POOL" ]; then
+    _pass "exportPool — zfs-list.cache/$POOL removed"
+else
+    _fail "exportPool — zfs-list.cache/$POOL still present" ""
+fi
+
 assert_rpc "importPool — by name" "Zfs" "importPool" \
     "{\"poolname\":\"$POOL\",\"all\":false,\"force\":false}"
 
@@ -3938,6 +4023,12 @@ if echo "$LIST_OUT" | grep -q "\"$POOL\""; then
     _pass "Pool visible in listPools after import"
 else
     _fail "Pool not visible after import" ""
+fi
+
+if [ -s "/etc/zfs/zfs-list.cache/$POOL" ] && grep -q "^${POOL}	" "/etc/zfs/zfs-list.cache/$POOL"; then
+    _pass "importPool — zfs-list.cache/$POOL recreated"
+else
+    _fail "importPool — zfs-list.cache/$POOL missing after import" ""
 fi
 
 # ===========================================================================

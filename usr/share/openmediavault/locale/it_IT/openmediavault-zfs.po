@@ -3,6 +3,8 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
+# Giovanni Scafora <scafora.giovanni@gmail.com>, 2026
+# Marco, 2015
 # Marco, 2015
 # d5316b6b4d283a9cbe4ea704ae8abe02_b972f24 <bd82b27c045fcb3aa6bd04640e5224c5_36908>, 2015-2016
 msgid ""
@@ -11,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: d5316b6b4d283a9cbe4ea704ae8abe02_b972f24 <bd82b27c045fcb3aa6bd04640e5224c5_36908>, 2015-2016\n"
+"Last-Translator: Giovanni Scafora <scafora.giovanni@gmail.com>, 2026\n"
 "Language-Team: Italian (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,61 +24,61 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "'Snapshot' conserva gli N più recenti; le unità di tempo eliminano gli snapshot più vecchi di N giorni/settimane/mesi/anni."
 
 msgid "A different name must be specified."
-msgstr ""
+msgstr "È necessario specificare un nome diverso."
 
 msgid "ARC Stats"
-msgstr ""
+msgstr "Statistiche ARC"
 
 msgid "Add"
-msgstr ""
+msgstr "Aggiungi"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "Aggiungi dispositivo speciale"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "Aggiungi cache / log / di riserva / speciale"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "Aggiungi file system crittografato"
 
 msgid "Add filesystem"
-msgstr ""
+msgstr "Aggiungi file system"
 
 msgid "Add new"
-msgstr ""
+msgstr "Aggiungi nuovo"
 
 msgid "Add new + delete missing"
-msgstr ""
+msgstr "Aggiungi nuovo + elimina mancanti"
 
 msgid "Add pool"
-msgstr ""
+msgstr "Aggiungi pool"
 
 msgid "Add snapshot"
-msgstr ""
+msgstr "Aggiungi snapshot"
 
 msgid "Add volume"
-msgstr ""
+msgstr "Aggiungi volume"
 
 msgid "Adding filesystem ..."
-msgstr ""
+msgstr "Aggiunta del file system in corso..."
 
 msgid "Adding missing ZFS mntent entries ..."
-msgstr ""
+msgstr "Aggiunta delle voci mntent ZFS mancanti in corso..."
 
 msgid "Adding snapshot ..."
-msgstr ""
+msgstr "Aggiunta dello snapshot in corso..."
 
 msgid "Adding volume ..."
-msgstr ""
+msgstr "Aggiunta del volume in corso..."
 
 msgid ""
 "Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
 " per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
 "Apply/reboot."
-msgstr ""
+msgstr "Ulteriori righe 'options zfs ...' aggiunte in fondo a /etc/modprobe.d/zfs.conf, una per riga, ad es. 'options zfs l2arc_mfuonly=1'. Applicate al successivo comando Applica/riavvio."
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -84,111 +86,111 @@ msgid ""
 "replication. Not compatible with 'Recursive' (ZFS does not support recursive"
 " sends from a bookmark) and not needed when 'Use existing snapshots' is "
 "enabled."
-msgstr ""
+msgstr "Dopo ogni invio riuscito, crea un bookmark ZFS come base incrementale. Consente di ridurre gli snapshot di origine a 1 mantenendo la replica incrementale. Non compatibile con 'Ricorsivo' (ZFS non supporta invii ricorsivi da un bookmark) e non necessario quando è abilitata l'opzione 'Usa snapshot esistenti'."
 
 msgid "Algorithm"
-msgstr ""
+msgstr "Algoritmo"
 
 msgid "All snapshots deleted."
-msgstr ""
+msgstr "Tutti gli snapshot sono stati eliminati."
 
 msgid "Alloc"
-msgstr ""
+msgstr "Allocato"
 
 msgid ""
 "Allow self-signed or untrusted certificates. Use only on trusted local "
 "networks."
-msgstr ""
+msgstr "Consenti certificati autofirmati o non attendibili. Da usare solo su reti locali attendibili."
 
 msgid "Anchor (existing device or RAIDZ vdev)"
-msgstr ""
+msgstr "Ancoraggio (dispositivo esistente o vdev RAIDZ)"
 
 msgid "April"
-msgstr ""
+msgstr "Aprile"
 
 msgid "Are you sure you want to add this device to the pool?"
-msgstr ""
+msgstr "Sei sicuro di voler aggiungere questo dispositivo al pool?"
 
 msgid ""
 "Are you sure you want to cancel the vdev removal? Data evacuation will stop "
 "and the vdev will remain in the pool."
-msgstr ""
+msgstr "Sei sicuro di voler annullare la rimozione del vdev? L'evacuazione dei dati si fermerà e il vdev rimarrà nel pool."
 
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
 "and all child datasets?"
-msgstr ""
+msgstr "Sei sicuro di voler eliminare '{{ _selected[0].path }}' da questo dataset e da tutti i dataset figli?"
 
 msgid ""
 "Are you sure you want to delete ALL snapshots on the parent dataset '{{ "
 "_selected[0].parent }}'?"
-msgstr ""
+msgstr "Sei sicuro di voler eliminare TUTTI gli snapshot sul dataset genitore '{{ _selected[0].parent }}'?"
 
 msgid "Are you sure you want to delete the selected snapshot(s)?"
-msgstr ""
+msgstr "Sei sicuro di voler eliminare gli snapshot selezionati?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all earlier snapshots on "
 "the same dataset?"
-msgstr ""
+msgstr "Sei sicuro di voler eliminare questo snapshot e tutti quelli precedenti sullo stesso dataset?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all later snapshots on the"
 " same dataset?"
-msgstr ""
+msgstr "Sei sicuro di voler eliminare questo snapshot e tutti quelli successivi sullo stesso dataset?"
 
 msgid "Are you sure you want to delete?"
-msgstr ""
+msgstr "Sei sicuro di voler procedere con l'eliminazione?"
 
 msgid "Are you sure you want to detach this device from the pool?"
-msgstr ""
+msgstr "Sei sicuro di voler scollegare questo dispositivo dal pool?"
 
 msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
 "configuration will be removed and you will need to enter the passphrase "
 "manually after each reboot."
-msgstr ""
+msgstr "Sei sicuro di voler disabilitare lo sblocco automatico? La chiave salvata o la configurazione dell'URL remoto verranno rimosse e sarà necessario inserire la passphrase manualmente dopo ogni riavvio."
 
 msgid "Are you sure you want to export?"
-msgstr ""
+msgstr "Sei sicuro di voler esportare?"
 
 msgid ""
 "Are you sure you want to promote this dataset? This detaches the clone from "
 "its origin snapshot dependency."
-msgstr ""
+msgstr "Sei sicuro di voler promuovere questo dataset? Questo scollega il clone dalla sua dipendenza dallo snapshot di origine."
 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
 "immediately."
-msgstr ""
+msgstr "Sei sicuro di voler sostituire questo dispositivo? Il resilvering inizierà immediatamente."
 
 msgid "Are you sure you want to rollback to this snapshot?"
-msgstr ""
+msgstr "Sei sicuro di voler effettuare il rollback a questo snapshot?"
 
 msgid ""
 "Are you sure you want to start a TRIM operation on this pool? This is only "
 "meaningful for SSD-backed pools."
-msgstr ""
+msgstr "Sei sicuro di voler avviare un'operazione TRIM su questo pool? Ha senso solo per i pool basati su SSD."
 
 msgid "Are you sure you want to start a scrub?"
-msgstr ""
+msgstr "Sei sicuro di voler avviare un controllo?"
 
 msgid "Are you sure you want to stop the scrub?"
-msgstr ""
+msgstr "Sei sicuro di voler arrestare il controllo?"
 
 msgid "Are you sure you want to take this device offline?"
-msgstr ""
+msgstr "Sei sicuro di voler mettere offline questo dispositivo?"
 
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
 "inaccessible until it is unlocked again."
-msgstr ""
+msgstr "Sei sicuro di voler scaricare la chiave di crittografia? Il dataset diventerà inaccessibile finché non verrà sbloccato di nuovo."
 
 msgid ""
 "Are you sure you want to upgrade this pool? This enables new feature flags "
 "and cannot be undone. The pool will no longer be accessible by older ZFS "
 "versions."
-msgstr ""
+msgstr "Sei sicuro di voler aggiornare questo pool? Questo abilita nuovi flag di funzionalità e non può essere annullato. Il pool non sarà più accessibile da versioni di ZFS più vecchie."
 
 msgid ""
 "Are you sure? For a mirror or stripe pool this attaches the new device to "
@@ -196,44 +198,44 @@ msgid ""
 "device into a 2-way mirror (irreversible without full pool recreation). For "
 "a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, "
 "permanently increasing its width."
-msgstr ""
+msgstr "Sei sicuro? Per un pool mirror o stripe, questo collega il nuovo dispositivo al dispositivo esistente selezionato, estendendo il mirror o convertendo un dispositivo stripe in un mirror a 2 vie (irreversibile senza la ricreazione completa del pool). Per un pool RAIDZ, questo espande il vdev RAIDZ selezionato aggiungendo un dispositivo, aumentandone permanentemente la larghezza."
 
 msgid "Ashift value"
 msgstr "Valore Ashift"
 
 msgid "At least five devices are required."
-msgstr ""
+msgstr "Sono richiesti almeno cinque dispositivi."
 
 msgid "At least four devices are required."
-msgstr ""
+msgstr "Sono richiesti almeno quattro dispositivi."
 
 msgid "At least three devices are required."
-msgstr ""
+msgstr "Sono richiesti almeno tre dispositivi."
 
 msgid "At least two devices are required."
-msgstr ""
+msgstr "Sono richiesti almeno due dispositivi."
 
 msgid "At reboot"
-msgstr ""
+msgstr "Al riavvio"
 
 msgid "Attach device"
-msgstr ""
+msgstr "Collega dispositivo"
 
 msgid "August"
-msgstr ""
+msgstr "Agosto"
 
 msgid "Auto-unlock"
-msgstr ""
+msgstr "Sblocco automatico"
 
 msgid "Auto-unlock at boot"
-msgstr ""
+msgstr "Sblocco automatico all'avvio"
 
 msgid "Auto-unlock disabled."
-msgstr ""
+msgstr "Sblocco automatico disabilitato."
 
 msgid ""
 "Auto-unlock enabled. The key will be loaded from the local keyfile at boot."
-msgstr ""
+msgstr "Sblocco automatico abilitato. La chiave verrà caricata dal file chiave locale all'avvio."
 
 msgid "Available"
 msgstr "Disponibile"
@@ -242,261 +244,261 @@ msgid "Basic"
 msgstr "Di base"
 
 msgid "Bulk Delete"
-msgstr ""
+msgstr "Eliminazione massiva"
 
 msgid "By ID"
-msgstr ""
+msgstr "Per ID"
 
 msgid "By Path"
 msgstr "Per percorso"
 
 msgid "Cache (L2ARC)"
-msgstr ""
+msgstr "Cache (L2ARC)"
 
 msgid "Cancel vdev removal"
-msgstr ""
+msgstr "Annulla rimozione vdev"
 
 msgid "Cancelling vdev removal ..."
-msgstr ""
+msgstr "Annullamento della rimozione del vdev in corso..."
 
 msgid "Cap"
-msgstr ""
+msgstr "Capacità"
 
 msgid "Case sensitivity"
-msgstr ""
+msgstr "Sensibilità alle maiuscole/minuscole"
 
 msgid "Certain date"
-msgstr ""
+msgstr "Data specifica"
 
 msgid "Change encryption key"
-msgstr ""
+msgstr "Modifica chiave di crittografia"
 
 msgid "Change key"
-msgstr ""
+msgstr "Modifica chiave"
 
 msgid "Changing encryption key ..."
-msgstr ""
+msgstr "Modifica della chiave di crittografia in corso..."
 
 msgid "Clear errors"
-msgstr ""
+msgstr "Cancella errori"
 
 msgid "Clearing pool errors ..."
-msgstr ""
+msgstr "Cancellazione degli errori del pool in corso..."
 
 msgid "Clone"
-msgstr ""
+msgstr "Clona"
 
 msgid "Clone dataset"
-msgstr ""
+msgstr "Clona dataset"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Nome del clone"
 
 msgid "Clone path (within pool)"
-msgstr ""
+msgstr "Percorso del clone (all'interno del pool)"
 
 msgid "Clone snapshot"
-msgstr ""
+msgstr "Clona snapshot"
 
 msgid "Cloning dataset ..."
-msgstr ""
+msgstr "Clonazione del dataset in corso..."
 
 msgid "Cloning snapshot ..."
-msgstr ""
+msgstr "Clonazione dello snapshot in corso..."
 
 msgid "Comment"
-msgstr ""
+msgstr "Commento"
 
 msgid "Compress ratio"
-msgstr ""
+msgstr "Rapporto di compressione"
 
 msgid "Compression"
-msgstr ""
+msgstr "Compressione"
 
 msgid "Compression type"
-msgstr ""
+msgstr "Tipo di compressione"
 
 msgid "Confirm new passphrase / key"
-msgstr ""
+msgstr "Conferma nuova passphrase / chiave"
 
 msgid "Confirm passphrase"
-msgstr ""
+msgstr "Conferma passphrase"
 
 msgid "Confirm passphrase / key"
-msgstr ""
+msgstr "Conferma passphrase / chiave"
 
 msgid "Create"
-msgstr ""
+msgstr "Crea"
 
 msgid "Created pool."
-msgstr ""
+msgstr "Pool creato."
 
 msgid "Created replication job."
-msgstr ""
+msgstr "Lavoro di replica creato."
 
 msgid "Created scrub job."
-msgstr ""
+msgstr "Lavoro di controllo creato."
 
 msgid "Created snapshot job."
-msgstr ""
+msgstr "Lavoro di snapshot creato."
 
 msgid "Creating encrypted filesystem ..."
-msgstr ""
+msgstr "Creazione del file system crittografato in corso..."
 
 msgid "Creating recursive snapshot ..."
-msgstr ""
+msgstr "Creazione dello snapshot ricorsivo in corso..."
 
 msgid "Creating snapshot ..."
-msgstr ""
+msgstr "Creazione dello snapshot in corso..."
 
 msgid "Current passphrase / key"
-msgstr ""
+msgstr "Passphrase / chiave attuale"
 
 msgid "DEGRADED"
-msgstr ""
+msgstr "DEGRADATO"
 
 msgid "Daily"
-msgstr ""
+msgstr "Giornaliero"
 
 msgid "Dataset"
-msgstr ""
+msgstr "Dataset"
 
 msgid "Dataset cloned."
-msgstr ""
+msgstr "Dataset clonato."
 
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
 "the dataset path on the remote host."
-msgstr ""
+msgstr "Percorso del dataset sulla destinazione (es. backup/replica). Per il remoto, questo è il percorso del dataset sull'host remoto."
 
 msgid "Dataset promoted."
-msgstr ""
+msgstr "Dataset promosso."
 
 msgid "Dataset renamed."
-msgstr ""
+msgstr "Dataset rinominato."
 
 msgid "Datasets"
-msgstr ""
+msgstr "Dataset"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Data/Ora"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Giorno del mese"
 
 msgid "Day of week"
-msgstr ""
+msgstr "Giorno della settimana"
 
 msgid "December"
-msgstr ""
+msgstr "Dicembre"
 
 msgid "Decryption passphrase (optional)"
-msgstr ""
+msgstr "Passphrase di decrittografia (facoltativa)"
 
 msgid "Dedup"
-msgstr ""
+msgstr "Deduplica"
 
 msgid "Default (128K)"
-msgstr ""
+msgstr "Predefinito (128K)"
 
 msgid "Delete"
 msgstr "Elimina"
 
 msgid "Delete all snapshots on parent dataset"
-msgstr ""
+msgstr "Elimina tutti gli snapshot sul dataset genitore"
 
 msgid "Delete missing"
-msgstr ""
+msgstr "Elimina mancanti"
 
 msgid "Delete recursively"
-msgstr ""
+msgstr "Elimina ricorsivamente"
 
 msgid "Delete this and all earlier snapshots"
-msgstr ""
+msgstr "Elimina questo e tutti gli snapshot precedenti"
 
 msgid "Delete this and all later snapshots"
-msgstr ""
+msgstr "Elimina questo e tutti gli snapshot successivi"
 
 msgid "Deleting all snapshots ..."
-msgstr ""
+msgstr "Eliminazione di tutti gli snapshot in corso..."
 
 msgid "Deleting object ..."
-msgstr ""
+msgstr "Eliminazione dell'oggetto in corso..."
 
 msgid "Deleting pool ..."
-msgstr ""
+msgstr "Eliminazione del pool in corso..."
 
 msgid "Deleting snapshot ..."
-msgstr ""
+msgstr "Eliminazione dello snapshot in corso..."
 
 msgid "Deleting snapshot recursively ..."
-msgstr ""
+msgstr "Eliminazione ricorsiva dello snapshot in corso..."
 
 msgid "Deleting snapshots ..."
-msgstr ""
+msgstr "Eliminazione degli snapshot in corso..."
 
 msgid "Destination"
-msgstr ""
+msgstr "Destinazione"
 
 msgid "Destination dataset"
-msgstr ""
+msgstr "Dataset di destinazione"
 
 msgid "Detach device"
-msgstr ""
+msgstr "Scollega dispositivo"
 
 msgid "Details"
 msgstr "Dettagli"
 
 msgid "Device"
-msgstr ""
+msgstr "Dispositivo"
 
 msgid "Device Attach"
-msgstr ""
+msgstr "Collegamento dispositivo"
 
 msgid "Device Detach"
-msgstr ""
+msgstr "Disconnessione dispositivo"
 
 msgid "Device Offline"
-msgstr ""
+msgstr "Dispositivo offline"
 
 msgid "Device Online"
-msgstr ""
+msgstr "Dispositivo online"
 
 msgid "Device Replace"
-msgstr ""
+msgstr "Sostituzione dispositivo"
 
 msgid "Device alias"
 msgstr "Nome dispositivo"
 
 msgid "Device to detach"
-msgstr ""
+msgstr "Dispositivo da scollegare"
 
 msgid "Device to replace"
-msgstr ""
+msgstr "Dispositivo da sostituire"
 
 msgid "Device type"
-msgstr ""
+msgstr "Tipo di dispositivo"
 
 msgid "Devices"
 msgstr "Dispositivi"
 
 msgid "Diff"
-msgstr ""
+msgstr "Differenze"
 
 msgid "Disable auto-unlock at boot"
-msgstr ""
+msgstr "Disabilita sblocco automatico all'avvio"
 
 msgid "Disabling auto-unlock ..."
-msgstr ""
+msgstr "Disabilitazione dello sblocco automatico in corso..."
 
 msgid "Discover"
-msgstr ""
+msgstr "Individua"
 
 msgid ""
 "Displays the health of all ZFS pools with traffic-light status. Green = "
 "healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click "
 "a pool to view details."
-msgstr ""
+msgstr "Mostra lo stato di salute di tutti i pool ZFS con indicatori semaforici. Verde = integro, arancione = >80% pieno, rosso = degradato/guasto/errori/>90% pieno. Fai clic su un pool per visualizzare i dettagli."
 
 msgid ""
 "Do not create a new snapshot. Instead, replicate the most recent existing "
@@ -504,124 +506,124 @@ msgid ""
 "manages snapshots for this dataset — this is the recommended approach when "
 "replicating to multiple destinations or at different frequencies, as it "
 "avoids conflicts between replication chains."
-msgstr ""
+msgstr "Non creare un nuovo snapshot. Replica invece lo snapshot esistente più recente che corrisponde al prefisso. Usare questa opzione quando un lavoro di snapshot separato gestisce già gli snapshot per questo dataset; questo è l'approccio consigliato quando si esegue la replica verso più destinazioni o a frequenze diverse, poiché evita conflitti tra le catene di replica."
 
 msgid "Do you really want to expand the ZFS pool?"
-msgstr ""
+msgstr "Vuoi davvero espandere il pool ZFS?"
 
 msgid "Docs"
-msgstr ""
+msgstr "Documentazione"
 
 msgid "Edit"
-msgstr ""
+msgstr "Modifica"
 
 msgid "Edit property"
-msgstr ""
+msgstr "Modifica proprietà"
 
 msgid "Enable auto-unlock"
-msgstr ""
+msgstr "Abilita sblocco automatico"
 
 msgid "Enable auto-unlock at boot (local file)"
-msgstr ""
+msgstr "Abilita sblocco automatico all'avvio (file locale)"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr ""
+msgstr "Abilita sblocco automatico all'avvio (HTTPS remoto)"
 
 msgid "Enable auto-unlock — local file"
-msgstr ""
+msgstr "Abilita sblocco automatico — file locale"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr ""
+msgstr "Abilita sblocco automatico — HTTPS remoto"
 
 msgid "Enabled"
-msgstr ""
+msgstr "Abilitato"
 
 msgid "Enabling auto-unlock ..."
-msgstr ""
+msgstr "Abilitazione dello sblocco automatico in corso..."
 
 msgid "Encrypted filesystem created."
-msgstr ""
+msgstr "File system crittografato creato."
 
 msgid "Encryption"
-msgstr ""
+msgstr "Crittografia"
 
 msgid "Encryption key changed."
-msgstr ""
+msgstr "Chiave di crittografia modificata."
 
 msgid "Encryption key loaded."
-msgstr ""
+msgstr "Chiave di crittografia caricata."
 
 msgid "Encryption key unloaded."
-msgstr ""
+msgstr "Chiave di crittografia scaricata."
 
 msgid "Error"
-msgstr ""
+msgstr "Errore"
 
 msgid "Event"
-msgstr ""
+msgstr "Evento"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Ogni N giorno del mese"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Ogni N ora"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Ogni N minuto"
 
 msgid "Expand"
 msgstr "Espandi"
 
 msgid "Expand pool"
-msgstr ""
+msgstr "Espandi pool"
 
 msgid "Expanded pool."
-msgstr ""
+msgstr "Pool espanso."
 
 msgid "Exporting pool ..."
-msgstr ""
+msgstr "Esportazione del pool in corso..."
 
 msgid "Extra module options"
-msgstr ""
+msgstr "Opzioni modulo aggiuntive"
 
 msgid "FAULTED"
-msgstr ""
+msgstr "GUASTO"
 
 msgid "February"
-msgstr ""
+msgstr "Febbraio"
 
 msgid ""
 "Filename case sensitivity for the pool's root dataset. Cannot be changed "
 "after creation."
-msgstr ""
+msgstr "Sensibilità alle maiuscole/minuscole per il dataset radice del pool. Non può essere modificata dopo la creazione."
 
 msgid "Filename case sensitivity. Cannot be changed after creation."
-msgstr ""
+msgstr "Sensibilità alle maiuscole/minuscole dei nomi file. Non può essere modificata dopo la creazione."
 
 msgid "Filesystem added."
-msgstr ""
+msgstr "File system aggiunto."
 
 msgid "Fix packages"
-msgstr ""
+msgstr "Correggi pacchetti"
 
 msgid "Fixing packages ..."
-msgstr ""
+msgstr "Correzione dei pacchetti in corso..."
 
 msgid "Force creation"
 msgstr "Forza creazione"
 
 msgid "Force import"
-msgstr ""
+msgstr "Forza importazione"
 
 msgid ""
 "Force import even if the pool appears to be in use or was not cleanly "
 "exported."
-msgstr ""
+msgstr "Forza l'importazione anche se il pool sembra essere in uso o non è stato esportato correttamente."
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
 "extreme caution!"
-msgstr ""
+msgstr "Forza la creazione del vdev anche se vengono segnalati errori. Usare con estrema cautela!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
@@ -629,223 +631,223 @@ msgid ""
 msgstr "Forza la creazione del pool anche se vengono riportati errori. Usare con estrema cautela!"
 
 msgid "Frag"
-msgstr ""
+msgstr "Frammentazione"
 
 msgid "Free"
-msgstr ""
+msgstr "Libero"
 
 msgid "Friday"
-msgstr ""
+msgstr "Venerdì"
 
 msgid "Has children"
-msgstr ""
+msgstr "Ha figli"
 
 msgid "Has shares"
-msgstr ""
+msgstr "Ha condivisioni"
 
 msgid "Health"
-msgstr ""
+msgstr "Stato di salute"
 
 msgid "History"
-msgstr ""
+msgstr "Cronologia"
 
 msgid "Hits"
-msgstr ""
+msgstr "Riscontri"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr ""
+msgstr "Nome host o indirizzo IP dell'host ZFS remoto."
 
 msgid "Hot spare"
-msgstr ""
+msgstr "Disco di riserva a caldo"
 
 msgid "Hour"
-msgstr ""
+msgstr "Ora"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Orario"
 
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
 "network is slow to come up at boot."
-msgstr ""
+msgstr "Tempo di attesa per l'accesso alla rete prima di rinunciare. Aumentare se la rete è lenta ad avviarsi all'avvio del sistema."
 
 msgid ""
 "If set, the remote server must serve an OpenSSL-encrypted key. Generate the "
 "encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc "
 "-pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
-msgstr ""
+msgstr "Se impostato, il server remoto deve fornire una chiave crittografata con OpenSSL. Genera il valore crittografato eseguendo -- echo -n 'TUA_CHIAVE' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:PASSPHRASE_DI_DECRITTOGRAFIA"
 
 msgid "Import"
-msgstr ""
+msgstr "Importa"
 
 msgid "Import / Export"
-msgstr ""
+msgstr "Importa / Esporta"
 
 msgid "Import all available pools"
-msgstr ""
+msgstr "Importa tutti i pool disponibili"
 
 msgid "Import pool(s)"
-msgstr ""
+msgstr "Importa pool"
 
 msgid "Importing pool ..."
-msgstr ""
+msgstr "Importazione del pool in corso..."
 
 msgid "Inherit from parent"
-msgstr ""
+msgstr "Eredita dal genitore"
 
 msgid "Insensitive"
-msgstr ""
+msgstr "Non sensibile"
 
 msgid "Is encryption root"
-msgstr ""
+msgstr "È la radice di crittografia"
 
 msgid "January"
-msgstr ""
+msgstr "Gennaio"
 
 msgid "Job"
-msgstr ""
+msgstr "Lavoro"
 
 msgid "July"
-msgstr ""
+msgstr "Luglio"
 
 msgid "June"
-msgstr ""
+msgstr "Giugno"
 
 msgid "Keep"
-msgstr ""
+msgstr "Conserva"
 
 msgid "Keep snapshots on source"
-msgstr ""
+msgstr "Conserva gli snapshot sull'origine"
 
 msgid "Key URL"
-msgstr ""
+msgstr "URL della chiave"
 
 msgid "Key status"
-msgstr ""
+msgstr "Stato della chiave"
 
 msgid "Last scrub"
-msgstr ""
+msgstr "Ultimo controllo"
 
 msgid "Level"
-msgstr ""
+msgstr "Livello"
 
 msgid "Load encryption key"
-msgstr ""
+msgstr "Carica chiave di crittografia"
 
 msgid "Load key"
-msgstr ""
+msgstr "Carica chiave"
 
 msgid "Load key (unlock)"
-msgstr ""
+msgstr "Carica chiave (sblocca)"
 
 msgid "Loading encryption key ..."
-msgstr ""
+msgstr "Caricamento della chiave di crittografia in corso..."
 
 msgid "Local"
-msgstr ""
+msgstr "Locale"
 
 msgid "Log (ZIL/SLOG)"
-msgstr ""
+msgstr "Log (ZIL/SLOG)"
 
 msgid "March"
-msgstr ""
+msgstr "Marzo"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "Dimensione massima ARC (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "Dimensione massima della cache ARC di ZFS in MiB. Impostare a 0 per nessun limite (predefinito di ZFS). Un valore tipico è il 50% della RAM installata (es. 16384 per 16 GiB)."
 
 msgid "May"
-msgstr ""
+msgstr "Maggio"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
-msgstr ""
+msgstr "Può includere sotto-dataset, ad es. secure/clone1"
 
 msgid "Message"
-msgstr ""
+msgstr "Messaggio"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "Dimensione minima ARC (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "Dimensione minima a cui l'ARC si ridurrà in caso di pressione della memoria, in MiB. Impostare a 0 per utilizzare il valore predefinito di ZFS."
 
 msgid "Minute"
-msgstr ""
+msgstr "Minuto"
 
 msgid "Mirror"
 msgstr "Mirror"
 
 msgid "Misses"
-msgstr ""
+msgstr "Mancati riscontri"
 
 msgid "Missing ZFS mntent entries added."
-msgstr ""
+msgstr "Voci mntent ZFS mancanti aggiunte."
 
 msgid "Mixed"
-msgstr ""
+msgstr "Misto"
 
 msgid "Modified"
 msgstr "Modificato"
 
 msgid "Monday"
-msgstr ""
+msgstr "Lunedì"
 
 msgid "Month"
-msgstr ""
+msgstr "Mese"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Mensile"
 
 msgid "Mounted"
-msgstr ""
+msgstr "Montato"
 
 msgid "Mountpoint"
-msgstr "Mountpoint"
+msgstr "Punto di montaggio"
 
 msgid "Name"
 msgstr "Nome"
 
 msgid "Name of the new clone, created in the same parent as the source."
-msgstr ""
+msgstr "Nome del nuovo clone, creato nello stesso genitore della sorgente."
 
 msgid "Name of the specific pool to import."
-msgstr ""
+msgstr "Nome dello specifico pool da importare."
 
 msgid "Network timeout (seconds)"
-msgstr ""
+msgstr "Timeout di rete (secondi)"
 
 msgid "New Property"
-msgstr ""
+msgstr "Nuova proprietà"
 
 msgid "New device to attach"
-msgstr ""
+msgstr "Nuovo dispositivo da collegare"
 
 msgid "New name"
-msgstr ""
+msgstr "Nuovo nome"
 
 msgid "New passphrase / key"
-msgstr ""
+msgstr "Nuova passphrase / chiave"
 
 msgid "New passphrases do not match."
-msgstr ""
+msgstr "Le nuove passphrase non corrispondono."
 
 msgid "New property"
-msgstr ""
+msgstr "Nuova proprietà"
 
 msgid "No ZFS pools found."
-msgstr ""
+msgstr "Nessun pool ZFS trovato."
 
 msgid "None"
 msgstr "Nessuno"
 
 msgid "November"
-msgstr ""
+msgstr "Novembre"
 
 msgid ""
 "Number of replication snapshots to keep on the source after each successful "
@@ -853,121 +855,121 @@ msgid ""
 "replication jobs share the same dataset and prefix — prefer 0 and manage "
 "retention with a dedicated snapshot job instead. Ignored when 'Use existing "
 "snapshots' is enabled."
-msgstr ""
+msgstr "Numero di snapshot di replica da conservare sull'origine dopo ogni invio riuscito. 0 = conserva tutti. La pulizia dell'origine può interrompere le catene incrementali se più lavori di replica condividono lo stesso dataset e prefisso — preferire 0 e gestire la conservazione con un lavoro di snapshot dedicato. Ignorato quando l'opzione 'Usa snapshot esistenti' è abilitata."
 
 msgid "OFFLINE"
-msgstr ""
+msgstr "OFFLINE"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "ONLINE"
-msgstr ""
+msgstr "ONLINE"
 
 msgid "Object deleted."
-msgstr ""
+msgstr "Oggetto eliminato."
 
 msgid "October"
-msgstr ""
+msgstr "Ottobre"
 
 msgid "Offline device"
-msgstr ""
+msgstr "Metti dispositivo offline"
 
 msgid "Online device"
-msgstr ""
+msgstr "Metti dispositivo online"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
-msgstr ""
+msgstr "Sono consentiti solo caratteri alfanumerici, trattini e trattini bassi."
 
 msgid "Only send an email if the job exits with an error."
-msgstr ""
+msgstr "Invia un'email solo se il lavoro termina con un errore."
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
-msgstr ""
+msgstr "Punto di montaggio opzionale per il pool. L'impostazione predefinita usa il nome del pool."
 
 msgid "Optional mountpoint. Default is to use the dataset path."
-msgstr ""
+msgstr "Punto di montaggio opzionale. L'impostazione predefinita usa il percorso del dataset."
 
 msgid "Origin"
-msgstr ""
+msgstr "Origine"
 
 msgid "Packages fixed."
-msgstr ""
+msgstr "Pacchetti corretti."
 
 msgid "Parent"
-msgstr ""
+msgstr "Genitore"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Passphrase"
 
 msgid "Passphrase / key"
-msgstr ""
+msgstr "Passphrase / chiave"
 
 msgid "Passphrases do not match."
-msgstr ""
+msgstr "Le passphrase non corrispondono."
 
 msgid "Path"
-msgstr ""
+msgstr "Percorso"
 
 msgid "Pause scrub"
-msgstr ""
+msgstr "Metti in pausa il controllo"
 
 msgid "Pausing scrub ..."
-msgstr ""
+msgstr "Messa in pausa del controllo in corso..."
 
 msgid "Pool"
-msgstr ""
+msgstr "Pool"
 
 msgid "Pool deleted."
-msgstr ""
+msgstr "Pool eliminato."
 
 msgid "Pool errors cleared."
-msgstr ""
+msgstr "Errori del pool cancellati."
 
 msgid "Pool exported."
-msgstr ""
+msgstr "Pool esportato."
 
 msgid "Pool imported."
-msgstr ""
+msgstr "Pool importato."
 
 msgid "Pool name"
-msgstr ""
+msgstr "Nome del pool"
 
 msgid "Pool root"
-msgstr ""
+msgstr "Radice del pool"
 
 msgid "Pool type"
-msgstr "Tipo pool"
+msgstr "Tipo di pool"
 
 msgid "Pool upgraded."
-msgstr ""
+msgstr "Pool aggiornato."
 
 msgid "Pools"
-msgstr ""
+msgstr "Pool"
 
 msgid "Prefix"
 msgstr "Prefisso"
 
 msgid "Promote"
-msgstr ""
+msgstr "Promuovi"
 
 msgid "Promoting dataset ..."
-msgstr ""
+msgstr "Promozione del dataset in corso..."
 
 msgid "Properties"
-msgstr ""
+msgstr "Proprietà"
 
 msgid "Properties saved."
-msgstr ""
+msgstr "Proprietà salvate."
 
 msgid "Property"
 msgstr "Proprietà"
 
 msgid "Quick recursive snapshot"
-msgstr ""
+msgstr "Snapshot ricorsivo rapido"
 
 msgid "Quick snapshot"
-msgstr ""
+msgstr "Snapshot rapido"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -979,261 +981,261 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "REMOVED"
-msgstr ""
+msgstr "RIMOSSO"
 
 msgid "Raw send"
-msgstr ""
+msgstr "Invio raw"
 
 msgid "Record size"
-msgstr ""
+msgstr "Dimensione record"
 
 msgid "Recursive"
-msgstr ""
+msgstr "Ricorsivo"
 
 msgid "Recursive snapshot created."
-msgstr ""
+msgstr "Snapshot ricorsivo creato."
 
 msgid "Refer"
-msgstr ""
+msgstr "Referenziato"
 
 msgid "Referenced"
-msgstr ""
+msgstr "Referenziato"
 
 msgid "Remote"
-msgstr ""
+msgstr "Remoto"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr ""
+msgstr "Sblocco automatico remoto abilitato. La chiave verrà recuperata all'avvio."
 
 msgid "Remote host"
-msgstr ""
+msgstr "Host remoto"
 
 msgid "Removal state"
-msgstr ""
+msgstr "Stato di rimozione"
 
 msgid "Removal status"
-msgstr ""
+msgstr "Stato della rimozione"
 
 msgid "Remove Vdev"
-msgstr ""
+msgstr "Rimuovi Vdev"
 
 msgid "Remove vdev"
-msgstr ""
+msgstr "Rimuovi vdev"
 
 msgid "Removing stale ZFS mntent entries ..."
-msgstr ""
+msgstr "Rimozione delle voci mntent ZFS obsolete in corso..."
 
 msgid "Rename"
-msgstr ""
+msgstr "Rinomina"
 
 msgid "Rename dataset"
-msgstr ""
+msgstr "Rinomina dataset"
 
 msgid "Renaming dataset ..."
-msgstr ""
+msgstr "Rinomina del dataset in corso..."
 
 msgid "Replace device"
-msgstr ""
+msgstr "Sostituisci dispositivo"
 
 msgid "Replacement device"
-msgstr ""
+msgstr "Dispositivo sostitutivo"
 
 msgid "Replication Jobs"
-msgstr ""
+msgstr "Lavori di replica"
 
 msgid ""
 "Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use "
 "existing snapshots' is enabled, this must exactly match the prefix used by "
 "the snapshot job that manages this dataset (e.g. 'auto') — a mismatch will "
 "cause replication to fail with 'No snapshots found'."
-msgstr ""
+msgstr "Gli snapshot di replica saranno denominati <prefisso>-AAAAMMGG-HHMMSS. Quando l'opzione 'Usa snapshot esistenti' è abilitata, questo deve corrispondere esattamente al prefisso utilizzato dal lavoro di snapshot che gestisce questo dataset (es. 'auto'); una mancata corrispondenza farà fallire la replica con l'errore 'Nessun snapshot trovato'."
 
 msgid "Resume scrub"
-msgstr ""
+msgstr "Riprendi controllo"
 
 msgid "Resuming scrub ..."
-msgstr ""
+msgstr "Ripresa del controllo in corso..."
 
 msgid "Rollback"
-msgstr ""
+msgstr "Ripristina"
 
 msgid "Rolling back snapshot ..."
-msgstr ""
+msgstr "Ripristino dello snapshot in corso..."
 
 msgid "Run"
-msgstr ""
+msgstr "Esegui"
 
 msgid "Run now"
-msgstr ""
+msgstr "Esegui ora"
 
 msgid "Run replication job"
-msgstr ""
+msgstr "Esegui lavoro di replica"
 
 msgid "Run snapshot job"
-msgstr ""
+msgstr "Esegui lavoro di snapshot"
 
 msgid "SSH Certificate"
-msgstr ""
+msgstr "Certificato SSH"
 
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr ""
+msgstr "Coppia di chiavi SSH per l'autenticazione con l'host remoto. Creane una in Sistema > Certificati > SSH, quindi usa Copia sul remoto per autorizzarla."
 
 msgid "SSH port"
-msgstr ""
+msgstr "Porta SSH"
 
 msgid "SSH user"
-msgstr ""
+msgstr "Utente SSH"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Sabato"
 
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
 "on startup."
-msgstr ""
+msgstr "Salva la passphrase in /etc/zfs/keys/ in modo che il dataset si sblocchi automaticamente all'avvio."
 
 msgid ""
 "Saves the passphrase unencrypted to /etc/zfs/keys/ so the dataset unlocks "
 "automatically on startup. Protects against drive theft but not theft of the "
 "whole server."
-msgstr ""
+msgstr "Salva la passphrase non crittografata in /etc/zfs/keys/ in modo che il dataset si sblocchi automaticamente all'avvio. Protegge dal furto dei dischi ma non dal furto dell'intero server."
 
 msgid "Scan for and import all pools not currently imported."
-msgstr ""
+msgstr "Cerca e importa tutti i pool attualmente non importati."
 
 msgid "Schedule"
-msgstr ""
+msgstr "Pianificazione"
 
 msgid "Scheduling"
-msgstr ""
+msgstr "Pianificazione"
 
 msgid "Scrub"
 msgstr "Controllo integrità"
 
 msgid "Scrub Jobs"
-msgstr ""
+msgstr "Lavori di controllo"
 
 msgid "Scrub paused."
-msgstr ""
+msgstr "Controllo in pausa."
 
 msgid "Scrub resumed."
-msgstr ""
+msgstr "Controllo ripreso."
 
 msgid "Scrub started."
-msgstr ""
+msgstr "Controllo avviato."
 
 msgid "Scrub started. Monitor progress in the Pools tab."
-msgstr ""
+msgstr "Controllo avviato. Monitora l'avanzamento nella scheda Pool."
 
 msgid "Scrub state"
-msgstr ""
+msgstr "Stato del controllo"
 
 msgid "Scrub status"
-msgstr ""
+msgstr "Stato del controllo"
 
 msgid "Scrub stopped."
-msgstr ""
+msgstr "Controllo arrestato."
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "Invia email solo in caso di errore"
 
 msgid "Send output via email"
-msgstr ""
+msgstr "Invia l'output tramite email"
 
 msgid "Send the command output via email on completion."
-msgstr ""
+msgstr "Invia l'output del comando tramite email al completamento."
 
 msgid "Sensitive"
-msgstr ""
+msgstr "Sensibile"
 
 msgid "Sensitive (default)"
-msgstr ""
+msgstr "Sensibile (predefinito)"
 
 msgid "September"
-msgstr ""
+msgstr "Settembre"
 
 msgid "Set ashift"
 msgstr "Imposta ashift"
 
 msgid "Settings"
-msgstr ""
+msgstr "Impostazioni"
 
 msgid "Size"
 msgstr "Dimensione"
 
 msgid "Skip certificate verification"
-msgstr ""
+msgstr "Salta la verifica del certificato"
 
 msgid "Snapshot Diff"
-msgstr ""
+msgstr "Differenze snapshot"
 
 msgid "Snapshot Jobs"
-msgstr ""
+msgstr "Lavori di snapshot"
 
 msgid "Snapshot added."
-msgstr ""
+msgstr "Snapshot aggiunto."
 
 msgid "Snapshot and replicate the dataset and all its children."
-msgstr ""
+msgstr "Esegui lo snapshot e la replica del dataset e di tutti i suoi figli."
 
 msgid "Snapshot cloned."
-msgstr ""
+msgstr "Snapshot clonato."
 
 msgid "Snapshot created."
-msgstr ""
+msgstr "Snapshot creato."
 
 msgid "Snapshot deleted recursively."
-msgstr ""
+msgstr "Snapshot eliminato ricorsivamente."
 
 msgid "Snapshot deleted."
-msgstr ""
+msgstr "Snapshot eliminato."
 
 msgid "Snapshot prefix"
-msgstr ""
+msgstr "Prefisso snapshot"
 
 msgid "Snapshot rolled back."
-msgstr ""
+msgstr "Snapshot ripristinato."
 
 msgid ""
 "Snapshot the dataset and all its children. Retention pruning counts "
 "generations at the parent level and destroys each expired generation across "
 "all children."
-msgstr ""
+msgstr "Esegue lo snapshot del dataset e di tutti i suoi figli. La pulizia della conservazione conta le generazioni a livello di genitore ed elimina ogni generazione scaduta su tutti i figli."
 
 msgid "Snapshot this dataset and all its children."
-msgstr ""
+msgstr "Esegui lo snapshot di questo dataset e di tutti i suoi figli."
 
 msgid "Snapshots"
-msgstr ""
+msgstr "Snapshot"
 
 msgid "Snapshots deleted."
-msgstr ""
+msgstr "Snapshot eliminati."
 
 msgid "Snapshots will be named <prefix>-YYYYMMDD-HHMMSS."
-msgstr ""
+msgstr "Gli snapshot saranno denominati <prefisso>-AAAAMMGG-HHMMSS."
 
 msgid "Source"
 msgstr "Sorgente"
 
 msgid "Source dataset"
-msgstr ""
+msgstr "Dataset di origine"
 
 msgid "Source name"
-msgstr ""
+msgstr "Nome di origine"
 
 msgid "Source path"
-msgstr ""
+msgstr "Percorso di origine"
 
 msgid "Source pool"
-msgstr ""
+msgstr "Pool di origine"
 
 msgid "Special (metadata)"
-msgstr ""
+msgstr "Speciale (metadati)"
 
 msgid "Specifies which device alias should be used."
-msgstr ""
+msgstr "Specifica quale nome del dispositivo deve essere utilizzato."
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
@@ -1243,204 +1245,204 @@ msgid "Specify ashift value. Only use if you are sure you need it."
 msgstr "Specifica il valore ashift. Usare solo se siete sicuri che sia necessario."
 
 msgid "Stale ZFS mntent entries removed."
-msgstr ""
+msgstr "Voci mntent ZFS obsolete rimosse."
 
 msgid "Start scrub"
-msgstr ""
+msgstr "Avvia controllo"
 
 msgid "Starting TRIM ..."
-msgstr ""
+msgstr "Avvio di TRIM in corso..."
 
 msgid "Starting scrub ..."
-msgstr ""
+msgstr "Avvio del controllo in corso..."
 
 msgid "Status"
-msgstr ""
+msgstr "Stato"
 
 msgid "Stop scrub"
-msgstr ""
+msgstr "Arresta controllo"
 
 msgid "Stopping scrub ..."
-msgstr ""
+msgstr "Arresto del controllo in corso..."
 
 msgid "Sunday"
-msgstr ""
+msgstr "Domenica"
 
 msgid "Synchronising ZFS mntent entries ..."
-msgstr ""
+msgstr "Sincronizzazione delle voci mntent ZFS in corso..."
 
 msgid "TRIM started."
-msgstr ""
+msgstr "TRIM avviato."
 
 msgid "The field should only contain * or a comma separated list of values."
-msgstr ""
+msgstr "Il campo deve contenere solo * o un elenco di valori separati da virgole."
 
 msgid ""
 "The passphrase will be fetched from a remote HTTPS server at boot. The key "
 "is never stored on this machine, protecting against theft of the whole "
 "server. Requires network access during boot."
-msgstr ""
+msgstr "La passphrase verrà recuperata da un server HTTPS remoto all'avvio. La chiave non viene mai memorizzata su questa macchina, proteggendo dal furto dell'intero server. Richiede l'accesso alla rete durante l'avvio."
 
 msgid ""
 "The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. "
 "Protects against drive theft but not theft of the whole server."
-msgstr ""
+msgstr "La passphrase verrà salvata non crittografata in /etc/zfs/keys/ su questa macchina. Protegge dal furto dei dischi ma non dal furto dell'intero server."
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "Thin provisioning"
 
 msgid "Thursday"
-msgstr ""
+msgstr "Giovedì"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Ora di esecuzione"
 
 msgid "Trim"
-msgstr ""
+msgstr "Trim"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Martedì"
 
 msgid "Type"
 msgstr "Tipo"
 
 msgid "UNAVAIL"
-msgstr ""
+msgstr "NON DISPONIBILE"
 
 msgid "UNKNOWN"
-msgstr ""
+msgstr "SCONOSCIUTO"
 
 msgid "URL must start with https://"
-msgstr ""
+msgstr "L'URL deve iniziare con https://"
 
 msgid "Unit"
-msgstr ""
+msgstr "Unità"
 
 msgid "Unload key (lock)"
-msgstr ""
+msgstr "Scarica chiave (blocca)"
 
 msgid "Unloading encryption key ..."
-msgstr ""
+msgstr "Scaricamento della chiave di crittografia in corso..."
 
 msgid "Updated replication job."
-msgstr ""
+msgstr "Lavoro di replica aggiornato."
 
 msgid "Updated scrub job."
-msgstr ""
+msgstr "Lavoro di controllo aggiornato."
 
 msgid "Updated snapshot job."
-msgstr ""
+msgstr "Lavoro di snapshot aggiornato."
 
 msgid "Upgrade"
-msgstr ""
+msgstr "Aggiorna"
 
 msgid "Upgrading pool ..."
-msgstr ""
+msgstr "Aggiornamento del pool in corso..."
 
 msgid "Use ZFS bookmarks"
-msgstr ""
+msgstr "Usa bookmark ZFS"
 
 msgid ""
 "Use default (128K) for general use. Use 4K-16K for databases, 1M for large "
 "files/media."
-msgstr ""
+msgstr "Usa il valore predefinito (128K) per uso generale. Usa 4K-16K per i database, 1M per file di grandi dimensioni/multimediali."
 
 msgid "Use existing snapshots"
-msgstr ""
+msgstr "Usa snapshot esistenti"
 
 msgid ""
 "Use zfs send -w to send encrypted data without decrypting. Requires "
 "encryption on the source dataset."
-msgstr ""
+msgstr "Usa zfs send -w per inviare dati crittografati senza decrittarli. Richiede la crittografia sul dataset di origine."
 
 msgid "Used"
 msgstr "Usato"
 
 msgid "Used (%)"
-msgstr ""
+msgstr "Usato (%)"
 
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
 "on the remote to grant non-root access."
-msgstr ""
+msgstr "Utente sull'host remoto con i permessi per eseguire zfs receive. Usa 'zfs allow' sul remoto per concedere l'accesso senza privilegi di root."
 
 msgid "Value"
 msgstr "Valore"
 
 msgid "Vdev removal cancelled."
-msgstr ""
+msgstr "Rimozione del vdev annullata."
 
 msgid "Vdev to remove"
-msgstr ""
+msgstr "Vdev da rimuovere"
 
 msgid "Vdev type"
-msgstr "Tipo Vdev"
+msgstr "Tipo di vdev"
 
 msgid "Volume added."
-msgstr ""
+msgstr "Volume aggiunto."
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Mercoledì"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Settimanale"
 
 msgid "Yearly"
-msgstr ""
+msgstr "Annuale"
 
 msgid "ZFS ARC Hits/Misses"
-msgstr ""
+msgstr "Riscontri/Mancati riscontri ARC ZFS"
 
 msgid "ZFS ARC Size"
-msgstr ""
+msgstr "Dimensione ARC ZFS"
 
 msgid "ZFS Pool Events"
-msgstr ""
+msgstr "Eventi pool ZFS"
 
 msgid "ZFS Pool Health"
-msgstr ""
+msgstr "Stato di salute pool ZFS"
 
 msgid "ZFS Pool Status"
-msgstr ""
+msgstr "Stato pool ZFS"
 
 msgid "ZFS Remote Unlock"
-msgstr ""
+msgstr "Sblocco remoto ZFS"
 
 msgid "ZFS Replication"
-msgstr ""
+msgstr "Replica ZFS"
 
 msgid "ZFS Scrub"
-msgstr ""
+msgstr "Controllo integrità ZFS"
 
 msgid "ZFS ZED"
-msgstr ""
+msgstr "ZFS ZED"
 
 msgid "ZFS mntent entries synchronised."
-msgstr ""
+msgstr "Voci mntent ZFS sincronizzate."
 
 msgid "days"
-msgstr ""
+msgstr "giorni"
 
 msgid "months"
-msgstr ""
+msgstr "mesi"
 
 msgid "omv-extras.org wiki"
-msgstr ""
+msgstr "wiki di omv-extras.org"
 
 msgid "snapshots"
-msgstr ""
+msgstr "snapshot"
 
 msgid "weeks"
-msgstr ""
+msgstr "settimane"
 
 msgid "years"
-msgstr ""
+msgstr "anni"
 
 msgid "zfs"
-msgstr ""
+msgstr "zfs"
 
 msgid "zpool export"
-msgstr ""
+msgstr "zpool export"
 
 msgid "zpool import"
-msgstr ""
+msgstr "zpool import"

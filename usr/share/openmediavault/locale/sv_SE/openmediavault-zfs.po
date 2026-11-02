@@ -3,6 +3,8 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
+# efef6ec5b435a041fce803c7f8af77d2_2341d43, 2017
+# Jonatan Nyberg, 2018,2021,2026
 # Jonatan Nyberg, 2018,2021
 # efef6ec5b435a041fce803c7f8af77d2_2341d43, 2017
 # Jonatan Nyberg, 2026
@@ -12,7 +14,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Jonatan Nyberg, 2026\n"
+"Last-Translator: Jonatan Nyberg, 2018,2021,2026\n"
 "Language-Team: Swedish (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,61 +25,61 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "”Ögonblicksbilder” behåller de N senaste. Tidsenheter tar bort ögonblicksbilder som är äldre än N dagar, veckor, månader eller år."
 
 msgid "A different name must be specified."
-msgstr ""
+msgstr "Ett annat namn måste anges."
 
 msgid "ARC Stats"
-msgstr ""
+msgstr "ARC-statistik"
 
 msgid "Add"
-msgstr ""
+msgstr "Lägg till"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "Lägg till specialenhet"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "Lägg till cache, logg, reservenhet eller specialenhet"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "Lägg till krypterat filsystem"
 
 msgid "Add filesystem"
-msgstr ""
+msgstr "Lägg till filsystem"
 
 msgid "Add new"
-msgstr ""
+msgstr "Lägg till ny"
 
 msgid "Add new + delete missing"
-msgstr ""
+msgstr "Lägg till nya och ta bort saknade"
 
 msgid "Add pool"
-msgstr ""
+msgstr "Lägg till pool"
 
 msgid "Add snapshot"
-msgstr ""
+msgstr "Lägg till ögonblicksbild"
 
 msgid "Add volume"
-msgstr ""
+msgstr "Lägg till volym"
 
 msgid "Adding filesystem ..."
-msgstr ""
+msgstr "Lägger till filsystem…"
 
 msgid "Adding missing ZFS mntent entries ..."
-msgstr ""
+msgstr "Lägger till saknade ZFS-mntent-poster…"
 
 msgid "Adding snapshot ..."
-msgstr ""
+msgstr "Lägger till ögonblicksbild…"
 
 msgid "Adding volume ..."
-msgstr ""
+msgstr "Lägger till volym…"
 
 msgid ""
 "Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
 " per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
 "Apply/reboot."
-msgstr ""
+msgstr "Ytterligare rader av typen ”options zfs …” som läggs till i /etc/modprobe.d/zfs.conf, en per rad, till exempel ”options zfs l2arc_mfuonly=1”. De tillämpas nästa gång ändringarna verkställs eller systemet startas om."
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -85,111 +87,111 @@ msgid ""
 "replication. Not compatible with 'Recursive' (ZFS does not support recursive"
 " sends from a bookmark) and not needed when 'Use existing snapshots' is "
 "enabled."
-msgstr ""
+msgstr "Skapa ett ZFS-bokmärke som bas för inkrementell replikering efter varje lyckad överföring. Det gör att antalet ögonblicksbilder på källan kan minskas till en utan att den inkrementella replikeringen bryts. Funktionen är inte kompatibel med ”Rekursiv”, eftersom ZFS inte stöder rekursiva överföringar från bokmärken, och behövs inte när ”Använd befintliga ögonblicksbilder” är aktiverat."
 
 msgid "Algorithm"
-msgstr ""
+msgstr "Algoritm"
 
 msgid "All snapshots deleted."
-msgstr ""
+msgstr "Alla ögonblicksbilder har tagits bort."
 
 msgid "Alloc"
-msgstr ""
+msgstr "Allokerat"
 
 msgid ""
 "Allow self-signed or untrusted certificates. Use only on trusted local "
 "networks."
-msgstr ""
+msgstr "Tillåt självsignerade eller ej betrodda certifikat. Använd endast i betrodda lokala nätverk."
 
 msgid "Anchor (existing device or RAIDZ vdev)"
-msgstr ""
+msgstr "Fästpunkt (befintlig enhet eller RAIDZ-vdev)"
 
 msgid "April"
-msgstr ""
+msgstr "April"
 
 msgid "Are you sure you want to add this device to the pool?"
-msgstr ""
+msgstr "Vill du verkligen lägga till den här enheten i poolen?"
 
 msgid ""
 "Are you sure you want to cancel the vdev removal? Data evacuation will stop "
 "and the vdev will remain in the pool."
-msgstr ""
+msgstr "Vill du verkligen avbryta borttagningen av vdev-enheten? Dataflytten stoppas och vdev-enheten blir kvar i poolen."
 
 msgid ""
 "Are you sure you want to delete '{{ _selected[0].path }}' from this dataset "
 "and all child datasets?"
-msgstr ""
+msgstr "Vill du verkligen ta bort ”{{ _selected[0].path }}” från den här datauppsättningen och alla underordnade datauppsättningar?"
 
 msgid ""
 "Are you sure you want to delete ALL snapshots on the parent dataset '{{ "
 "_selected[0].parent }}'?"
-msgstr ""
+msgstr "Vill du verkligen ta bort ALLA ögonblicksbilder i den överordnade datauppsättningen ”{{ _selected[0].parent }}”?"
 
 msgid "Are you sure you want to delete the selected snapshot(s)?"
-msgstr ""
+msgstr "Vill du verkligen ta bort de valda ögonblicksbilderna?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all earlier snapshots on "
 "the same dataset?"
-msgstr ""
+msgstr "Vill du verkligen ta bort den här och alla tidigare ögonblicksbilder i samma datauppsättning?"
 
 msgid ""
 "Are you sure you want to delete this snapshot and all later snapshots on the"
 " same dataset?"
-msgstr ""
+msgstr "Vill du verkligen ta bort den här och alla senare ögonblicksbilder i samma datauppsättning?"
 
 msgid "Are you sure you want to delete?"
-msgstr ""
+msgstr "Vill du verkligen ta bort detta?"
 
 msgid "Are you sure you want to detach this device from the pool?"
-msgstr ""
+msgstr "Vill du verkligen koppla loss den här enheten från poolen?"
 
 msgid ""
 "Are you sure you want to disable auto-unlock? The saved key or remote URL "
 "configuration will be removed and you will need to enter the passphrase "
 "manually after each reboot."
-msgstr ""
+msgstr "Vill du verkligen inaktivera automatisk upplåsning? Den sparade nyckeln eller konfigurationen för fjärrwebbadressen tas bort och du måste ange lösenfrasen manuellt efter varje omstart."
 
 msgid "Are you sure you want to export?"
-msgstr ""
+msgstr "Vill du verkligen exportera?"
 
 msgid ""
 "Are you sure you want to promote this dataset? This detaches the clone from "
 "its origin snapshot dependency."
-msgstr ""
+msgstr "Vill du verkligen befordra den här datauppsättningen? Klonen frikopplas då från beroendet till den ursprungliga ögonblicksbilden."
 
 msgid ""
 "Are you sure you want to replace this device? Resilvering will begin "
 "immediately."
-msgstr ""
+msgstr "Vill du verkligen ersätta den här enheten? Återspeglingen börjar omedelbart."
 
 msgid "Are you sure you want to rollback to this snapshot?"
-msgstr ""
+msgstr "Vill du verkligen återställa till den här ögonblicksbilden?"
 
 msgid ""
 "Are you sure you want to start a TRIM operation on this pool? This is only "
 "meaningful for SSD-backed pools."
-msgstr ""
+msgstr "Vill du verkligen starta en TRIM-åtgärd för den här poolen? Det är endast meningsfullt för pooler som använder SSD-enheter."
 
 msgid "Are you sure you want to start a scrub?"
-msgstr ""
+msgstr "Vill du verkligen starta en datakontroll?"
 
 msgid "Are you sure you want to stop the scrub?"
-msgstr ""
+msgstr "Vill du verkligen stoppa datakontrollen?"
 
 msgid "Are you sure you want to take this device offline?"
-msgstr ""
+msgstr "Vill du verkligen koppla från den här enheten?"
 
 msgid ""
 "Are you sure you want to unload the encryption key? The dataset will become "
 "inaccessible until it is unlocked again."
-msgstr ""
+msgstr "Vill du verkligen läsa ur krypteringsnyckeln? Datauppsättningen blir otillgänglig tills den låses upp igen."
 
 msgid ""
 "Are you sure you want to upgrade this pool? This enables new feature flags "
 "and cannot be undone. The pool will no longer be accessible by older ZFS "
 "versions."
-msgstr ""
+msgstr "Vill du verkligen uppgradera den här poolen? Nya funktionsflaggor aktiveras och åtgärden kan inte ångras. Poolen kommer inte längre att vara åtkomlig med äldre ZFS-versioner."
 
 msgid ""
 "Are you sure? For a mirror or stripe pool this attaches the new device to "
@@ -197,44 +199,44 @@ msgid ""
 "device into a 2-way mirror (irreversible without full pool recreation). For "
 "a RAIDZ pool this expands the selected RAIDZ vdev by adding one device, "
 "permanently increasing its width."
-msgstr ""
+msgstr "Är du säker? För en speglad eller stripad pool ansluts den nya enheten till den valda befintliga enheten. Spegeln utökas eller en stripad enhet omvandlas till en tvåvägsspegel, vilket inte kan ångras utan att hela poolen skapas om. För en RAIDZ-pool utökas den valda RAIDZ-vdev-enheten med en enhet och dess bredd ökas permanent."
 
 msgid "Ashift value"
 msgstr "Ashift-värde"
 
 msgid "At least five devices are required."
-msgstr ""
+msgstr "Minst fem enheter krävs."
 
 msgid "At least four devices are required."
-msgstr ""
+msgstr "Minst fyra enheter krävs."
 
 msgid "At least three devices are required."
-msgstr ""
+msgstr "Minst tre enheter krävs."
 
 msgid "At least two devices are required."
-msgstr ""
+msgstr "Minst två enheter krävs."
 
 msgid "At reboot"
-msgstr ""
+msgstr "Vid omstart"
 
 msgid "Attach device"
-msgstr ""
+msgstr "Anslut enhet"
 
 msgid "August"
-msgstr ""
+msgstr "Augusti"
 
 msgid "Auto-unlock"
-msgstr ""
+msgstr "Automatisk upplåsning"
 
 msgid "Auto-unlock at boot"
-msgstr ""
+msgstr "Automatisk upplåsning vid start"
 
 msgid "Auto-unlock disabled."
-msgstr ""
+msgstr "Automatisk upplåsning har inaktiverats."
 
 msgid ""
 "Auto-unlock enabled. The key will be loaded from the local keyfile at boot."
-msgstr ""
+msgstr "Automatisk upplåsning har aktiverats. Nyckeln läses in från den lokala nyckelfilen vid start."
 
 msgid "Available"
 msgstr "Tillgänglig"
@@ -243,261 +245,261 @@ msgid "Basic"
 msgstr "Grundläggande"
 
 msgid "Bulk Delete"
-msgstr ""
+msgstr "Massborttagning"
 
 msgid "By ID"
-msgstr ""
+msgstr "Efter ID"
 
 msgid "By Path"
 msgstr "Efter sökväg"
 
 msgid "Cache (L2ARC)"
-msgstr ""
+msgstr "Cache (L2ARC)"
 
 msgid "Cancel vdev removal"
-msgstr ""
+msgstr "Avbryt borttagning av vdev"
 
 msgid "Cancelling vdev removal ..."
-msgstr ""
+msgstr "Avbryter borttagning av vdev…"
 
 msgid "Cap"
-msgstr ""
+msgstr "Kapacitet"
 
 msgid "Case sensitivity"
-msgstr ""
+msgstr "Skiftlägeskänslighet"
 
 msgid "Certain date"
-msgstr ""
+msgstr "Visst datum"
 
 msgid "Change encryption key"
-msgstr ""
+msgstr "Byt krypteringsnyckel"
 
 msgid "Change key"
-msgstr ""
+msgstr "Byt nyckel"
 
 msgid "Changing encryption key ..."
-msgstr ""
+msgstr "Byter krypteringsnyckel…"
 
 msgid "Clear errors"
-msgstr ""
+msgstr "Rensa fel"
 
 msgid "Clearing pool errors ..."
-msgstr ""
+msgstr "Rensar poolfel…"
 
 msgid "Clone"
 msgstr "Klona"
 
 msgid "Clone dataset"
-msgstr ""
+msgstr "Klona datauppsättning"
 
 msgid "Clone name"
-msgstr ""
+msgstr "Klonnamn"
 
 msgid "Clone path (within pool)"
-msgstr ""
+msgstr "Klonsökväg (inom poolen)"
 
 msgid "Clone snapshot"
-msgstr ""
+msgstr "Klona ögonblicksbild"
 
 msgid "Cloning dataset ..."
-msgstr ""
+msgstr "Klonar datauppsättning…"
 
 msgid "Cloning snapshot ..."
-msgstr ""
+msgstr "Klonar ögonblicksbild…"
 
 msgid "Comment"
-msgstr ""
+msgstr "Kommentar"
 
 msgid "Compress ratio"
-msgstr ""
+msgstr "Komprimeringsförhållande"
 
 msgid "Compression"
-msgstr ""
+msgstr "Komprimering"
 
 msgid "Compression type"
-msgstr ""
+msgstr "Komprimeringstyp"
 
 msgid "Confirm new passphrase / key"
-msgstr ""
+msgstr "Bekräfta ny lösenfras/nyckel"
 
 msgid "Confirm passphrase"
-msgstr ""
+msgstr "Bekräfta lösenfras"
 
 msgid "Confirm passphrase / key"
-msgstr ""
+msgstr "Bekräfta lösenfras/nyckel"
 
 msgid "Create"
-msgstr ""
+msgstr "Skapa"
 
 msgid "Created pool."
-msgstr ""
+msgstr "Poolen har skapats."
 
 msgid "Created replication job."
-msgstr ""
+msgstr "Replikeringsjobbet har skapats."
 
 msgid "Created scrub job."
-msgstr ""
+msgstr "Datakontrollsjobbet har skapats."
 
 msgid "Created snapshot job."
-msgstr ""
+msgstr "Jobbet för ögonblicksbilder har skapats."
 
 msgid "Creating encrypted filesystem ..."
-msgstr ""
+msgstr "Skapar krypterat filsystem…"
 
 msgid "Creating recursive snapshot ..."
-msgstr ""
+msgstr "Skapar rekursiv ögonblicksbild…"
 
 msgid "Creating snapshot ..."
-msgstr ""
+msgstr "Skapar ögonblicksbild…"
 
 msgid "Current passphrase / key"
-msgstr ""
+msgstr "Nuvarande lösenfras/nyckel"
 
 msgid "DEGRADED"
-msgstr ""
+msgstr "FÖRSÄMRAD"
 
 msgid "Daily"
-msgstr ""
+msgstr "Daglig"
 
 msgid "Dataset"
-msgstr ""
+msgstr "Datauppsättning"
 
 msgid "Dataset cloned."
-msgstr ""
+msgstr "Datauppsättningen har klonats."
 
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
 "the dataset path on the remote host."
-msgstr ""
+msgstr "Datauppsättningens sökväg på målet, till exempel backup/replica. För ett fjärrmål är det sökvägen till datauppsättningen på fjärrvärden."
 
 msgid "Dataset promoted."
-msgstr ""
+msgstr "Datauppsättningen har befordrats."
 
 msgid "Dataset renamed."
-msgstr ""
+msgstr "Datauppsättningen har bytt namn."
 
 msgid "Datasets"
-msgstr ""
+msgstr "Datauppsättningar"
 
 msgid "Date/Time"
-msgstr ""
+msgstr "Datum/tid"
 
 msgid "Day of month"
-msgstr ""
+msgstr "Dag i månaden"
 
 msgid "Day of week"
-msgstr ""
+msgstr "Veckodag"
 
 msgid "December"
-msgstr ""
+msgstr "December"
 
 msgid "Decryption passphrase (optional)"
-msgstr ""
+msgstr "Lösenfras för dekryptering (valfri)"
 
 msgid "Dedup"
-msgstr ""
+msgstr "Deduplicering"
 
 msgid "Default (128K)"
-msgstr ""
+msgstr "Standard (128K)"
 
 msgid "Delete"
 msgstr "Ta bort"
 
 msgid "Delete all snapshots on parent dataset"
-msgstr ""
+msgstr "Ta bort alla ögonblicksbilder i den överordnade datauppsättningen"
 
 msgid "Delete missing"
-msgstr ""
+msgstr "Ta bort saknade"
 
 msgid "Delete recursively"
-msgstr ""
+msgstr "Ta bort rekursivt"
 
 msgid "Delete this and all earlier snapshots"
-msgstr ""
+msgstr "Ta bort den här och alla tidigare ögonblicksbilder"
 
 msgid "Delete this and all later snapshots"
-msgstr ""
+msgstr "Ta bort den här och alla senare ögonblicksbilder"
 
 msgid "Deleting all snapshots ..."
-msgstr ""
+msgstr "Tar bort alla ögonblicksbilder…"
 
 msgid "Deleting object ..."
-msgstr ""
+msgstr "Tar bort objekt…"
 
 msgid "Deleting pool ..."
-msgstr ""
+msgstr "Tar bort pool…"
 
 msgid "Deleting snapshot ..."
-msgstr ""
+msgstr "Tar bort ögonblicksbild…"
 
 msgid "Deleting snapshot recursively ..."
-msgstr ""
+msgstr "Tar bort ögonblicksbild rekursivt…"
 
 msgid "Deleting snapshots ..."
-msgstr ""
+msgstr "Tar bort ögonblicksbilder…"
 
 msgid "Destination"
-msgstr ""
+msgstr "Mål"
 
 msgid "Destination dataset"
-msgstr ""
+msgstr "Måldatauppsättning"
 
 msgid "Detach device"
-msgstr ""
+msgstr "Koppla loss enhet"
 
 msgid "Details"
 msgstr "Detaljer"
 
 msgid "Device"
-msgstr ""
+msgstr "Enhet"
 
 msgid "Device Attach"
-msgstr ""
+msgstr "Anslutning av enhet"
 
 msgid "Device Detach"
-msgstr ""
+msgstr "Frånkoppling av enhet"
 
 msgid "Device Offline"
-msgstr ""
+msgstr "Frånkopplad enhet"
 
 msgid "Device Online"
-msgstr ""
+msgstr "Ansluten enhet"
 
 msgid "Device Replace"
-msgstr ""
+msgstr "Ersättning av enhet"
 
 msgid "Device alias"
 msgstr "Enhetsalias"
 
 msgid "Device to detach"
-msgstr ""
+msgstr "Enhet som ska kopplas loss"
 
 msgid "Device to replace"
-msgstr ""
+msgstr "Enhet som ska ersättas"
 
 msgid "Device type"
-msgstr ""
+msgstr "Enhetstyp"
 
 msgid "Devices"
 msgstr "Enheter"
 
 msgid "Diff"
-msgstr ""
+msgstr "Skillnad"
 
 msgid "Disable auto-unlock at boot"
-msgstr ""
+msgstr "Inaktivera automatisk upplåsning vid start"
 
 msgid "Disabling auto-unlock ..."
-msgstr ""
+msgstr "Inaktiverar automatisk upplåsning…"
 
 msgid "Discover"
-msgstr ""
+msgstr "Sök"
 
 msgid ""
 "Displays the health of all ZFS pools with traffic-light status. Green = "
 "healthy, orange = >80% full, red = degraded/faulted/errors/>90% full. Click "
 "a pool to view details."
-msgstr ""
+msgstr "Visar hälsotillståndet för alla ZFS-pooler med trafikljusstatus. Grönt = felfri, orange = mer än 80 % full, rött = försämrad/felaktig/fel/mer än 90 % full. Klicka på en pool för att visa detaljer."
 
 msgid ""
 "Do not create a new snapshot. Instead, replicate the most recent existing "
@@ -505,306 +507,306 @@ msgid ""
 "manages snapshots for this dataset — this is the recommended approach when "
 "replicating to multiple destinations or at different frequencies, as it "
 "avoids conflicts between replication chains."
-msgstr ""
+msgstr "Skapa inte en ny ögonblicksbild. Replikera i stället den senaste befintliga ögonblicksbilden som matchar prefixet. Använd detta när ett separat ögonblicksbildsjobb redan hanterar ögonblicksbilder för datauppsättningen. Det är den rekommenderade metoden vid replikering till flera mål eller med olika intervall, eftersom konflikter mellan replikeringskedjor undviks."
 
 msgid "Do you really want to expand the ZFS pool?"
-msgstr ""
+msgstr "Vill du verkligen utöka ZFS-poolen?"
 
 msgid "Docs"
-msgstr ""
+msgstr "Dokumentation"
 
 msgid "Edit"
-msgstr ""
+msgstr "Redigera"
 
 msgid "Edit property"
-msgstr ""
+msgstr "Redigera egenskap"
 
 msgid "Enable auto-unlock"
-msgstr ""
+msgstr "Aktivera automatisk upplåsning"
 
 msgid "Enable auto-unlock at boot (local file)"
-msgstr ""
+msgstr "Aktivera automatisk upplåsning vid start (lokal fil)"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr ""
+msgstr "Aktivera automatisk upplåsning vid start (HTTPS-fjärrserver)"
 
 msgid "Enable auto-unlock — local file"
-msgstr ""
+msgstr "Aktivera automatisk upplåsning – lokal fil"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr ""
+msgstr "Aktivera automatisk upplåsning – HTTPS-fjärrserver"
 
 msgid "Enabled"
-msgstr ""
+msgstr "Aktiverad"
 
 msgid "Enabling auto-unlock ..."
-msgstr ""
+msgstr "Aktiverar automatisk upplåsning…"
 
 msgid "Encrypted filesystem created."
-msgstr ""
+msgstr "Det krypterade filsystemet har skapats."
 
 msgid "Encryption"
-msgstr ""
+msgstr "Kryptering"
 
 msgid "Encryption key changed."
-msgstr ""
+msgstr "Krypteringsnyckeln har bytts."
 
 msgid "Encryption key loaded."
-msgstr ""
+msgstr "Krypteringsnyckeln har lästs in."
 
 msgid "Encryption key unloaded."
-msgstr ""
+msgstr "Krypteringsnyckeln har lästs ur."
 
 msgid "Error"
-msgstr ""
+msgstr "Fel"
 
 msgid "Event"
-msgstr ""
+msgstr "Händelse"
 
 msgid "Every N day of month"
-msgstr ""
+msgstr "Var N:e dag i månaden"
 
 msgid "Every N hour"
-msgstr ""
+msgstr "Var N:e timme"
 
 msgid "Every N minute"
-msgstr ""
+msgstr "Var N:e minut"
 
 msgid "Expand"
 msgstr "Expandera"
 
 msgid "Expand pool"
-msgstr ""
+msgstr "Utöka pool"
 
 msgid "Expanded pool."
-msgstr ""
+msgstr "Poolen har utökats."
 
 msgid "Exporting pool ..."
-msgstr ""
+msgstr "Exporterar pool…"
 
 msgid "Extra module options"
-msgstr ""
+msgstr "Extra modulinställningar"
 
 msgid "FAULTED"
-msgstr ""
+msgstr "FELAKTIG"
 
 msgid "February"
-msgstr ""
+msgstr "Februari"
 
 msgid ""
 "Filename case sensitivity for the pool's root dataset. Cannot be changed "
 "after creation."
-msgstr ""
+msgstr "Skiftlägeskänslighet för filnamn i poolens rotdatauppsättning. Kan inte ändras efter att poolen har skapats."
 
 msgid "Filename case sensitivity. Cannot be changed after creation."
-msgstr ""
+msgstr "Skiftlägeskänslighet för filnamn. Kan inte ändras efter att datauppsättningen har skapats."
 
 msgid "Filesystem added."
-msgstr ""
+msgstr "Filsystemet har lagts till."
 
 msgid "Fix packages"
-msgstr ""
+msgstr "Reparera paket"
 
 msgid "Fixing packages ..."
-msgstr ""
+msgstr "Reparerar paket…"
 
 msgid "Force creation"
-msgstr "Tvinga skapandet"
+msgstr "Tvinga skapande"
 
 msgid "Force import"
-msgstr ""
+msgstr "Tvinga import"
 
 msgid ""
 "Force import even if the pool appears to be in use or was not cleanly "
 "exported."
-msgstr ""
+msgstr "Tvinga import även om poolen verkar användas eller inte exporterades korrekt."
 
 msgid ""
 "Forces the creation of the Vded even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Tvingar skapandet av Vded även om fel rapporteras. Använd med extrem försiktighet! "
+msgstr "Tvingar skapandet av vdev-enheten även om fel rapporteras. Använd med yttersta försiktighet!"
 
 msgid ""
 "Forces the creation of the pool even if errors are reported. Use with "
 "extreme caution!"
-msgstr "Tvingar skapandet av poolen även om fel rapporteras. Använd med extrem försiktighet!"
+msgstr "Tvingar skapandet av poolen även om fel rapporteras. Använd med yttersta försiktighet!"
 
 msgid "Frag"
-msgstr ""
+msgstr "Fragmentering"
 
 msgid "Free"
-msgstr ""
+msgstr "Ledigt"
 
 msgid "Friday"
-msgstr ""
+msgstr "Fredag"
 
 msgid "Has children"
-msgstr ""
+msgstr "Har underordnade"
 
 msgid "Has shares"
-msgstr ""
+msgstr "Har delningar"
 
 msgid "Health"
-msgstr ""
+msgstr "Hälsa"
 
 msgid "History"
-msgstr ""
+msgstr "Historik"
 
 msgid "Hits"
-msgstr ""
+msgstr "Träffar"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr ""
+msgstr "Värdnamn eller IP-adress för ZFS-fjärrvärden."
 
 msgid "Hot spare"
-msgstr ""
+msgstr "Varm reservenhet"
 
 msgid "Hour"
-msgstr ""
+msgstr "Timme"
 
 msgid "Hourly"
-msgstr ""
+msgstr "Varje timme"
 
 msgid ""
 "How long to wait for network access before giving up. Increase if your "
 "network is slow to come up at boot."
-msgstr ""
+msgstr "Hur länge systemet ska vänta på nätverksåtkomst innan försöket avbryts. Öka värdet om nätverket tar lång tid att bli tillgängligt vid start."
 
 msgid ""
 "If set, the remote server must serve an OpenSSL-encrypted key. Generate the "
 "encrypted value by running -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc "
 "-pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
-msgstr ""
+msgstr "Om detta anges måste fjärrservern tillhandahålla en OpenSSL-krypterad nyckel. Skapa det krypterade värdet genom att köra -- echo -n 'YOUR_KEY' | openssl enc -aes-256-cbc -pbkdf2 -base64 -pass pass:DECRYPTION_PASSPHRASE"
 
 msgid "Import"
-msgstr ""
+msgstr "Importera"
 
 msgid "Import / Export"
-msgstr ""
+msgstr "Import/export"
 
 msgid "Import all available pools"
-msgstr ""
+msgstr "Importera alla tillgängliga pooler"
 
 msgid "Import pool(s)"
-msgstr ""
+msgstr "Importera pooler"
 
 msgid "Importing pool ..."
-msgstr ""
+msgstr "Importerar pool…"
 
 msgid "Inherit from parent"
-msgstr ""
+msgstr "Ärv från överordnad"
 
 msgid "Insensitive"
-msgstr ""
+msgstr "Inte skiftlägeskänslig"
 
 msgid "Is encryption root"
-msgstr ""
+msgstr "Är krypteringsrot"
 
 msgid "January"
-msgstr ""
+msgstr "Januari"
 
 msgid "Job"
-msgstr ""
+msgstr "Jobb"
 
 msgid "July"
-msgstr ""
+msgstr "Juli"
 
 msgid "June"
-msgstr ""
+msgstr "Juni"
 
 msgid "Keep"
-msgstr ""
+msgstr "Behåll"
 
 msgid "Keep snapshots on source"
-msgstr ""
+msgstr "Behåll ögonblicksbilder på källan"
 
 msgid "Key URL"
-msgstr ""
+msgstr "Nyckelwebbadress"
 
 msgid "Key status"
-msgstr ""
+msgstr "Nyckelstatus"
 
 msgid "Last scrub"
-msgstr ""
+msgstr "Senaste datakontroll"
 
 msgid "Level"
-msgstr ""
+msgstr "Nivå"
 
 msgid "Load encryption key"
-msgstr ""
+msgstr "Läs in krypteringsnyckel"
 
 msgid "Load key"
-msgstr ""
+msgstr "Läs in nyckel"
 
 msgid "Load key (unlock)"
-msgstr ""
+msgstr "Läs in nyckel (lås upp)"
 
 msgid "Loading encryption key ..."
-msgstr ""
+msgstr "Läser in krypteringsnyckel…"
 
 msgid "Local"
-msgstr ""
+msgstr "Lokal"
 
 msgid "Log (ZIL/SLOG)"
-msgstr ""
+msgstr "Logg (ZIL/SLOG)"
 
 msgid "March"
-msgstr ""
+msgstr "Mars"
 
 msgid "Maximum ARC size (MiB)"
-msgstr ""
+msgstr "Största ARC-storlek (MiB)"
 
 msgid ""
 "Maximum size of the ZFS ARC cache in MiB. Set to 0 for no limit (ZFS "
 "default). A typical value is 50% of installed RAM (e.g. 16384 for 16 GiB)."
-msgstr ""
+msgstr "Den största storleken på ZFS ARC-cacheminnet i MiB. Ange 0 för ingen gräns, vilket är ZFS-standard. Ett vanligt värde är 50 % av installerat RAM-minne, till exempel 16384 för 16 GiB."
 
 msgid "May"
-msgstr ""
+msgstr "Maj"
 
 msgid "May include sub-datasets, e.g. secure/clone1"
-msgstr ""
+msgstr "Kan innehålla underordnade datauppsättningar, till exempel secure/clone1"
 
 msgid "Message"
-msgstr ""
+msgstr "Meddelande"
 
 msgid "Minimum ARC size (MiB)"
-msgstr ""
+msgstr "Minsta ARC-storlek (MiB)"
 
 msgid ""
 "Minimum size the ARC will shrink to under memory pressure, in MiB. Set to 0 "
 "to use the ZFS default."
-msgstr ""
+msgstr "Den minsta storlek som ARC minskas till vid minnesbrist, i MiB. Ange 0 för att använda ZFS-standardvärdet."
 
 msgid "Minute"
-msgstr ""
+msgstr "Minut"
 
 msgid "Mirror"
 msgstr "Spegel"
 
 msgid "Misses"
-msgstr ""
+msgstr "Missar"
 
 msgid "Missing ZFS mntent entries added."
-msgstr ""
+msgstr "Saknade ZFS-mntent-poster har lagts till."
 
 msgid "Mixed"
-msgstr ""
+msgstr "Blandat"
 
 msgid "Modified"
 msgstr "Ändrad"
 
 msgid "Monday"
-msgstr ""
+msgstr "Måndag"
 
 msgid "Month"
-msgstr ""
+msgstr "Månad"
 
 msgid "Monthly"
-msgstr ""
+msgstr "Varje månad"
 
 msgid "Mounted"
-msgstr ""
+msgstr "Monterad"
 
 msgid "Mountpoint"
 msgstr "Monteringspunkt"
@@ -813,40 +815,40 @@ msgid "Name"
 msgstr "Namn"
 
 msgid "Name of the new clone, created in the same parent as the source."
-msgstr ""
+msgstr "Namnet på den nya klonen, som skapas under samma överordnade datauppsättning som källan."
 
 msgid "Name of the specific pool to import."
-msgstr ""
+msgstr "Namnet på den specifika pool som ska importeras."
 
 msgid "Network timeout (seconds)"
-msgstr ""
+msgstr "Tidsgräns för nätverk (sekunder)"
 
 msgid "New Property"
-msgstr ""
+msgstr "Ny egenskap"
 
 msgid "New device to attach"
-msgstr ""
+msgstr "Ny enhet som ska anslutas"
 
 msgid "New name"
-msgstr ""
+msgstr "Nytt namn"
 
 msgid "New passphrase / key"
-msgstr ""
+msgstr "Ny lösenfras/nyckel"
 
 msgid "New passphrases do not match."
-msgstr ""
+msgstr "De nya lösenfraserna överensstämmer inte."
 
 msgid "New property"
-msgstr ""
+msgstr "Ny egenskap"
 
 msgid "No ZFS pools found."
-msgstr ""
+msgstr "Inga ZFS-pooler hittades."
 
 msgid "None"
-msgstr "Inga"
+msgstr "Ingen"
 
 msgid "November"
-msgstr ""
+msgstr "November"
 
 msgid ""
 "Number of replication snapshots to keep on the source after each successful "
@@ -854,121 +856,121 @@ msgid ""
 "replication jobs share the same dataset and prefix — prefer 0 and manage "
 "retention with a dedicated snapshot job instead. Ignored when 'Use existing "
 "snapshots' is enabled."
-msgstr ""
+msgstr "Antal replikeringsögonblicksbilder som ska behållas på källan efter varje lyckad överföring. 0 = behåll alla. Rensning på källan kan bryta inkrementella kedjor om flera replikeringsjobb använder samma datauppsättning och prefix. Använd helst 0 och hantera lagringstiden med ett separat ögonblicksbildsjobb. Inställningen ignoreras när ”Använd befintliga ögonblicksbilder” är aktiverat."
 
 msgid "OFFLINE"
-msgstr ""
+msgstr "FRÅNKOPPLAD"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "ONLINE"
-msgstr ""
+msgstr "ANSLUTEN"
 
 msgid "Object deleted."
-msgstr ""
+msgstr "Objektet har tagits bort."
 
 msgid "October"
-msgstr ""
+msgstr "Oktober"
 
 msgid "Offline device"
-msgstr ""
+msgstr "Koppla från enhet"
 
 msgid "Online device"
-msgstr ""
+msgstr "Anslut enhet"
 
 msgid "Only alphanumeric characters, hyphens, and underscores are allowed."
-msgstr ""
+msgstr "Endast alfanumeriska tecken, bindestreck och understreck är tillåtna."
 
 msgid "Only send an email if the job exits with an error."
-msgstr ""
+msgstr "Skicka e-post endast om jobbet avslutas med ett fel."
 
 msgid "Optional mountpoint for the pool. Default is to use the pool name."
-msgstr ""
+msgstr "Valfri monteringspunkt för poolen. Poolnamnet används som standard."
 
 msgid "Optional mountpoint. Default is to use the dataset path."
-msgstr ""
+msgstr "Valfri monteringspunkt. Datauppsättningens sökväg används som standard."
 
 msgid "Origin"
-msgstr ""
+msgstr "Ursprung"
 
 msgid "Packages fixed."
-msgstr ""
+msgstr "Paketen har reparerats."
 
 msgid "Parent"
-msgstr ""
+msgstr "Överordnad"
 
 msgid "Passphrase"
-msgstr ""
+msgstr "Lösenfras"
 
 msgid "Passphrase / key"
-msgstr ""
+msgstr "Lösenfras/nyckel"
 
 msgid "Passphrases do not match."
-msgstr ""
+msgstr "Lösenfraserna överensstämmer inte."
 
 msgid "Path"
-msgstr ""
+msgstr "Sökväg"
 
 msgid "Pause scrub"
-msgstr ""
+msgstr "Pausa datakontroll"
 
 msgid "Pausing scrub ..."
-msgstr ""
+msgstr "Pausar datakontroll…"
 
 msgid "Pool"
-msgstr ""
+msgstr "Pool"
 
 msgid "Pool deleted."
-msgstr ""
+msgstr "Poolen har tagits bort."
 
 msgid "Pool errors cleared."
-msgstr ""
+msgstr "Poolfelen har rensats."
 
 msgid "Pool exported."
-msgstr ""
+msgstr "Poolen har exporterats."
 
 msgid "Pool imported."
-msgstr ""
+msgstr "Poolen har importerats."
 
 msgid "Pool name"
-msgstr ""
+msgstr "Poolnamn"
 
 msgid "Pool root"
-msgstr ""
+msgstr "Poolrot"
 
 msgid "Pool type"
 msgstr "Pooltyp"
 
 msgid "Pool upgraded."
-msgstr ""
+msgstr "Poolen har uppgraderats."
 
 msgid "Pools"
-msgstr ""
+msgstr "Pooler"
 
 msgid "Prefix"
 msgstr "Prefix"
 
 msgid "Promote"
-msgstr ""
+msgstr "Befordra"
 
 msgid "Promoting dataset ..."
-msgstr ""
+msgstr "Befordrar datauppsättning…"
 
 msgid "Properties"
-msgstr ""
+msgstr "Egenskaper"
 
 msgid "Properties saved."
-msgstr ""
+msgstr "Egenskaperna har sparats."
 
 msgid "Property"
 msgstr "Egenskap"
 
 msgid "Quick recursive snapshot"
-msgstr ""
+msgstr "Snabb rekursiv ögonblicksbild"
 
 msgid "Quick snapshot"
-msgstr ""
+msgstr "Snabb ögonblicksbild"
 
 msgid "RAID-Z1"
 msgstr "RAID-Z1"
@@ -980,468 +982,468 @@ msgid "RAID-Z3"
 msgstr "RAID-Z3"
 
 msgid "REMOVED"
-msgstr ""
+msgstr "BORTTAGEN"
 
 msgid "Raw send"
-msgstr ""
+msgstr "Rå överföring"
 
 msgid "Record size"
-msgstr ""
+msgstr "Poststorlek"
 
 msgid "Recursive"
-msgstr ""
+msgstr "Rekursiv"
 
 msgid "Recursive snapshot created."
-msgstr ""
+msgstr "Den rekursiva ögonblicksbilden har skapats."
 
 msgid "Refer"
 msgstr "Hänvisa"
 
 msgid "Referenced"
-msgstr ""
+msgstr "Refererad"
 
 msgid "Remote"
-msgstr ""
+msgstr "Fjärr"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr ""
+msgstr "Automatisk fjärrupplåsning har aktiverats. Nyckeln hämtas vid start."
 
 msgid "Remote host"
-msgstr ""
+msgstr "Fjärrvärd"
 
 msgid "Removal state"
-msgstr ""
+msgstr "Borttagningstillstånd"
 
 msgid "Removal status"
-msgstr ""
+msgstr "Borttagningsstatus"
 
 msgid "Remove Vdev"
-msgstr ""
+msgstr "Ta bort vdev"
 
 msgid "Remove vdev"
-msgstr ""
+msgstr "Ta bort vdev"
 
 msgid "Removing stale ZFS mntent entries ..."
-msgstr ""
+msgstr "Tar bort inaktuella ZFS-mntent-poster…"
 
 msgid "Rename"
-msgstr ""
+msgstr "Byt namn"
 
 msgid "Rename dataset"
-msgstr ""
+msgstr "Byt namn på datauppsättning"
 
 msgid "Renaming dataset ..."
-msgstr ""
+msgstr "Byter namn på datauppsättning…"
 
 msgid "Replace device"
-msgstr ""
+msgstr "Ersätt enhet"
 
 msgid "Replacement device"
-msgstr ""
+msgstr "Ersättningsenhet"
 
 msgid "Replication Jobs"
-msgstr ""
+msgstr "Replikeringsjobb"
 
 msgid ""
 "Replication snapshots will be named <prefix>-YYYYMMDD-HHMMSS. When 'Use "
 "existing snapshots' is enabled, this must exactly match the prefix used by "
 "the snapshot job that manages this dataset (e.g. 'auto') — a mismatch will "
 "cause replication to fail with 'No snapshots found'."
-msgstr ""
+msgstr "Replikeringsögonblicksbilder får namn enligt <prefix>-YYYYMMDD-HHMMSS. När ”Använd befintliga ögonblicksbilder” är aktiverat måste detta exakt motsvara prefixet som används av ögonblicksbildsjobbet som hanterar datauppsättningen, till exempel ”auto”. Om prefixen inte stämmer överens misslyckas replikeringen med felet ”Inga ögonblicksbilder hittades”."
 
 msgid "Resume scrub"
-msgstr ""
+msgstr "Återuppta datakontroll"
 
 msgid "Resuming scrub ..."
-msgstr ""
+msgstr "Återupptar datakontroll…"
 
 msgid "Rollback"
 msgstr "Rulla tillbaka"
 
 msgid "Rolling back snapshot ..."
-msgstr ""
+msgstr "Återställer till ögonblicksbild…"
 
 msgid "Run"
-msgstr ""
+msgstr "Kör"
 
 msgid "Run now"
-msgstr ""
+msgstr "Kör nu"
 
 msgid "Run replication job"
-msgstr ""
+msgstr "Kör replikeringsjobb"
 
 msgid "Run snapshot job"
-msgstr ""
+msgstr "Kör jobb för ögonblicksbilder"
 
 msgid "SSH Certificate"
-msgstr ""
+msgstr "SSH-certifikat"
 
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr ""
+msgstr "SSH-nyckelpar för autentisering mot fjärrvärden. Skapa ett under System > Certifikat > SSH och använd sedan Kopiera till fjärrvärd för att auktorisera det."
 
 msgid "SSH port"
-msgstr ""
+msgstr "SSH-port"
 
 msgid "SSH user"
-msgstr ""
+msgstr "SSH-användare"
 
 msgid "Saturday"
-msgstr ""
+msgstr "Lördag"
 
 msgid ""
 "Saves the passphrase to /etc/zfs/keys/ so the dataset unlocks automatically "
 "on startup."
-msgstr ""
+msgstr "Sparar lösenfrasen i /etc/zfs/keys/ så att datauppsättningen låses upp automatiskt vid start."
 
 msgid ""
 "Saves the passphrase unencrypted to /etc/zfs/keys/ so the dataset unlocks "
 "automatically on startup. Protects against drive theft but not theft of the "
 "whole server."
-msgstr ""
+msgstr "Sparar lösenfrasen okrypterad i /etc/zfs/keys/ så att datauppsättningen låses upp automatiskt vid start. Det skyddar mot stöld av enheten men inte mot stöld av hela servern."
 
 msgid "Scan for and import all pools not currently imported."
-msgstr ""
+msgstr "Sök efter och importera alla pooler som inte redan är importerade."
 
 msgid "Schedule"
-msgstr ""
+msgstr "Schema"
 
 msgid "Scheduling"
-msgstr ""
+msgstr "Schemaläggning"
 
 msgid "Scrub"
-msgstr "Skrubba"
+msgstr "Datakontroll"
 
 msgid "Scrub Jobs"
-msgstr ""
+msgstr "Datakontrollsjobb"
 
 msgid "Scrub paused."
-msgstr ""
+msgstr "Datakontrollen har pausats."
 
 msgid "Scrub resumed."
-msgstr ""
+msgstr "Datakontrollen har återupptagits."
 
 msgid "Scrub started."
-msgstr ""
+msgstr "Datakontrollen har startats."
 
 msgid "Scrub started. Monitor progress in the Pools tab."
-msgstr ""
+msgstr "Datakontrollen har startats. Följ förloppet på fliken Pooler."
 
 msgid "Scrub state"
-msgstr ""
+msgstr "Datakontrollens tillstånd"
 
 msgid "Scrub status"
-msgstr ""
+msgstr "Datakontrollens status"
 
 msgid "Scrub stopped."
-msgstr ""
+msgstr "Datakontrollen har stoppats."
 
 msgid "Send email on error only"
-msgstr ""
+msgstr "Skicka e-post endast vid fel"
 
 msgid "Send output via email"
-msgstr ""
+msgstr "Skicka utdata via e-post"
 
 msgid "Send the command output via email on completion."
-msgstr ""
+msgstr "Skicka kommandots utdata via e-post när jobbet är klart."
 
 msgid "Sensitive"
-msgstr ""
+msgstr "Skiftlägeskänslig"
 
 msgid "Sensitive (default)"
-msgstr ""
+msgstr "Skiftlägeskänslig (standard)"
 
 msgid "September"
-msgstr ""
+msgstr "September"
 
 msgid "Set ashift"
 msgstr "Ställ in ashift"
 
 msgid "Settings"
-msgstr ""
+msgstr "Inställningar"
 
 msgid "Size"
 msgstr "Storlek"
 
 msgid "Skip certificate verification"
-msgstr ""
+msgstr "Hoppa över certifikatverifiering"
 
 msgid "Snapshot Diff"
-msgstr ""
+msgstr "Skillnader mellan ögonblicksbilder"
 
 msgid "Snapshot Jobs"
-msgstr ""
+msgstr "Jobb för ögonblicksbilder"
 
 msgid "Snapshot added."
-msgstr ""
+msgstr "Ögonblicksbilden har lagts till."
 
 msgid "Snapshot and replicate the dataset and all its children."
-msgstr ""
+msgstr "Skapa en ögonblicksbild av datauppsättningen och alla dess underordnade datauppsättningar och replikera dem."
 
 msgid "Snapshot cloned."
-msgstr ""
+msgstr "Ögonblicksbilden har klonats."
 
 msgid "Snapshot created."
-msgstr ""
+msgstr "Ögonblicksbilden har skapats."
 
 msgid "Snapshot deleted recursively."
-msgstr ""
+msgstr "Ögonblicksbilden har tagits bort rekursivt."
 
 msgid "Snapshot deleted."
-msgstr ""
+msgstr "Ögonblicksbilden har tagits bort."
 
 msgid "Snapshot prefix"
-msgstr ""
+msgstr "Prefix för ögonblicksbilder"
 
 msgid "Snapshot rolled back."
-msgstr ""
+msgstr "Ögonblicksbilden har återställts."
 
 msgid ""
 "Snapshot the dataset and all its children. Retention pruning counts "
 "generations at the parent level and destroys each expired generation across "
 "all children."
-msgstr ""
+msgstr "Skapa en ögonblicksbild av datauppsättningen och alla dess underordnade datauppsättningar. Vid rensning enligt lagringspolicyn räknas generationer på den överordnade nivån och varje utgången generation tas bort i alla underordnade datauppsättningar."
 
 msgid "Snapshot this dataset and all its children."
-msgstr ""
+msgstr "Skapa en ögonblicksbild av den här datauppsättningen och alla dess underordnade datauppsättningar."
 
 msgid "Snapshots"
-msgstr "Ögonblicksbild"
+msgstr "Ögonblicksbilder"
 
 msgid "Snapshots deleted."
-msgstr ""
+msgstr "Ögonblicksbilderna har tagits bort."
 
 msgid "Snapshots will be named <prefix>-YYYYMMDD-HHMMSS."
-msgstr ""
+msgstr "Ögonblicksbilder får namn enligt <prefix>-YYYYMMDD-HHMMSS."
 
 msgid "Source"
 msgstr "Källa"
 
 msgid "Source dataset"
-msgstr ""
+msgstr "Källdatauppsättning"
 
 msgid "Source name"
-msgstr ""
+msgstr "Källnamn"
 
 msgid "Source path"
-msgstr ""
+msgstr "Källsökväg"
 
 msgid "Source pool"
-msgstr ""
+msgstr "Källpool"
 
 msgid "Special (metadata)"
-msgstr ""
+msgstr "Specialenhet (metadata)"
 
 msgid "Specifies which device alias should be used."
 msgstr "Anger vilket enhetsalias som ska användas."
 
 msgid ""
 "Specifies which device alias should be used. Don't change unless needed."
-msgstr "Anger vilken alias för enhet som ska användas. Byt inte om det inte behövs."
+msgstr "Anger vilket enhetsalias som ska användas. Ändra det endast vid behov."
 
 msgid "Specify ashift value. Only use if you are sure you need it."
-msgstr "Ange ashift värde. Använd bara om du är säker på att du behöver det."
+msgstr "Ange ett ashift-värde. Använd det endast om du är säker på att det behövs."
 
 msgid "Stale ZFS mntent entries removed."
-msgstr ""
+msgstr "Inaktuella ZFS-mntent-poster har tagits bort."
 
 msgid "Start scrub"
-msgstr ""
+msgstr "Starta datakontroll"
 
 msgid "Starting TRIM ..."
-msgstr ""
+msgstr "Startar TRIM…"
 
 msgid "Starting scrub ..."
-msgstr ""
+msgstr "Startar datakontroll…"
 
 msgid "Status"
 msgstr "Status"
 
 msgid "Stop scrub"
-msgstr ""
+msgstr "Stoppa datakontroll"
 
 msgid "Stopping scrub ..."
-msgstr ""
+msgstr "Stoppar datakontroll…"
 
 msgid "Sunday"
-msgstr ""
+msgstr "Söndag"
 
 msgid "Synchronising ZFS mntent entries ..."
-msgstr ""
+msgstr "Synkroniserar ZFS-mntent-poster…"
 
 msgid "TRIM started."
-msgstr ""
+msgstr "TRIM har startats."
 
 msgid "The field should only contain * or a comma separated list of values."
-msgstr ""
+msgstr "Fältet ska bara innehålla * eller en kommaseparerad lista över värden."
 
 msgid ""
 "The passphrase will be fetched from a remote HTTPS server at boot. The key "
 "is never stored on this machine, protecting against theft of the whole "
 "server. Requires network access during boot."
-msgstr ""
+msgstr "Lösenfrasen hämtas från en HTTPS-fjärrserver vid start. Nyckeln lagras aldrig på den här datorn, vilket skyddar mot stöld av hela servern. Nätverksåtkomst krävs under starten."
 
 msgid ""
 "The passphrase will be saved unencrypted to /etc/zfs/keys/ on this machine. "
 "Protects against drive theft but not theft of the whole server."
-msgstr ""
+msgstr "Lösenfrasen sparas okrypterad i /etc/zfs/keys/ på den här datorn. Det skyddar mot stöld av enheten men inte mot stöld av hela servern."
 
 msgid "Thin provisioning"
-msgstr ""
+msgstr "Tunn allokering"
 
 msgid "Thursday"
-msgstr ""
+msgstr "Torsdag"
 
 msgid "Time of execution"
-msgstr ""
+msgstr "Tidpunkt för körning"
 
 msgid "Trim"
-msgstr ""
+msgstr "TRIM"
 
 msgid "Tuesday"
-msgstr ""
+msgstr "Tisdag"
 
 msgid "Type"
 msgstr "Typ"
 
 msgid "UNAVAIL"
-msgstr ""
+msgstr "OTILLGÄNGLIG"
 
 msgid "UNKNOWN"
-msgstr ""
+msgstr "OKÄND"
 
 msgid "URL must start with https://"
-msgstr ""
+msgstr "Webbadressen måste börja med https://"
 
 msgid "Unit"
-msgstr ""
+msgstr "Enhet"
 
 msgid "Unload key (lock)"
-msgstr ""
+msgstr "Läs ur nyckel (lås)"
 
 msgid "Unloading encryption key ..."
-msgstr ""
+msgstr "Läser ur krypteringsnyckel…"
 
 msgid "Updated replication job."
-msgstr ""
+msgstr "Replikeringsjobbet har uppdaterats."
 
 msgid "Updated scrub job."
-msgstr ""
+msgstr "Datakontrollsjobbet har uppdaterats."
 
 msgid "Updated snapshot job."
-msgstr ""
+msgstr "Jobbet för ögonblicksbilder har uppdaterats."
 
 msgid "Upgrade"
-msgstr ""
+msgstr "Uppgradera"
 
 msgid "Upgrading pool ..."
-msgstr ""
+msgstr "Uppgraderar pool…"
 
 msgid "Use ZFS bookmarks"
-msgstr ""
+msgstr "Använd ZFS-bokmärken"
 
 msgid ""
 "Use default (128K) for general use. Use 4K-16K for databases, 1M for large "
 "files/media."
-msgstr ""
+msgstr "Använd standardvärdet 128K för allmän användning. Använd 4K–16K för databaser och 1M för stora filer och media."
 
 msgid "Use existing snapshots"
-msgstr ""
+msgstr "Använd befintliga ögonblicksbilder"
 
 msgid ""
 "Use zfs send -w to send encrypted data without decrypting. Requires "
 "encryption on the source dataset."
-msgstr ""
+msgstr "Använd zfs send -w för att överföra krypterade data utan att dekryptera dem. Källdatauppsättningen måste vara krypterad."
 
 msgid "Used"
-msgstr "Använd"
+msgstr "Använt"
 
 msgid "Used (%)"
-msgstr ""
+msgstr "Använt (%)"
 
 msgid ""
 "User on the remote host with permission to run zfs receive. Use 'zfs allow' "
 "on the remote to grant non-root access."
-msgstr ""
+msgstr "Användare på fjärrvärden med behörighet att köra zfs receive. Använd ”zfs allow” på fjärrvärden för att ge åtkomst utan root-behörighet."
 
 msgid "Value"
 msgstr "Värde"
 
 msgid "Vdev removal cancelled."
-msgstr ""
+msgstr "Borttagningen av vdev-enheten har avbrutits."
 
 msgid "Vdev to remove"
-msgstr ""
+msgstr "Vdev som ska tas bort"
 
 msgid "Vdev type"
-msgstr "Vdev typ"
+msgstr "Vdev-typ"
 
 msgid "Volume added."
-msgstr ""
+msgstr "Volymen har lagts till."
 
 msgid "Wednesday"
-msgstr ""
+msgstr "Onsdag"
 
 msgid "Weekly"
-msgstr ""
+msgstr "Varje vecka"
 
 msgid "Yearly"
-msgstr ""
+msgstr "Varje år"
 
 msgid "ZFS ARC Hits/Misses"
-msgstr ""
+msgstr "ZFS ARC-träffar och missar"
 
 msgid "ZFS ARC Size"
-msgstr ""
+msgstr "ZFS ARC-storlek"
 
 msgid "ZFS Pool Events"
-msgstr ""
+msgstr "Händelser för ZFS-pooler"
 
 msgid "ZFS Pool Health"
-msgstr ""
+msgstr "Hälsa för ZFS-pooler"
 
 msgid "ZFS Pool Status"
-msgstr ""
+msgstr "Status för ZFS-pooler"
 
 msgid "ZFS Remote Unlock"
-msgstr ""
+msgstr "ZFS-fjärrupplåsning"
 
 msgid "ZFS Replication"
-msgstr ""
+msgstr "ZFS-replikering"
 
 msgid "ZFS Scrub"
-msgstr ""
+msgstr "ZFS-datakontroll"
 
 msgid "ZFS ZED"
 msgstr "ZFS ZED"
 
 msgid "ZFS mntent entries synchronised."
-msgstr ""
+msgstr "ZFS-mntent-posterna har synkroniserats."
 
 msgid "days"
-msgstr ""
+msgstr "dagar"
 
 msgid "months"
-msgstr ""
+msgstr "månader"
 
 msgid "omv-extras.org wiki"
-msgstr ""
+msgstr "omv-extras.org-wiki"
 
 msgid "snapshots"
-msgstr ""
+msgstr "ögonblicksbilder"
 
 msgid "weeks"
-msgstr ""
+msgstr "veckor"
 
 msgid "years"
-msgstr ""
+msgstr "år"
 
 msgid "zfs"
-msgstr ""
+msgstr "zfs"
 
 msgid "zpool export"
-msgstr ""
+msgstr "zpool export"
 
 msgid "zpool import"
-msgstr ""
+msgstr "zpool import"

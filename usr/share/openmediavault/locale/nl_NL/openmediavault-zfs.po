@@ -77,7 +77,7 @@ msgid ""
 "Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
 " per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
 "Apply/reboot."
-msgstr ""
+msgstr "Extra regels 'options zfs ...' toegevoegd aan /etc/modprobe.d/zfs.conf, één per regel, bijv. 'options zfs l2arc_mfuonly=1'. Toegepast bij de volgende Toepassen/herstart."
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -368,7 +368,7 @@ msgstr "Dataset gekloond."
 msgid ""
 "Dataset path on the destination (e.g. backup/replica). For remote, this is "
 "the dataset path on the remote host."
-msgstr "Pad van dataset op de bestemming (bijvoorbeeld back-up/replica). Voor remote is dit het datasetpad op de remote host."
+msgstr "Pad van dataset op de bestemming (bijvoorbeeld back-up/replica). Voor extern is dit het datasetpad op de externe host."
 
 msgid "Dataset promoted."
 msgstr "Dataset gepromoveerd."
@@ -526,13 +526,13 @@ msgid "Enable auto-unlock at boot (local file)"
 msgstr "Autom. ontgrendelen inschakelen bij het opstarten (lokaal bestand)"
 
 msgid "Enable auto-unlock at boot (remote HTTPS)"
-msgstr "Autom. ontgrendelen inschakelen bij het opstarten (HTTPS op afstand)"
+msgstr "Autom. ontgrendelen inschakelen bij het opstarten (externe HTTPS)"
 
 msgid "Enable auto-unlock — local file"
 msgstr "Autom. ontgrendelen inschakelen — lokaal bestand"
 
 msgid "Enable auto-unlock — remote HTTPS"
-msgstr "Autom. ontgrendelen inschakelen — HTTPS op afstand"
+msgstr "Autom. ontgrendelen inschakelen — externe HTTPS"
 
 msgid "Enabled"
 msgstr "Ingeschakeld"
@@ -583,7 +583,7 @@ msgid "Exporting pool ..."
 msgstr "Pool exporteren…"
 
 msgid "Extra module options"
-msgstr ""
+msgstr "Extra module opties"
 
 msgid "FAULTED"
 msgstr "DEFECT"
@@ -654,7 +654,7 @@ msgid "Hits"
 msgstr "Hits"
 
 msgid "Hostname or IP address of the remote ZFS host."
-msgstr "Hostnaam of IP-adres van de ZFS-host op afstand."
+msgstr "Hostnaam of IP-adres van de externe ZFS-host."
 
 msgid "Hot spare"
 msgstr "Hot reserve"
@@ -1001,13 +1001,13 @@ msgid "Referenced"
 msgstr "Met verwijzing"
 
 msgid "Remote"
-msgstr "Op afstand"
+msgstr "Extern"
 
 msgid "Remote auto-unlock enabled. The key will be fetched at boot."
-msgstr "Automatisch ontgrendelen op afstand ingeschakeld. De sleutel wordt bij het opstarten opgehaald."
+msgstr "Automatisch extern ontgrendelen ingeschakeld. De sleutel wordt bij het opstarten opgehaald."
 
 msgid "Remote host"
-msgstr "Host op afstand"
+msgstr "Externe host"
 
 msgid "Removal state"
 msgstr "Verwijderingstoestand"
@@ -1079,7 +1079,7 @@ msgstr "SSH-certificaat"
 msgid ""
 "SSH key pair to authenticate with the remote host. Create one under System >"
 " Certificates > SSH, then use Copy to Remote to authorize it."
-msgstr "SSH-sleutelpaar om te authenticeren met de externe host. Maak er een aan onder Systeem > Certificaten > SSH en gebruik vervolgens Kopiëren op afstand om dit te autoriseren."
+msgstr "SSH-sleutelpaar om te authenticeren met de externe host. Maak er een aan onder Systeem > Certificaten > SSH en gebruik vervolgens Extern kopiëren om dit te autoriseren."
 
 msgid "SSH port"
 msgstr "SSH-poort"
@@ -1405,7 +1405,7 @@ msgid "ZFS Pool Status"
 msgstr "ZFS-pool Status"
 
 msgid "ZFS Remote Unlock"
-msgstr "ZFS Ontgrendeling op afstand"
+msgstr "ZFS extern ontgrendelen"
 
 msgid "ZFS Replication"
 msgstr "ZFS-Replicatie"

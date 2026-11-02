@@ -4,14 +4,14 @@
 # 
 # Translators:
 # Napalkov Sergey <nsv102@mail.ru>, 2014
-# Дмитрий <bardimnik@rambler.ru>, 2019
+# Дмитрий, 2019
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Дмитрий <bardimnik@rambler.ru>, 2019\n"
+"Last-Translator: Дмитрий, 2019\n"
 "Language-Team: Russian (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

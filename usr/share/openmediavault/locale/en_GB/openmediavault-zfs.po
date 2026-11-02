@@ -75,7 +75,7 @@ msgid ""
 "Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one"
 " per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next "
 "Apply/reboot."
-msgstr ""
+msgstr "Additional 'options zfs ...' lines appended to /etc/modprobe.d/zfs.conf, one per line, e.g. 'options zfs l2arc_mfuonly=1'. Applied on the next Apply/reboot."
 
 msgid ""
 "After each successful send, create a ZFS bookmark as the incremental base. "
@@ -581,7 +581,7 @@ msgid "Exporting pool ..."
 msgstr "Exporting pool ..."
 
 msgid "Extra module options"
-msgstr ""
+msgstr "Extra module options"
 
 msgid "FAULTED"
 msgstr "FAULTED"

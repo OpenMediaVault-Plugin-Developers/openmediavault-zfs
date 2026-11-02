@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the openmediavault-zfs package.
 # 
 # Translators:
-# Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023
+# Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023,2026
 msgid ""
 msgstr ""
 "Project-Id-Version: openmediavault-zfs\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-05 17:45+0000\n"
 "PO-Revision-Date: 2014-10-16 11:20+0000\n"
-"Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023\n"
+"Last-Translator: Toshihiro Kan <kansuke4649@gmail.com>, 2014,2018,2023,2026\n"
 "Language-Team: Japanese (Japan) (http://app.transifex.com/openmediavault-plugin-developers/openmediavault-zfs/language/ja_JP/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,28 +21,28 @@ msgstr ""
 msgid ""
 "'Snapshots' keeps the N most recent; time units delete snapshots older than "
 "N days/weeks/months/years."
-msgstr ""
+msgstr "「スナップショット」は、直近の N 件を保持します。時間単位の設定により、N 日/週/月/年より古いスナップショットは削除されます。"
 
 msgid "A different name must be specified."
-msgstr ""
+msgstr "別の名前を指定する必要があります。"
 
 msgid "ARC Stats"
-msgstr ""
+msgstr "ARC Stats"
 
 msgid "Add"
 msgstr "追加"
 
 msgid "Add Special Device"
-msgstr ""
+msgstr "特別なデバイスを追加"
 
 msgid "Add cache / log / spare / special"
-msgstr ""
+msgstr "キャッシュ／ログ／スペア／特別を追加"
 
 msgid "Add encrypted filesystem"
-msgstr ""
+msgstr "暗号化されたファイルシステムを追加"
 
 msgid "Add filesystem"
-msgstr ""
+msgstr "ファイルシステムを追加"
 
 msgid "Add new"
 msgstr ""

@@ -123,8 +123,9 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $deleteStale = $params['deleteStale'] ?? false;
         self::fixOMVMntEnt($context, $addMissing, $deleteStale);
         // Backfill zfs-list.cache files for pools created/imported before the
-        // plugin maintained them, so zfs-mount-generator orders their mounts.
-        self::ensureZfsListCacheForAllPools();
+        // plugin maintained them, and refresh existing ones in case ZED missed
+        // a dataset change, so zfs-mount-generator orders every mount.
+        self::ensureZfsListCacheForAllPools(true);
     }
 
     public function doDiscoverBg($params, $context)
@@ -762,6 +763,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             default:
                 throw new \OMV\Exception('Illegal type provided: ' . $params['type']);
         }
+        if (in_array($params['type'], ['filesystem', 'clone'], true)) {
+            // Don't rely on ZED alone to add the new dataset to zfs-list.cache;
+            // if it misses the event no boot .mount unit is generated (#119).
+            $parent = ($params['type'] === 'clone') ? $params['pool'] : $params['path'];
+            self::updateZfsListCache(explode('/', $parent)[0]);
+        }
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
@@ -797,6 +804,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             throw $e;
         }
         self::fixOMVMntEnt($context, true, true);
+        self::updateZfsListCache(explode('/', $newPath)[0]);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
@@ -820,6 +828,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         $cmd = sprintf('zfs clone -p %s %s 2>&1', escapeshellarg($snapshot), escapeshellarg($target));
         self::zfsExec($cmd, $out, $res);
         self::addOMVMntEntForDataset($context, $target);
+        self::updateZfsListCache(explode('/', $target)[0]);
         self::dirtyModules(['collectd', 'fstab', 'monit', 'quota']);
     }
 
@@ -1034,6 +1043,8 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             }
         }
         if ($params['type'] === 'Filesystem') {
+            // mountpoint, canmount, etc. are recorded in zfs-list.cache.
+            self::updateZfsListCache(explode('/', $params['name'])[0]);
             \OMV\Engine\Notify\Dispatcher::getInstance()->notify(OMV_NOTIFY_MODIFY,
                 'org.openmediavault.storage.zfs.filesystem', $context);
             self::dirtyModules(['collectd', 'monit', 'quota']);
@@ -3412,6 +3423,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      */
     private static function updateZfsListCache(string $poolName): void
     {
+        // Callers may pass a dataset or snapshot name; only the pool counts.
+        $poolName  = preg_split('#[/@]#', $poolName)[0];
+        if ($poolName === '') {
+            return;
+        }
         $cacheDir  = '/etc/zfs/zfs-list.cache';
         $cacheFile = $cacheDir . '/' . $poolName;
         if (!is_dir($cacheDir)) {
@@ -3438,15 +3454,17 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
 
     /**
      * Create /etc/zfs/zfs-list.cache/<pool> for every imported pool that does
-     * not have one yet.  Existing files are left alone (ZED keeps them current).
+     * not have one yet.  With $refreshExisting, existing files are rewritten
+     * too, repairing caches where ZED missed a dataset event (#119).
      */
-    private static function ensureZfsListCacheForAllPools(): void
+    private static function ensureZfsListCacheForAllPools(bool $refreshExisting = false): void
     {
         $pools = [];
         self::zfsTryExec('zpool list -H -o name 2>/dev/null', $pools);
         foreach ($pools as $pool) {
             $pool = trim($pool);
-            if ($pool === '' || file_exists('/etc/zfs/zfs-list.cache/' . $pool)) {
+            if ($pool === '' ||
+                (!$refreshExisting && file_exists('/etc/zfs/zfs-list.cache/' . $pool))) {
                 continue;
             }
             self::updateZfsListCache($pool);

@@ -3801,6 +3801,53 @@ rm -f "/tmp/zlc_backup_$$"
 unset ZP_DS ZP_PARAMS ZP_UNIT ZP_ENABLED
 
 # ===========================================================================
+section "zfs-list.cache — maintained without ZED (issue #119)"
+# ===========================================================================
+# A child dataset created after addPool was missing from the cache, so no
+# .mount unit was generated for it.  Stop ZED so only the plugin can update
+# the cache, then check create, rename and doDiscover repair.
+
+ZN_CACHE="/etc/zfs/zfs-list.cache/$POOL"
+ZN_ZED_WAS_ACTIVE=$(systemctl is-active zfs-zed 2>/dev/null || echo "inactive")
+systemctl stop zfs-zed 2>/dev/null || true
+
+assert_rpc "addObject — zlc_nozed (ZED stopped)" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$POOL\",\"name\":\"zlc_nozed\",\"mountpoint\":\"\"}"
+if grep -q "^${POOL}/zlc_nozed	" "$ZN_CACHE" 2>/dev/null; then
+    _pass "zfs-list.cache — zlc_nozed added by addObject without ZED"
+else
+    _fail "zfs-list.cache — zlc_nozed missing after addObject without ZED" \
+        "$(cut -f1 "$ZN_CACHE" 2>/dev/null)"
+fi
+
+assert_rpc "renameObject — zlc_nozed to zlc_nozed2 (ZED stopped)" "Zfs" "renameObject" \
+    "{\"oldpath\":\"$POOL/zlc_nozed\",\"oldname\":\"zlc_nozed\",\"type\":\"Filesystem\",\"newname\":\"zlc_nozed2\"}"
+if grep -q "^${POOL}/zlc_nozed2	" "$ZN_CACHE" 2>/dev/null \
+        && ! grep -q "^${POOL}/zlc_nozed	" "$ZN_CACHE" 2>/dev/null; then
+    _pass "zfs-list.cache — rename reflected without ZED"
+else
+    _fail "zfs-list.cache — rename not reflected without ZED" \
+        "$(cut -f1 "$ZN_CACHE" 2>/dev/null)"
+fi
+
+# doDiscover must repair an existing cache file that lacks a dataset.
+grep -v "^${POOL}/zlc_nozed2	" "$ZN_CACHE" > "/tmp/zn_cache_$$" && cat "/tmp/zn_cache_$$" > "$ZN_CACHE"
+rm -f "/tmp/zn_cache_$$"
+assert_rpc "doDiscover — refresh stale cache" "Zfs" "doDiscover" '{"addMissing":false,"deleteStale":false}'
+if grep -q "^${POOL}/zlc_nozed2	" "$ZN_CACHE" 2>/dev/null; then
+    _pass "doDiscover — restored zlc_nozed2 in existing zfs-list.cache"
+else
+    _fail "doDiscover — did not restore zlc_nozed2 in existing zfs-list.cache" ""
+fi
+
+assert_rpc "deleteObject — zlc_nozed2" "Zfs" "deleteObject" \
+    "{\"name\":\"$POOL/zlc_nozed2\",\"mp\":\"/$POOL/zlc_nozed2\",\"type\":\"Filesystem\"}"
+if [ "$ZN_ZED_WAS_ACTIVE" = "active" ]; then
+    systemctl start zfs-zed 2>/dev/null || true
+fi
+unset ZN_CACHE ZN_ZED_WAS_ACTIVE
+
+# ===========================================================================
 section "Error injection — zinject checksum and I/O errors"
 # ===========================================================================
 # Uses 'zinject' to drive non-zero error counters into the pool and verifies

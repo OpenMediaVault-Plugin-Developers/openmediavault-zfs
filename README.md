@@ -155,6 +155,11 @@ Calls that require no pool and verify the plugin can communicate with the engine
 - An encrypted dataset with `autounlock=true` is created so the cache has a `keylocation=file://` entry and `zfs-mount-generator` generates a `zfs-load-key@` unit for it
 - `deleteObject (Filesystem)` — destroys the dataset; verifies the entry is removed from `/etc/zfs/zfs-list.cache/<pool>`, the keyfile is removed from `/etc/zfs/keys/`, and the `zfs-load-key@<instance>.service` unit is no longer active and is unmasked (removing any stale `/dev/null` symlink left by a prior `removeAutoUnlock` call)
 
+#### zfs-list.cache — maintained without ZED (issue #119)
+- `zfs-zed` is stopped so only the plugin can update `/etc/zfs/zfs-list.cache/<pool>`
+- `addObject (filesystem)` and `renameObject` — verifies the cache reflects the new/renamed dataset
+- `doDiscover` — removes the dataset line from an existing cache file and verifies Discover restores it; ZED is restarted afterwards if it was running
+
 #### Encryption — stale mountpoint directory repair
 - An encrypted dataset is created; its mountpoint directory is manually removed to simulate corruption
 - `loadEncryptionKey` — verifies `addOMVMntEntForDataset` is triggered to recreate the missing mountpoint directory before mounting

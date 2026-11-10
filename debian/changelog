@@ -1,3 +1,16 @@
+openmediavault-zfs (8.1.4) stable; urgency=low
+
+  * Stop masking zfs-load-key@ units for keylocation=prompt encryption roots;
+    a masked unit cannot be started, so units depending on those datasets
+    (e.g. nfs-server via RequiresMountsFor=) failed to restart (#120)
+    - Use a per-dataset drop-in that replaces the passphrase prompt with a
+      keystatus check instead, so boot still does not wait for a passphrase
+    - Remote HTTPS auto-unlock datasets (keylocation=prompt) are no longer
+      masked either
+    - Existing masks are migrated on upgrade and removed when found
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 10 Nov 2026 12:00:00 +0000
+
 openmediavault-zfs (8.1.3) stable; urgency=low
 
   * Revert datasets tab tree view

@@ -8,6 +8,8 @@ openmediavault-zfs (8.1.4) stable; urgency=low
     - Remote HTTPS auto-unlock datasets (keylocation=prompt) are no longer
       masked either
     - Existing masks are migrated on upgrade and removed when found
+  * Stop the zfs-load-key@ units when locking a dataset so they no longer
+    stay active after the key is unloaded
 
  -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Tue, 10 Nov 2026 12:00:00 +0000
 

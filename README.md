@@ -137,14 +137,17 @@ Calls that require no pool and verify the plugin can communicate with the engine
 - `addObject (filesystem, child of encrypted parent)` — verifies the child is immediately mounted (CASE 2 regression)
 - `getEncryptionStatus` — confirms `autounlock=true` and `keystatus=available`
 - `removeAutoUnlock` — disables auto-unlock: keyfile removed, `keylocation` reset to `prompt`
-  - Verifies the `zfs-load-key@<instance>.service` unit is **masked** (a `/dev/null` symlink is written to `/etc/systemd/system/`) so `zfs-mount-generator` does not prompt for a passphrase at the next boot
+  - Verifies the `zfs-load-key@<instance>.service` unit has the **no-prompt drop-in** (`omv-zfs-no-prompt.conf`), that systemd loaded it, that the effective `ExecStart` does not call `systemd-ask-password`, and that the unit is **not masked** (#120)
+  - Starts a transient unit with `RequiresMountsFor=` on the still-unlocked dataset, the same dependency `nfs-server` has on its exports; it must start (#120 reproduction)
   - Verifies the `wait-for-remote-unlock.conf` drop-in state matches the number of datasets with active remote unlock (absent when none; present when others exist on the system)
-- `setAutoUnlock` (re-enable local) — re-creates the keyfile and **unmasks** the `zfs-load-key@<instance>.service` unit so auto-unlock is active again at the next boot; keyfile presence verified
-- `removeAutoUnlock` (second call) — re-masks the unit before the simulated-reboot portion of the test
-- `unloadEncryptionKey` — simulates a post-reboot locked state (`keystatus=unavailable`)
+- `unloadEncryptionKey` — simulates a post-reboot locked state (`keystatus=unavailable`); starting the load-key unit must then fail immediately instead of hanging on a passphrase prompt
+- `setAutoUnlock` (re-enable local) — re-creates the keyfile and **removes** the no-prompt drop-in so the generated unit runs `zfs load-key` at the next boot; keyfile presence verified
+- `removeAutoUnlock` (second call) — restores the drop-in; the locked unit again fails fast
 - `doDiscoverBg (deleteStale=true)` — verifies the OMV fstab entry is **preserved** for a locked (unmounted) encrypted dataset (regression: a naive stale-entry scan would incorrectly delete it)
 - `loadEncryptionKey` — manually unlocks and mounts the dataset after the simulated reboot; parent and child datasets verified as mounted
-  - The RPC temporarily unmasks any masked `zfs-load-key@` units before starting them, so the associated `.mount` units can satisfy their `BindsTo` dependencies — without this, systemd unmounts child datasets immediately after `zfs mount` succeeds because the parent `.mount` unit is in a failed state; units are re-masked after mounting to preserve the `removeAutoUnlock` setting
+  - The RPC resets and starts the `zfs-load-key@` unit so the associated `.mount` units can satisfy their `BindsTo` dependencies — without this, systemd unmounts child datasets immediately after `zfs mount` succeeds because the parent `.mount` unit is in a failed state
+  - After unlocking: the load-key unit is active, starting it again succeeds, and transient units with `RequiresMountsFor=` on the dataset and its child start without unmounting anything (#120)
+- `zfs destroy` + `doDiscover` — the cache refresh removes the orphaned no-prompt drop-in
 
 #### Encryption — clone and promote edge cases
 - `cloneDataset` — clones an encrypted dataset; `isencryptionroot` verified (source=true, clone=false)
@@ -153,7 +156,16 @@ Calls that require no pool and verify the plugin can communicate with the engine
 
 #### Encryption — zfs-list.cache and deleteObject cleanup
 - An encrypted dataset with `autounlock=true` is created so the cache has a `keylocation=file://` entry and `zfs-mount-generator` generates a `zfs-load-key@` unit for it
-- `deleteObject (Filesystem)` — destroys the dataset; verifies the entry is removed from `/etc/zfs/zfs-list.cache/<pool>`, the keyfile is removed from `/etc/zfs/keys/`, and the `zfs-load-key@<instance>.service` unit is no longer active and is unmasked (removing any stale `/dev/null` symlink left by a prior `removeAutoUnlock` call)
+- `deleteObject (Filesystem)` — destroys the dataset; verifies the entry is removed from `/etc/zfs/zfs-list.cache/<pool>`, the keyfile is removed from `/etc/zfs/keys/`, and the `zfs-load-key@<instance>.service` unit is no longer active and is unmasked (removing any stale `/dev/null` symlink left by plugin versions before 8.1.4)
+
+#### zfs-list.cache — prompt encryption roots (issue #120)
+- `enableEncryption` (prompt, hyphenated name to exercise `systemd-escape`) — no-prompt drop-in present, unit not masked, dataset still mounted after `daemon-reload`, dependent unit starts
+- `addObject` child — no drop-in for the child (not an encryption root), dependent unit on the child starts
+- Legacy mask (pre-8.1.4) — the test masks the unit, confirms a dependent unit then fails (#120 reproduced), and verifies both `doDiscover` and `loadEncryptionKey` replace the mask with the drop-in
+- `renameObject` — the drop-in moves to the new name
+- `setAutoUnlock` (remote) / `removeAutoUnlock` — remote unlock (also `keylocation=prompt`) gets the drop-in, not a mask, and the unit is ordered after `zfs-remote-unlock.service`
+- `deleteObject` — child deletion keeps the root's drop-in; root deletion removes it
+- `deleteObjectBg (Pool)` — removes any remaining drop-ins of the pool
 
 #### zfs-list.cache — maintained without ZED (issue #119)
 - `zfs-zed` is stopped so only the plugin can update `/etc/zfs/zfs-list.cache/<pool>`
@@ -174,15 +186,15 @@ Calls that require no pool and verify the plugin can communicate with the engine
 
 ## Deleting an encrypted dataset from the command line
 
-If a dataset has auto-unlock (local keyfile or remote URL) configured in the plugin, deleting it with `zfs destroy` directly leaves orphaned plugin artifacts: a keyfile or remote-key JSON file, a masked `zfs-load-key@` systemd unit, and possibly the `wait-for-remote-unlock.conf` drop-in. Use the RPCs from the command line to let the plugin clean up correctly.
+If a dataset has auto-unlock (local keyfile or remote URL) configured in the plugin, deleting it with `zfs destroy` directly leaves orphaned plugin artifacts: a keyfile or remote-key JSON file, a `zfs-load-key@` no-prompt drop-in, and possibly the `wait-for-remote-unlock.conf` drop-in. Use the RPCs from the command line to let the plugin clean up correctly.
 
 ### Using the plugin RPCs (recommended)
 
 Replace `pool/dataset` with your actual dataset path.
 
 ```bash
-# 1. Remove auto-unlock (deletes keyfile/metadata, unmasks the load-key unit,
-#    removes the drop-in if no other datasets have remote unlock, daemon-reload).
+# 1. Remove auto-unlock (deletes keyfile/metadata, removes the remote-unlock
+#    drop-in if no other datasets have remote unlock, daemon-reload).
 omv-rpc -u admin "Zfs" "removeAutoUnlock" '{"name":"pool/dataset"}'
 
 # 2. If the dataset is locked (keystatus=unavailable), load the key manually
@@ -209,8 +221,12 @@ rm -f "/etc/zfs/keys/${SAFE}.key"
 # Remove remote-key metadata (remote auto-unlock).
 rm -f "/etc/zfs/remote-keys/${SAFE}.json"
 
-# Unmask the zfs-load-key@ unit that removeAutoUnlock would have masked.
-systemctl unmask "zfs-load-key@$(systemd-escape -p "$DATASET").service"
+# Remove the no-prompt drop-in of the zfs-load-key@ unit (running Discover in
+# the plugin also does this), and any mask left by plugin versions before 8.1.4.
+UNIT="zfs-load-key@$(systemd-escape -p "$DATASET").service"
+rm -f "/etc/systemd/system/${UNIT}.d/omv-zfs-no-prompt.conf"
+rmdir --ignore-fail-on-non-empty "/etc/systemd/system/${UNIT}.d" 2>/dev/null
+systemctl unmask --no-reload "$UNIT"
 
 # If no remote-key JSON files remain, remove the ordering drop-in and disable
 # the remote-unlock service.

@@ -431,13 +431,17 @@ the passphrase to confirm. The plugin:
 
 1. Writes the keyfile to `/etc/zfs/keys/<pool_dataset>.key`.
 2. Sets `keylocation=file:///etc/zfs/keys/<pool_dataset>.key` on the dataset.
-3. Unmasks the `zfs-load-key@<instance>.service` systemd unit so it runs at boot.
+3. Removes the no-prompt override from the `zfs-load-key@<instance>.service` systemd unit so
+   it loads the keyfile at boot.
 4. Writes the dataset path into the ZFS list cache so `zfs-mount-generator` generates the
    correct mount unit.
 
 To remove auto-unlock, click **Encryption → Disable auto-unlock**. The keyfile is deleted,
-`keylocation` is reset to `prompt`, and the systemd unit is masked so no passphrase prompt
-appears at boot (the dataset simply stays locked until manually unlocked).
+`keylocation` is reset to `prompt`, and the systemd unit gets a drop-in
+(`/etc/systemd/system/zfs-load-key@<instance>.service.d/omv-zfs-no-prompt.conf`) so no
+passphrase prompt appears at boot (the dataset simply stays locked until manually unlocked).
+The unit is not masked, so services that depend on the dataset (for example the NFS server)
+can still be restarted once it is unlocked.
 
 ### Auto-unlock: remote HTTPS
 

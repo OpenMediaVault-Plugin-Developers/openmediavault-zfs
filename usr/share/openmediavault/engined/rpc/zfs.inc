@@ -913,6 +913,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         // generate stale systemd units for destroyed datasets/pools.
         if ($params['type'] === 'Pool') {
             @unlink('/etc/zfs/zfs-list.cache/' . $name);
+            self::removeStaleNoPromptDropins($name, []);
         } elseif ($params['type'] === 'Filesystem') {
             self::updateZfsListCache(explode('/', $name)[0]);
             // Clean up encryption artifacts so stale keyfiles and remote-key metadata
@@ -927,12 +928,12 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 @unlink($metafile);
                 self::manageRemoteUnlockService();
             }
-            // Unmask and stop the zfs-load-key@ unit for the deleted dataset.
-            // Without unmasking, a stale /dev/null symlink from removeAutoUnlock
-            // remains in /etc/systemd/system/ as an orphaned artifact.
-            $instanceOut = [];
-            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
-            $instance = trim(implode('', $instanceOut));
+            // Stop the zfs-load-key@ unit for the deleted dataset.  Its
+            // no-prompt drop-in was already removed by updateZfsListCache
+            // (removeStaleNoPromptDropins); also remove any mask left by
+            // plugin versions before 8.1.4 so no orphaned /dev/null symlink
+            // stays in /etc/systemd/system/.
+            $instance = self::loadKeyUnitInstance($name);
             if ($instance !== '') {
                 $loadKeyUnit = 'zfs-load-key@' . $instance . '.service';
                 self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
@@ -1635,26 +1636,19 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         //                                       transitions service to 'active'
         // With the service active, the BindsTo is satisfied and the mount unit
         // stays up permanently.
-        $maskedLoadKeyUnits = [];
+        //
+        // A keylocation=prompt root gets its no-prompt drop-in here as well, and
+        // any mask left by an older plugin version is removed: a masked unit
+        // cannot be started, neither by us nor by units depending on the
+        // dataset (#120).
+        if (($encStatus['keylocation']['value'] ?? '') === 'prompt'
+            && self::applyNoPromptLoadKeyUnits([$params['name']])) {
+            self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
+        }
         foreach ($toMount as $ds) {
-            $instanceOut = [];
-            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($ds)), $instanceOut);
-            $instance = trim(implode('', $instanceOut));
+            $instance = self::loadKeyUnitInstance($ds);
             if ($instance !== '') {
                 $loadKeyUnit = sprintf('zfs-load-key@%s.service', $instance);
-                // A masked load-key unit cannot start, which causes the associated
-                // .mount unit to fail its dependency check and fall into a failed
-                // state.  Child datasets whose .mount unit has Requires=parent.mount
-                // are then immediately unmounted by systemd right after zfs mount
-                // succeeds.  Temporarily unmask so the service can start (it exits 0
-                // immediately since the key is now loaded); we re-mask after all
-                // mounts are verified so the removeAutoUnlock setting is preserved.
-                $maskFile = '/etc/systemd/system/' . $loadKeyUnit;
-                if (is_link($maskFile) && readlink($maskFile) === '/dev/null') {
-                    self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
-                        escapeshellarg($loadKeyUnit)));
-                    $maskedLoadKeyUnits[] = $loadKeyUnit;
-                }
                 self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
                 self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($loadKeyUnit)));
             }
@@ -1731,12 +1725,6 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 'Key loaded but failed to mount: %s',
                 implode('; ', $mountErrors)
             );
-        }
-        // Re-mask load-key units that were temporarily unmasked above.  The service
-        // remains active (RemainAfterExit=yes) so the .mount BindsTo dependency stays
-        // satisfied; the mask only prevents the unit from auto-starting at next boot.
-        foreach ($maskedLoadKeyUnits as $unit) {
-            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null', escapeshellarg($unit)));
         }
         // All datasets are mounted and verified via /proc/mounts.  Register OMV
         // mntent entries but skip the omvzfsplugin:uuid property write.  On
@@ -1921,16 +1909,15 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 escapeshellarg('file://' . $keyfile), escapeshellarg($name)), $out, $res);
             self::manageRemoteUnlockService();
         }
-        // Unmask the zfs-load-key@ unit for this dataset in case it was masked
-        // by a prior removeAutoUnlock call, so auto-unlock takes effect at boot.
-        $instanceOut = [];
-        exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
-        $instance = trim(implode('', $instanceOut));
+        // Remove any mask left on the zfs-load-key@ unit by plugin versions
+        // before 8.1.4, so local auto-unlock takes effect at boot.  The
+        // no-prompt drop-in is removed (local) or kept (remote, which uses
+        // keylocation=prompt) by updateZfsListCache -> syncLoadKeyUnits.
+        $instance = self::loadKeyUnitInstance($name);
         if ($instance !== '') {
-            self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
+            self::zfsTryExec(sprintf('systemctl unmask --no-reload %s 2>/dev/null',
                 escapeshellarg('zfs-load-key@' . $instance . '.service')));
         }
-        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => true];
     }
@@ -1953,19 +1940,11 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
             unlink($metafile);
         }
         self::manageRemoteUnlockService();
-        // Mask the zfs-load-key@ unit for this dataset so it does not prompt
-        // for a passphrase at boot (causing a hang) now that auto-unlock is
-        // disabled.  systemctl mask creates a /dev/null symlink in
-        // /etc/systemd/system/ which takes precedence over the generator's
-        // output in /run/systemd/generator/ at next boot.
-        $instanceOut = [];
-        exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
-        $instance = trim(implode('', $instanceOut));
-        if ($instance !== '') {
-            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null',
-                escapeshellarg('zfs-load-key@' . $instance . '.service')));
-        }
-        self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
+        // keylocation is now prompt, so updateZfsListCache -> syncLoadKeyUnits
+        // gives the zfs-load-key@ unit the no-prompt drop-in: boot does not
+        // hang on a passphrase prompt, and the unit is not masked, so units
+        // that depend on the dataset can still be (re)started once the key is
+        // loaded (#120).
         self::updateZfsListCache(explode('/', $name)[0]);
         return ['autounlock' => false, 'keylocation' => 'prompt'];
     }
@@ -3449,7 +3428,7 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         self::zfsTryExec($cmd, $lines);
         sort($lines);
         file_put_contents($cacheFile, implode("\n", $lines) . "\n");
-        self::syncLoadKeyUnits($lines);
+        self::syncLoadKeyUnits($poolName, $lines);
     }
 
     /**
@@ -3480,9 +3459,14 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      * dataset whose load-key unit is inactive.  Starting the unit is a no-op
      * when the key is already loaded (ExecStart exits 0) and keeps it active.
      *
-     * Encryption roots with keylocation=prompt get their load-key unit masked
-     * so the next boot does not block on a passphrase prompt — the same policy
-     * removeAutoUnlock applies.  The key is loaded via loadEncryptionKey.
+     * Encryption roots with keylocation=prompt get a drop-in that replaces
+     * the passphrase prompt with a plain keystatus check (see
+     * noPromptDropinContent), so the next boot does not block on a prompt.  The
+     * key is loaded via loadEncryptionKey or zfs-remote-unlock.  The unit is
+     * never masked: systemd refuses every start job for a masked unit, which
+     * would break (re)starting anything that depends on the dataset, e.g.
+     * nfs-server via RequiresMountsFor= (#120).  Masks left by older plugin
+     * versions are removed here.
      *
      * The unit only exists after daemon-reload, so systemd may already have
      * stopped (unmounted) the dataset before we can start it.  Encrypted
@@ -3491,13 +3475,17 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
      *
      * Cache columns: 0=name ... 10=encroot 11=keylocation (see updateZfsListCache).
      */
-    private static function syncLoadKeyUnits(array $lines): void
+    private static function syncLoadKeyUnits(string $poolName, array $lines): void
     {
         $wasMounted = [];
+        $roots      = []; // encryption root name => keylocation
         foreach ($lines as $line) {
             $parts = explode("\t", $line);
             if (count($parts) < 12 || $parts[10] === '-' || $parts[10] === '') {
                 continue; // not encrypted
+            }
+            if ($parts[10] === $parts[0]) {
+                $roots[$parts[0]] = $parts[11];
             }
             $mOut = [];
             exec(sprintf('zfs get -H -o value mounted %s 2>/dev/null', escapeshellarg($parts[0])), $mOut);
@@ -3505,61 +3493,29 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 $wasMounted[] = $parts[0];
             }
         }
+        $promptRoots = array_keys(array_filter($roots,
+            static fn($keylocation) => $keylocation === 'prompt'));
+        self::applyNoPromptLoadKeyUnits($promptRoots);
+        self::removeStaleNoPromptDropins($poolName, $promptRoots);
         self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
-        $toStart = [];
-        $toMask  = [];
-        foreach ($lines as $line) {
-            $parts = explode("\t", $line);
-            if (count($parts) < 12 || $parts[10] !== $parts[0]) {
-                continue; // not an encryption root
-            }
-            $name = $parts[0];
-            $instanceOut = [];
-            exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $instanceOut);
-            $instance = trim(implode('', $instanceOut));
+        foreach (array_keys($roots) as $name) {
+            $instance = self::loadKeyUnitInstance($name);
             if ($instance === '') {
                 continue;
             }
             $unit = 'zfs-load-key@' . $instance . '.service';
             $keyOut = [];
             exec(sprintf('zfs get -H -o value keystatus %s 2>/dev/null', escapeshellarg($name)), $keyOut);
+            if (trim(implode('', $keyOut)) !== 'available') {
+                continue;
+            }
             $activeOut = [];
             exec(sprintf('systemctl is-active %s 2>/dev/null', escapeshellarg($unit)), $activeOut);
-            if (trim(implode('', $keyOut)) === 'available'
-                && trim(implode('', $activeOut)) !== 'active') {
-                $toStart[] = $unit;
+            if (trim(implode('', $activeOut)) === 'active') {
+                continue;
             }
-            if ($parts[11] === 'prompt') {
-                $toMask[] = $unit;
-            }
-        }
-        if (!empty($toStart)) {
-            // A masked unit cannot start; unmask first, start, then re-mask
-            // below if it is a prompt unit (the active state survives masking).
-            $masked = [];
-            foreach ($toStart as $unit) {
-                $enOut = [];
-                exec(sprintf('systemctl is-enabled %s 2>/dev/null', escapeshellarg($unit)), $enOut);
-                if (str_starts_with(trim(implode('', $enOut)), 'masked')) {
-                    $masked[] = $unit;
-                }
-            }
-            if (!empty($masked)) {
-                self::zfsTryExec(sprintf('systemctl unmask %s 2>/dev/null',
-                    implode(' ', array_map('escapeshellarg', $masked))));
-                self::zfsTryExec('systemctl daemon-reload 2>/dev/null');
-                // Restore the mask on non-prompt units too; we only unmasked
-                // them to start them.
-                $toMask = array_unique(array_merge($toMask, $masked));
-            }
-            foreach ($toStart as $unit) {
-                self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($unit)));
-                self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($unit)));
-            }
-        }
-        if (!empty($toMask)) {
-            self::zfsTryExec(sprintf('systemctl mask %s 2>/dev/null',
-                implode(' ', array_map('escapeshellarg', $toMask))));
+            self::zfsTryExec(sprintf('systemctl reset-failed %s 2>/dev/null', escapeshellarg($unit)));
+            self::zfsTryExec(sprintf('systemctl start %s 2>/dev/null', escapeshellarg($unit)));
         }
         // $lines is sorted, so parents are re-mounted before children.
         foreach ($wasMounted as $ds) {
@@ -3569,6 +3525,128 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
                 self::zfsTryExec(sprintf('zfs mount %s 2>&1', escapeshellarg($ds)));
             }
         }
+    }
+
+    /**
+     * Name of the drop-in placed in /etc/systemd/system/zfs-load-key@<instance>.service.d/
+     * for encryption roots with keylocation=prompt.  Must match debian/postinst
+     * and debian/postrm.
+     */
+    private const NO_PROMPT_DROPIN = 'omv-zfs-no-prompt.conf';
+
+    /**
+     * Return the systemd instance name of a dataset's zfs-load-key@ unit, as
+     * zfs-mount-generator names it (systemd-escape -p), or '' on failure.
+     */
+    private static function loadKeyUnitInstance(string $name): string
+    {
+        $out = [];
+        exec(sprintf('systemd-escape -p %s 2>/dev/null', escapeshellarg($name)), $out);
+        return trim(implode('', $out));
+    }
+
+    /**
+     * Contents of the no-prompt drop-in for an encryption root.
+     *
+     * The generated ExecStart asks for the passphrase when the key is not
+     * loaded.  The override never prompts: it succeeds when the key is
+     * already loaded and fails otherwise.  So at boot the unit fails at once
+     * (the datasets stay unmounted, their .mount units are only wanted by
+     * local-fs.target), and once the key has been loaded — manually or by
+     * zfs-remote-unlock, which the load-key units are ordered after — starting
+     * the unit succeeds, so dependent units start normally.
+     *
+     * ZFS names cannot contain quotes, '$', '%' or '\', so the name is safe
+     * inside the double quotes (zfs-mount-generator embeds it the same way).
+     * The '# dataset=' line is used by removeStaleNoPromptDropins.
+     */
+    private static function noPromptDropinContent(string $name): string
+    {
+        return "# Managed by openmediavault-zfs - do not edit.\n"
+            . "# dataset=" . $name . "\n"
+            . "# keylocation=prompt: never ask for the passphrase, only succeed\n"
+            . "# once the key has been loaded (plugin unlock or zfs-remote-unlock).\n"
+            . "[Service]\n"
+            . "ExecStart=\n"
+            . "ExecStart=/bin/sh -euc '[ \"$$(/usr/sbin/zfs get -H -o value keystatus \""
+            . $name . "\")\" = \"available\" ]'\n";
+    }
+
+    /**
+     * Make the zfs-load-key@ units of the given keylocation=prompt encryption
+     * roots non-interactive: write the no-prompt drop-in and remove any mask
+     * (/dev/null symlink) left by plugin versions before 8.1.4.  Returns true
+     * when anything changed; the caller must run systemctl daemon-reload.
+     *
+     * Shell commands are used for /etc/systemd/system because open_basedir
+     * blocks PHP file functions there in the engined context.
+     */
+    private static function applyNoPromptLoadKeyUnits(array $names): bool
+    {
+        if (empty($names)) {
+            return false;
+        }
+        $masked = [];
+        self::zfsTryExec('find /etc/systemd/system -maxdepth 1 -lname /dev/null '
+            . '-name \'zfs-load-key@*.service\' -printf \'%f\n\' 2>/dev/null', $masked);
+        $changed = false;
+        $unmask  = [];
+        foreach ($names as $name) {
+            $instance = self::loadKeyUnitInstance($name);
+            if ($instance === '') {
+                continue;
+            }
+            $unit    = 'zfs-load-key@' . $instance . '.service';
+            $dir     = '/etc/systemd/system/' . $unit . '.d';
+            $file    = $dir . '/' . self::NO_PROMPT_DROPIN;
+            $content = self::noPromptDropinContent($name);
+            $current = [];
+            self::zfsTryExec(sprintf('cat %s 2>/dev/null', escapeshellarg($file)), $current);
+            if (implode("\n", $current) . "\n" !== $content) {
+                self::zfsTryExec(sprintf('mkdir -p %s && printf %%s %s > %s',
+                    escapeshellarg($dir), escapeshellarg($content), escapeshellarg($file)));
+                $changed = true;
+            }
+            if (in_array($unit, $masked, true)) {
+                $unmask[] = $unit;
+            }
+        }
+        if (!empty($unmask)) {
+            self::zfsTryExec(sprintf('systemctl unmask --no-reload %s 2>/dev/null',
+                implode(' ', array_map('escapeshellarg', $unmask))));
+            $changed = true;
+        }
+        return $changed;
+    }
+
+    /**
+     * Remove no-prompt drop-ins of datasets in $poolName that are not in
+     * $keep (destroyed, renamed, no longer an encryption root, or switched to
+     * a file:// keylocation).  Pass an empty $keep to remove all of a pool's
+     * drop-ins.  Returns true when anything was removed.
+     */
+    private static function removeStaleNoPromptDropins(string $poolName, array $keep): bool
+    {
+        $found = [];
+        self::zfsTryExec(sprintf(
+            'grep -H -m1 \'^# dataset=\' /etc/systemd/system/zfs-load-key@*.service.d/%s 2>/dev/null',
+            self::NO_PROMPT_DROPIN), $found);
+        $removed = false;
+        foreach ($found as $line) {
+            $pos = strpos($line, ':# dataset=');
+            if ($pos === false) {
+                continue;
+            }
+            $file = substr($line, 0, $pos);
+            $name = substr($line, $pos + strlen(':# dataset='));
+            if (explode('/', $name)[0] !== $poolName || in_array($name, $keep, true)) {
+                continue;
+            }
+            self::zfsTryExec(sprintf('rm -f %s && rmdir --ignore-fail-on-non-empty %s 2>/dev/null',
+                escapeshellarg($file), escapeshellarg(dirname($file))));
+            $removed = true;
+        }
+        return $removed;
     }
 
     /**

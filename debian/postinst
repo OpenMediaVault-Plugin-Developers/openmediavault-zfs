@@ -16,6 +16,45 @@ case "$1" in
       omv-confdbadm migrate "conf.service.zfs" "${2}"
     fi
 
+    # Before 8.1.4 the plugin masked the zfs-load-key@ unit of keylocation=prompt
+    # encryption roots.  systemd refuses every start job for a masked unit, so
+    # nothing depending on those datasets (e.g. nfs-server) could be restarted
+    # (#120).  Replace each mask with the no-prompt drop-in the plugin now uses
+    # (keep in sync with noPromptDropinContent() in engined/rpc/zfs.inc).
+    if [ -n "$2" ] && dpkg --compare-versions "$2" lt 8.1.4 && \
+       [ -e /dev/zfs ] && command -v zfs >/dev/null 2>&1; then
+      for f in /etc/systemd/system/zfs-load-key@*.service; do
+        [ -L "$f" ] && [ "$(readlink "$f")" = "/dev/null" ] || continue
+        unit="${f##*/}"
+        inst="${unit#zfs-load-key@}"
+        inst="${inst%.service}"
+        ds="$(systemd-escape -u -p "$inst" 2>/dev/null)" || continue
+        ds="${ds#/}"
+        pool="${ds%%/*}"
+        if ! zpool list -H -o name "$pool" >/dev/null 2>&1; then
+          continue  # pool not imported; leave it alone
+        fi
+        if ! zfs list -H -o name "$ds" >/dev/null 2>&1; then
+          rm -f "$f"  # stale mask of a destroyed dataset
+          continue
+        fi
+        [ "$(zfs get -H -o value keylocation "$ds" 2>/dev/null)" = "prompt" ] || continue
+        [ "$(zfs get -H -o value encryptionroot "$ds" 2>/dev/null)" = "$ds" ] || continue
+        mkdir -p "$f.d"
+        printf '%s\n' \
+          "# Managed by openmediavault-zfs - do not edit." \
+          "# dataset=$ds" \
+          "# keylocation=prompt: never ask for the passphrase, only succeed" \
+          "# once the key has been loaded (plugin unlock or zfs-remote-unlock)." \
+          "[Service]" \
+          "ExecStart=" \
+          "ExecStart=/bin/sh -euc '[ \"\$\$(/usr/sbin/zfs get -H -o value keystatus \"$ds\")\" = \"available\" ]'" \
+          > "$f.d/omv-zfs-no-prompt.conf"
+        rm -f "$f"
+      done
+      systemctl daemon-reload || :
+    fi
+
     # run saltstack
     omv-salt deploy run --no-color zfs zfszed zfscron || :
 

@@ -12,10 +12,18 @@ remove_action() {
     # removed by dpkg, but it may still be enabled/running).
     systemctl disable --now zfs-remote-unlock.service 2>/dev/null || true
 
-    # Remove any per-dataset zfs-load-key@ masks created by removeAutoUnlock
-    # (symlinks to /dev/null in /etc/systemd/system/).
+    # Remove any per-dataset zfs-load-key@ masks created by plugin versions
+    # before 8.1.4 (symlinks to /dev/null in /etc/systemd/system/).
     for f in /etc/systemd/system/zfs-load-key@*.service; do
         [ -L "$f" ] && [ "$(readlink "$f")" = "/dev/null" ] && rm -f "$f" || true
+    done
+
+    # Remove the per-dataset no-prompt drop-ins for keylocation=prompt
+    # encryption roots, and their directories if nothing else is in them.
+    for f in /etc/systemd/system/zfs-load-key@*.service.d/omv-zfs-no-prompt.conf; do
+        [ -f "$f" ] || continue
+        rm -f "$f"
+        rmdir --ignore-fail-on-non-empty "${f%/*}" 2>/dev/null || true
     done
 
     # Remove the drop-in directory if it's empty (the drop-in file itself is

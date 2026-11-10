@@ -1807,6 +1807,35 @@ class OMVRpcServiceZFS extends \OMV\Rpc\ServiceAbstract
         }
         $cmd = sprintf('zfs unload-key -r %s 2>&1', escapeshellarg($params['name']));
         self::zfsExec($cmd, $out, $res);
+        // Stop the zfs-load-key@ units of every encryption root whose key was
+        // just unloaded (unload-key -r includes descendant roots).  Otherwise
+        // they stay 'active' (RemainAfterExit=yes) although the key is gone,
+        // and later start jobs are no-ops instead of checking the key.  ExecStop
+        // only unloads a key that is still available, so this is a no-op for
+        // ZFS; the bound .mount units are already inactive.
+        $roots = [];
+        if (self::zfsTryExec(sprintf(
+            'zfs get -H -r -t filesystem,volume -o name,value encryptionroot %s 2>/dev/null',
+            escapeshellarg($params['name'])
+        ), $rootLines)) {
+            foreach ($rootLines as $line) {
+                $parts = explode("\t", trim($line));
+                if (count($parts) === 2 && $parts[0] === $parts[1]) {
+                    $roots[] = $parts[0];
+                }
+            }
+        }
+        $units = [];
+        foreach ($roots as $root) {
+            $instance = self::loadKeyUnitInstance($root);
+            if ($instance !== '') {
+                $units[] = 'zfs-load-key@' . $instance . '.service';
+            }
+        }
+        if (!empty($units)) {
+            self::zfsTryExec(sprintf('systemctl stop %s 2>/dev/null',
+                implode(' ', array_map('escapeshellarg', $units))));
+        }
         // The datasets are now unmounted and the key is unavailable — safe to
         // write omvzfsplugin:uuid.  On OpenZFS 2.4.x-pve1 this call is unsafe
         // on mounted/key-loaded encrypted datasets (physically unmounts them),

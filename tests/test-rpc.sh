@@ -196,6 +196,146 @@ print(match['uuid'] if match else '')
 }
 
 # ---------------------------------------------------------------------------
+# zfs-load-key@ unit helpers (issue #120)
+#
+# keylocation=prompt encryption roots must NOT have their zfs-load-key@ unit
+# masked: systemd rejects every start job for a masked unit, so any unit that
+# depends on the dataset (nfs-server via RequiresMountsFor=, ...) fails to
+# (re)start.  Instead the plugin writes a drop-in that replaces the passphrase
+# prompt with a keystatus check.
+# ---------------------------------------------------------------------------
+NOPROMPT_DROPIN_NAME="omv-zfs-no-prompt.conf"
+
+loadkey_unit() {
+    echo "zfs-load-key@$(systemd-escape -p "$1" 2>/dev/null).service"
+}
+noprompt_dropin() {
+    echo "/etc/systemd/system/$(loadkey_unit "$1").d/$NOPROMPT_DROPIN_NAME"
+}
+loadkey_masked() {
+    local f
+    f="/etc/systemd/system/$(loadkey_unit "$1")"
+    [ -L "$f" ] && [ "$(readlink "$f")" = "/dev/null" ]
+}
+
+# assert_noprompt_unit DESC DATASET
+# Prompt encryption root: drop-in present and naming the dataset, loaded by
+# systemd, effective ExecStart has no passphrase prompt, unit not masked.
+assert_noprompt_unit() {
+    local desc=$1 ds=$2 unit dropin execstart
+    unit=$(loadkey_unit "$ds")
+    dropin=$(noprompt_dropin "$ds")
+    if [ -f "$dropin" ] && grep -qxF "# dataset=$ds" "$dropin"; then
+        _pass "$desc — no-prompt drop-in present for $ds"
+    else
+        _fail "$desc — no-prompt drop-in missing for $ds" \
+              "expected $dropin with '# dataset=$ds'; got: $(cat "$dropin" 2>/dev/null || echo 'file not found')"
+    fi
+    if loadkey_masked "$ds"; then
+        _fail "$desc — $unit is masked (#120: breaks dependent units)" \
+              "/etc/systemd/system/$unit -> /dev/null"
+    else
+        _pass "$desc — $unit not masked"
+    fi
+    # DropInPaths is unit-specific; match on the file name because systemctl
+    # C-escapes the path (the '\x2d' of a hyphen is shown as '\\x2d').
+    if systemctl show -p DropInPaths --value "$unit" 2>/dev/null | grep -qF "/$NOPROMPT_DROPIN_NAME"; then
+        _pass "$desc — systemd loaded the drop-in for $unit"
+    else
+        _fail "$desc — systemd has not loaded the drop-in for $unit" \
+              "DropInPaths: $(systemctl show -p DropInPaths --value "$unit" 2>/dev/null)"
+    fi
+    execstart=$(systemctl show -p ExecStart --value "$unit" 2>/dev/null)
+    if echo "$execstart" | grep -q "keystatus" && ! echo "$execstart" | grep -q "systemd-ask-password"; then
+        _pass "$desc — effective ExecStart of $unit does not prompt"
+    else
+        _fail "$desc — effective ExecStart of $unit still prompts or is unexpected" "${execstart:0:300}"
+    fi
+}
+
+# assert_no_noprompt_unit DESC DATASET
+# Non-prompt / non-root / destroyed dataset: no drop-in and no mask.
+assert_no_noprompt_unit() {
+    local desc=$1 ds=$2 dropin
+    dropin=$(noprompt_dropin "$ds")
+    if [ -e "$dropin" ]; then
+        _fail "$desc — stale no-prompt drop-in for $ds" "$dropin"
+    else
+        _pass "$desc — no no-prompt drop-in for $ds"
+    fi
+    if loadkey_masked "$ds"; then
+        _fail "$desc — $(loadkey_unit "$ds") is masked" ""
+    else
+        _pass "$desc — $(loadkey_unit "$ds") not masked"
+    fi
+}
+
+# dependent_unit_starts MOUNTPOINT
+# Reproduces #120: start a transient unit with RequiresMountsFor= on the
+# dataset, exactly the dependency nfs-server has on its exports.  The
+# transaction pulls in the .mount unit and, via BindsTo=, the zfs-load-key@
+# unit.  Prints systemd-run output; returns its exit status.
+dependent_unit_starts() {
+    local mp=$1 unit
+    unit="omvzfstest-dep-$$-${RANDOM}"
+    timeout 90 systemd-run --quiet --wait --collect --unit="$unit" \
+        -p RequiresMountsFor="$mp" /bin/true 2>&1
+}
+
+# assert_dependent_unit_starts DESC MOUNTPOINT
+assert_dependent_unit_starts() {
+    local desc=$1 mp=$2 out ec=0
+    out=$(dependent_unit_starts "$mp") || ec=$?
+    if [ $ec -eq 0 ]; then
+        _pass "$desc — unit with RequiresMountsFor=$mp starts (#120)"
+    else
+        _fail "$desc — unit with RequiresMountsFor=$mp failed to start (#120)" \
+              "rc=$ec: ${out:0:300}"
+    fi
+}
+
+# assert_loadkey_fails_fast DESC DATASET
+# Locked prompt root, as at boot: starting its load-key unit must fail at once
+# instead of waiting on a passphrase prompt (rc 124 = timed out = prompting).
+# unloadEncryptionKey only unloads the key, so the unit may still be 'active'
+# (RemainAfterExit=yes) and a start would be a no-op; stop it first so it is
+# inactive as at boot (ExecStop is a no-op with the key unloaded).
+# Clears the failed state afterwards.
+assert_loadkey_fails_fast() {
+    local desc=$1 ds=$2 unit ec=0
+    unit=$(loadkey_unit "$ds")
+    systemctl stop "$unit" >/dev/null 2>&1 || true
+    timeout 20 systemctl start "$unit" >/dev/null 2>&1 || ec=$?
+    if [ $ec -eq 124 ]; then
+        _fail "$desc — starting $unit hung (passphrase prompt at boot)" ""
+        systemctl stop "$unit" >/dev/null 2>&1 || true
+    elif [ $ec -eq 0 ]; then
+        _fail "$desc — $unit started although the key is not loaded" ""
+    else
+        _pass "$desc — $unit fails immediately while locked (no boot prompt)"
+    fi
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+}
+
+# remove_loadkey_artifacts POOL_REGEX
+# Remove no-prompt drop-ins and legacy masks for datasets of matching pools.
+remove_loadkey_artifacts() {
+    local re=$1 f
+    for f in /etc/systemd/system/zfs-load-key@*.service.d/"$NOPROMPT_DROPIN_NAME"; do
+        [ -f "$f" ] || continue
+        if grep -qE "^# dataset=(${re})(/|$)" "$f"; then
+            rm -f "$f"
+            rmdir --ignore-fail-on-non-empty "${f%/*}" 2>/dev/null || true
+        fi
+    done
+    for f in /etc/systemd/system/zfs-load-key@*.service; do
+        [ -L "$f" ] && [ "$(readlink "$f")" = "/dev/null" ] || continue
+        echo "${f##*/zfs-load-key@}" | grep -qE "^(${re})(-|\.service$)" && rm -f "$f"
+    done
+    systemctl daemon-reload 2>/dev/null || true
+}
+
+# ---------------------------------------------------------------------------
 # Cleanup — always runs on exit
 # ---------------------------------------------------------------------------
 cleanup() {
@@ -223,6 +363,8 @@ cleanup() {
     for dev in "${DEVICES[@]}"; do
         zpool labelclear -f "$dev" 2>/dev/null || true
     done
+    info "Removing zfs-load-key@ drop-ins/masks left for $POOL"
+    remove_loadkey_artifacts "$POOL"
     info "Removing any remaining mntent entries for this pool"
     omv-rpc -u admin "Zfs" "doDiscover" \
         '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
@@ -3224,18 +3366,19 @@ else
     _fail "getEncryptionStatus — keylocation should be prompt, got: $AU_KEYLOC2" ""
 fi
 
-# ---- removeAutoUnlock must mask the zfs-load-key@ unit ---------------------
-# The mask (/dev/null symlink in /etc/systemd/system/) prevents zfs-mount-generator
-# from prompting for a passphrase at boot when auto-unlock is disabled.
-AU_INSTANCE=$(systemd-escape -p "$AU_DS" 2>/dev/null || echo "")
-AU_MASK_FILE="/etc/systemd/system/zfs-load-key@${AU_INSTANCE}.service"
-if [ -n "$AU_INSTANCE" ]; then
-    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
-        _pass "removeAutoUnlock — zfs-load-key@${AU_INSTANCE}.service masked (/dev/null symlink)"
-    else
-        _fail "removeAutoUnlock — zfs-load-key@${AU_INSTANCE}.service not masked" \
-              "expected $AU_MASK_FILE -> /dev/null; $(ls -la "$AU_MASK_FILE" 2>/dev/null || echo 'file not found')"
-    fi
+# ---- removeAutoUnlock must make the zfs-load-key@ unit non-interactive -----
+# The no-prompt drop-in keeps boot from waiting for a passphrase now that
+# auto-unlock is disabled.  The unit must not be masked (#120).
+assert_noprompt_unit "removeAutoUnlock" "$AU_DS"
+
+# The dataset is still unlocked: units depending on it — e.g. nfs-server after
+# an export change — must still (re)start.  This is the #120 reproduction.
+AU_MP=$(zfs get -H -o value mountpoint "$AU_DS" 2>/dev/null || echo "")
+assert_dependent_unit_starts "removeAutoUnlock (dataset unlocked)" "$AU_MP"
+if [ "$(zfs get -H -o value mounted "$AU_DS" 2>/dev/null)" = "yes" ]; then
+    _pass "removeAutoUnlock — $AU_DS still mounted after dependent unit start"
+else
+    _fail "removeAutoUnlock — $AU_DS unmounted after dependent unit start" ""
 fi
 
 # ---- wait-for-remote-unlock.conf drop-in state must match active remote keys ---
@@ -3274,6 +3417,9 @@ if [ "$AU_KEYSTATUS2" = "unavailable" ]; then
 else
     _fail "simulate reboot — keystatus should be unavailable, got: $AU_KEYSTATUS2" ""
 fi
+# What boot does with a locked prompt root: the load-key unit must fail
+# straight away rather than wait on a passphrase prompt.
+assert_loadkey_fails_fast "simulate reboot" "$AU_DS"
 
 # ---- setAutoUnlock must reject a wrong passphrase before saving anything ----
 # A wrong passphrase would otherwise be written to the keyfile and only fail at
@@ -3297,7 +3443,7 @@ else
     _fail "setAutoUnlock — keylocation must stay 'prompt' after rejection, got: $AU_KEYLOC_BAD" ""
 fi
 
-# ---- setAutoUnlock must unmask the unit (tested while dataset is locked) ----
+# ---- setAutoUnlock must drop the no-prompt drop-in (dataset locked) --------
 # The round-trip is done here — after unloadEncryptionKey while datasets are
 # unmounted — so that the daemon-reload inside setAutoUnlock/removeAutoUnlock
 # does not interfere with the mount tracking of live filesystems.
@@ -3308,12 +3454,14 @@ print(json.dumps({'name': '$AU_DS', 'keyloctype': 'local', 'key': '$AU_PASS'}))
 assert_rpc "setAutoUnlock — re-enable local auto-unlock on $AU_DS (dataset locked)" \
     "Zfs" "setAutoUnlock" "$AU_SET_PARAMS"
 
-if [ -n "$AU_INSTANCE" ]; then
-    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
-        _fail "setAutoUnlock — zfs-load-key@${AU_INSTANCE}.service still masked after re-enable" ""
-    else
-        _pass "setAutoUnlock — zfs-load-key@${AU_INSTANCE}.service unmasked after re-enable"
-    fi
+# keylocation=file:// — the generated unit must load the key itself at boot,
+# so the no-prompt override has to be gone.
+assert_no_noprompt_unit "setAutoUnlock (local)" "$AU_DS"
+AU_EXECSTART=$(systemctl show -p ExecStart --value "$(loadkey_unit "$AU_DS")" 2>/dev/null)
+if echo "$AU_EXECSTART" | grep -q "load-key"; then
+    _pass "setAutoUnlock — effective ExecStart loads the key at boot"
+else
+    _fail "setAutoUnlock — effective ExecStart does not run zfs load-key" "${AU_EXECSTART:0:300}"
 fi
 if [ -f "$AU_KEYFILE" ]; then
     _pass "setAutoUnlock — keyfile re-created at $AU_KEYFILE"
@@ -3321,16 +3469,11 @@ else
     _fail "setAutoUnlock — keyfile not found at $AU_KEYFILE after re-enable" ""
 fi
 
-# Disable auto-unlock again (re-masks the unit) before the manual-unlock test.
+# Disable auto-unlock again (restores the drop-in) before the manual-unlock test.
 assert_rpc "removeAutoUnlock — disable again before manual-unlock test" \
     "Zfs" "removeAutoUnlock" "{\"name\":\"$AU_DS\"}"
-if [ -n "$AU_INSTANCE" ]; then
-    if [ -L "$AU_MASK_FILE" ] && [ "$(readlink "$AU_MASK_FILE")" = "/dev/null" ]; then
-        _pass "removeAutoUnlock (2nd) — zfs-load-key@${AU_INSTANCE}.service re-masked"
-    else
-        _fail "removeAutoUnlock (2nd) — zfs-load-key@${AU_INSTANCE}.service not masked" ""
-    fi
-fi
+assert_noprompt_unit "removeAutoUnlock (2nd)" "$AU_DS"
+assert_loadkey_fails_fast "removeAutoUnlock (2nd, locked)" "$AU_DS"
 
 
 # ---- doDiscover(deleteStale=true) must NOT remove the mntent entry ---------
@@ -3385,6 +3528,35 @@ else
           "loadEncryptionKey must remount all datasets sharing the encryptionroot; got mounted=$AU_CHILD_MOUNTED3"
 fi
 
+# ---- #120: after a manual unlock, dependent units must (re)start -----------
+# Issue scenario: unlock a prompt dataset via the plugin, then change an NFS
+# export — nfs-server restart pulled in the masked load-key unit and failed.
+AU_UNIT=$(loadkey_unit "$AU_DS")
+AU_UNIT_STATE=$(systemctl is-active "$AU_UNIT" 2>/dev/null || true)
+if [ "$AU_UNIT_STATE" = "active" ]; then
+    _pass "loadEncryptionKey — $AU_UNIT active after unlock"
+else
+    _fail "loadEncryptionKey — $AU_UNIT not active after unlock" "is-active: $AU_UNIT_STATE"
+fi
+assert_noprompt_unit "loadEncryptionKey (after unlock)" "$AU_DS"
+assert_dependent_unit_starts "loadEncryptionKey (after unlock)" "$AU_MP"
+AU_CHILD_MP=$(zfs get -H -o value mountpoint "$AU_CHILD" 2>/dev/null || echo "")
+assert_dependent_unit_starts "loadEncryptionKey (child of unlocked root)" "$AU_CHILD_MP"
+# An explicit start of the load-key unit (what systemd does for every
+# dependent start job) must also succeed, and must not unmount anything.
+if systemctl start "$AU_UNIT" 2>/dev/null; then
+    _pass "systemctl start $AU_UNIT succeeds while unlocked"
+else
+    _fail "systemctl start $AU_UNIT fails while unlocked" \
+          "$(systemctl status "$AU_UNIT" 2>&1 | tail -3)"
+fi
+if [ "$(zfs get -H -o value mounted "$AU_DS" 2>/dev/null)" = "yes" ] && \
+   [ "$(zfs get -H -o value mounted "$AU_CHILD" 2>/dev/null)" = "yes" ]; then
+    _pass "loadEncryptionKey — $AU_DS and child still mounted after dependent starts"
+else
+    _fail "loadEncryptionKey — dataset unmounted after dependent unit starts" ""
+fi
+
 # ---- Cleanup ---------------------------------------------------------------
 info "Cleaning up $AU_DS"
 # Use -f (force) to unmount before destroying — the dataset may still be
@@ -3392,8 +3564,11 @@ info "Cleaning up $AU_DS"
 zfs destroy -rf "$AU_DS" 2>/dev/null || true
 omv-rpc -u admin "Zfs" "doDiscover" \
     '{"addMissing":false,"deleteStale":true}' >/dev/null 2>&1 || true
+# Destroyed outside the plugin: the cache refresh in doDiscover must drop the
+# orphaned no-prompt drop-in.
+assert_no_noprompt_unit "zfs destroy + doDiscover" "$AU_DS"
 
-unset AU_DS AU_PASS AU_ENC_PARAMS AU_MP
+unset AU_DS AU_PASS AU_ENC_PARAMS AU_MP AU_UNIT AU_UNIT_STATE AU_CHILD_MP AU_EXECSTART
 unset AU_CHILD AU_CHILD_MOUNTED AU_CHILD_MOUNTED3
 unset AU_STATUS AU_STATUS2 AU_AUTOUNLOCK AU_AUTOUNLOCK2
 unset AU_KEYSTATUS AU_KEYSTATUS2 AU_KEYSTATUS3 AU_KEYLOC2
@@ -3749,43 +3924,150 @@ section "zfs-list.cache — prompt encryption roots and doDiscover backfill"
 # ===========================================================================
 # Every pool now has a cache file, so generated .mount units BindsTo= the
 # encryption root's zfs-load-key@ unit.  For keylocation=prompt the plugin
-# must (a) keep the unlocked dataset mounted across daemon-reload and
-# (b) mask the load-key unit so boot does not block on a passphrase prompt.
+# must (a) keep the unlocked dataset mounted across daemon-reload, (b) give
+# the load-key unit a no-prompt drop-in so boot does not block on a
+# passphrase prompt, and (c) never mask it — a masked unit cannot be started,
+# so every unit depending on the dataset fails to (re)start (#120).
+# The hyphen in the name exercises systemd-escape (\x2d) in the unit name.
 
-ZP_DS="$POOL/zlc_prompt"
+ZP_DS="$POOL/zlc-prompt"
+ZP_PASS="ZlcPromptPass321!"
 ZP_PARAMS=$(python3 -c "
 import json
 print(json.dumps({
     'path':           '$POOL',
-    'name':           'zlc_prompt',
+    'name':           'zlc-prompt',
     'encryptiontype': 'aes-256-gcm',
-    'key':            'ZlcPromptPass321!',
+    'key':            '$ZP_PASS',
     'autounlock':     False,
 }))
 ")
 if omv-rpc -u admin "Zfs" "enableEncryption" "$ZP_PARAMS" >/dev/null 2>&1; then
-    _pass "zlc_prompt — encrypted dataset created (keylocation=prompt)"
+    _pass "zlc-prompt — encrypted dataset created (keylocation=prompt)"
 else
-    _fail "zlc_prompt — encrypted dataset creation failed" ""
+    _fail "zlc-prompt — encrypted dataset creation failed" ""
 fi
-ZP_UNIT="zfs-load-key@$(systemd-escape -p "$ZP_DS" 2>/dev/null).service"
-ZP_ENABLED=$(systemctl is-enabled "$ZP_UNIT" 2>/dev/null || true)
-if [[ "$ZP_ENABLED" == masked* ]]; then
-    _pass "zlc_prompt — $ZP_UNIT masked (no boot prompt)"
-else
-    _fail "zlc_prompt — $ZP_UNIT not masked" "is-enabled: $ZP_ENABLED"
-fi
+ZP_UNIT=$(loadkey_unit "$ZP_DS")
+ZP_MP=$(zfs get -H -o value mountpoint "$ZP_DS" 2>/dev/null || echo "")
+assert_noprompt_unit "enableEncryption (prompt)" "$ZP_DS"
 systemctl daemon-reload 2>/dev/null || true
 sleep 2
 if [ "$(zfs get -H -o value mounted "$ZP_DS" 2>/dev/null)" = "yes" ]; then
-    _pass "zlc_prompt — still mounted after daemon-reload (BindsTo satisfied)"
+    _pass "zlc-prompt — still mounted after daemon-reload (BindsTo satisfied)"
 else
-    _fail "zlc_prompt — unmounted by systemd after daemon-reload" \
+    _fail "zlc-prompt — unmounted by systemd after daemon-reload" \
         "load-key unit: $(systemctl is-active "$ZP_UNIT" 2>/dev/null)"
 fi
-assert_rpc "deleteObject — zlc_prompt" "Zfs" "deleteObject" \
-    "{\"name\":\"$ZP_DS\",\"mp\":\"/$ZP_DS\",\"type\":\"Filesystem\"}"
+assert_dependent_unit_starts "enableEncryption (prompt)" "$ZP_MP"
+
+# A child inheriting the key has no load-key unit of its own; its mount
+# unit binds to the root's.  Only encryption roots get a drop-in.
+ZP_CHILD="$ZP_DS/child"
+assert_rpc "addObject — child of prompt encryption root" "Zfs" "addObject" \
+    "{\"type\":\"filesystem\",\"path\":\"$ZP_DS\",\"name\":\"child\",\"mountpoint\":\"\",\"compression\":\"\",\"recordsize\":\"\"}"
+assert_no_noprompt_unit "child (not an encryption root)" "$ZP_CHILD"
+assert_noprompt_unit "addObject child (root unchanged)" "$ZP_DS"
+ZP_CHILD_MP=$(zfs get -H -o value mountpoint "$ZP_CHILD" 2>/dev/null || echo "")
+assert_dependent_unit_starts "child of prompt root" "$ZP_CHILD_MP"
+
+# ---- Upgrade path: a mask left by plugin < 8.1.4 is replaced ---------------
+# Recreate the pre-8.1.4 state on the unlocked dataset.
+info "Simulating a legacy (pre-8.1.4) mask on $ZP_UNIT"
+rm -f "$(noprompt_dropin "$ZP_DS")"
+systemctl mask --no-reload "$ZP_UNIT" >/dev/null 2>&1 || true
+systemctl daemon-reload 2>/dev/null || true
+# Sanity check that the dependent-unit test really detects #120.
+if ZP_OUT=$(dependent_unit_starts "$ZP_MP"); then
+    _fail "legacy mask — dependent unit started despite masked $ZP_UNIT" \
+          "the #120 check cannot detect the bug on this system"
+else
+    _pass "legacy mask — dependent unit fails while $ZP_UNIT is masked (#120 reproduced)"
+fi
+assert_rpc "doDiscover — repairs legacy mask" "Zfs" "doDiscover" \
+    '{"addMissing":false,"deleteStale":false}'
+assert_noprompt_unit "doDiscover (legacy mask)" "$ZP_DS"
+if [ "$(zfs get -H -o value mounted "$ZP_DS" 2>/dev/null)" = "yes" ]; then
+    _pass "doDiscover (legacy mask) — $ZP_DS still mounted"
+else
+    _fail "doDiscover (legacy mask) — $ZP_DS unmounted" ""
+fi
+assert_dependent_unit_starts "doDiscover (legacy mask)" "$ZP_MP"
+
+# Same upgrade case, but the first thing the user does is unlock the dataset
+# after a reboot: loadEncryptionKey must remove the mask itself.
+assert_rpc "unloadEncryptionKey — lock zlc-prompt" "Zfs" "unloadEncryptionKey" \
+    "{\"name\":\"$ZP_DS\"}" "unloaded"
+rm -f "$(noprompt_dropin "$ZP_DS")"
+systemctl mask --no-reload "$ZP_UNIT" >/dev/null 2>&1 || true
+systemctl daemon-reload 2>/dev/null || true
+ZP_LOAD_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'name': '$ZP_DS', 'key': '$ZP_PASS'}))
+")
+assert_rpc "loadEncryptionKey — unlock with legacy mask present" "Zfs" "loadEncryptionKey" \
+    "$ZP_LOAD_PARAMS" "loaded"
+assert_noprompt_unit "loadEncryptionKey (legacy mask)" "$ZP_DS"
+if [ "$(systemctl is-active "$ZP_UNIT" 2>/dev/null)" = "active" ]; then
+    _pass "loadEncryptionKey (legacy mask) — $ZP_UNIT active"
+else
+    _fail "loadEncryptionKey (legacy mask) — $ZP_UNIT not active" \
+          "$(systemctl is-active "$ZP_UNIT" 2>/dev/null)"
+fi
+assert_dependent_unit_starts "loadEncryptionKey (legacy mask)" "$ZP_MP"
+assert_dependent_unit_starts "loadEncryptionKey (legacy mask, child)" "$ZP_CHILD_MP"
+
+# ---- Rename: drop-in follows the dataset -----------------------------------
+ZP_OLD_DS="$ZP_DS"
+assert_rpc "renameObject — zlc-prompt to zlc-prompt2" "Zfs" "renameObject" \
+    "{\"oldpath\":\"$ZP_DS\",\"oldname\":\"zlc-prompt\",\"type\":\"Filesystem\",\"newname\":\"zlc-prompt2\"}"
+ZP_DS="$POOL/zlc-prompt2"
+ZP_UNIT=$(loadkey_unit "$ZP_DS")
+ZP_MP=$(zfs get -H -o value mountpoint "$ZP_DS" 2>/dev/null || echo "")
+assert_no_noprompt_unit "renameObject (old name)" "$ZP_OLD_DS"
+assert_noprompt_unit "renameObject (new name)" "$ZP_DS"
+if [ "$(zfs get -H -o value mounted "$ZP_DS" 2>/dev/null)" = "yes" ]; then
+    assert_dependent_unit_starts "renameObject" "$ZP_MP"
+else
+    _fail "renameObject — $ZP_DS not mounted after rename" ""
+fi
+
+# ---- Remote HTTPS auto-unlock also uses keylocation=prompt -----------------
+# It must get the same drop-in (not a mask): at boot the load-key unit runs
+# after zfs-remote-unlock and just confirms the key is loaded.  The URL is
+# unreachable; only the unit configuration is checked here.
+ZP_REMOTE_PARAMS=$(python3 -c "
+import json
+print(json.dumps({'name': '$ZP_DS', 'keyloctype': 'remote',
+                  'remoteurl': 'https://127.0.0.1:9/omvzfstest.key',
+                  'insecure': True, 'network_timeout': 10}))
+")
+assert_rpc "setAutoUnlock — remote on $ZP_DS" "Zfs" "setAutoUnlock" "$ZP_REMOTE_PARAMS"
+if [ "$(zfs get -H -o value keylocation "$ZP_DS" 2>/dev/null)" = "prompt" ]; then
+    _pass "setAutoUnlock (remote) — keylocation=prompt"
+else
+    _fail "setAutoUnlock (remote) — keylocation is not prompt" ""
+fi
+assert_noprompt_unit "setAutoUnlock (remote)" "$ZP_DS"
+if systemctl show -p After --value "$ZP_UNIT" 2>/dev/null | grep -q "zfs-remote-unlock.service"; then
+    _pass "setAutoUnlock (remote) — $ZP_UNIT ordered after zfs-remote-unlock.service"
+else
+    _fail "setAutoUnlock (remote) — $ZP_UNIT not ordered after zfs-remote-unlock.service" ""
+fi
+assert_dependent_unit_starts "setAutoUnlock (remote)" "$ZP_MP"
+assert_rpc "removeAutoUnlock — remote on $ZP_DS" "Zfs" "removeAutoUnlock" \
+    "{\"name\":\"$ZP_DS\"}"
+assert_noprompt_unit "removeAutoUnlock (remote)" "$ZP_DS"
+
+# ---- deleteObject removes the drop-in --------------------------------------
+ZP_CHILD="$ZP_DS/child"
+ZP_CHILD_MP=$(zfs get -H -o value mountpoint "$ZP_CHILD" 2>/dev/null || echo "")
+assert_rpc "deleteObject — zlc-prompt2/child" "Zfs" "deleteObject" \
+    "{\"name\":\"$ZP_CHILD\",\"mp\":\"$ZP_CHILD_MP\",\"type\":\"Filesystem\"}"
+assert_noprompt_unit "deleteObject child (root keeps drop-in)" "$ZP_DS"
+assert_rpc "deleteObject — zlc-prompt2" "Zfs" "deleteObject" \
+    "{\"name\":\"$ZP_DS\",\"mp\":\"$ZP_MP\",\"type\":\"Filesystem\"}"
 zfs destroy -rf "$ZP_DS" 2>/dev/null || true
+assert_no_noprompt_unit "deleteObject" "$ZP_DS"
 
 # doDiscover backfills a missing cache file (existing installs, issue #119).
 cp -p "/etc/zfs/zfs-list.cache/$POOL" "/tmp/zlc_backup_$$" 2>/dev/null || true
@@ -3798,7 +4080,8 @@ else
     cp -p "/tmp/zlc_backup_$$" "/etc/zfs/zfs-list.cache/$POOL" 2>/dev/null || true
 fi
 rm -f "/tmp/zlc_backup_$$"
-unset ZP_DS ZP_PARAMS ZP_UNIT ZP_ENABLED
+unset ZP_DS ZP_PASS ZP_PARAMS ZP_UNIT ZP_MP ZP_CHILD ZP_CHILD_MP ZP_OUT
+unset ZP_LOAD_PARAMS ZP_OLD_DS ZP_REMOTE_PARAMS
 
 # ===========================================================================
 section "zfs-list.cache — maintained without ZED (issue #119)"
@@ -4152,6 +4435,12 @@ zfs list -H -o name -r "$POOL" 2>/dev/null | grep -v "^${POOL}$" | sort -r | whi
     zfs destroy -rf "$ds" 2>/dev/null || true
 done
 
+# Plant an orphaned no-prompt drop-in, as left when an encrypted dataset is
+# destroyed with plain `zfs destroy`; deleting the pool must remove it.
+PD_GHOST="$POOL/ghost-enc"
+mkdir -p "$(dirname "$(noprompt_dropin "$PD_GHOST")")"
+printf '%s\n' "# dataset=$PD_GHOST" "[Service]" > "$(noprompt_dropin "$PD_GHOST")"
+
 assert_rpc_bg "deleteObjectBg — Pool" "Zfs" "deleteObjectBg" \
     "{\"name\":\"$POOL\",\"mp\":\"/$POOL\",\"type\":\"Pool\"}"
 
@@ -4167,6 +4456,18 @@ else
     _fail "zfs-list.cache — cache file still present after pool deletion" ""
 fi
 
+# No-prompt drop-ins of the pool's encryption roots must go with the pool.
+# The pool must be empty to delete it, so a drop-in of a dataset destroyed
+# outside the plugin was planted before the delete (see above).
+PD_LEFT=$(grep -lE "^# dataset=${POOL}(/|$)" \
+    /etc/systemd/system/zfs-load-key@*.service.d/"$NOPROMPT_DROPIN_NAME" 2>/dev/null || true)
+if [ -z "$PD_LEFT" ]; then
+    _pass "deleteObject (Pool) — no no-prompt drop-ins left for $POOL"
+else
+    _fail "deleteObject (Pool) — no-prompt drop-ins left for $POOL" "$PD_LEFT"
+fi
+unset PD_LEFT PD_GHOST
+
 # ===========================================================================
 section "Orphan cleanup"
 # ===========================================================================
@@ -4177,6 +4478,19 @@ find /etc/zfs/zfs-list.cache/ -type f -name "omvzfs*" -ls -delete 2>/dev/null ||
 
 # Remove stale keyfiles left by previous test runs.
 find /etc/zfs/keys/ -name "omvzfstest_*.key" -ls -delete 2>/dev/null || true
+
+# Remove zfs-load-key@ masks (older plugin versions) and no-prompt drop-ins
+# left by previous test runs whose pools no longer exist.
+_ORPHAN_POOLS=$(
+    { ls /etc/systemd/system/ | sed -n 's/^zfs-load-key@\(omvzfstest[0-9]*\)[-.].*/\1/p'
+      grep -h '^# dataset=omvzfstest' /etc/systemd/system/zfs-load-key@*.service.d/"$NOPROMPT_DROPIN_NAME" 2>/dev/null \
+        | sed 's|^# dataset=\([^/]*\).*|\1|'; } | sort -u)
+for _p in $_ORPHAN_POOLS; do
+    zpool list "$_p" >/dev/null 2>&1 && continue
+    info "Removing zfs-load-key@ masks/drop-ins of old test pool $_p"
+    remove_loadkey_artifacts "$_p"
+done
+unset _ORPHAN_POOLS _p
 
 # ===========================================================================
 section "Summary"

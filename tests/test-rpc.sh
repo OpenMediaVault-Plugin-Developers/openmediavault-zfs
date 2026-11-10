@@ -3417,6 +3417,15 @@ if [ "$AU_KEYSTATUS2" = "unavailable" ]; then
 else
     _fail "simulate reboot — keystatus should be unavailable, got: $AU_KEYSTATUS2" ""
 fi
+# unloadEncryptionKey must stop the load-key unit; otherwise it stays
+# 'active' (RemainAfterExit=yes) with the key unloaded.
+AU_UNIT_LOCKED=$(systemctl is-active "$(loadkey_unit "$AU_DS")" 2>/dev/null || true)
+if [ "$AU_UNIT_LOCKED" != "active" ]; then
+    _pass "unloadEncryptionKey — $(loadkey_unit "$AU_DS") stopped ($AU_UNIT_LOCKED)"
+else
+    _fail "unloadEncryptionKey — $(loadkey_unit "$AU_DS") still active after locking" ""
+fi
+unset AU_UNIT_LOCKED
 # What boot does with a locked prompt root: the load-key unit must fail
 # straight away rather than wait on a passphrase prompt.
 assert_loadkey_fails_fast "simulate reboot" "$AU_DS"
